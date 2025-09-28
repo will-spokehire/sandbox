@@ -574,6 +574,5 @@ export async function runMigration(): Promise<void> {
 }
 
 // Run migration if this file is executed directly
-if (require.main === module) {
-  runMigration().catch(console.error);
-}
+// Note: In ES modules, we can't use require.main === module
+// This check is handled by the separate script files instead
