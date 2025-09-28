@@ -7,8 +7,8 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import type { SourceRecord } from '../src/lib/migration/data-mappers.js';
 import {
-  SourceRecord,
   extractEmail,
   extractUserData,
   extractVehicleData,
@@ -16,7 +16,7 @@ import {
   extractOriginalId,
   convertEngineCapacity,
   convertNumberOfSeats,
-} from '../src/lib/migration/data-mappers';
+} from '../src/lib/migration/data-mappers.js';
 
 interface DataSources {
   catalog: SourceRecord[];

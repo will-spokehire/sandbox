@@ -5,7 +5,7 @@
  * Run with: npm run migrate-data
  */
 
-import { runMigration } from '../src/lib/migration/migration-runner';
+import { runMigration } from '../src/lib/migration/migration-runner.js';
 
 async function main() {
   console.log('🚀 Starting data migration script...\n');

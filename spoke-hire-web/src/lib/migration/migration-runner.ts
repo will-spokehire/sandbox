@@ -5,11 +5,13 @@
 import { PrismaClient } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
-import {
+import type {
   SourceRecord,
   MappedUserData,
   MappedVehicleData,
   MappedMediaData,
+} from './data-mappers.js';
+import {
   extractEmail,
   extractUserData,
   extractVehicleData,
@@ -19,7 +21,7 @@ import {
   mapSteeringToType,
   parseCollections,
   generateCollectionSlug,
-} from './data-mappers';
+} from './data-mappers.js';
 
 const prisma = new PrismaClient();
 

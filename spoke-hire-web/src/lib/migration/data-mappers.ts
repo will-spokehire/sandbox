@@ -96,15 +96,15 @@ export interface MappedVehicleData {
   model: string;
   year: string;
   registration?: string;
-  engineCapacity?: number; // in CC
-  numberOfSeats?: number;
+  engineCapacity?: number | null; // in CC
+  numberOfSeats?: number | null;
   steering?: string;
   gearbox?: string;
   exteriorColour?: string;
   interiorColour?: string;
   condition?: string;
   isRoadLegal: boolean;
-  price?: number;
+  price?: number | null;
   status: 'DRAFT' | 'PUBLISHED' | 'DECLINED' | 'ARCHIVED';
   description?: string;
 }
@@ -182,7 +182,7 @@ export function convertEngineCapacity(capacity?: string): number | null {
   
   // Handle various formats: "1.8L", "1800cc", "2.5", "6700cc"
   const match = capacity.match(/(\d+(?:\.\d+)?)\s*(?:L|cc|litre|liter)/i);
-  if (match) {
+  if (match && match[1]) {
     const value = parseFloat(match[1]);
     return capacity.toLowerCase().includes('l') ? Math.round(value * 1000) : Math.round(value);
   }
@@ -269,7 +269,7 @@ export function extractColorFromDescription(colorOption?: string, description?: 
   // Common colors
   const colors = ['red', 'blue', 'green', 'black', 'white', 'silver', 'grey', 'gray', 'yellow', 'orange'];
   const colorMatch = description.toLowerCase().match(new RegExp(`\\b(${colors.join('|')})\\b`));
-  return colorMatch ? colorMatch[1] : '';
+  return colorMatch && colorMatch[1] ? colorMatch[1] : '';
 }
 
 /**
