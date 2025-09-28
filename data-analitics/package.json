@@ -1,0 +1,33 @@
+{
+  "name": "spokehire-data-processor",
+  "version": "1.0.0",
+  "description": "Data processing pipeline for vehicle catalog with automated runs",
+  "main": "pipeline/pipeline.js",
+  "scripts": {
+    "start": "node pipeline/pipeline.js run",
+    "dev": "node server.js",
+    "server": "node server.js",
+    "pipeline": "node pipeline/pipeline.js run",
+    "pipeline:list": "node pipeline/pipeline.js list",
+    "pipeline:help": "node pipeline/pipeline.js help",
+    "pipeline:copy-latest": "node pipeline/pipeline.js copy-latest",
+    "monitor": "node pipeline/monitor.js dashboard",
+    "monitor:list": "node pipeline/monitor.js list",
+    "monitor:metrics": "node pipeline/monitor.js metrics",
+    "monitor:cleanup": "node pipeline/monitor.js cleanup",
+    "process-images": "node image-scripts/processImages.js",
+    "process-catalog-images": "node image-scripts/processCatalogImages.js",
+    "analyze-images": "node image-scripts/analyzeCsvWithImages.js",
+    "analyze-no-images": "node image-scripts/analyzeRecordsWithoutImages.js",
+    "test-no-images": "node image-scripts/testNoImages.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "csv-parser": "^3.0.0",
+    "fs-extra": "^11.1.1",
+    "path": "^0.12.7"
+  },
+  "keywords": ["data", "processing", "vehicle", "catalog", "pipeline", "automation"],
+  "author": "",
+  "license": "MIT"
+}

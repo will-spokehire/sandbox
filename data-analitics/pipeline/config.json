@@ -1,0 +1,168 @@
+{
+  "pipeline": {
+    "name": "SpokeHire Vehicle Catalog Pipeline",
+    "version": "1.0.0",
+    "description": "Automated pipeline for processing vehicle catalog data into improved format",
+    "author": "SpokeHire Team"
+  },
+  "runs": {
+    "baseDirectory": "pipeline/runs",
+    "maxRunsToKeep": 10,
+    "namingPattern": "run_YYYY-MM-DDTHH-mm-ss",
+    "cleanupPolicy": "keep_last_10_runs"
+  },
+  "steps": [
+    {
+      "id": "convert_csv_sources",
+      "name": "Convert CSV Sources",
+      "script": "convertCsvToJson.js",
+      "description": "Convert cleansed_database.csv to JSON format",
+      "inputs": [
+        "cleansed_database.csv"
+      ],
+      "outputs": [
+        "cleansed_database.json"
+      ],
+      "timeout": 300000,
+      "retry": {
+        "maxAttempts": 3,
+        "backoffMs": 5000
+      }
+    },
+    {
+      "id": "convert_catalog_csv",
+      "name": "Convert Catalog CSV",
+      "script": "convertCatalogCsvToJson.js",
+      "description": "Convert web_site_catalog_products.csv to JSON format",
+      "inputs": [
+        "web_site_catalog_products.csv"
+      ],
+      "outputs": [
+        "catalog_products.json"
+      ],
+      "timeout": 300000,
+      "retry": {
+        "maxAttempts": 3,
+        "backoffMs": 5000
+      }
+    },
+    {
+      "id": "analyze_matching_patterns",
+      "name": "Analyze Matching Patterns",
+      "script": "analyzeMatchingPatterns.js",
+      "description": "Analyze email and vehicle matching patterns across datasets",
+      "inputs": [
+        "cleansed_database.json",
+        "catalog_products.json",
+        "submission.from.1march.2025.json"
+      ],
+      "outputs": [
+        "matching_patterns_analysis.json"
+      ],
+      "timeout": 600000,
+      "retry": {
+        "maxAttempts": 2,
+        "backoffMs": 10000
+      }
+    },
+    {
+      "id": "merge_vehicle_data",
+      "name": "Merge Vehicle Data",
+      "script": "mergeVehicleData.js",
+      "description": "Merge data from all sources into unified structure",
+      "inputs": [
+        "cleansed_database.json",
+        "catalog_products.json",
+        "submission.from.1march.2025.json"
+      ],
+      "outputs": [
+        "final_vehicle_catalog.json"
+      ],
+      "timeout": 600000,
+      "retry": {
+        "maxAttempts": 2,
+        "backoffMs": 10000
+      }
+    },
+    {
+      "id": "sophisticated_matching",
+      "name": "Sophisticated Matching",
+      "script": "sophisticatedVehicleMatcher.js",
+      "description": "Apply sophisticated matching algorithms to create improved catalog",
+      "inputs": [
+        "cleansed_database.json",
+        "catalog_products.json",
+        "submission.from.1march.2025.json",
+        "matching_patterns_analysis.json",
+        "final_vehicle_catalog.json"
+      ],
+      "outputs": [
+        "improved_vehicle_catalog.json"
+      ],
+      "timeout": 900000,
+      "retry": {
+        "maxAttempts": 1,
+        "backoffMs": 30000
+      }
+    }
+  ],
+  "dataSources": {
+    "primary": [
+      "cleansed_database.csv",
+      "web_site_catalog_products.csv",
+      "submission.from.1march.2025.json"
+    ],
+    "intermediate": [
+      "cleansed_database.json",
+      "catalog_products.json",
+      "matching_patterns_analysis.json",
+      "final_vehicle_catalog.json"
+    ],
+    "final": [
+      "improved_vehicle_catalog.json"
+    ]
+  },
+  "qualityChecks": {
+    "enabled": true,
+    "checks": [
+      {
+        "name": "Record Count Validation",
+        "description": "Ensure output has reasonable number of records",
+        "minRecords": 100,
+        "maxRecords": 5000
+      },
+      {
+        "name": "Required Fields Check",
+        "description": "Verify essential fields are present",
+        "requiredFields": ["vehicle.make", "vehicle.model", "vehicle.year"]
+      },
+      {
+        "name": "Data Consistency Check",
+        "description": "Check for data consistency across records",
+        "consistencyRules": [
+          "vehicle.year should be numeric or empty",
+          "vehicle.registration should match expected format"
+        ]
+      }
+    ]
+  },
+  "monitoring": {
+    "enabled": true,
+    "logLevel": "info",
+    "metrics": [
+      "execution_time_per_step",
+      "records_processed",
+      "memory_usage",
+      "error_rate"
+    ]
+  },
+  "notifications": {
+    "enabled": false,
+    "webhooks": [],
+    "email": {
+      "enabled": false,
+      "recipients": [],
+      "events": ["pipeline_start", "pipeline_complete", "pipeline_failure"]
+    }
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "name": "Vehicle Catalog Processing Pipeline",
+  "version": "1.0.0",
+  "description": "Data processing pipeline for vehicle catalog with duplicate handling",
+  "steps": [
+    {
+      "id": "load-data",
+      "name": "Load Raw Data",
+      "script": "load-data.js",
+      "description": "Load and validate raw vehicle catalog data",
+      "input": "data/raw/vehicle-catalog.json",
+      "output": "data/processed/vehicle-catalog-validated.json"
+    },
+    {
+      "id": "process-duplicates",
+      "name": "Process Duplicates",
+      "script": "process-duplicates.js",
+      "description": "Handle duplicate records by marking them and creating unique IDs",
+      "input": "../../spoke-hire-web/public/data/vehicle-catalog.json",
+      "output": "../../spoke-hire-web/public/data/vehicle-catalog-with-duplicates.json",
+      "enabled": true
+    },
+    {
+      "id": "fix-published-status",
+      "name": "Fix Published Status",
+      "script": "fix-published-status.js",
+      "description": "Correct published status based on data source and visibility rules",
+      "input": "../../spoke-hire-web/public/data/vehicle-catalog-with-duplicates.json",
+      "output": "../../spoke-hire-web/public/data/vehicle-catalog.json",
+      "enabled": true
+    },
+    {
+      "id": "validate-data",
+      "name": "Validate Data",
+      "script": "validate-data.js",
+      "description": "Validate processed data integrity and completeness",
+      "input": "data/processed/vehicle-catalog-with-duplicates.json",
+      "output": "data/validated/vehicle-catalog-final.json"
+    },
+    {
+      "id": "generate-stats",
+      "name": "Generate Statistics",
+      "script": "generate-stats.js",
+      "description": "Generate comprehensive statistics and reports",
+      "input": "data/validated/vehicle-catalog-final.json",
+      "output": "reports/vehicle-catalog-stats.json"
+    }
+  ],
+  "settings": {
+    "duplicateHandling": {
+      "strategy": "mark-and-unique-id",
+      "keepAllRecords": true,
+      "markDuplicates": true,
+      "createUniqueIds": true,
+      "preserveOriginalId": true
+    },
+    "output": {
+      "format": "json",
+      "prettyPrint": true,
+      "includeMetadata": true
+    },
+    "logging": {
+      "level": "info",
+      "includeTimestamps": true,
+      "includeStats": true
+    }
+  },
+  "paths": {
+    "data": "data",
+    "scripts": "scripts",
+    "reports": "reports",
+    "logs": "logs"
+  }
+}

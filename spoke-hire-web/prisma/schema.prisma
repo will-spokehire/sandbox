@@ -1,0 +1,266 @@
+// Enhanced Prisma Schema with Unified Media Management
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+// User Types
+enum UserType {
+    OWNER_ONLY    // Has vehicles but no Supabase account yet
+    REGISTERED    // Has Supabase account
+    ADMIN         // Admin users
+}
+
+// User Status
+enum UserStatus {
+    ACTIVE
+    INACTIVE
+    SUSPENDED
+}
+
+// Media Types
+enum MediaType {
+    IMAGE
+    VIDEO
+}
+
+// Media Status
+enum MediaStatus {
+    UPLOADING
+    PROCESSING
+    READY
+    FAILED
+    DELETED
+}
+
+// Vehicle Status Enum
+enum VehicleStatus {
+    DRAFT
+    PUBLISHED
+    DECLINED
+    ARCHIVED
+}
+
+// Core User/Owner Entity
+model User {
+    id                String     @id @default(cuid())
+    createdAt         DateTime   @default(now())
+    updatedAt         DateTime   @updatedAt
+    
+    // Supabase Integration (Optional)
+    supabaseId        String?    @unique // Optional - only for registered users
+    email             String     @unique
+    
+    // User Profile
+    firstName         String?
+    lastName          String?
+    phone             String?
+    userType          UserType   @default(OWNER_ONLY) // Default to owner without account
+    status            UserStatus @default(ACTIVE)
+    
+    // Address
+    street            String?
+    city              String?
+    county            String?
+    postcode          String?
+    country           String?
+    
+    // Metadata
+    lastLoginAt       DateTime?
+    profileCompleted  Boolean    @default(false)
+    
+    // Relationships
+    vehicles          Vehicle[]
+    
+    @@index([email])
+    @@index([supabaseId])
+    @@index([userType])
+    @@index([status])
+}
+
+// Steering Types Lookup Table
+model SteeringType {
+    id          String   @id @default(cuid())
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+    
+    name        String   @unique // "Right Hand Drive", "Left Hand Drive"
+    code        String   @unique // "RHD", "LHD"
+    description String?
+    
+    // Relationships
+    vehicles    Vehicle[]
+    
+    @@index([code])
+}
+
+// Collections/Tags for filtering
+model Collection {
+    id          String   @id @default(cuid())
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+    
+    name        String   @unique // "Classic", "Luxury", "Vintage", etc.
+    slug        String   @unique // "classic", "luxury", "vintage"
+    description String?
+    color       String?  // Hex color for UI display
+    isActive    Boolean  @default(true)
+    
+    // Relationships
+    vehicles    VehicleCollection[]
+    
+    @@index([slug])
+    @@index([isActive])
+}
+
+// Core Vehicle Entity
+model Vehicle {
+    id                String   @id @default(cuid())
+    createdAt         DateTime @default(now())
+    updatedAt         DateTime @updatedAt
+    
+    // Basic Vehicle Info
+    name              String
+    make              String
+    model             String
+    year              String
+    registration      String?
+    engineCapacity    Int?     // Engine capacity in CC
+    numberOfSeats     Int?     // Number of seats as integer
+    steeringId        String?  // Reference to SteeringType
+    steering          SteeringType? @relation(fields: [steeringId], references: [id])
+    gearbox           String?
+    exteriorColour    String?
+    interiorColour    String?
+    condition         String?
+    isRoadLegal       Boolean  @default(true)
+    
+    // Business Fields
+    price             Decimal? @db.Decimal(10,2)
+    status            VehicleStatus @default(DRAFT)
+    description       String?
+    
+    // Relationships - Owner is REQUIRED but may not have Supabase account
+    ownerId           String   // Required - but owner might not be registered user
+    owner             User     @relation(fields: [ownerId], references: [id])
+    media             Media[]  // Unified media (images and videos)
+    sources           VehicleSource[]
+    specifications    VehicleSpecification[]
+    collections       VehicleCollection[]
+    
+    // Indexes for performance
+    @@index([make, model])
+    @@index([year])
+    @@index([status])
+    @@index([engineCapacity])
+    @@index([numberOfSeats])
+    @@index([isRoadLegal])
+    @@index([price])
+    @@index([ownerId])
+}
+
+// Unified Media Entity (Images and Videos)
+model Media {
+    id                String     @id @default(cuid())
+    createdAt         DateTime   @default(now())
+    updatedAt         DateTime   @updatedAt
+    
+    // Basic Info
+    type              MediaType  // IMAGE or VIDEO
+    title             String?
+    description       String?
+    altText           String?    // For accessibility
+    
+    // File Information
+    originalUrl       String     // Original file URL/path
+    filename          String     // Original filename
+    fileSize          BigInt?    // File size in bytes
+    mimeType          String?    // image/jpeg, video/mp4, etc.
+    
+    // Media-specific metadata
+    width             Int?       // Width in pixels
+    height            Int?       // Height in pixels
+    duration          Int?       // Duration in seconds (for videos)
+    format            String?    // jpg, png, mp4, webm, etc.
+    
+    // Status
+    status            MediaStatus @default(READY)
+    
+    // Relationships
+    vehicleId         String
+    vehicle           Vehicle    @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+    
+    // Ordering and display
+    order             Int        @default(0)
+    isPrimary         Boolean    @default(false)
+    isVisible         Boolean    @default(true)
+    
+    @@index([vehicleId, order])
+    @@index([type])
+    @@index([status])
+    @@index([isPrimary])
+}
+
+// Track Data Sources
+model VehicleSource {
+    id          String   @id @default(cuid())
+    createdAt   DateTime @default(now())
+    
+    vehicleId   String
+    vehicle     Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+    
+    sourceType  String   // 'catalog', 'cleansed', 'submission'
+    sourceId    String   // Original ID from source
+    matchScore  Int?
+    matchType   String?
+    rawData     Json?    // Store original data for reference
+    
+    @@unique([sourceType, sourceId])
+    @@index([vehicleId])
+}
+
+// Flexible Specifications
+model VehicleSpecification {
+    id          String   @id @default(cuid())
+    createdAt   DateTime @default(now())
+    
+    vehicleId   String
+    vehicle     Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+    
+    category    String   // 'performance', 'safety', 'comfort', 'exterior', 'interior'
+    name        String   // 'horsepower', 'fuel_type', 'airbags', etc.
+    value       String
+    unit        String?  // 'hp', 'cc', 'mpg', etc.
+    
+    @@index([vehicleId, category])
+}
+
+// Many-to-many relationship between Vehicles and Collections
+model VehicleCollection {
+    id           String     @id @default(cuid())
+    createdAt    DateTime   @default(now())
+    
+    vehicleId    String
+    vehicle      Vehicle    @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+    
+    collectionId String
+    collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+    
+    @@unique([vehicleId, collectionId])
+    @@index([vehicleId])
+    @@index([collectionId])
+}
+
+// Legacy Post model (can be removed later)
+model Post {
+    id        Int      @id @default(autoincrement())
+    name      String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([name])
+}

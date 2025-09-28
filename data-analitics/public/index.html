@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Catalog Reviewer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚗 Vehicle Catalog Reviewer</h1>
+            <p>Review and analyze your consolidated vehicle data catalog</p>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-records">0</div>
+                    <div class="stat-label">Total Records</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="published-records">0</div>
+                    <div class="stat-label">Published</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="multi-source-records">0</div>
+                    <div class="stat-label">Multi-Source</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="with-images">0</div>
+                    <div class="stat-label">With Images</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="with-contact">0</div>
+                    <div class="stat-label">With Contact</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="with-address">0</div>
+                    <div class="stat-label">With Address</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="with-registration">0</div>
+                    <div class="stat-label">With Registration</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <input type="text" class="search-box" id="search-input" placeholder="🔍 Search all 1,038 vehicles... (leave empty to show all)">
+            <select class="filter-select" id="source-filter">
+                <option value="all">All Sources (1038)</option>
+                <option value="catalog">Catalog Only</option>
+                <option value="cleansed">Cleansed Only</option>
+                <option value="submission">Submission Only</option>
+                <option value="multi">Multi-Source</option>
+                <option value="has-submission">Contains Submission</option>
+                <option value="has-cleansed">Contains Cleansed</option>
+                <option value="published">Published (92)</option>
+            </select>
+        </div>
+
+        <div class="content">
+            <div class="sidebar">
+                <div class="loading" id="loading">Loading vehicles...</div>
+                <div id="vehicle-list"></div>
+            </div>
+
+            <div class="main-content">
+                <div class="no-data" id="no-selection">
+                    <h3>🚗 Select a vehicle to view details</h3>
+                    <p>Choose any vehicle from the list on the left to see its complete information, images, and owner details.</p>
+                    <p><strong>💡 Tip:</strong> The list shows all 1,038 vehicles by default. Use the search box above to filter results.</p>
+                </div>
+                <div id="vehicle-detail" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

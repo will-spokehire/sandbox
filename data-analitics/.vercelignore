@@ -1,0 +1,20 @@
+# Ignore specific folders that shouldn't be deployed
+node_modules/
+.git/
+archive/
+images/
+catalog_images/
+lib/
+pipeline/
+scripts/
+image-scripts/
+server.js
+package.json
+package-lock.json
+*.log
+middleware.js.backup
+public/
+
+# Allow the data files needed for the website
+!data/improved_vehicle_catalog.json
+!data/improved_vehicle_catalog_*.json

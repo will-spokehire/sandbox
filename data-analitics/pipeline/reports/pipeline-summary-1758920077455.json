@@ -1,0 +1,17 @@
+{
+  "pipeline": "Vehicle Catalog Processing Pipeline",
+  "timestamp": "2025-09-26T20:54:37.455Z",
+  "success": true,
+  "totalSteps": 1,
+  "successfulSteps": 1,
+  "failedSteps": 0,
+  "skippedSteps": 0,
+  "results": [
+    {
+      "step": "process-duplicates",
+      "success": true,
+      "duration": 81,
+      "output": "🔄 Processing duplicates in vehicle catalog...\n📁 Input: /Users/dip/Projects/SpokeHire/spoke-hire-web/public/data/vehicle-catalog.json\n📁 Output: /Users/dip/Projects/SpokeHire/spoke-hire-web/public/data/vehicle-catalog-with-duplicates.json\n📊 Loaded 1038 records\n\n📈 Processing Statistics:\n   Total records: 1038\n   Unique IDs: 981\n   IDs with duplicates: 51\n   Duplicate records: 57\n   Records with duplicates: 51\n\n✅ Successfully processed duplicates!\n📁 Output saved to: /Users/dip/Projects/SpokeHire/spoke-hire-web/public/data/vehicle-catalog-with-duplicates.json\n\n🔍 Sample of processed duplicates:\n   ID: 729-1 (original: 729) - Maserati Grancab\n   ID: 730-1 (original: 730) - Maserati Grancab\n   ID: 755-1 (original: 755) - Volkswagen Splitscreen camper"
+    }
+  ]
+}
