@@ -352,151 +352,303 @@ export function VehicleFilters({
         </SelectContent>
       </Select>
 
-      {/* Collection Filter - Multi-select with Search */}
-      <Popover open={collectionOpen} onOpenChange={setCollectionOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={collectionOpen}
-            className={cn("justify-between", isMobile ? "w-full" : "w-[200px]")}
-          >
-            {collectionIds.length === 0 ? (
-              "Select collections..."
-            ) : (
-              <div className="flex gap-1 flex-wrap">
-                {collectionIds.length === 1 ? (
-                  <span>
-                    {filterOptions?.collections.find((c) => c.id === collectionIds[0])?.name}
-                  </span>
-                ) : (
-                  <span>{collectionIds.length} collections</span>
-                )}
-              </div>
-            )}
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[280px] p-0" align="start">
-          <Command>
-            <CommandInput placeholder="Search collections..." />
-            <CommandList>
-              <CommandEmpty>No collection found.</CommandEmpty>
-              <CommandGroup>
-                {filterOptions?.collections.map((collection) => (
-                  <CommandItem
-                    key={collection.id}
-                    value={collection.name}
-                    onSelect={() => handleCollectionToggle(collection.id)}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        collectionIds.includes(collection.id) ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                    {collection.color && (
-                      <div
-                        className="w-3 h-3 rounded-full mr-2"
-                        style={{ backgroundColor: collection.color }}
+      {/* Collection Filter - Multi-select with Search (Mobile uses Sheet, Desktop uses Popover) */}
+      {isMobileDevice ? (
+        <Sheet open={collectionOpen} onOpenChange={setCollectionOpen}>
+          <SheetTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn("justify-between", isMobile ? "w-full" : "w-[200px]")}
+            >
+              {collectionIds.length === 0 ? (
+                "Select collections..."
+              ) : (
+                <div className="flex gap-1 flex-wrap">
+                  {collectionIds.length === 1 ? (
+                    <span>
+                      {filterOptions?.collections.find((c) => c.id === collectionIds[0])?.name}
+                    </span>
+                  ) : (
+                    <span>{collectionIds.length} collections</span>
+                  )}
+                </div>
+              )}
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="bottom" className="h-[80vh]">
+            <SheetHeader>
+              <SheetTitle>Select Collections</SheetTitle>
+            </SheetHeader>
+            <Command className="mt-4">
+              <CommandInput placeholder="Search collections..." />
+              <CommandList>
+                <CommandEmpty>No collection found.</CommandEmpty>
+                <CommandGroup>
+                  {filterOptions?.collections.map((collection) => (
+                    <CommandItem
+                      key={collection.id}
+                      value={collection.name}
+                      onSelect={() => handleCollectionToggle(collection.id)}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          collectionIds.includes(collection.id) ? "opacity-100" : "opacity-0"
+                        )}
                       />
-                    )}
-                    {collection.name}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
-
-      {/* Exterior Color Filter - Multi-select */}
-      <Popover open={exteriorColorOpen} onOpenChange={setExteriorColorOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={exteriorColorOpen}
-            className={cn("justify-between", isMobile ? "w-full" : "w-[180px]")}
-          >
-            {exteriorColors.length === 0 ? (
-              "Exterior colors..."
-            ) : (
-              <span>{exteriorColors.length} exterior{exteriorColors.length !== 1 ? ' colors' : ''}</span>
-            )}
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[280px] p-0" align="start">
-          <Command>
-            <CommandInput placeholder="Search colors..." />
-            <CommandList>
-              <CommandEmpty>No color found.</CommandEmpty>
-              <CommandGroup>
-                {filterOptions?.exteriorColors.map((color) => (
-                  <CommandItem
-                    key={`ext-${color}`}
-                    value={color}
-                    onSelect={() => handleExteriorColorToggle(color)}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        exteriorColors.includes(color) ? "opacity-100" : "opacity-0"
+                      {collection.color && (
+                        <div
+                          className="w-3 h-3 rounded-full mr-2"
+                          style={{ backgroundColor: collection.color }}
+                        />
                       )}
-                    />
-                    {color}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
-
-      {/* Interior Color Filter - Multi-select */}
-      <Popover open={interiorColorOpen} onOpenChange={setInteriorColorOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={interiorColorOpen}
-            className={cn("justify-between", isMobile ? "w-full" : "w-[180px]")}
-          >
-            {interiorColors.length === 0 ? (
-              "Interior colors..."
-            ) : (
-              <span>{interiorColors.length} interior{interiorColors.length !== 1 ? ' colors' : ''}</span>
-            )}
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[280px] p-0" align="start">
-          <Command>
-            <CommandInput placeholder="Search colors..." />
-            <CommandList>
-              <CommandEmpty>No color found.</CommandEmpty>
-              <CommandGroup>
-                {filterOptions?.interiorColors.map((color) => (
-                  <CommandItem
-                    key={`int-${color}`}
-                    value={color}
-                    onSelect={() => handleInteriorColorToggle(color)}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        interiorColors.includes(color) ? "opacity-100" : "opacity-0"
+                      {collection.name}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </SheetContent>
+        </Sheet>
+      ) : (
+        <Popover open={collectionOpen} onOpenChange={setCollectionOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={collectionOpen}
+              className={cn("justify-between", isMobile ? "w-full" : "w-[200px]")}
+            >
+              {collectionIds.length === 0 ? (
+                "Select collections..."
+              ) : (
+                <div className="flex gap-1 flex-wrap">
+                  {collectionIds.length === 1 ? (
+                    <span>
+                      {filterOptions?.collections.find((c) => c.id === collectionIds[0])?.name}
+                    </span>
+                  ) : (
+                    <span>{collectionIds.length} collections</span>
+                  )}
+                </div>
+              )}
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[280px] p-0" align="start">
+            <Command>
+              <CommandInput placeholder="Search collections..." />
+              <CommandList>
+                <CommandEmpty>No collection found.</CommandEmpty>
+                <CommandGroup>
+                  {filterOptions?.collections.map((collection) => (
+                    <CommandItem
+                      key={collection.id}
+                      value={collection.name}
+                      onSelect={() => handleCollectionToggle(collection.id)}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          collectionIds.includes(collection.id) ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {collection.color && (
+                        <div
+                          className="w-3 h-3 rounded-full mr-2"
+                          style={{ backgroundColor: collection.color }}
+                        />
                       )}
-                    />
-                    {color}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+                      {collection.name}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+      )}
+
+      {/* Exterior Color Filter - Multi-select (Mobile uses Sheet, Desktop uses Popover) */}
+      {isMobileDevice ? (
+        <Sheet open={exteriorColorOpen} onOpenChange={setExteriorColorOpen}>
+          <SheetTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn("justify-between", isMobile ? "w-full" : "w-[180px]")}
+            >
+              {exteriorColors.length === 0 ? (
+                "Exterior colors..."
+              ) : (
+                <span>{exteriorColors.length} exterior{exteriorColors.length !== 1 ? ' colors' : ''}</span>
+              )}
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="bottom" className="h-[80vh]">
+            <SheetHeader>
+              <SheetTitle>Select Exterior Colors</SheetTitle>
+            </SheetHeader>
+            <Command className="mt-4">
+              <CommandInput placeholder="Search colors..." />
+              <CommandList>
+                <CommandEmpty>No color found.</CommandEmpty>
+                <CommandGroup>
+                  {filterOptions?.exteriorColors.map((color) => (
+                    <CommandItem
+                      key={`ext-${color}`}
+                      value={color}
+                      onSelect={() => handleExteriorColorToggle(color)}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          exteriorColors.includes(color) ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {color}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </SheetContent>
+        </Sheet>
+      ) : (
+        <Popover open={exteriorColorOpen} onOpenChange={setExteriorColorOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={exteriorColorOpen}
+              className={cn("justify-between", isMobile ? "w-full" : "w-[180px]")}
+            >
+              {exteriorColors.length === 0 ? (
+                "Exterior colors..."
+              ) : (
+                <span>{exteriorColors.length} exterior{exteriorColors.length !== 1 ? ' colors' : ''}</span>
+              )}
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[280px] p-0" align="start">
+            <Command>
+              <CommandInput placeholder="Search colors..." />
+              <CommandList>
+                <CommandEmpty>No color found.</CommandEmpty>
+                <CommandGroup>
+                  {filterOptions?.exteriorColors.map((color) => (
+                    <CommandItem
+                      key={`ext-${color}`}
+                      value={color}
+                      onSelect={() => handleExteriorColorToggle(color)}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          exteriorColors.includes(color) ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {color}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+      )}
+
+      {/* Interior Color Filter - Multi-select (Mobile uses Sheet, Desktop uses Popover) */}
+      {isMobileDevice ? (
+        <Sheet open={interiorColorOpen} onOpenChange={setInteriorColorOpen}>
+          <SheetTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn("justify-between", isMobile ? "w-full" : "w-[180px]")}
+            >
+              {interiorColors.length === 0 ? (
+                "Interior colors..."
+              ) : (
+                <span>{interiorColors.length} interior{interiorColors.length !== 1 ? ' colors' : ''}</span>
+              )}
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="bottom" className="h-[80vh]">
+            <SheetHeader>
+              <SheetTitle>Select Interior Colors</SheetTitle>
+            </SheetHeader>
+            <Command className="mt-4">
+              <CommandInput placeholder="Search colors..." />
+              <CommandList>
+                <CommandEmpty>No color found.</CommandEmpty>
+                <CommandGroup>
+                  {filterOptions?.interiorColors.map((color) => (
+                    <CommandItem
+                      key={`int-${color}`}
+                      value={color}
+                      onSelect={() => handleInteriorColorToggle(color)}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          interiorColors.includes(color) ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {color}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </SheetContent>
+        </Sheet>
+      ) : (
+        <Popover open={interiorColorOpen} onOpenChange={setInteriorColorOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={interiorColorOpen}
+              className={cn("justify-between", isMobile ? "w-full" : "w-[180px]")}
+            >
+              {interiorColors.length === 0 ? (
+                "Interior colors..."
+              ) : (
+                <span>{interiorColors.length} interior{interiorColors.length !== 1 ? ' colors' : ''}</span>
+              )}
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[280px] p-0" align="start">
+            <Command>
+              <CommandInput placeholder="Search colors..." />
+              <CommandList>
+                <CommandEmpty>No color found.</CommandEmpty>
+                <CommandGroup>
+                  {filterOptions?.interiorColors.map((color) => (
+                    <CommandItem
+                      key={`int-${color}`}
+                      value={color}
+                      onSelect={() => handleInteriorColorToggle(color)}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          interiorColors.includes(color) ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {color}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+      )}
 
       {/* Year From Select */}
       <Select
