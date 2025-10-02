@@ -35,12 +35,14 @@ interface VehicleFiltersProps {
   status?: VehicleStatus;
   makeIds?: string[];
   modelId?: string;
+  collectionIds?: string[];
   yearFrom?: string;
   yearTo?: string;
   onSearchChange: (search: string) => void;
   onStatusChange: (status?: VehicleStatus) => void;
   onMakeIdsChange: (makeIds: string[]) => void;
   onModelChange: (modelId?: string) => void;
+  onCollectionIdsChange: (collectionIds: string[]) => void;
   onYearFromChange: (year?: string) => void;
   onYearToChange: (year?: string) => void;
   onClearFilters: () => void;
@@ -56,18 +58,21 @@ export function VehicleFilters({
   status,
   makeIds = [],
   modelId,
+  collectionIds = [],
   yearFrom,
   yearTo,
   onSearchChange,
   onStatusChange,
   onMakeIdsChange,
   onModelChange,
+  onCollectionIdsChange,
   onYearFromChange,
   onYearToChange,
   onClearFilters,
 }: VehicleFiltersProps) {
   const [searchInput, setSearchInput] = useState(search);
   const [makeOpen, setMakeOpen] = useState(false);
+  const [collectionOpen, setCollectionOpen] = useState(false);
 
   // Fetch filter options
   const { data: filterOptions } = api.vehicle.getFilterOptions.useQuery();
@@ -78,7 +83,7 @@ export function VehicleFilters({
     { enabled: makeIds.length === 1 }
   );
 
-  const hasActiveFilters = !!(search || status || makeIds.length > 0 || modelId || yearFrom || yearTo);
+  const hasActiveFilters = !!(search || status || makeIds.length > 0 || modelId || collectionIds.length > 0 || yearFrom || yearTo);
 
   // Generate year options (from 1900 to current year + 1)
   const currentYear = new Date().getFullYear();
@@ -137,6 +142,14 @@ export function VehicleFilters({
     }
   };
 
+  const handleCollectionToggle = (collectionId: string) => {
+    const newCollectionIds = collectionIds.includes(collectionId)
+      ? collectionIds.filter((id) => id !== collectionId)
+      : [...collectionIds, collectionId];
+    
+    onCollectionIdsChange(newCollectionIds);
+  };
+
   const handleClearFilters = () => {
     setSearchInput("");
     onClearFilters();
@@ -151,7 +164,7 @@ export function VehicleFilters({
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search vehicles, make, model, registration..."
+              placeholder="Search by vehicle, make, model, registration, owner name, email, phone..."
               value={searchInput}
               onChange={(e) => handleSearchChange(e.target.value)}
               className="pl-9"
@@ -244,6 +257,64 @@ export function VehicleFilters({
                 ))}
               </SelectContent>
             </Select>
+
+            {/* Collection Filter - Multi-select with Search */}
+            <Popover open={collectionOpen} onOpenChange={setCollectionOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={collectionOpen}
+                  className="w-[200px] justify-between"
+                >
+                  {collectionIds.length === 0 ? (
+                    "Select collections..."
+                  ) : (
+                    <div className="flex gap-1 flex-wrap">
+                      {collectionIds.length === 1 ? (
+                        <span>
+                          {filterOptions?.collections.find((c) => c.id === collectionIds[0])?.name}
+                        </span>
+                      ) : (
+                        <span>{collectionIds.length} collections</span>
+                      )}
+                    </div>
+                  )}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[200px] p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Search collections..." />
+                  <CommandList>
+                    <CommandEmpty>No collection found.</CommandEmpty>
+                    <CommandGroup>
+                      {filterOptions?.collections.map((collection) => (
+                        <CommandItem
+                          key={collection.id}
+                          value={collection.name}
+                          onSelect={() => handleCollectionToggle(collection.id)}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              collectionIds.includes(collection.id) ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          {collection.color && (
+                            <div
+                              className="w-3 h-3 rounded-full mr-2"
+                              style={{ backgroundColor: collection.color }}
+                            />
+                          )}
+                          {collection.name}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
 
             {/* Year From Select */}
             <Select

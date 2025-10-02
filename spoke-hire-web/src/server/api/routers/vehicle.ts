@@ -24,6 +24,7 @@ const listVehiclesInputSchema = z.object({
   makeId: z.string().optional(), // Single make (deprecated, use makeIds)
   makeIds: z.array(z.string()).optional(), // Multiple makes with OR logic
   modelId: z.string().optional(),
+  collectionIds: z.array(z.string()).optional(), // Multiple collections with OR logic
   yearFrom: z.string().optional(),
   yearTo: z.string().optional(),
   priceFrom: z.number().optional(),
@@ -63,6 +64,7 @@ export const vehicleRouter = createTRPCRouter({
         makeId,
         makeIds,
         modelId,
+        collectionIds,
         yearFrom,
         yearTo,
         priceFrom,
@@ -93,6 +95,16 @@ export const vehicleRouter = createTRPCRouter({
         where.modelId = modelId;
       }
 
+      // Collection filter with OR logic
+      if (collectionIds && collectionIds.length > 0) {
+        // Vehicles that have ANY of the selected collections
+        where.collections = {
+          some: {
+            collectionId: { in: collectionIds }
+          }
+        };
+      }
+
       // Year range filter
       if (yearFrom || yearTo) {
         where.year = {};
@@ -112,14 +124,20 @@ export const vehicleRouter = createTRPCRouter({
         where.ownerId = ownerId;
       }
 
-      // Search across multiple fields
+      // Search across multiple fields including owner information
       if (search && search.trim()) {
         where.OR = [
+          // Vehicle fields
           { name: { contains: search, mode: "insensitive" } },
           { registration: { contains: search, mode: "insensitive" } },
           { description: { contains: search, mode: "insensitive" } },
           { make: { name: { contains: search, mode: "insensitive" } } },
           { model: { name: { contains: search, mode: "insensitive" } } },
+          // Owner fields
+          { owner: { email: { contains: search, mode: "insensitive" } } },
+          { owner: { firstName: { contains: search, mode: "insensitive" } } },
+          { owner: { lastName: { contains: search, mode: "insensitive" } } },
+          { owner: { phone: { contains: search, mode: "insensitive" } } },
         ];
       }
 
@@ -342,6 +360,17 @@ export const vehicleRouter = createTRPCRouter({
       },
     });
 
+    // Get all collections
+    const collections = await ctx.db.collection.findMany({
+      where: { isActive: true },
+      orderBy: { name: "asc" },
+      select: {
+        id: true,
+        name: true,
+        color: true,
+      },
+    });
+
     // Get unique years
     const years = await ctx.db.vehicle.findMany({
       distinct: ["year"],
@@ -357,6 +386,7 @@ export const vehicleRouter = createTRPCRouter({
 
     return {
       makes,
+      collections,
       years: years.map((v) => v.year),
       statusCounts: statusCounts.map((sc) => ({
         status: sc.status,
