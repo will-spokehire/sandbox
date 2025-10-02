@@ -54,107 +54,107 @@ export function VehicleCard({
 
   return (
     <Card
-      className="cursor-pointer hover:shadow-md transition-shadow"
+      className="cursor-pointer hover:shadow-md transition-shadow active:scale-[0.98] transition-transform"
       onClick={() => onView?.(vehicle.id)}
     >
-      <CardContent className="p-4">
-        <div className="flex gap-4">
-          {/* Image */}
-          <div className="relative h-32 w-40 flex-shrink-0 overflow-hidden rounded-md border bg-muted">
-            <Image
-              src={imageUrl}
-              alt={vehicle.name}
-              fill
-              className="object-cover"
-              sizes="160px"
-            />
+      <CardContent className="p-0">
+        {/* Image - Full width for better impact */}
+        <div className="relative h-48 w-full overflow-hidden rounded-t-lg bg-muted">
+          <Image
+            src={imageUrl}
+            alt={vehicle.name}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 400px"
+          />
+          
+          {/* Status badge overlay */}
+          <div className="absolute top-3 left-3">
+            <VehicleStatusBadge status={vehicle.status} />
+          </div>
+          
+          {/* Actions overlay */}
+          <div className="absolute top-3 right-3" onClick={(e) => e.stopPropagation()}>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="secondary" 
+                  size="icon" 
+                  className="h-9 w-9 shadow-lg backdrop-blur-sm bg-background/80 hover:bg-background/90"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">Open menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => onView?.(vehicle.id)}>
+                  <Eye className="mr-2 h-4 w-4" />
+                  View Details
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onEdit?.(vehicle.id)}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit Vehicle
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => onDelete?.(vehicle.id)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-4">
+          {/* Title and Price */}
+          <div className="mb-3">
+            <div className="flex items-start justify-between gap-2 mb-1">
+              <h3 className="font-semibold text-lg text-foreground leading-tight">
+                {vehicle.name}
+              </h3>
+              <span className="font-bold text-lg text-primary whitespace-nowrap">
+                {formatPrice(vehicle.price)}
+              </span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {vehicle.make.name} {vehicle.model.name} • {vehicle.year}
+            </p>
           </div>
 
-          {/* Content */}
-          <div className="flex-1 min-w-0">
-            {/* Header with title and actions */}
-            <div className="flex items-start justify-between gap-2 mb-2">
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-base text-foreground truncate">
-                  {vehicle.name}
-                </h3>
-                <p className="text-sm text-muted-foreground truncate">
-                  {vehicle.make.name} {vehicle.model.name}
-                </p>
-              </div>
-              
-              {/* Actions */}
-              <div onClick={(e) => e.stopPropagation()}>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <MoreHorizontal className="h-4 w-4" />
-                      <span className="sr-only">Open menu</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => onView?.(vehicle.id)}>
-                      <Eye className="mr-2 h-4 w-4" />
-                      View Details
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onEdit?.(vehicle.id)}>
-                      <Edit className="mr-2 h-4 w-4" />
-                      Edit Vehicle
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => onDelete?.(vehicle.id)}
-                      className="text-destructive focus:text-destructive"
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+          {/* Key Details Grid */}
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm mb-3 pb-3 border-b">
+            <div>
+              <span className="text-muted-foreground text-xs">Registration</span>
+              <p className="font-mono font-medium text-xs mt-0.5">
+                {formatRegistration(vehicle.registration)}
+              </p>
             </div>
-
-            {/* Details */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Year:</span>
-                <span className="font-medium">{vehicle.year}</span>
-              </div>
-              
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Registration:</span>
-                <span className="font-medium font-mono text-xs">
-                  {formatRegistration(vehicle.registration)}
-                </span>
-              </div>
-              
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Status:</span>
-                <VehicleStatusBadge status={vehicle.status} />
-              </div>
-              
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Price:</span>
-                <span className="font-semibold text-base">
-                  {formatPrice(vehicle.price)}
-                </span>
-              </div>
-              
-              <div className="flex items-center justify-between text-sm pt-1 border-t">
-                <span className="text-muted-foreground">Location:</span>
-                <span className="font-medium text-xs truncate max-w-[150px]">
-                  {location}
-                </span>
-              </div>
-              
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Owner:</span>
-                <span className="font-medium text-xs truncate max-w-[150px]">
-                  {ownerName}
-                </span>
-              </div>
+            <div className="text-right">
+              <span className="text-muted-foreground text-xs">Year</span>
+              <p className="font-semibold mt-0.5">{vehicle.year}</p>
+            </div>
+          </div>
+          
+          {/* Owner & Location */}
+          <div className="space-y-1.5 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground text-xs">Location</span>
+              <span className="font-medium text-xs truncate ml-2">
+                {location}
+              </span>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground text-xs">Owner</span>
+              <span className="font-medium text-xs truncate ml-2">
+                {ownerName}
+              </span>
             </div>
           </div>
         </div>
