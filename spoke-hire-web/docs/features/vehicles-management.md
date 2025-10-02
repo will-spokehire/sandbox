@@ -13,12 +13,12 @@ The Vehicles Management feature provides a comprehensive interface for administr
 **Procedures:**
 
 1. **`list`** - Get paginated list of vehicles with filters
-   - Input: Pagination, search, filters (status, make, model, year, price, owner), sorting
+   - Input: Pagination, search, filters (status, makeIds, modelId, collectionIds, exteriorColors, interiorColors, year range, price, owner), sorting
    - Output: Array of vehicles with relations, next cursor, total count
    - Auth: Admin only
    - Features:
-     - Full-text search across name, registration, description, make, model
-     - Multiple filter options
+     - Full-text search across name, registration, description, make, model, owner (email, name, phone)
+     - Multiple filter options with OR logic (makes, collections, colors)
      - Cursor-based pagination
      - Flexible sorting
 
@@ -40,7 +40,7 @@ The Vehicles Management feature provides a comprehensive interface for administr
    - Note: Soft delete by setting status to ARCHIVED
 
 5. **`getFilterOptions`** - Get available filter options
-   - Output: List of makes, years, status counts
+   - Output: List of makes, collections (with colors), exterior colors, interior colors, years, status counts
    - Auth: Admin only
    - Used to populate filter dropdowns
 
@@ -58,9 +58,12 @@ The Vehicles Management feature provides a comprehensive interface for administr
 - Main page for vehicle list
 - Client component with URL state management
 - Features:
-  - Search with debouncing (300ms)
+  - Search with debouncing (300ms) - searches vehicle and owner info
+  - Multi-select filters with OR logic (makes, collections, colors)
   - Filters synced to URL query parameters
-  - Statistics cards (total, published, draft, current results)
+  - Results count display
+  - Table/Card view toggle for desktop
+  - Load More pagination
   - Loading and error states
   - Navigation to vehicle detail/edit pages
 
@@ -79,9 +82,14 @@ The Vehicles Management feature provides a comprehensive interface for administr
    - Click row to navigate to detail page
 
 3. **`VehicleFilters.tsx`** (Client)
-   - Search input with icon
+   - Search input with icon (searches vehicle + owner info)
    - Status filter dropdown
-   - Make/model cascading filters
+   - Make multi-select filter (searchable with checkboxes)
+   - Model filter (enabled when single make selected)
+   - Collection multi-select filter (searchable with color indicators)
+   - Exterior color multi-select filter (16 colors)
+   - Interior color multi-select filter (16 colors)
+   - Year range filters (from/to dropdowns)
    - Clear filters button
    - Active filters indicator
 
@@ -160,20 +168,25 @@ All filters are synced to URL query parameters for:
 - Bookmark-able filtered views
 
 **Query Parameters:**
-- `search` - Search term
-- `status` - Vehicle status filter
-- `makeId` - Make filter
+- `search` - Search term (vehicle and owner info)
+- `status` - Vehicle status filter (default: PUBLISHED)
+- `makeIds` - Comma-separated make IDs (OR logic)
 - `modelId` - Model filter
+- `collectionIds` - Comma-separated collection IDs (OR logic)
+- `exteriorColors` - Comma-separated colors (OR logic)
+- `interiorColors` - Comma-separated colors (OR logic)
+- `yearFrom` - Year range start
+- `yearTo` - Year range end
 
-Example: `/admin/vehicles?search=porsche&status=PUBLISHED&makeId=123`
+Example: `/admin/vehicles?search=john@example.com&status=PUBLISHED&makeIds=bmw-id,audi-id&collectionIds=classic-id&exteriorColors=Red,Blue&yearFrom=2000&yearTo=2020`
 
 ## UI/UX Features
 
 ### Responsive Design
-- Desktop (≥ 768px): Full table with all columns
+- Desktop (≥ 768px): Table or Card view (user toggle)
 - Mobile (< 768px): Card-based layout with stacked information
 - Touch-friendly tap targets (min 44x44px)
-- Horizontal scrolling stats on small screens
+- Filter row wraps on smaller screens
 
 ### Loading States
 - Skeleton loader with 5 rows
@@ -327,11 +340,13 @@ src/
 ---
 
 **Last Updated:** October 2, 2025  
-**Status:** ✅ Mobile-first responsive implementation complete, detail/edit pages TODO
+**Status:** ✅ Comprehensive filtering system complete with multi-select, search, and view toggles. Detail/edit pages TODO.
 
 ## Recent Updates
 
 ### October 2, 2025
+
+#### Initial Implementation
 - ✅ Added mobile-first responsive design
 - ✅ Implemented card layout for mobile devices
 - ✅ Added Supabase storage domain to Next.js config
@@ -343,4 +358,33 @@ src/
 - ✅ Implemented "Load More" pagination with cursor-based loading
 - ✅ Shows remaining count on Load More button
 - ✅ Loading spinner while fetching more vehicles
+
+#### Enhanced Filtering
+- ✅ Replaced statistics cards with simple results count
+- ✅ Set default status filter to "Published"
+- ✅ Added location display (Postcode, City, Country) from owner data
+- ✅ Separated Location and Owner columns in table view
+- ✅ Added desktop view toggle (Table/Cards)
+- ✅ Reused mobile card component for desktop cards view
+
+#### Advanced Filters
+- ✅ **Year Range Filter:** Dropdown selects for year from/to (1900-2026)
+- ✅ **Make Multi-Select:** Searchable dropdown with checkboxes, OR logic
+- ✅ **Collection Multi-Select:** Searchable with color indicators, OR logic
+  - 9 collections created from catalog data
+  - 926 collection assignments across 708 vehicles
+  - Collections: Classic (627), American (89), Convertibles (88), Modern (84), 4x4 (27), Vans (20), Service Vehicles (13), Motorbikes (6), Emergency Vehicles (1)
+- ✅ **Enhanced Search:** Now searches owner email, first name, last name, phone
+- ✅ **Color Filters:** Multi-select for exterior and interior colors
+  - 16 colors each: Beige, Black, Blue, Brown, Cream, Gold, Green, Grey, Maroon, Orange, Pink, Purple, Red, Silver, White, Yellow
+  - OR logic within each color type
+  - Top colors: Blue (159), Red (129), Black (107), Green (81), White (81)
+
+#### Technical Improvements
+- ✅ URL persistence for all filter states
+- ✅ OR logic for multi-select filters (makes, collections, colors)
+- ✅ AND logic between different filter types
+- ✅ Cursor-based pagination with filter reset on filter change
+- ✅ Created update-vehicle-collections.ts script for data migration
+- ✅ Added Command and Popover components from shadcn/ui
 
