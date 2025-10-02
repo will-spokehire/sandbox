@@ -54,7 +54,7 @@ export function VehicleCard({
 
   return (
     <Card
-      className="cursor-pointer hover:shadow-md transition-shadow active:scale-[0.98] transition-transform overflow-hidden"
+      className="cursor-pointer hover:shadow-md transition-shadow active:scale-[0.98] transition-transform overflow-hidden py-0"
       onClick={() => onView?.(vehicle.id)}
     >
       <CardContent className="p-0">
