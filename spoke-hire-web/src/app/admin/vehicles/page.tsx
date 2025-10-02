@@ -31,9 +31,10 @@ export default function VehiclesPage() {
   const [status, setStatus] = useState<VehicleStatus | undefined>(
     (searchParams.get("status") as VehicleStatus) ?? "PUBLISHED"
   );
-  const [makeId, setMakeId] = useState<string | undefined>(
-    searchParams.get("makeId") ?? undefined
-  );
+  const [makeIds, setMakeIds] = useState<string[]>(() => {
+    const makeIdsParam = searchParams.get("makeIds");
+    return makeIdsParam ? makeIdsParam.split(",") : [];
+  });
   const [modelId, setModelId] = useState<string | undefined>(
     searchParams.get("modelId") ?? undefined
   );
@@ -63,7 +64,7 @@ export default function VehiclesPage() {
       cursor,
       search: debouncedSearch || undefined,
       status,
-      makeId,
+      makeIds: makeIds.length > 0 ? makeIds : undefined, // Multiple makes with OR logic
       modelId,
       yearFrom,
       yearTo,
@@ -92,7 +93,7 @@ export default function VehiclesPage() {
   useEffect(() => {
     setCursor(undefined);
     setAllVehicles([]);
-  }, [debouncedSearch, status, makeId, modelId, yearFrom, yearTo]);
+  }, [debouncedSearch, status, makeIds, modelId, yearFrom, yearTo]);
 
   // Update URL when filters change
   useEffect(() => {
@@ -100,14 +101,14 @@ export default function VehiclesPage() {
     
     if (debouncedSearch) params.set("search", debouncedSearch);
     if (status) params.set("status", status);
-    if (makeId) params.set("makeId", makeId);
+    if (makeIds.length > 0) params.set("makeIds", makeIds.join(","));
     if (modelId) params.set("modelId", modelId);
     if (yearFrom) params.set("yearFrom", yearFrom);
     if (yearTo) params.set("yearTo", yearTo);
 
     const newUrl = params.toString() ? `?${params.toString()}` : "/admin/vehicles";
     router.push(newUrl, { scroll: false });
-  }, [debouncedSearch, status, makeId, modelId, yearFrom, yearTo, router]);
+  }, [debouncedSearch, status, makeIds, modelId, yearFrom, yearTo, router]);
 
   // Handle errors
   useEffect(() => {
@@ -138,7 +139,7 @@ export default function VehiclesPage() {
   const handleClearFilters = () => {
     setSearchInput("");
     setStatus(undefined);
-    setMakeId(undefined);
+    setMakeIds([]);
     setModelId(undefined);
     setYearFrom(undefined);
     setYearTo(undefined);
@@ -154,7 +155,7 @@ export default function VehiclesPage() {
   };
 
   // Check if any filters are active
-  const hasFilters = !!(debouncedSearch || status || makeId || modelId || yearFrom || yearTo);
+  const hasFilters = !!(debouncedSearch || status || makeIds.length > 0 || modelId || yearFrom || yearTo);
 
   if (isAuthLoading || !user) {
     return (
@@ -211,13 +212,13 @@ export default function VehiclesPage() {
           <VehicleFilters
             search={searchInput}
             status={status}
-            makeId={makeId}
+            makeIds={makeIds}
             modelId={modelId}
             yearFrom={yearFrom}
             yearTo={yearTo}
             onSearchChange={setSearchInput}
             onStatusChange={setStatus}
-            onMakeChange={setMakeId}
+            onMakeIdsChange={setMakeIds}
             onModelChange={setModelId}
             onYearFromChange={setYearFrom}
             onYearToChange={setYearTo}

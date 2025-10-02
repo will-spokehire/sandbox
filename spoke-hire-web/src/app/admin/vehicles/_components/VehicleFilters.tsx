@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, X } from "lucide-react";
+import { Check, ChevronsUpDown, Search, X } from "lucide-react";
 import { VehicleStatus } from "@prisma/client";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
@@ -13,18 +13,33 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Card, CardContent } from "~/components/ui/card";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "~/components/ui/command";
+import { Badge } from "~/components/ui/badge";
+import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 
 interface VehicleFiltersProps {
   search?: string;
   status?: VehicleStatus;
-  makeId?: string;
+  makeIds?: string[];
   modelId?: string;
   yearFrom?: string;
   yearTo?: string;
   onSearchChange: (search: string) => void;
   onStatusChange: (status?: VehicleStatus) => void;
-  onMakeChange: (makeId?: string) => void;
+  onMakeIdsChange: (makeIds: string[]) => void;
   onModelChange: (modelId?: string) => void;
   onYearFromChange: (year?: string) => void;
   onYearToChange: (year?: string) => void;
@@ -39,30 +54,31 @@ interface VehicleFiltersProps {
 export function VehicleFilters({
   search = "",
   status,
-  makeId,
+  makeIds = [],
   modelId,
   yearFrom,
   yearTo,
   onSearchChange,
   onStatusChange,
-  onMakeChange,
+  onMakeIdsChange,
   onModelChange,
   onYearFromChange,
   onYearToChange,
   onClearFilters,
 }: VehicleFiltersProps) {
   const [searchInput, setSearchInput] = useState(search);
+  const [makeOpen, setMakeOpen] = useState(false);
 
   // Fetch filter options
   const { data: filterOptions } = api.vehicle.getFilterOptions.useQuery();
 
   // Fetch models when make is selected
   const { data: models } = api.vehicle.getModelsByMake.useQuery(
-    { makeId: makeId! },
-    { enabled: !!makeId }
+    { makeId: makeIds[0]! },
+    { enabled: makeIds.length === 1 }
   );
 
-  const hasActiveFilters = !!(search || status || makeId || modelId || yearFrom || yearTo);
+  const hasActiveFilters = !!(search || status || makeIds.length > 0 || modelId || yearFrom || yearTo);
 
   // Generate year options (from 1900 to current year + 1)
   const currentYear = new Date().getFullYear();
@@ -76,13 +92,16 @@ export function VehicleFilters({
     onSearchChange(value);
   };
 
-  const handleMakeChange = (value: string) => {
-    if (value === "all") {
-      onMakeChange(undefined);
-      onModelChange(undefined); // Clear model when make changes
-    } else {
-      onMakeChange(value);
-      onModelChange(undefined); // Clear model when make changes
+  const handleMakeToggle = (makeId: string) => {
+    const newMakeIds = makeIds.includes(makeId)
+      ? makeIds.filter((id) => id !== makeId)
+      : [...makeIds, makeId];
+    
+    onMakeIdsChange(newMakeIds);
+    
+    // Clear model if no makes or multiple makes selected
+    if (newMakeIds.length !== 1) {
+      onModelChange(undefined);
     }
   };
 
@@ -155,26 +174,63 @@ export function VehicleFilters({
               </SelectContent>
             </Select>
 
-            {/* Make Filter */}
-            <Select value={makeId ?? "all"} onValueChange={handleMakeChange}>
-              <SelectTrigger className="w-[160px]">
-                <SelectValue placeholder="Make" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Makes</SelectItem>
-                {filterOptions?.makes.map((make) => (
-                  <SelectItem key={make.id} value={make.id}>
-                    {make.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {/* Make Filter - Multi-select with Search */}
+            <Popover open={makeOpen} onOpenChange={setMakeOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={makeOpen}
+                  className="w-[200px] justify-between"
+                >
+                  {makeIds.length === 0 ? (
+                    "Select makes..."
+                  ) : (
+                    <div className="flex gap-1 flex-wrap">
+                      {makeIds.length === 1 ? (
+                        <span>
+                          {filterOptions?.makes.find((m) => m.id === makeIds[0])?.name}
+                        </span>
+                      ) : (
+                        <span>{makeIds.length} makes selected</span>
+                      )}
+                    </div>
+                  )}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[200px] p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Search makes..." />
+                  <CommandList>
+                    <CommandEmpty>No make found.</CommandEmpty>
+                    <CommandGroup>
+                      {filterOptions?.makes.map((make) => (
+                        <CommandItem
+                          key={make.id}
+                          value={make.name}
+                          onSelect={() => handleMakeToggle(make.id)}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              makeIds.includes(make.id) ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          {make.name}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
 
-            {/* Model Filter (only enabled when make is selected) */}
+            {/* Model Filter (only enabled when single make is selected) */}
             <Select
               value={modelId ?? "all"}
               onValueChange={handleModelChange}
-              disabled={!makeId}
+              disabled={makeIds.length !== 1}
             >
               <SelectTrigger className="w-[160px]">
                 <SelectValue placeholder="Model" />

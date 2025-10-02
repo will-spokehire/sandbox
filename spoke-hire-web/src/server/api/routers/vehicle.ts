@@ -21,7 +21,8 @@ const listVehiclesInputSchema = z.object({
   
   // Filters
   status: z.nativeEnum(VehicleStatus).optional(),
-  makeId: z.string().optional(),
+  makeId: z.string().optional(), // Single make (deprecated, use makeIds)
+  makeIds: z.array(z.string()).optional(), // Multiple makes with OR logic
   modelId: z.string().optional(),
   yearFrom: z.string().optional(),
   yearTo: z.string().optional(),
@@ -60,6 +61,7 @@ export const vehicleRouter = createTRPCRouter({
         search,
         status,
         makeId,
+        makeIds,
         modelId,
         yearFrom,
         yearTo,
@@ -78,10 +80,15 @@ export const vehicleRouter = createTRPCRouter({
         where.status = status;
       }
 
-      // Make/Model filters
-      if (makeId) {
+      // Make/Model filters with OR logic
+      if (makeIds && makeIds.length > 0) {
+        // Multiple makes: use OR logic (makeId IN makeIds)
+        where.makeId = { in: makeIds };
+      } else if (makeId) {
+        // Single make (backward compatibility)
         where.makeId = makeId;
       }
+      
       if (modelId) {
         where.modelId = modelId;
       }
