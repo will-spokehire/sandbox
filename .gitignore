@@ -90,13 +90,13 @@ tmp/
 temp/
 
 # Large data files (keep samples only)
-data-analitics/data/*.json
-!data-analitics/data/sample_*.json
-data-analitics/images/
-data-analitics/catalog_images/
+data-analytics/data/*.json
+!data-analytics/data/sample_*.json
+data-analytics/images/
+data-analytics/catalog_images/
 
 # Pipeline runs
-data-analitics/pipeline/runs/
+data-analytics/pipeline/runs/
 
 # Vercel
 .vercel
