@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { VehicleStatus } from "@prisma/client";
+import { LayoutGrid, Table as TableIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useRequireAdmin } from "~/providers/auth-provider";
 import { UserMenu } from "~/components/auth/UserMenu";
@@ -38,6 +39,7 @@ export default function VehiclesPage() {
   );
   const [cursor, setCursor] = useState<string | undefined>(undefined);
   const [allVehicles, setAllVehicles] = useState<VehicleListItem[]>([]);
+  const [viewMode, setViewMode] = useState<"table" | "cards">("table");
 
   // Debounce search input
   const debouncedSearch = useDebounce(searchInput, 300);
@@ -206,7 +208,7 @@ export default function VehiclesPage() {
             onClearFilters={handleClearFilters}
           />
 
-          {/* Results Count */}
+          {/* Results Count & View Toggle */}
           {!isVehiclesLoading && (
             <div className="flex items-center justify-between">
               <p className="text-sm text-slate-600 dark:text-slate-400">
@@ -216,22 +218,45 @@ export default function VehiclesPage() {
                   <>
                     Found <span className="font-semibold text-slate-900 dark:text-slate-50">{data?.totalCount}</span> vehicle{data?.totalCount !== 1 ? "s" : ""}
                     {hasFilters && " matching your criteria"}
+                    {allVehicles.length > 0 && allVehicles.length < (data?.totalCount ?? 0) && (
+                      <span className="ml-2">
+                        (Showing <span className="font-semibold">{allVehicles.length}</span>)
+                      </span>
+                    )}
                   </>
                 )}
               </p>
-              {allVehicles.length > 0 && allVehicles.length < (data?.totalCount ?? 0) && (
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Showing <span className="font-semibold text-slate-900 dark:text-slate-50">{allVehicles.length}</span> of <span className="font-semibold">{data?.totalCount}</span>
-                </p>
-              )}
+              
+              {/* Desktop View Toggle */}
+              <div className="hidden md:flex items-center gap-2">
+                <Button
+                  variant={viewMode === "table" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setViewMode("table")}
+                  className="gap-2"
+                >
+                  <TableIcon className="h-4 w-4" />
+                  Table
+                </Button>
+                <Button
+                  variant={viewMode === "cards" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setViewMode("cards")}
+                  className="gap-2"
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                  Cards
+                </Button>
+              </div>
             </div>
           )}
 
-          {/* Table */}
+          {/* Table/Cards */}
           <VehicleListTable
             vehicles={allVehicles}
             isLoading={isVehiclesLoading && !cursor}
             hasFilters={hasFilters}
+            viewMode={viewMode}
             onView={handleView}
             onEdit={handleEdit}
             onDelete={handleDelete}

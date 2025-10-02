@@ -18,6 +18,7 @@ interface VehicleListTableProps {
   vehicles: VehicleListItem[];
   isLoading?: boolean;
   hasFilters?: boolean;
+  viewMode?: "table" | "cards";
   onView?: (id: string) => void;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
@@ -27,12 +28,15 @@ interface VehicleListTableProps {
 /**
  * Vehicle List Table
  * 
- * Responsive component: Cards on mobile, table on desktop
+ * Responsive component with view mode toggle:
+ * - Mobile: Always cards
+ * - Desktop: Table or cards based on viewMode prop
  */
 export function VehicleListTable({
   vehicles,
   isLoading = false,
   hasFilters = false,
+  viewMode = "table",
   onView,
   onEdit,
   onDelete,
@@ -48,26 +52,28 @@ export function VehicleListTable({
     );
   }
 
+  // Card view skeleton
+  const CardSkeleton = () => (
+    <div className="rounded-lg border bg-card p-4">
+      <div className="flex gap-4">
+        <Skeleton className="h-24 w-24 rounded flex-shrink-0" />
+        <div className="flex-1 space-y-2">
+          <Skeleton className="h-5 w-3/4" />
+          <Skeleton className="h-4 w-1/2" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-2/3" />
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <>
-      {/* Mobile Card View (< md) */}
+      {/* Mobile: Always Card View (< md) */}
       <div className="md:hidden space-y-4">
         {isLoading ? (
-          // Mobile loading skeleton
-          Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="rounded-lg border bg-card p-4">
-              <div className="flex gap-4">
-                <Skeleton className="h-24 w-24 rounded flex-shrink-0" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-5 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-2/3" />
-                </div>
-              </div>
-            </div>
-          ))
+          Array.from({ length: 5 }).map((_, i) => <CardSkeleton key={i} />)
         ) : (
           vehicles.map((vehicle) => (
             <VehicleCard
@@ -81,8 +87,28 @@ export function VehicleListTable({
         )}
       </div>
 
-      {/* Desktop Table View (>= md) */}
-      <div className="hidden md:block rounded-md border">
+      {/* Desktop: Cards View (>= md) - when viewMode === "cards" */}
+      {viewMode === "cards" && (
+        <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {isLoading ? (
+            Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} />)
+          ) : (
+            vehicles.map((vehicle) => (
+              <VehicleCard
+                key={vehicle.id}
+                vehicle={vehicle}
+                onView={onView}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
+            ))
+          )}
+        </div>
+      )}
+
+      {/* Desktop: Table View (>= md) - when viewMode === "table" */}
+      {viewMode === "table" && (
+        <div className="hidden md:block rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -116,7 +142,8 @@ export function VehicleListTable({
             </TableBody>
           )}
         </Table>
-      </div>
+        </div>
+      )}
     </>
   );
 }
