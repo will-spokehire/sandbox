@@ -107,3 +107,5 @@ spoke-hire-web/public/images-by-coverage/
 spoke-hire-web/public/detections/
 spoke-hire-web/data/*.json
 !spoke-hire-web/data/sample_*.json
+spoke-hire-web/data/images-without-cars.csv
+spoke-hire-web/data/images-without-cars.txt
