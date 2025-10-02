@@ -6,11 +6,14 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
-import { initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
+import { type User as SupabaseUser } from "@supabase/supabase-js";
 
 import { db } from "~/server/db";
+import { createClient } from "~/lib/supabase/server";
+import { type User, type UserType } from "@prisma/client";
 
 /**
  * 1. CONTEXT
@@ -25,8 +28,25 @@ import { db } from "~/server/db";
  * @see https://trpc.io/docs/server/context
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
+  // Get Supabase auth session
+  const supabase = await createClient();
+  const {
+    data: { user: supabaseUser },
+  } = await supabase.auth.getUser();
+
+  // If user is authenticated, fetch their data from our database
+  let user: User | null = null;
+  if (supabaseUser?.id) {
+    user = await db.user.findUnique({
+      where: { supabaseId: supabaseUser.id },
+    });
+  }
+
   return {
     db,
+    supabase,
+    supabaseUser,
+    user,
     ...opts,
   };
 };
@@ -104,3 +124,65 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
  * are logged in.
  */
 export const publicProcedure = t.procedure.use(timingMiddleware);
+
+/**
+ * Protected procedure - requires authentication
+ *
+ * Use this for endpoints that require a user to be logged in.
+ * Throws UNAUTHORIZED error if no user session exists.
+ */
+const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
+  if (!ctx.supabaseUser || !ctx.user) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "You must be logged in to access this resource",
+    });
+  }
+
+  return next({
+    ctx: {
+      ...ctx,
+      // Infer that user and supabaseUser are non-nullable
+      supabaseUser: ctx.supabaseUser,
+      user: ctx.user,
+    },
+  });
+});
+
+export const protectedProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(enforceUserIsAuthed);
+
+/**
+ * Admin procedure - requires authentication AND admin role
+ *
+ * Use this for endpoints that require admin privileges.
+ * Throws UNAUTHORIZED if not logged in, FORBIDDEN if not admin.
+ */
+const enforceUserIsAdmin = t.middleware(async ({ ctx, next }) => {
+  if (!ctx.supabaseUser || !ctx.user) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "You must be logged in to access this resource",
+    });
+  }
+
+  if (ctx.user.userType !== "ADMIN") {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "You must be an admin to access this resource",
+    });
+  }
+
+  return next({
+    ctx: {
+      ...ctx,
+      supabaseUser: ctx.supabaseUser,
+      user: ctx.user,
+    },
+  });
+});
+
+export const adminProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(enforceUserIsAdmin);

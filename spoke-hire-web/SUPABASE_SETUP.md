@@ -63,11 +63,40 @@ This guide will help you set up Supabase authentication for the SpokeHire admin 
 
 ## 📧 Step 5: Configure Email OTP Settings
 
+### A. Update Email Template for OTP
+
+1. Go to **Authentication** → **Email Templates**
+2. Select **"Magic Link"** template
+3. Update the template to show OTP code:
+
+**Subject:**
+```
+Your SpokeHire Admin Login Code
+```
+
+**Body (HTML):**
+```html
+<h2>Your Login Code</h2>
+<p>Use this code to sign in to SpokeHire Admin:</p>
+<h1 style="font-size: 32px; font-weight: bold; margin: 20px 0;">{{ .Token }}</h1>
+<p>This code will expire in {{ .TokenExpiryDuration }} seconds.</p>
+<p>If you didn't request this code, you can safely ignore this email.</p>
+```
+
+**Important:** Use `{{ .Token }}` to display the OTP code (not `{{ .ConfirmationURL }}`).
+
+4. Click **Save**
+
+### B. Configure OTP Settings
+
 1. Go to **Authentication** → **Settings**
 2. Under **Auth Providers** → **Email**:
+   - ✅ **Enable Email provider**
    - Set **OTP expiry duration**: 3600 seconds (1 hour recommended)
    - Set **OTP length**: 6 digits (default)
 3. Click **Save**
+
+> 📝 **Note:** For a detailed, production-ready email template, see [SUPABASE_OTP_CONFIG.md](SUPABASE_OTP_CONFIG.md)
 
 ## 🌐 Step 6: Configure Site URL and Redirect URLs
 

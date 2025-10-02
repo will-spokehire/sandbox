@@ -39,7 +39,8 @@
     "copy-images-without-cars": "tsx scripts/copy-images-without-cars.ts",
     "copy-images-by-coverage": "tsx scripts/copy-images-by-car-coverage.ts",
     "upload-images-to-supabase": "tsx scripts/upload-images-to-supabase.ts",
-    "check-upload-status": "tsx scripts/check-upload-status.ts"
+    "check-upload-status": "tsx scripts/check-upload-status.ts",
+    "create-admin-user": "tsx scripts/create-admin-user.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
