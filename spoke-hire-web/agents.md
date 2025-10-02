@@ -134,6 +134,20 @@ server/api/
     └── [feature].ts           # Feature router
 ```
 
+### Documentation Structure
+```
+docs/
+└── features/
+    └── [feature_short_name].md   # Feature implementation docs
+```
+
+**Important Documentation Rules:**
+- ❌ **DO NOT** create implementation description files in the project root
+- ✅ **DO** create feature documentation in `docs/features/[feature_short_name].md`
+- ❌ **DO NOT** create separate MD files for bug fixes or minor changes
+- ✅ **DO** update the existing feature documentation when making fixes or changes
+- Keep documentation organized by feature, not by individual changes
+
 ## Performance Best Practices
 
 1. **Lazy load heavy components:** Use `dynamic` from Next.js

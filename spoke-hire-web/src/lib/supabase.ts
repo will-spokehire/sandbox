@@ -1,7 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
 
 /**
- * Supabase client for server-side operations (scripts)
+ * @deprecated This file is kept for backward compatibility with existing scripts.
+ * For new code, please use:
+ * - Client components: import { createClient } from '@/lib/supabase/client'
+ * - Server components: import { createClient } from '@/lib/supabase/server'
+ * - Middleware: import { updateSession } from '@/lib/supabase/middleware'
+ * 
+ * Legacy Supabase client for server-side operations (scripts)
  * Uses environment variables for configuration
  */
 export function createSupabaseClient() {
@@ -28,6 +34,9 @@ export function createSupabaseClient() {
   });
 }
 
+/**
+ * @deprecated Use the new Supabase client factories instead
+ */
 export const supabase = createSupabaseClient();
 
 

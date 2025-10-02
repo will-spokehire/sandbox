@@ -1,0 +1,9 @@
+# Feature Documentation
+
+This directory contains implementation documentation for each feature.
+
+## Naming Convention
+- Use short, descriptive names: `auth.md`, `dashboard.md`, `user-management.md`
+- One file per feature
+- Update the same file when making changes or fixes to the feature
+
