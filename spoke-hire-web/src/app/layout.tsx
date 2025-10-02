@@ -4,11 +4,10 @@ import { type Metadata } from "next";
 import { Geist } from "next/font/google";
 
 import { TRPCReactProvider } from "~/trpc/react";
-import { AuthProvider } from "~/contexts/AuthContext";
 
 export const metadata: Metadata = {
-  title: "SpokeHire - Vehicle Catalog",
-  description: "Vehicle catalog management system",
+  title: "SpokeHire - Admin Interface",
+  description: "SpokeHire admin management system",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
@@ -23,9 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geist.variable}`}>
       <body>
-        <TRPCReactProvider>
-          <AuthProvider>{children}</AuthProvider>
-        </TRPCReactProvider>
+        <TRPCReactProvider>{children}</TRPCReactProvider>
       </body>
     </html>
   );
