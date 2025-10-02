@@ -82,16 +82,39 @@ The Vehicles Management feature provides a comprehensive interface for administr
    - Click row to navigate to detail page
 
 3. **`VehicleFilters.tsx`** (Client)
-   - Search input with icon (searches vehicle + owner info)
-   - Status filter dropdown
-   - Make multi-select filter (searchable with checkboxes)
-   - Model filter (enabled when single make selected)
-   - Collection multi-select filter (searchable with color indicators)
-   - Exterior color multi-select filter (16 colors)
-   - Interior color multi-select filter (16 colors)
-   - Year range filters (from/to dropdowns)
-   - Clear filters button
-   - Active filters indicator
+   - Main filter orchestrator component (~170 lines, refactored from 753 lines)
+   - Uses composition pattern with extracted sub-components
+   - Mobile-first responsive design with optimized UX
+   - Features:
+     - Search input (searches vehicle + owner info)
+     - Status filter dropdown
+     - Make multi-select filter (searchable with checkboxes)
+     - Model filter (enabled when single make selected)
+     - Collection multi-select filter (searchable with color indicators)
+     - Exterior color multi-select filter (16 colors)
+     - Interior color multi-select filter (16 colors)
+     - Year range filters (from/to dropdowns)
+     - Clear filters button
+     - Active filters indicator
+   - Mobile UX:
+     - All filters full-width on mobile (collapsible panel)
+     - Bottom sheet for multi-select filters (80vh height)
+     - Year filters use flex layout for equal distribution
+     - Touch-friendly tap targets
+   - Desktop UX:
+     - Fixed widths for consistent layout
+     - Popovers for multi-select filters
+     - Horizontal flex-wrap layout
+   - Sub-components (in `filters/` subdirectory):
+     - `SearchInput.tsx` - Reusable search input with icon
+     - `MultiSelectFilter.tsx` - Generic multi-select with Sheet (mobile) / Popover (desktop)
+     - `SingleSelectFilter.tsx` - Generic single-select dropdown with responsive width
+     - `YearRangeFilter.tsx` - Combined year from/to filter with flex layout
+     - `FilterActions.tsx` - Clear filters button
+     - `MobileFilters.tsx` - Collapsible filter panel for mobile
+     - `DesktopFilters.tsx` - Always-visible filter container for desktop
+     - `FilterGrid.tsx` - Contains all individual filter controls
+     - `types.ts` - Shared TypeScript types
 
 4. **`VehicleStatusBadge.tsx`** (Server)
    - Colored badge for vehicle status
