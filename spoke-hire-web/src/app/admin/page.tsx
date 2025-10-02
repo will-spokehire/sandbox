@@ -1,7 +1,10 @@
 'use client';
 
+import Link from 'next/link';
+import { Car, Users, Settings } from 'lucide-react';
 import { useRequireAdmin } from '~/providers/auth-provider';
 import { UserMenu } from '~/components/auth/UserMenu';
+import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 
 /**
@@ -56,10 +59,43 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>Vehicles</CardTitle>
-              <CardDescription>
-                Manage vehicle listings
-              </CardDescription>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Car className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <CardTitle>Vehicles</CardTitle>
+                  <CardDescription>
+                    Manage vehicle listings
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                View, search, and manage all vehicles in the system.
+              </p>
+              <Button asChild className="w-full">
+                <Link href="/admin/vehicles">
+                  View Vehicles
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                  <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <CardTitle>Users</CardTitle>
+                  <CardDescription>
+                    Manage user accounts
+                  </CardDescription>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-slate-600 dark:text-slate-400">
@@ -70,24 +106,17 @@ export default function AdminDashboard() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Users</CardTitle>
-              <CardDescription>
-                Manage user accounts
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                Coming soon...
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Settings</CardTitle>
-              <CardDescription>
-                Configure system settings
-              </CardDescription>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                  <Settings className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                </div>
+                <div>
+                  <CardTitle>Settings</CardTitle>
+                  <CardDescription>
+                    Configure system settings
+                  </CardDescription>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-slate-600 dark:text-slate-400">

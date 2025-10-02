@@ -1,0 +1,78 @@
+import {
+  type Vehicle,
+  type Make,
+  type Model,
+  type User,
+  type Media,
+  type VehicleStatus,
+  type SteeringType,
+  type VehicleSource,
+  type VehicleSpecification,
+} from "@prisma/client";
+
+/**
+ * Vehicle type with relations for list view
+ */
+export type VehicleListItem = Vehicle & {
+  make: Pick<Make, "id" | "name">;
+  model: Pick<Model, "id" | "name">;
+  owner: Pick<User, "id" | "email" | "firstName" | "lastName">;
+  media: Pick<Media, "id" | "publishedUrl" | "originalUrl" | "type">[];
+  _count: {
+    media: number;
+  };
+};
+
+/**
+ * Vehicle with full details for detail view
+ */
+export type VehicleDetail = Vehicle & {
+  make: Make;
+  model: Model;
+  owner: Pick<User, "id" | "email" | "firstName" | "lastName" | "phone" | "userType" | "status">;
+  steering: SteeringType | null;
+  media: Media[];
+  sources: VehicleSource[];
+  specifications: VehicleSpecification[];
+  collections: {
+    collection: {
+      id: string;
+      name: string;
+    };
+  }[];
+};
+
+/**
+ * Filters for vehicle list
+ */
+export interface VehicleFilters {
+  search?: string;
+  status?: VehicleStatus;
+  makeId?: string;
+  modelId?: string;
+  yearFrom?: string;
+  yearTo?: string;
+  priceFrom?: number;
+  priceTo?: number;
+  ownerId?: string;
+}
+
+/**
+ * Sort options for vehicle list
+ */
+export type VehicleSortBy = "createdAt" | "updatedAt" | "price" | "year" | "name";
+export type VehicleSortOrder = "asc" | "desc";
+
+export interface VehicleSort {
+  sortBy: VehicleSortBy;
+  sortOrder: VehicleSortOrder;
+}
+
+/**
+ * Pagination info
+ */
+export interface VehiclePagination {
+  limit: number;
+  cursor?: string;
+}
+

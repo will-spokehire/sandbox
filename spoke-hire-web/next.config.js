@@ -16,6 +16,20 @@ const config = {
     // your project has type errors.
     ignoreBuildErrors: true,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "static.wixstatic.com",
+        pathname: "/media/**",
+      },
+      {
+        protocol: "https",
+        hostname: "fowkrmwxgvmjbdzgrsfn.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
+    ],
+  },
 };
 
 export default config;

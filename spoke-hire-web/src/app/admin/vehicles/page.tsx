@@ -1,0 +1,266 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { VehicleStatus } from "@prisma/client";
+import { toast } from "sonner";
+import { useRequireAdmin } from "~/providers/auth-provider";
+import { UserMenu } from "~/components/auth/UserMenu";
+import { Button } from "~/components/ui/button";
+import { api } from "~/trpc/react";
+import { useDebounce } from "~/hooks/useDebounce";
+import { type VehicleListItem } from "~/types/vehicle";
+import {
+  VehicleListTable,
+  VehicleFilters,
+} from "./_components";
+
+/**
+ * Vehicles List Page
+ * 
+ * Admin page for viewing and managing all vehicles
+ */
+export default function VehiclesPage() {
+  const { user, isLoading: isAuthLoading } = useRequireAdmin();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Get filters from URL
+  const [searchInput, setSearchInput] = useState(searchParams.get("search") ?? "");
+  const [status, setStatus] = useState<VehicleStatus | undefined>(
+    (searchParams.get("status") as VehicleStatus) ?? undefined
+  );
+  const [makeId, setMakeId] = useState<string | undefined>(
+    searchParams.get("makeId") ?? undefined
+  );
+  const [modelId, setModelId] = useState<string | undefined>(
+    searchParams.get("modelId") ?? undefined
+  );
+  const [cursor, setCursor] = useState<string | undefined>(undefined);
+  const [allVehicles, setAllVehicles] = useState<VehicleListItem[]>([]);
+
+  // Debounce search input
+  const debouncedSearch = useDebounce(searchInput, 300);
+
+  // Fetch vehicles
+  const {
+    data,
+    isLoading: isVehiclesLoading,
+    isFetching,
+    error,
+    refetch,
+  } = api.vehicle.list.useQuery(
+    {
+      limit: 20,
+      cursor,
+      search: debouncedSearch || undefined,
+      status,
+      makeId,
+      modelId,
+      sortBy: "createdAt",
+      sortOrder: "desc",
+    },
+    {
+      enabled: !isAuthLoading && !!user,
+    }
+  );
+
+  // Update all vehicles when data changes
+  useEffect(() => {
+    if (data?.vehicles) {
+      if (cursor) {
+        // Append to existing vehicles (load more)
+        setAllVehicles((prev) => [...prev, ...data.vehicles]);
+      } else {
+        // Replace vehicles (new search/filter)
+        setAllVehicles(data.vehicles);
+      }
+    }
+  }, [data, cursor]);
+
+  // Reset cursor when filters change
+  useEffect(() => {
+    setCursor(undefined);
+    setAllVehicles([]);
+  }, [debouncedSearch, status, makeId, modelId]);
+
+  // Update URL when filters change
+  useEffect(() => {
+    const params = new URLSearchParams();
+    
+    if (debouncedSearch) params.set("search", debouncedSearch);
+    if (status) params.set("status", status);
+    if (makeId) params.set("makeId", makeId);
+    if (modelId) params.set("modelId", modelId);
+
+    const newUrl = params.toString() ? `?${params.toString()}` : "/admin/vehicles";
+    router.push(newUrl, { scroll: false });
+  }, [debouncedSearch, status, makeId, modelId, router]);
+
+  // Handle errors
+  useEffect(() => {
+    if (error) {
+      toast.error("Failed to load vehicles", {
+        description: error.message,
+      });
+    }
+  }, [error]);
+
+  // Handle view vehicle
+  const handleView = (id: string) => {
+    router.push(`/admin/vehicles/${id}`);
+  };
+
+  // Handle edit vehicle
+  const handleEdit = (id: string) => {
+    router.push(`/admin/vehicles/${id}/edit`);
+  };
+
+  // Handle delete vehicle
+  const handleDelete = (id: string) => {
+    // TODO: Implement delete confirmation dialog
+    toast.info("Delete functionality coming soon");
+  };
+
+  // Clear all filters
+  const handleClearFilters = () => {
+    setSearchInput("");
+    setStatus(undefined);
+    setMakeId(undefined);
+    setModelId(undefined);
+    setCursor(undefined);
+    setAllVehicles([]);
+  };
+
+  // Handle load more
+  const handleLoadMore = () => {
+    if (data?.nextCursor) {
+      setCursor(data.nextCursor);
+    }
+  };
+
+  // Check if any filters are active
+  const hasFilters = !!(debouncedSearch || status || makeId || modelId);
+
+  if (isAuthLoading || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="h-12 w-12 border-4 border-slate-200 border-t-slate-600 rounded-full animate-spin mx-auto" />
+          <p className="text-sm text-slate-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+      {/* Header */}
+      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+        <div className="container mx-auto px-4 py-3 md:py-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-50 truncate">
+                Vehicles
+              </h1>
+              <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400">
+                Manage vehicle listings
+              </p>
+            </div>
+            <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push("/admin")}
+                className="hidden sm:flex"
+              >
+                Back to Dashboard
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => router.push("/admin")}
+                className="sm:hidden"
+              >
+                ←
+              </Button>
+              <UserMenu />
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-8">
+        <div className="space-y-6">
+          {/* Filters */}
+          <VehicleFilters
+            search={searchInput}
+            status={status}
+            makeId={makeId}
+            modelId={modelId}
+            onSearchChange={setSearchInput}
+            onStatusChange={setStatus}
+            onMakeChange={setMakeId}
+            onModelChange={setModelId}
+            onClearFilters={handleClearFilters}
+          />
+
+          {/* Results Count */}
+          {!isVehiclesLoading && (
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                {data?.totalCount === 0 ? (
+                  "No vehicles found"
+                ) : (
+                  <>
+                    Found <span className="font-semibold text-slate-900 dark:text-slate-50">{data?.totalCount}</span> vehicle{data?.totalCount !== 1 ? "s" : ""}
+                    {hasFilters && " matching your criteria"}
+                  </>
+                )}
+              </p>
+              {allVehicles.length > 0 && allVehicles.length < (data?.totalCount ?? 0) && (
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  Showing <span className="font-semibold text-slate-900 dark:text-slate-50">{allVehicles.length}</span> of <span className="font-semibold">{data?.totalCount}</span>
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Table */}
+          <VehicleListTable
+            vehicles={allVehicles}
+            isLoading={isVehiclesLoading && !cursor}
+            hasFilters={hasFilters}
+            onView={handleView}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onClearFilters={handleClearFilters}
+          />
+
+          {/* Load More Button */}
+          {data?.nextCursor && (
+            <div className="flex justify-center pt-4">
+              <Button
+                variant="outline"
+                onClick={handleLoadMore}
+                disabled={isFetching}
+                className="min-w-[200px]"
+              >
+                {isFetching ? (
+                  <>
+                    <div className="h-4 w-4 border-2 border-slate-400 border-t-slate-600 rounded-full animate-spin mr-2" />
+                    Loading...
+                  </>
+                ) : (
+                  `Load More (${data.totalCount - allVehicles.length} remaining)`
+                )}
+              </Button>
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+}
+
