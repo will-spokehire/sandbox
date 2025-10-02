@@ -19,6 +19,13 @@ import {
   PopoverTrigger,
 } from "~/components/ui/popover";
 import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "~/components/ui/sheet";
+import {
   Command,
   CommandEmpty,
   CommandGroup,
@@ -34,6 +41,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "~/components/ui/collapsible";
+import { useIsMobile } from "~/hooks/useMediaQuery";
 
 interface VehicleFiltersProps {
   search?: string;
@@ -90,6 +98,9 @@ export function VehicleFilters({
   const [exteriorColorOpen, setExteriorColorOpen] = useState(false);
   const [interiorColorOpen, setInteriorColorOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  
+  // Detect mobile device
+  const isMobileDevice = useIsMobile();
 
   // Fetch filter options
   const { data: filterOptions } = api.vehicle.getFilterOptions.useQuery();
@@ -216,57 +227,111 @@ export function VehicleFilters({
         </SelectContent>
       </Select>
 
-      {/* Make Filter - Multi-select with Search */}
-      <Popover open={makeOpen} onOpenChange={setMakeOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={makeOpen}
-            className={cn("justify-between", isMobile ? "w-full" : "w-[200px]")}
-          >
-            {makeIds.length === 0 ? (
-              "Select makes..."
-            ) : (
-              <div className="flex gap-1 flex-wrap">
-                {makeIds.length === 1 ? (
-                  <span>
-                    {filterOptions?.makes.find((m) => m.id === makeIds[0])?.name}
-                  </span>
-                ) : (
-                  <span>{makeIds.length} makes selected</span>
-                )}
-              </div>
-            )}
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[280px] p-0" align="start">
-          <Command>
-            <CommandInput placeholder="Search makes..." />
-            <CommandList>
-              <CommandEmpty>No make found.</CommandEmpty>
-              <CommandGroup>
-                {filterOptions?.makes.map((make) => (
-                  <CommandItem
-                    key={make.id}
-                    value={make.name}
-                    onSelect={() => handleMakeToggle(make.id)}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        makeIds.includes(make.id) ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                    {make.name}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+      {/* Make Filter - Multi-select with Search (Mobile uses Sheet, Desktop uses Popover) */}
+      {isMobileDevice ? (
+        <Sheet open={makeOpen} onOpenChange={setMakeOpen}>
+          <SheetTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn("justify-between", isMobile ? "w-full" : "w-[200px]")}
+            >
+              {makeIds.length === 0 ? (
+                "Select makes..."
+              ) : (
+                <div className="flex gap-1 flex-wrap">
+                  {makeIds.length === 1 ? (
+                    <span>
+                      {filterOptions?.makes.find((m) => m.id === makeIds[0])?.name}
+                    </span>
+                  ) : (
+                    <span>{makeIds.length} makes selected</span>
+                  )}
+                </div>
+              )}
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="bottom" className="h-[80vh]">
+            <SheetHeader>
+              <SheetTitle>Select Makes</SheetTitle>
+            </SheetHeader>
+            <Command className="mt-4">
+              <CommandInput placeholder="Search makes..." />
+              <CommandList>
+                <CommandEmpty>No make found.</CommandEmpty>
+                <CommandGroup>
+                  {filterOptions?.makes.map((make) => (
+                    <CommandItem
+                      key={make.id}
+                      value={make.name}
+                      onSelect={() => handleMakeToggle(make.id)}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          makeIds.includes(make.id) ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {make.name}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </SheetContent>
+        </Sheet>
+      ) : (
+        <Popover open={makeOpen} onOpenChange={setMakeOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={makeOpen}
+              className={cn("justify-between", isMobile ? "w-full" : "w-[200px]")}
+            >
+              {makeIds.length === 0 ? (
+                "Select makes..."
+              ) : (
+                <div className="flex gap-1 flex-wrap">
+                  {makeIds.length === 1 ? (
+                    <span>
+                      {filterOptions?.makes.find((m) => m.id === makeIds[0])?.name}
+                    </span>
+                  ) : (
+                    <span>{makeIds.length} makes selected</span>
+                  )}
+                </div>
+              )}
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[280px] p-0" align="start">
+            <Command>
+              <CommandInput placeholder="Search makes..." />
+              <CommandList>
+                <CommandEmpty>No make found.</CommandEmpty>
+                <CommandGroup>
+                  {filterOptions?.makes.map((make) => (
+                    <CommandItem
+                      key={make.id}
+                      value={make.name}
+                      onSelect={() => handleMakeToggle(make.id)}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          makeIds.includes(make.id) ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {make.name}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+      )}
 
       {/* Model Filter (only enabled when single make is selected) */}
       <Select
