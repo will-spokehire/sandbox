@@ -59,13 +59,13 @@ export function VehicleTableRow({
     >
       {/* Image */}
       <TableCell>
-        <div className="relative h-12 w-12 overflow-hidden rounded border bg-muted">
+        <div className="relative h-20 w-28 overflow-hidden rounded-md border bg-muted">
           <Image
             src={imageUrl}
             alt={vehicle.name}
             fill
             className="object-cover"
-            sizes="48px"
+            sizes="112px"
           />
         </div>
       </TableCell>

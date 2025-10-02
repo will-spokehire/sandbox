@@ -60,13 +60,13 @@ export function VehicleCard({
       <CardContent className="p-4">
         <div className="flex gap-4">
           {/* Image */}
-          <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded border bg-muted">
+          <div className="relative h-32 w-40 flex-shrink-0 overflow-hidden rounded-md border bg-muted">
             <Image
               src={imageUrl}
               alt={vehicle.name}
               fill
               className="object-cover"
-              sizes="96px"
+              sizes="160px"
             />
           </div>
 
