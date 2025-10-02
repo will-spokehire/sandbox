@@ -38,7 +38,7 @@ interface AnalysisResult {
 }
 
 async function loadDataSources(): Promise<DataSources> {
-  const dataDir = path.join(process.cwd(), '../../data-analitics/data');
+  const dataDir = path.join(process.cwd(), '../data-analitics/data');
   
   console.log('📥 Loading data sources...');
   

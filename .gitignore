@@ -100,3 +100,10 @@ data-analitics/pipeline/runs/
 
 # Vercel
 .vercel
+
+# SpokeHire Web - Large data and image files
+spoke-hire-web/public/car-images/
+spoke-hire-web/public/images-by-coverage/
+spoke-hire-web/public/detections/
+spoke-hire-web/data/*.json
+!spoke-hire-web/data/sample_*.json

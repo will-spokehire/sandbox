@@ -45,37 +45,56 @@ enum VehicleStatus {
     ARCHIVED
 }
 
+// Country Lookup Table
+model Country {
+    id          String   @id @default(cuid())
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    name        String   @unique // "England", "Scotland", "Wales", etc.
+    code        String?  @unique // ISO country code like "GB", "US", etc.
+    isActive    Boolean  @default(true)
+
+    // Relationships
+    users       User[]
+
+    @@index([name])
+    @@index([code])
+    @@index([isActive])
+}
+
 // Core User/Owner Entity
 model User {
     id                String     @id @default(cuid())
     createdAt         DateTime   @default(now())
     updatedAt         DateTime   @updatedAt
-    
+
     // Supabase Integration (Optional)
     supabaseId        String?    @unique // Optional - only for registered users
     email             String     @unique
-    
+
     // User Profile
     firstName         String?
     lastName          String?
     phone             String?
     userType          UserType   @default(OWNER_ONLY) // Default to owner without account
     status            UserStatus @default(ACTIVE)
-    
+
     // Address
     street            String?
     city              String?
     county            String?
     postcode          String?
-    country           String?
-    
+    countryId         String?    // Reference to Country
+    country           Country?   @relation(fields: [countryId], references: [id])
+
     // Metadata
     lastLoginAt       DateTime?
     profileCompleted  Boolean    @default(false)
-    
+
     // Relationships
     vehicles          Vehicle[]
-    
+
     @@index([email])
     @@index([supabaseId])
     @@index([userType])
@@ -96,6 +115,48 @@ model SteeringType {
     vehicles    Vehicle[]
     
     @@index([code])
+}
+
+// Vehicle Makes Lookup Table
+model Make {
+    id          String   @id @default(cuid())
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+    
+    name        String   @unique // "BMW", "Mercedes-Benz", "Toyota", etc.
+    slug        String   @unique // "bmw", "mercedes-benz", "toyota"
+    description String?
+    logoUrl     String?  // URL to make logo
+    isActive    Boolean  @default(true)
+    
+    // Relationships
+    models      Model[]
+    vehicles    Vehicle[]
+    
+    @@index([slug])
+    @@index([isActive])
+}
+
+// Vehicle Models Lookup Table
+model Model {
+    id          String   @id @default(cuid())
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+    
+    name        String   // "3 Series", "C-Class", "Camry", etc.
+    slug        String   // "3-series", "c-class", "camry"
+    description String?
+    isActive    Boolean  @default(true)
+    
+    // Relationships
+    makeId      String
+    make        Make     @relation(fields: [makeId], references: [id])
+    vehicles    Vehicle[]
+    
+    @@unique([makeId, slug]) // Unique model slug per make
+    @@index([makeId])
+    @@index([slug])
+    @@index([isActive])
 }
 
 // Collections/Tags for filtering
@@ -125,8 +186,10 @@ model Vehicle {
     
     // Basic Vehicle Info
     name              String
-    make              String
-    model             String
+    makeId            String   // Reference to Make
+    make              Make     @relation(fields: [makeId], references: [id])
+    modelId           String   // Reference to Model
+    model             Model    @relation(fields: [modelId], references: [id])
     year              String
     registration      String?
     engineCapacity    Int?     // Engine capacity in CC
@@ -153,7 +216,9 @@ model Vehicle {
     collections       VehicleCollection[]
     
     // Indexes for performance
-    @@index([make, model])
+    @@index([makeId])
+    @@index([modelId])
+    @@index([makeId, modelId])
     @@index([year])
     @@index([status])
     @@index([engineCapacity])
@@ -177,6 +242,7 @@ model Media {
     
     // File Information
     originalUrl       String     // Original file URL/path
+    publishedUrl      String?    // Published URL (e.g., Supabase Storage URL)
     filename          String     // Original filename
     fileSize          BigInt?    // File size in bytes
     mimeType          String?    // image/jpeg, video/mp4, etc.
@@ -203,6 +269,7 @@ model Media {
     @@index([type])
     @@index([status])
     @@index([isPrimary])
+    @@unique([originalUrl, vehicleId])
 }
 
 // Track Data Sources
@@ -255,12 +322,3 @@ model VehicleCollection {
     @@index([collectionId])
 }
 
-// Legacy Post model (can be removed later)
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    @@index([name])
-}

@@ -42,11 +42,165 @@ interface DataSources {
   submission: SourceRecord[];
 }
 
+interface ProcessedVehicleRecord {
+  id: string;
+  primarySource: string;
+  sources: string[];
+  vehicle: {
+    name: string;
+    make: string;
+    model: string;
+    year: string;
+    registration?: string;
+    engineCapacity?: string;
+    numberOfSeats?: string;
+    steering?: string;
+    gearbox?: string;
+    exteriorColour?: string;
+    interiorColour?: string;
+    condition?: string;
+    isRoadLegal?: string;
+    price?: number | null;
+    collection?: string;
+    visible: boolean;
+    published: boolean;
+    inventory?: string;
+  };
+  owner?: {
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    street?: string;
+    city?: string;
+    county?: string;
+    postcode?: string;
+    country?: string;
+  };
+  images?: string[];
+  // Ignore these fields - they're for info only
+  cleansedData?: any;
+  submissionData?: any;
+  catalogData?: any;
+}
+
+interface ProcessedVehicleCatalog {
+  metadata: {
+    generatedAt: string;
+    totalRecords: number;
+    [key: string]: any;
+  };
+  records: ProcessedVehicleRecord[];
+}
+
+export interface MigrationFilters {
+  onlyPublished?: boolean; // Filter for published=true in vehicle data
+  onlyVisible?: boolean; // Filter for visible=true in vehicle data (deprecated, use onlyPublished)
+  // Add more filters here later
+}
+
+export const DEFAULT_FILTERS: MigrationFilters = {
+  onlyPublished: true, // Default to only migrate published records
+};
+
 /**
- * Load data from JSON files
+ * Apply filters to processed vehicle records
+ */
+function applyFiltersToProcessedRecords(
+  catalog: ProcessedVehicleCatalog, 
+  filters: MigrationFilters = DEFAULT_FILTERS
+): ProcessedVehicleRecord[] {
+  console.log('🔍 Applying filters to processed vehicle records...');
+  
+  let filteredRecords = [...catalog.records];
+  const originalCount = filteredRecords.length;
+  
+  // Apply published filter (primary filter)
+  if (filters.onlyPublished) {
+    filteredRecords = filteredRecords.filter(record => record.vehicle.published === true);
+    const publishedCount = filteredRecords.length;
+    const removedCount = originalCount - publishedCount;
+    console.log(`  ✅ Published filter: ${publishedCount} published records kept, ${removedCount} unpublished records filtered out`);
+  }
+  
+  // Apply visible filter (fallback or additional filter)
+  if (filters.onlyVisible && !filters.onlyPublished) {
+    filteredRecords = filteredRecords.filter(record => record.vehicle.visible === true);
+    const visibleCount = filteredRecords.length;
+    const removedCount = originalCount - visibleCount;
+    console.log(`  ✅ Visible filter: ${visibleCount} visible records kept, ${removedCount} hidden records filtered out`);
+  }
+  
+  // Add more filters here later
+  
+  console.log(`📊 Filtered records: ${filteredRecords.length} out of ${originalCount} total records`);
+  
+  return filteredRecords;
+}
+
+/**
+ * Apply filters to source data (DEPRECATED)
+ */
+function applyFilters(sources: DataSources, filters: MigrationFilters = DEFAULT_FILTERS): DataSources {
+  console.log('🔍 Applying data filters...');
+  
+  const filteredSources: DataSources = {
+    catalog: [...sources.catalog],
+    cleansed: [...sources.cleansed],
+    submission: [...sources.submission],
+  };
+  
+  // Apply visible filter to catalog data
+  if (filters.onlyVisible) {
+    const originalCatalogCount = filteredSources.catalog.length;
+    filteredSources.catalog = filteredSources.catalog.filter(record => record.visible === true);
+    const filteredCatalogCount = filteredSources.catalog.length;
+    const removedCount = originalCatalogCount - filteredCatalogCount;
+    
+    console.log(`  ✅ Visible filter: ${filteredCatalogCount} visible records kept, ${removedCount} hidden records filtered out`);
+  } else {
+    console.log(`  ⚠️ Visible filter disabled - keeping all ${filteredSources.catalog.length} catalog records`);
+  }
+  
+  // Add more filters here later
+  
+  console.log('📊 Filtered data summary:');
+  console.log(`  Catalog: ${filteredSources.catalog.length} records`);
+  console.log(`  Cleansed: ${filteredSources.cleansed.length} records`);
+  console.log(`  Submission: ${filteredSources.submission.length} records`);
+  
+  return filteredSources;
+}
+
+/**
+ * Load processed vehicle catalog
+ */
+async function loadProcessedVehicleCatalog(): Promise<ProcessedVehicleCatalog> {
+  console.log('📥 Loading processed vehicle catalog...');
+  
+  const catalogPath = path.join(process.cwd(), 'public/data/vehicle-catalog.json');
+  
+  if (!fs.existsSync(catalogPath)) {
+    throw new Error('vehicle-catalog.json not found in public/data/');
+  }
+  
+  try {
+    const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8')) as ProcessedVehicleCatalog;
+    console.log(`✅ Loaded ${catalog.records.length} processed vehicle records`);
+    console.log(`📊 Generated: ${catalog.metadata.generatedAt}`);
+    
+    return catalog;
+  } catch (error) {
+    console.error('❌ Error loading processed vehicle catalog:', error);
+    throw error;
+  }
+}
+
+/**
+ * Load data from JSON files (DEPRECATED - use loadProcessedVehicleCatalog)
  */
 async function loadDataSources(): Promise<DataSources> {
-  const dataDir = path.join(process.cwd(), '../../data-analitics/data');
+  const dataDir = path.join(process.cwd(), '../data-analitics/data');
   
   console.log('📥 Loading data sources...');
   
@@ -162,6 +316,84 @@ async function setupSteeringTypes(): Promise<Record<string, string>> {
 }
 
 /**
+ * Setup makes and models
+ */
+async function setupMakesAndModels(sources: DataSources): Promise<{
+  makeMap: Record<string, string>;
+  modelMap: Record<string, string>;
+}> {
+  console.log('\n🏭 Setting up makes and models...');
+  
+  const makeNames = new Set<string>();
+  const modelData = new Map<string, Set<string>>(); // make -> models
+  
+  // Extract makes and models from all sources
+  for (const [sourceName, records] of Object.entries(sources)) {
+    for (const record of records) {
+      const vehicleData = extractVehicleData(record, sourceName);
+      if (vehicleData?.make && vehicleData?.model) {
+        makeNames.add(vehicleData.make);
+        
+        if (!modelData.has(vehicleData.make)) {
+          modelData.set(vehicleData.make, new Set());
+        }
+        modelData.get(vehicleData.make)!.add(vehicleData.model);
+      }
+    }
+  }
+  
+  const makeMap: Record<string, string> = {};
+  const modelMap: Record<string, string> = {};
+  
+  // Create makes first
+  for (const makeName of makeNames) {
+    const slug = makeName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const created = await prisma.make.upsert({
+      where: { slug },
+      update: { name: makeName },
+      create: {
+        name: makeName,
+        slug,
+        isActive: true,
+      },
+    });
+    makeMap[makeName] = created.id;
+    console.log(`✅ Created/updated make: ${makeName} (${slug})`);
+  }
+  
+  // Create models for each make
+  for (const [makeName, models] of modelData.entries()) {
+    const makeId = makeMap[makeName];
+    if (!makeId) continue;
+    
+    for (const modelName of models) {
+      const slug = modelName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      const modelKey = `${makeName}:${modelName}`;
+      
+      const created = await prisma.model.upsert({
+        where: {
+          makeId_slug: {
+            makeId,
+            slug,
+          },
+        },
+        update: { name: modelName },
+        create: {
+          name: modelName,
+          slug,
+          makeId,
+          isActive: true,
+        },
+      });
+      modelMap[modelKey] = created.id;
+      console.log(`✅ Created/updated model: ${makeName} ${modelName} (${slug})`);
+    }
+  }
+  
+  return { makeMap, modelMap };
+}
+
+/**
  * Setup collections
  */
 async function setupCollections(sources: DataSources): Promise<Record<string, string>> {
@@ -198,6 +430,31 @@ async function setupCollections(sources: DataSources): Promise<Record<string, st
 }
 
 /**
+ * Create system user for catalog vehicles
+ */
+async function createSystemUser(): Promise<string> {
+  console.log('\n🤖 Creating system user for catalog vehicles...');
+  
+  const systemEmail = 'system@spokehire.com';
+  
+  const systemUser = await prisma.user.upsert({
+    where: { email: systemEmail },
+    update: {},
+    create: {
+      email: systemEmail,
+      firstName: 'System',
+      lastName: 'Catalog',
+      userType: 'ADMIN',
+      status: 'ACTIVE',
+      profileCompleted: true,
+    },
+  });
+  
+  console.log(`✅ Created/updated system user: ${systemUser.email} (${systemUser.id})`);
+  return systemUser.id;
+}
+
+/**
  * Migrate users
  */
 async function migrateUsers(sources: DataSources, stats: MigrationStats): Promise<Map<string, string>> {
@@ -205,6 +462,10 @@ async function migrateUsers(sources: DataSources, stats: MigrationStats): Promis
   
   const userMap = new Map<string, string>();
   const processedEmails = new Set<string>();
+  
+  // Create system user for catalog vehicles
+  const systemUserId = await createSystemUser();
+  userMap.set('SYSTEM_USER', systemUserId);
   
   // Process all sources to find unique users
   for (const [sourceName, records] of Object.entries(sources)) {
@@ -283,6 +544,8 @@ async function migrateVehicles(
   sources: DataSources,
   userMap: Map<string, string>,
   steeringMap: Record<string, string>,
+  makeMap: Record<string, string>,
+  modelMap: Record<string, string>,
   collectionMap: Record<string, string>,
   stats: MigrationStats
 ): Promise<Map<string, string>> {
@@ -307,6 +570,9 @@ async function migrateVehicles(
       let userId: string | undefined;
       if (userData?.email) {
         userId = userMap.get(userData.email);
+      } else if (sourceName === 'catalog') {
+        // Use system user for catalog vehicles (they don't have real owners)
+        userId = userMap.get('SYSTEM_USER');
       }
       
       if (!userId) {
@@ -324,12 +590,22 @@ async function migrateVehicles(
           }
         }
         
+        // Get make and model IDs
+        const makeId = makeMap[vehicleData.make];
+        const modelKey = `${vehicleData.make}:${vehicleData.model}`;
+        const modelId = modelMap[modelKey];
+        
+        if (!makeId || !modelId) {
+          console.warn(`⚠️ Missing make/model IDs for ${vehicleData.make} ${vehicleData.model}, skipping`);
+          continue;
+        }
+        
         // Create vehicle
         const vehicle = await prisma.vehicle.create({
           data: {
             name: vehicleData.name,
-            make: vehicleData.make,
-            model: vehicleData.model,
+            makeId: makeId,
+            modelId: modelId,
             year: vehicleData.year,
             registration: vehicleData.registration,
             engineCapacity: vehicleData.engineCapacity,
@@ -350,18 +626,23 @@ async function migrateVehicles(
         vehicleMap.set(`${sourceName}:${originalId}`, vehicle.id);
         stats.vehiclesCreated++;
         
-        // Add collections if from catalog
-        if (sourceName === 'catalog' && record.collection) {
+        // Assign collections if available
+        if (record.collection && sourceName === 'catalog') {
           const collections = parseCollections(record.collection);
           for (const collectionName of collections) {
             const collectionId = collectionMap[collectionName];
             if (collectionId) {
-              await prisma.vehicleCollection.create({
-                data: {
-                  vehicleId: vehicle.id,
-                  collectionId: collectionId,
-                },
-              });
+              try {
+                await prisma.vehicleCollection.create({
+                  data: {
+                    vehicleId: vehicle.id,
+                    collectionId: collectionId,
+                  },
+                });
+                console.log(`✅ Assigned collection "${collectionName}" to vehicle ${vehicle.name}`);
+              } catch (error) {
+                console.warn(`⚠️ Failed to assign collection "${collectionName}": ${error}`);
+              }
             }
           }
         }
@@ -464,8 +745,18 @@ async function migrateSources(
       }
       
       try {
-        await prisma.vehicleSource.create({
-          data: {
+        await prisma.vehicleSource.upsert({
+          where: {
+            sourceType_sourceId: {
+              sourceType: sourceName,
+              sourceId: originalId,
+            },
+          },
+          update: {
+            vehicleId: vehicleId,
+            rawData: record,
+          },
+          create: {
             vehicleId: vehicleId,
             sourceType: sourceName,
             sourceId: originalId,
@@ -499,6 +790,8 @@ async function getFinalStatistics(): Promise<void> {
   const sourceCount = await prisma.vehicleSource.count();
   const collectionCount = await prisma.collection.count();
   const steeringTypeCount = await prisma.steeringType.count();
+  const makeCount = await prisma.make.count();
+  const modelCount = await prisma.model.count();
   
   console.log(`  Users: ${userCount}`);
   console.log(`  Vehicles: ${vehicleCount}`);
@@ -506,12 +799,91 @@ async function getFinalStatistics(): Promise<void> {
   console.log(`  Sources: ${sourceCount}`);
   console.log(`  Collections: ${collectionCount}`);
   console.log(`  Steering Types: ${steeringTypeCount}`);
+  console.log(`  Makes: ${makeCount}`);
+  console.log(`  Models: ${modelCount}`);
 }
 
 /**
- * Main migration function
+ * Main migration function using processed vehicle catalog
  */
-export async function runMigration(): Promise<void> {
+export async function runMigration(filters: MigrationFilters = DEFAULT_FILTERS): Promise<void> {
+  console.log('🚀 Starting vehicle data migration from processed catalog...\n');
+  
+  const stats: MigrationStats = {
+    usersCreated: 0,
+    usersUpdated: 0,
+    vehiclesCreated: 0,
+    mediaCreated: 0,
+    sourcesCreated: 0,
+    collectionsCreated: 0,
+    steeringTypesCreated: 0,
+    errors: [],
+  };
+  
+  try {
+    // Load processed vehicle catalog
+    const catalog = await loadProcessedVehicleCatalog();
+    
+    // Apply filters
+    const filteredRecords = applyFiltersToProcessedRecords(catalog, filters);
+    
+    // Analyze filtered data
+    await analyzeProcessedData(filteredRecords);
+    
+    // Setup reference data
+    const steeringMap = await setupSteeringTypes();
+    const { makeMap, modelMap } = await setupMakesAndModelsFromProcessed(filteredRecords);
+    const collectionMap = await setupCollectionsFromProcessed(filteredRecords);
+    
+    // Migrate users from processed records
+    const userMap = await migrateUsersFromProcessed(filteredRecords, stats);
+    
+    // Migrate vehicles from processed records
+    const vehicleMap = await migrateVehiclesFromProcessed(
+      filteredRecords, 
+      userMap, 
+      steeringMap, 
+      makeMap, 
+      modelMap, 
+      collectionMap, 
+      stats
+    );
+    
+    // Migrate media from processed records
+    await migrateMediaFromProcessed(filteredRecords, vehicleMap, stats);
+    
+    // Create source tracking for processed records
+    await createSourceTrackingFromProcessed(filteredRecords, vehicleMap, stats);
+    
+    // Final statistics
+    await getFinalStatistics();
+    
+    console.log('\n✅ Migration completed successfully!');
+    console.log('\n📊 Migration Summary:');
+    console.log(`  Users Created: ${stats.usersCreated}`);
+    console.log(`  Users Updated: ${stats.usersUpdated}`);
+    console.log(`  Vehicles Created: ${stats.vehiclesCreated}`);
+    console.log(`  Media Created: ${stats.mediaCreated}`);
+    console.log(`  Sources Created: ${stats.sourcesCreated}`);
+    console.log(`  Errors: ${stats.errors.length}`);
+    
+    if (stats.errors.length > 0) {
+      console.log('\n❌ Errors encountered:');
+      stats.errors.forEach(error => console.log(`  - ${error}`));
+    }
+    
+  } catch (error) {
+    console.error('❌ Migration failed:', error);
+    throw error;
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+/**
+ * Legacy migration function using raw source files (DEPRECATED)
+ */
+export async function runLegacyMigration(filters: MigrationFilters = DEFAULT_FILTERS): Promise<void> {
   console.log('🚀 Starting vehicle data migration...\n');
   
   const stats: MigrationStats = {
@@ -527,20 +899,24 @@ export async function runMigration(): Promise<void> {
   
   try {
     // Load data sources
-    const sources = await loadDataSources();
+    const rawSources = await loadDataSources();
+    
+    // Apply filters
+    const sources = applyFilters(rawSources, filters);
     
     // Analyze data
     await analyzeData(sources);
     
     // Setup reference data
     const steeringMap = await setupSteeringTypes();
+    const { makeMap, modelMap } = await setupMakesAndModels(sources);
     const collectionMap = await setupCollections(sources);
     
     // Migrate users
     const userMap = await migrateUsers(sources, stats);
     
     // Migrate vehicles
-    const vehicleMap = await migrateVehicles(sources, userMap, steeringMap, collectionMap, stats);
+    const vehicleMap = await migrateVehicles(sources, userMap, steeringMap, makeMap, modelMap, collectionMap, stats);
     
     // Migrate media
     await migrateMedia(sources, vehicleMap, stats);
@@ -571,6 +947,69 @@ export async function runMigration(): Promise<void> {
   } finally {
     await prisma.$disconnect();
   }
+  
+  return stats;
+}
+
+/**
+ * Clean all migrated data from database
+ */
+export async function cleanDatabase(): Promise<void> {
+  console.log('🧹 Cleaning database...');
+  
+  try {
+    // Delete in correct order to respect foreign key constraints
+    await prisma.vehicleCollection.deleteMany();
+    console.log('  ✅ Deleted vehicle collections');
+    
+    await prisma.vehicleSpecification.deleteMany();
+    console.log('  ✅ Deleted vehicle specifications');
+    
+    await prisma.vehicleSource.deleteMany();
+    console.log('  ✅ Deleted vehicle sources');
+    
+    await prisma.media.deleteMany();
+    console.log('  ✅ Deleted media');
+    
+    await prisma.vehicle.deleteMany();
+    console.log('  ✅ Deleted vehicles');
+    
+    await prisma.collection.deleteMany();
+    console.log('  ✅ Deleted collections');
+    
+    await prisma.model.deleteMany();
+    console.log('  ✅ Deleted models');
+    
+    await prisma.make.deleteMany();
+    console.log('  ✅ Deleted makes');
+    
+    await prisma.steeringType.deleteMany();
+    console.log('  ✅ Deleted steering types');
+    
+    await prisma.user.deleteMany();
+    console.log('  ✅ Deleted users');
+    
+    console.log('🧹 Database cleaned successfully!');
+    
+  } catch (error) {
+    console.error('❌ Error cleaning database:', error);
+    throw error;
+  }
+}
+
+/**
+ * Full remigration: clean database and run migration
+ */
+export async function remigrate(filters: MigrationFilters = DEFAULT_FILTERS): Promise<void> {
+  console.log('🔄 Starting remigration...\n');
+  
+  // Clean existing data
+  await cleanDatabase();
+  
+  console.log('\n🚀 Starting fresh migration...\n');
+  
+  // Run migration
+  return await runMigration(filters);
 }
 
 // Run migration if this file is executed directly
