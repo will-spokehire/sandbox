@@ -24,7 +24,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  SheetFooter,
+  SheetClose,
 } from "~/components/ui/sheet";
 import {
   Command,
@@ -252,11 +252,20 @@ export function VehicleFilters({
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="bottom" className="h-[80vh] flex flex-col">
-            <SheetHeader>
+          <SheetContent side="bottom" className="h-[80vh]">
+            <SheetHeader className="relative">
               <SheetTitle>Select Makes</SheetTitle>
+              <SheetClose asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="absolute right-0 top-0 text-primary font-semibold"
+                >
+                  Done
+                </Button>
+              </SheetClose>
             </SheetHeader>
-            <Command className="mt-4 flex-1">
+            <Command className="mt-4">
               <CommandInput placeholder="Search makes..." />
               <CommandList>
                 <CommandEmpty>No make found.</CommandEmpty>
@@ -279,14 +288,6 @@ export function VehicleFilters({
                 </CommandGroup>
               </CommandList>
             </Command>
-            <SheetFooter className="mt-4">
-              <Button 
-                onClick={() => setMakeOpen(false)} 
-                className="w-full"
-              >
-                Done
-              </Button>
-            </SheetFooter>
           </SheetContent>
         </Sheet>
       ) : (
