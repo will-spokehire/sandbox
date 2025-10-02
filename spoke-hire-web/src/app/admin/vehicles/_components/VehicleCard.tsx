@@ -54,12 +54,12 @@ export function VehicleCard({
 
   return (
     <Card
-      className="cursor-pointer hover:shadow-md transition-shadow active:scale-[0.98] transition-transform"
+      className="cursor-pointer hover:shadow-md transition-shadow active:scale-[0.98] transition-transform overflow-hidden"
       onClick={() => onView?.(vehicle.id)}
     >
       <CardContent className="p-0">
         {/* Image - Full width for better impact */}
-        <div className="relative h-48 w-full overflow-hidden rounded-t-lg bg-muted">
+        <div className="relative h-48 w-full bg-muted">
           <Image
             src={imageUrl}
             alt={vehicle.name}
