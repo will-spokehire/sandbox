@@ -231,6 +231,23 @@ Example: `/admin/vehicles?search=john@example.com&status=PUBLISHED&makeIds=bmw-i
 - `description` - Text description
 - `ownerId` - Reference to User (owner)
 
+### Database Indexes (Performance Optimizations)
+
+**Vehicle Table:**
+- Single column: `makeId`, `modelId`, `year`, `status`, `price`, `ownerId`, `registration`, `exteriorColour`, `interiorColour`, `engineCapacity`, `numberOfSeats`, `isRoadLegal`
+- Composite: `[makeId, modelId]`, `[status, makeId]`, `[status, year]`, `[status, price]`
+
+**User Table (Owner Search):**
+- Single column: `email`, `supabaseId`, `userType`, `status`, `firstName`, `lastName`, `phone`, `postcode`
+
+**Media Table:**
+- Single column: `type`, `status`, `isPrimary`
+- Composite: `[vehicleId, order]`, `[vehicleId, isPrimary, status]`
+
+**VehicleCollection Table:**
+- Single column: `vehicleId`, `collectionId`
+- Unique constraint: `[vehicleId, collectionId]`
+
 ### Relations
 - `make` - Make details
 - `model` - Model details
@@ -387,4 +404,10 @@ src/
 - ✅ Cursor-based pagination with filter reset on filter change
 - ✅ Created update-vehicle-collections.ts script for data migration
 - ✅ Added Command and Popover components from shadcn/ui
+- ✅ Added comprehensive database indexes for search and filter performance
+  - Color filters: `exteriorColour`, `interiorColour`
+  - Owner search: `firstName`, `lastName`, `phone`, `postcode`
+  - Common filter combos: `[status, makeId]`, `[status, year]`, `[status, price]`
+  - Registration search: `registration`
+  - Media queries: `[vehicleId, isPrimary, status]`
 

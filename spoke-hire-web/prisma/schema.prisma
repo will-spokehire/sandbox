@@ -99,6 +99,10 @@ model User {
     @@index([supabaseId])
     @@index([userType])
     @@index([status])
+    @@index([firstName])
+    @@index([lastName])
+    @@index([phone])
+    @@index([postcode])
 }
 
 // Steering Types Lookup Table
@@ -226,6 +230,12 @@ model Vehicle {
     @@index([isRoadLegal])
     @@index([price])
     @@index([ownerId])
+    @@index([registration])
+    @@index([exteriorColour])
+    @@index([interiorColour])
+    @@index([status, makeId])
+    @@index([status, year])
+    @@index([status, price])
 }
 
 // Unified Media Entity (Images and Videos)
@@ -269,6 +279,7 @@ model Media {
     @@index([type])
     @@index([status])
     @@index([isPrimary])
+    @@index([vehicleId, isPrimary, status])
     @@unique([originalUrl, vehicleId])
 }
 
