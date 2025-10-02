@@ -25,6 +25,8 @@ const listVehiclesInputSchema = z.object({
   makeIds: z.array(z.string()).optional(), // Multiple makes with OR logic
   modelId: z.string().optional(),
   collectionIds: z.array(z.string()).optional(), // Multiple collections with OR logic
+  exteriorColors: z.array(z.string()).optional(), // Multiple exterior colors with OR logic
+  interiorColors: z.array(z.string()).optional(), // Multiple interior colors with OR logic
   yearFrom: z.string().optional(),
   yearTo: z.string().optional(),
   priceFrom: z.number().optional(),
@@ -65,6 +67,8 @@ export const vehicleRouter = createTRPCRouter({
         makeIds,
         modelId,
         collectionIds,
+        exteriorColors,
+        interiorColors,
         yearFrom,
         yearTo,
         priceFrom,
@@ -103,6 +107,16 @@ export const vehicleRouter = createTRPCRouter({
             collectionId: { in: collectionIds }
           }
         };
+      }
+
+      // Exterior color filter with OR logic
+      if (exteriorColors && exteriorColors.length > 0) {
+        where.exteriorColour = { in: exteriorColors };
+      }
+
+      // Interior color filter with OR logic
+      if (interiorColors && interiorColors.length > 0) {
+        where.interiorColour = { in: interiorColors };
       }
 
       // Year range filter
@@ -371,6 +385,32 @@ export const vehicleRouter = createTRPCRouter({
       },
     });
 
+    // Get unique exterior colors
+    const exteriorColorsData = await ctx.db.vehicle.findMany({
+      where: {
+        exteriorColour: { not: null },
+      },
+      distinct: ["exteriorColour"],
+      select: { exteriorColour: true },
+      orderBy: { exteriorColour: "asc" },
+    });
+    const exteriorColors = exteriorColorsData
+      .map((v) => v.exteriorColour)
+      .filter((c): c is string => c !== null);
+
+    // Get unique interior colors
+    const interiorColorsData = await ctx.db.vehicle.findMany({
+      where: {
+        interiorColour: { not: null },
+      },
+      distinct: ["interiorColour"],
+      select: { interiorColour: true },
+      orderBy: { interiorColour: "asc" },
+    });
+    const interiorColors = interiorColorsData
+      .map((v) => v.interiorColour)
+      .filter((c): c is string => c !== null);
+
     // Get unique years
     const years = await ctx.db.vehicle.findMany({
       distinct: ["year"],
@@ -387,6 +427,8 @@ export const vehicleRouter = createTRPCRouter({
     return {
       makes,
       collections,
+      exteriorColors,
+      interiorColors,
       years: years.map((v) => v.year),
       statusCounts: statusCounts.map((sc) => ({
         status: sc.status,

@@ -42,6 +42,14 @@ export default function VehiclesPage() {
     const collectionIdsParam = searchParams.get("collectionIds");
     return collectionIdsParam ? collectionIdsParam.split(",") : [];
   });
+  const [exteriorColors, setExteriorColors] = useState<string[]>(() => {
+    const exteriorColorsParam = searchParams.get("exteriorColors");
+    return exteriorColorsParam ? exteriorColorsParam.split(",") : [];
+  });
+  const [interiorColors, setInteriorColors] = useState<string[]>(() => {
+    const interiorColorsParam = searchParams.get("interiorColors");
+    return interiorColorsParam ? interiorColorsParam.split(",") : [];
+  });
   const [yearFrom, setYearFrom] = useState<string | undefined>(
     searchParams.get("yearFrom") ?? undefined
   );
@@ -71,6 +79,8 @@ export default function VehiclesPage() {
       makeIds: makeIds.length > 0 ? makeIds : undefined, // Multiple makes with OR logic
       modelId,
       collectionIds: collectionIds.length > 0 ? collectionIds : undefined, // Multiple collections with OR logic
+      exteriorColors: exteriorColors.length > 0 ? exteriorColors : undefined, // Multiple exterior colors with OR logic
+      interiorColors: interiorColors.length > 0 ? interiorColors : undefined, // Multiple interior colors with OR logic
       yearFrom,
       yearTo,
       sortBy: "createdAt",
@@ -98,7 +108,7 @@ export default function VehiclesPage() {
   useEffect(() => {
     setCursor(undefined);
     setAllVehicles([]);
-  }, [debouncedSearch, status, makeIds, modelId, collectionIds, yearFrom, yearTo]);
+  }, [debouncedSearch, status, makeIds, modelId, collectionIds, exteriorColors, interiorColors, yearFrom, yearTo]);
 
   // Update URL when filters change
   useEffect(() => {
@@ -109,12 +119,14 @@ export default function VehiclesPage() {
     if (makeIds.length > 0) params.set("makeIds", makeIds.join(","));
     if (modelId) params.set("modelId", modelId);
     if (collectionIds.length > 0) params.set("collectionIds", collectionIds.join(","));
+    if (exteriorColors.length > 0) params.set("exteriorColors", exteriorColors.join(","));
+    if (interiorColors.length > 0) params.set("interiorColors", interiorColors.join(","));
     if (yearFrom) params.set("yearFrom", yearFrom);
     if (yearTo) params.set("yearTo", yearTo);
 
     const newUrl = params.toString() ? `?${params.toString()}` : "/admin/vehicles";
     router.push(newUrl, { scroll: false });
-  }, [debouncedSearch, status, makeIds, modelId, collectionIds, yearFrom, yearTo, router]);
+  }, [debouncedSearch, status, makeIds, modelId, collectionIds, exteriorColors, interiorColors, yearFrom, yearTo, router]);
 
   // Handle errors
   useEffect(() => {
@@ -148,6 +160,8 @@ export default function VehiclesPage() {
     setMakeIds([]);
     setModelId(undefined);
     setCollectionIds([]);
+    setExteriorColors([]);
+    setInteriorColors([]);
     setYearFrom(undefined);
     setYearTo(undefined);
     setCursor(undefined);
@@ -162,7 +176,7 @@ export default function VehiclesPage() {
   };
 
   // Check if any filters are active
-  const hasFilters = !!(debouncedSearch || status || makeIds.length > 0 || modelId || collectionIds.length > 0 || yearFrom || yearTo);
+  const hasFilters = !!(debouncedSearch || status || makeIds.length > 0 || modelId || collectionIds.length > 0 || exteriorColors.length > 0 || interiorColors.length > 0 || yearFrom || yearTo);
 
   if (isAuthLoading || !user) {
     return (
@@ -222,6 +236,8 @@ export default function VehiclesPage() {
             makeIds={makeIds}
             modelId={modelId}
             collectionIds={collectionIds}
+            exteriorColors={exteriorColors}
+            interiorColors={interiorColors}
             yearFrom={yearFrom}
             yearTo={yearTo}
             onSearchChange={setSearchInput}
@@ -229,6 +245,8 @@ export default function VehiclesPage() {
             onMakeIdsChange={setMakeIds}
             onModelChange={setModelId}
             onCollectionIdsChange={setCollectionIds}
+            onExteriorColorsChange={setExteriorColors}
+            onInteriorColorsChange={setInteriorColors}
             onYearFromChange={setYearFrom}
             onYearToChange={setYearTo}
             onClearFilters={handleClearFilters}

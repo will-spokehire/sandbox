@@ -36,6 +36,8 @@ interface VehicleFiltersProps {
   makeIds?: string[];
   modelId?: string;
   collectionIds?: string[];
+  exteriorColors?: string[];
+  interiorColors?: string[];
   yearFrom?: string;
   yearTo?: string;
   onSearchChange: (search: string) => void;
@@ -43,6 +45,8 @@ interface VehicleFiltersProps {
   onMakeIdsChange: (makeIds: string[]) => void;
   onModelChange: (modelId?: string) => void;
   onCollectionIdsChange: (collectionIds: string[]) => void;
+  onExteriorColorsChange: (colors: string[]) => void;
+  onInteriorColorsChange: (colors: string[]) => void;
   onYearFromChange: (year?: string) => void;
   onYearToChange: (year?: string) => void;
   onClearFilters: () => void;
@@ -59,6 +63,8 @@ export function VehicleFilters({
   makeIds = [],
   modelId,
   collectionIds = [],
+  exteriorColors = [],
+  interiorColors = [],
   yearFrom,
   yearTo,
   onSearchChange,
@@ -66,6 +72,8 @@ export function VehicleFilters({
   onMakeIdsChange,
   onModelChange,
   onCollectionIdsChange,
+  onExteriorColorsChange,
+  onInteriorColorsChange,
   onYearFromChange,
   onYearToChange,
   onClearFilters,
@@ -73,6 +81,8 @@ export function VehicleFilters({
   const [searchInput, setSearchInput] = useState(search);
   const [makeOpen, setMakeOpen] = useState(false);
   const [collectionOpen, setCollectionOpen] = useState(false);
+  const [exteriorColorOpen, setExteriorColorOpen] = useState(false);
+  const [interiorColorOpen, setInteriorColorOpen] = useState(false);
 
   // Fetch filter options
   const { data: filterOptions } = api.vehicle.getFilterOptions.useQuery();
@@ -83,7 +93,7 @@ export function VehicleFilters({
     { enabled: makeIds.length === 1 }
   );
 
-  const hasActiveFilters = !!(search || status || makeIds.length > 0 || modelId || collectionIds.length > 0 || yearFrom || yearTo);
+  const hasActiveFilters = !!(search || status || makeIds.length > 0 || modelId || collectionIds.length > 0 || exteriorColors.length > 0 || interiorColors.length > 0 || yearFrom || yearTo);
 
   // Generate year options (from 1900 to current year + 1)
   const currentYear = new Date().getFullYear();
@@ -148,6 +158,22 @@ export function VehicleFilters({
       : [...collectionIds, collectionId];
     
     onCollectionIdsChange(newCollectionIds);
+  };
+
+  const handleExteriorColorToggle = (color: string) => {
+    const newColors = exteriorColors.includes(color)
+      ? exteriorColors.filter((c) => c !== color)
+      : [...exteriorColors, color];
+    
+    onExteriorColorsChange(newColors);
+  };
+
+  const handleInteriorColorToggle = (color: string) => {
+    const newColors = interiorColors.includes(color)
+      ? interiorColors.filter((c) => c !== color)
+      : [...interiorColors, color];
+    
+    onInteriorColorsChange(newColors);
   };
 
   const handleClearFilters = () => {
@@ -308,6 +334,94 @@ export function VehicleFilters({
                             />
                           )}
                           {collection.name}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+
+            {/* Exterior Color Filter - Multi-select */}
+            <Popover open={exteriorColorOpen} onOpenChange={setExteriorColorOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={exteriorColorOpen}
+                  className="w-[200px] justify-between"
+                >
+                  {exteriorColors.length === 0 ? (
+                    "Exterior colors..."
+                  ) : (
+                    <span>{exteriorColors.length} exterior color{exteriorColors.length !== 1 ? 's' : ''}</span>
+                  )}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[200px] p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Search colors..." />
+                  <CommandList>
+                    <CommandEmpty>No color found.</CommandEmpty>
+                    <CommandGroup>
+                      {filterOptions?.exteriorColors.map((color) => (
+                        <CommandItem
+                          key={`ext-${color}`}
+                          value={color}
+                          onSelect={() => handleExteriorColorToggle(color)}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              exteriorColors.includes(color) ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          {color}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+
+            {/* Interior Color Filter - Multi-select */}
+            <Popover open={interiorColorOpen} onOpenChange={setInteriorColorOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={interiorColorOpen}
+                  className="w-[200px] justify-between"
+                >
+                  {interiorColors.length === 0 ? (
+                    "Interior colors..."
+                  ) : (
+                    <span>{interiorColors.length} interior color{interiorColors.length !== 1 ? 's' : ''}</span>
+                  )}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[200px] p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Search colors..." />
+                  <CommandList>
+                    <CommandEmpty>No color found.</CommandEmpty>
+                    <CommandGroup>
+                      {filterOptions?.interiorColors.map((color) => (
+                        <CommandItem
+                          key={`int-${color}`}
+                          value={color}
+                          onSelect={() => handleInteriorColorToggle(color)}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              interiorColors.includes(color) ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          {color}
                         </CommandItem>
                       ))}
                     </CommandGroup>
