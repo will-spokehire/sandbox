@@ -37,7 +37,13 @@ export function VehicleListSkeleton({ rows = 5 }: VehicleListSkeletonProps) {
             <Skeleton className="h-4 w-20" />
           </TableCell>
           <TableCell>
-            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-4 w-28" />
+          </TableCell>
+          <TableCell>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-3 w-24" />
+            </div>
           </TableCell>
           <TableCell>
             <Skeleton className="h-8 w-8 rounded" />

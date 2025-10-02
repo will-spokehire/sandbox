@@ -25,10 +25,10 @@ export default function VehiclesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Get filters from URL
+  // Get filters from URL (default to PUBLISHED status)
   const [searchInput, setSearchInput] = useState(searchParams.get("search") ?? "");
   const [status, setStatus] = useState<VehicleStatus | undefined>(
-    (searchParams.get("status") as VehicleStatus) ?? undefined
+    (searchParams.get("status") as VehicleStatus) ?? "PUBLISHED"
   );
   const [makeId, setMakeId] = useState<string | undefined>(
     searchParams.get("makeId") ?? undefined

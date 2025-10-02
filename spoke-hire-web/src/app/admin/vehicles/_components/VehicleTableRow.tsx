@@ -18,6 +18,7 @@ import {
   formatPrice,
   formatRegistration,
   formatOwnerName,
+  formatLocation,
   getVehicleImageUrl,
 } from "~/lib/vehicles";
 
@@ -44,6 +45,11 @@ export function VehicleTableRow({
     vehicle.owner.firstName,
     vehicle.owner.lastName,
     vehicle.owner.email
+  );
+  const location = formatLocation(
+    vehicle.owner.postcode,
+    vehicle.owner.city,
+    vehicle.owner.country
   );
 
   return (
@@ -96,11 +102,16 @@ export function VehicleTableRow({
         <span className="font-medium">{formatPrice(vehicle.price)}</span>
       </TableCell>
 
+      {/* Location */}
+      <TableCell>
+        <span className="text-sm">{location}</span>
+      </TableCell>
+
       {/* Owner */}
       <TableCell>
         <div className="flex flex-col">
           <span className="text-sm">{ownerName}</span>
-          <span className="text-xs text-muted-foreground">
+          <span className="text-xs text-muted-foreground truncate max-w-[200px]">
             {vehicle.owner.email}
           </span>
         </div>

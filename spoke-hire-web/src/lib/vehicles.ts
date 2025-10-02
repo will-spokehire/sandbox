@@ -115,6 +115,23 @@ export function formatOwnerName(
 }
 
 /**
+ * Format vehicle location (postcode, city, country)
+ */
+export function formatLocation(
+  postcode?: string | null,
+  city?: string | null,
+  country?: { name: string } | null
+): string {
+  const parts: string[] = [];
+  
+  if (postcode) parts.push(postcode);
+  if (city) parts.push(city);
+  if (country?.name) parts.push(country.name);
+  
+  return parts.length > 0 ? parts.join(", ") : "N/A";
+}
+
+/**
  * Truncate text to specified length
  */
 export function truncateText(text: string, maxLength: number): string {

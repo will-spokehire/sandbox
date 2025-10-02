@@ -18,6 +18,7 @@ import {
   formatPrice,
   formatRegistration,
   formatOwnerName,
+  formatLocation,
   getVehicleImageUrl,
 } from "~/lib/vehicles";
 
@@ -44,6 +45,11 @@ export function VehicleCard({
     vehicle.owner.firstName,
     vehicle.owner.lastName,
     vehicle.owner.email
+  );
+  const location = formatLocation(
+    vehicle.owner.postcode,
+    vehicle.owner.city,
+    vehicle.owner.country
   );
 
   return (
@@ -137,6 +143,13 @@ export function VehicleCard({
               </div>
               
               <div className="flex items-center justify-between text-sm pt-1 border-t">
+                <span className="text-muted-foreground">Location:</span>
+                <span className="font-medium text-xs truncate max-w-[150px]">
+                  {location}
+                </span>
+              </div>
+              
+              <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Owner:</span>
                 <span className="font-medium text-xs truncate max-w-[150px]">
                   {ownerName}
