@@ -24,7 +24,6 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  SheetClose,
 } from "~/components/ui/sheet";
 import {
   Command,
@@ -253,17 +252,8 @@ export function VehicleFilters({
             </Button>
           </SheetTrigger>
           <SheetContent side="bottom" className="h-[80vh]">
-            <SheetHeader className="relative">
+            <SheetHeader>
               <SheetTitle>Select Makes</SheetTitle>
-              <SheetClose asChild>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  className="absolute right-0 top-0 text-primary font-semibold"
-                >
-                  Done
-                </Button>
-              </SheetClose>
             </SheetHeader>
             <Command className="mt-4">
               <CommandInput placeholder="Search makes..." />
