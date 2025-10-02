@@ -20,10 +20,14 @@ interface VehicleFiltersProps {
   status?: VehicleStatus;
   makeId?: string;
   modelId?: string;
+  yearFrom?: string;
+  yearTo?: string;
   onSearchChange: (search: string) => void;
   onStatusChange: (status?: VehicleStatus) => void;
   onMakeChange: (makeId?: string) => void;
   onModelChange: (modelId?: string) => void;
+  onYearFromChange: (year?: string) => void;
+  onYearToChange: (year?: string) => void;
   onClearFilters: () => void;
 }
 
@@ -37,10 +41,14 @@ export function VehicleFilters({
   status,
   makeId,
   modelId,
+  yearFrom,
+  yearTo,
   onSearchChange,
   onStatusChange,
   onMakeChange,
   onModelChange,
+  onYearFromChange,
+  onYearToChange,
   onClearFilters,
 }: VehicleFiltersProps) {
   const [searchInput, setSearchInput] = useState(search);
@@ -54,7 +62,14 @@ export function VehicleFilters({
     { enabled: !!makeId }
   );
 
-  const hasActiveFilters = !!(search || status || makeId || modelId);
+  const hasActiveFilters = !!(search || status || makeId || modelId || yearFrom || yearTo);
+
+  // Generate year options (from 1900 to current year + 1)
+  const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from(
+    { length: currentYear - 1900 + 2 },
+    (_, i) => (currentYear + 1 - i).toString()
+  );
 
   const handleSearchChange = (value: string) => {
     setSearchInput(value);
@@ -84,6 +99,22 @@ export function VehicleFilters({
       onStatusChange(undefined);
     } else {
       onStatusChange(value as VehicleStatus);
+    }
+  };
+
+  const handleYearFromChange = (value: string) => {
+    if (value === "all") {
+      onYearFromChange(undefined);
+    } else {
+      onYearFromChange(value);
+    }
+  };
+
+  const handleYearToChange = (value: string) => {
+    if (value === "all") {
+      onYearToChange(undefined);
+    } else {
+      onYearToChange(value);
     }
   };
 
@@ -153,6 +184,42 @@ export function VehicleFilters({
                 {models?.map((model) => (
                   <SelectItem key={model.id} value={model.id}>
                     {model.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Year From Select */}
+            <Select
+              value={yearFrom ?? "all"}
+              onValueChange={handleYearFromChange}
+            >
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Year from" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Year from</SelectItem>
+                {yearOptions.map((year) => (
+                  <SelectItem key={`from-${year}`} value={year}>
+                    {year}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Year To Select */}
+            <Select
+              value={yearTo ?? "all"}
+              onValueChange={handleYearToChange}
+            >
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Year to" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Year to</SelectItem>
+                {yearOptions.map((year) => (
+                  <SelectItem key={`to-${year}`} value={year}>
+                    {year}
                   </SelectItem>
                 ))}
               </SelectContent>
