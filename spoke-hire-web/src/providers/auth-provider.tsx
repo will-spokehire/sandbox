@@ -46,7 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const supabase = createClient();
 
   // tRPC queries
-  const { data: session, refetch: refetchSession } = api.auth.getSession.useQuery(
+  const { data: session, refetch: refetchSession, isLoading: sessionLoading } = api.auth.getSession.useQuery(
     undefined,
     {
       retry: false,
@@ -64,14 +64,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Update user when session changes
   useEffect(() => {
-    if (session?.user) {
-      setUser(session.user as User);
-      setIsLoading(false);
-    } else {
-      setUser(null);
-      setIsLoading(false);
+    // Only update state once the session query has completed
+    if (!sessionLoading) {
+      if (session?.user) {
+        setUser(session.user as User);
+        setIsLoading(false);
+      } else {
+        setUser(null);
+        setIsLoading(false);
+      }
     }
-  }, [session]);
+  }, [session, sessionLoading]);
 
   // Listen to Supabase auth changes
   useEffect(() => {

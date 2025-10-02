@@ -92,14 +92,30 @@ Created Supabase client infrastructure for Next.js 15 App Router:
 - Added `Toaster` for notifications
 - Full app-wide auth state management
 
-### ⏳ Phase 4: Admin Interface (Pending)
-- Admin layout
-- Dashboard
-- Vehicle management pages
+### ✅ Phase 4: Middleware & Session Management (Complete)
 
-### ⏳ Phase 5: Middleware Protection (Pending)
-- Next.js middleware for route protection
-- Redirect logic
+**Middleware:** (`middleware.ts` at project root)
+- Refreshes Supabase auth tokens on every request
+- Updates session cookies automatically
+- Keeps sessions alive during navigation
+- Lightweight and fast (no database queries)
+
+**Auth Protection Layers:**
+1. **Middleware**: Token refresh only (fast, runs on every request)
+2. **Client Components**: `useRequireAdmin()` hook redirects if not admin
+3. **Server Components**: tRPC context checks auth in `createTRPCContext`
+4. **API Endpoints**: `adminProcedure` enforces admin role
+
+**Security Benefits:**
+- Multi-layer defense (middleware + client + server + API)
+- Cannot be bypassed (server-side validation)
+- Fast middleware (no blocking database queries)
+- Session stays fresh automatically
+
+### ⏳ Phase 5: Admin Interface Pages (Pending)
+- Vehicle management
+- User management
+- Settings pages
 
 ## Usage Examples
 
@@ -461,8 +477,68 @@ npm run dev
 - Sign in and access `/admin` → shows dashboard
 - Sign out from user menu → redirects to login
 
+## Multi-Layer Security Architecture
+
+Protection is enforced at multiple levels for defense in depth:
+
+### Layer 1: Middleware (Token Refresh)
+**File:** `middleware.ts`
+- Runs on every request
+- Refreshes Supabase auth tokens
+- Updates session cookies
+- Fast and lightweight (no database queries)
+
+### Layer 2: Client-Side Protection
+**Hooks:** `useRequireAuth()`, `useRequireAdmin()`
+- Redirects unauthenticated users to login
+- Redirects non-admin users to home
+- Provides loading states
+- Example:
+```tsx
+export default function AdminPage() {
+  const { user, isLoading } = useRequireAdmin();
+  // User is guaranteed to be admin here
+}
+```
+
+### Layer 3: Server-Side Protection (tRPC Context)
+**File:** `src/server/api/trpc.ts`
+- Every tRPC call checks auth in `createTRPCContext`
+- Fetches user from database via `supabaseId`
+- Makes `user` and `supabaseUser` available in context
+
+### Layer 4: Protected Procedures
+**Middleware:** `enforceUserIsAuthed`, `enforceUserIsAdmin`
+- `protectedProcedure` - Requires authentication
+- `adminProcedure` - Requires ADMIN role
+- Throws errors if unauthorized
+- Example:
+```tsx
+export const vehicleRouter = createTRPCRouter({
+  getAllVehicles: adminProcedure.query(({ ctx }) => {
+    // Only admins can reach here
+    return ctx.db.vehicle.findMany();
+  }),
+});
+```
+
+### Why This Approach?
+
+**Advantages:**
+✅ Fast middleware (no slow database queries blocking requests)
+✅ Multiple layers of protection (can't bypass one layer)
+✅ Clear separation of concerns
+✅ Great developer experience (hooks, procedures)
+✅ Type-safe (TypeScript all the way)
+
+**Protection Summary:**
+- Middleware: Keeps sessions fresh
+- Client: User experience (redirects, loading states)
+- Server: Authorization (checks database role)
+- API: Endpoint protection (enforces admin role)
+
 ---
 
-**Last Updated**: Phase 3 Complete  
-**Next**: Phase 4 - Admin Interface Pages (Vehicle Management)
+**Last Updated**: Phase 4 Complete  
+**Next**: Phase 5 - Admin Interface Pages (Vehicle Management, User Management)
 
