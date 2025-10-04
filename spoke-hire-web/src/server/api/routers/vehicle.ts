@@ -15,6 +15,7 @@ const listVehiclesInputSchema = z.object({
   // Pagination
   limit: z.number().min(1).max(100).default(20),
   cursor: z.string().optional(), // Vehicle ID for cursor-based pagination
+  skip: z.number().min(0).optional(), // For offset-based pagination
   
   // Search
   search: z.string().optional(),
@@ -61,6 +62,7 @@ export const vehicleRouter = createTRPCRouter({
       const {
         limit,
         cursor,
+        skip,
         search,
         status,
         makeId,
@@ -174,6 +176,7 @@ export const vehicleRouter = createTRPCRouter({
       const vehicles = await ctx.db.vehicle.findMany({
         where,
         take: limit + 1, // Fetch one extra to determine if there's a next page
+        skip: skip ?? undefined, // Use skip for offset-based pagination
         orderBy,
         include: {
           make: {

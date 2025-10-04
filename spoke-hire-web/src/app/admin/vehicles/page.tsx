@@ -41,15 +41,16 @@ function VehiclesPageContent() {
   const yearFrom = searchParams.get("yearFrom") ?? undefined;
   const yearTo = searchParams.get("yearTo") ?? undefined;
   const viewMode = (searchParams.get("viewMode") as "table" | "cards") ?? "table";
-
-  // Local state for pagination - not in URL to avoid reload issues
-  const [cursor, setCursor] = useState<string | undefined>(undefined);
-  const [allVehicles, setAllVehicles] = useState<VehicleListItem[]>([]);
+  const currentPage = parseInt(searchParams.get("page") ?? "1", 10);
 
   // Debounce search input for better UX
   const debouncedSearch = useDebounce(searchInput, 300);
 
-  // Fetch vehicles - 20 at a time with cursor-based pagination
+  // Pagination settings
+  const itemsPerPage = 30;
+  const skip = (currentPage - 1) * itemsPerPage;
+
+  // Fetch vehicles with offset-based pagination
   const {
     data,
     isLoading: isVehiclesLoading,
@@ -57,8 +58,9 @@ function VehiclesPageContent() {
     error,
   } = api.vehicle.list.useQuery(
     {
-      limit: 20,
-      cursor,
+      limit: itemsPerPage,
+      cursor: undefined, // Not using cursor for offset pagination
+      skip, // Add skip parameter for offset
       search: debouncedSearch || undefined,
       status,
       makeIds: makeIds.length > 0 ? makeIds : undefined,
@@ -76,26 +78,9 @@ function VehiclesPageContent() {
     }
   );
 
+  const vehicles = data?.vehicles ?? [];
   const totalCount = data?.totalCount ?? 0;
-  const hasMore = data?.nextCursor !== undefined;
-
-  // Update vehicles list when data changes
-  useEffect(() => {
-    if (data?.vehicles) {
-      if (cursor) {
-        // Append for pagination (Load More)
-        setAllVehicles((prev: VehicleListItem[]) => [...prev, ...data.vehicles]);
-      } else {
-        // Replace for new search/filter or initial load
-        setAllVehicles(data.vehicles);
-      }
-    }
-  }, [data, cursor]);
-
-  // Reset pagination cursor when filters change
-  useEffect(() => {
-    setCursor(undefined);
-  }, [debouncedSearch, status, makeIds.join(","), modelId, collectionIds.join(","), exteriorColors.join(","), interiorColors.join(","), yearFrom, yearTo]);
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
 
   // Handle errors
   useEffect(() => {
@@ -121,6 +106,7 @@ function VehiclesPageContent() {
     yearFrom?: string;
     yearTo?: string;
     viewMode?: "table" | "cards";
+    page?: number;
   }) => {
     const params = new URLSearchParams(searchParams.toString());
 
@@ -155,6 +141,20 @@ function VehiclesPageContent() {
     if (updates.viewMode !== undefined) {
       updates.viewMode !== "table" ? params.set("viewMode", updates.viewMode) : params.delete("viewMode");
     }
+    if (updates.page !== undefined) {
+      updates.page > 1 ? params.set("page", updates.page.toString()) : params.delete("page");
+    }
+
+    // When filters change, reset to page 1
+    const isFilterChange = updates.search !== undefined || updates.status !== undefined || 
+                          updates.makeIds !== undefined || updates.modelId !== undefined ||
+                          updates.collectionIds !== undefined || updates.exteriorColors !== undefined ||
+                          updates.interiorColors !== undefined || updates.yearFrom !== undefined ||
+                          updates.yearTo !== undefined;
+    
+    if (isFilterChange && updates.page === undefined) {
+      params.delete("page"); // Reset to page 1 when filters change
+    }
 
     const newUrl = params.toString() ? `?${params.toString()}` : "/admin/vehicles";
     router.push(newUrl, { scroll: false });
@@ -178,11 +178,10 @@ function VehiclesPageContent() {
     router.push("/admin/vehicles?status=PUBLISHED", { scroll: false });
   };
 
-  const handleLoadMore = () => {
-    // Set cursor to fetch next page
-    if (data?.nextCursor) {
-      setCursor(data.nextCursor);
-    }
+  const handlePageChange = (page: number) => {
+    updateURL({ page });
+    // Scroll to top of list smoothly
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // Check if any filters are active
@@ -272,9 +271,9 @@ function VehiclesPageContent() {
                   <>
                     Found <span className="font-semibold text-slate-900 dark:text-slate-50">{totalCount}</span> vehicle{totalCount !== 1 ? "s" : ""}
                     {hasFilters && " matching your criteria"}
-                    {allVehicles.length > 0 && allVehicles.length < totalCount && (
+                    {totalPages > 1 && (
                       <span className="ml-2">
-                        (Showing <span className="font-semibold">{allVehicles.length}</span>)
+                        (Page <span className="font-semibold">{currentPage}</span> of <span className="font-semibold">{totalPages}</span>)
                       </span>
                     )}
                   </>
@@ -307,7 +306,7 @@ function VehiclesPageContent() {
 
           {/* Table/Cards */}
           <VehicleListTable
-            vehicles={allVehicles}
+            vehicles={vehicles}
             isLoading={isVehiclesLoading}
             hasFilters={hasFilters}
             viewMode={viewMode}
@@ -317,23 +316,85 @@ function VehiclesPageContent() {
             onClearFilters={handleClearFilters}
           />
 
-          {/* Load More Button */}
-          {hasMore && !isVehiclesLoading && (
-            <div className="flex justify-center pt-4">
+          {/* Pagination */}
+          {totalPages > 1 && !isVehiclesLoading && (
+            <div className="flex items-center justify-center gap-2 pt-6">
+              {/* Previous Button */}
               <Button
                 variant="outline"
-                onClick={handleLoadMore}
-                disabled={isFetching}
-                className="min-w-[200px]"
+                size="sm"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1 || isFetching}
               >
-                {isFetching ? (
+                Previous
+              </Button>
+
+              {/* Page Numbers */}
+              <div className="flex items-center gap-1">
+                {/* First page */}
+                {currentPage > 3 && (
                   <>
-                    <div className="h-4 w-4 border-2 border-slate-400 border-t-slate-600 rounded-full animate-spin mr-2" />
-                    Loading...
+                    <Button
+                      variant={1 === currentPage ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handlePageChange(1)}
+                      disabled={isFetching}
+                      className="w-10"
+                    >
+                      1
+                    </Button>
+                    {currentPage > 4 && (
+                      <span className="px-2 text-muted-foreground">...</span>
+                    )}
                   </>
-                ) : (
-                  `Load More (${totalCount - allVehicles.length} remaining)`
                 )}
+
+                {/* Pages around current */}
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter((page) => {
+                    // Show current page and 2 pages on each side
+                    return page >= currentPage - 2 && page <= currentPage + 2;
+                  })
+                  .map((page) => (
+                    <Button
+                      key={page}
+                      variant={page === currentPage ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handlePageChange(page)}
+                      disabled={isFetching}
+                      className="w-10"
+                    >
+                      {page}
+                    </Button>
+                  ))}
+
+                {/* Last page */}
+                {currentPage < totalPages - 2 && (
+                  <>
+                    {currentPage < totalPages - 3 && (
+                      <span className="px-2 text-muted-foreground">...</span>
+                    )}
+                    <Button
+                      variant={totalPages === currentPage ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handlePageChange(totalPages)}
+                      disabled={isFetching}
+                      className="w-10"
+                    >
+                      {totalPages}
+                    </Button>
+                  </>
+                )}
+              </div>
+
+              {/* Next Button */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages || isFetching}
+              >
+                Next
               </Button>
             </div>
           )}
