@@ -72,9 +72,13 @@ function VehiclesPageContent() {
       yearTo,
       sortBy: "createdAt",
       sortOrder: "desc",
+      // OPTIMIZATION: Only get count on first page
+      includeTotalCount: currentPage === 1,
     },
     {
       enabled: !isAuthLoading && !!user,
+      // Add stale time to reduce refetches
+      staleTime: 30000, // 30 seconds
     }
   );
 

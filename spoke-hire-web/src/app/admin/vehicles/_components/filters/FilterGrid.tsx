@@ -59,13 +59,18 @@ export function FilterGrid({
   onYearToChange,
   onClearFilters,
 }: FilterGridProps) {
-  // Fetch filter options
-  const { data: filterOptions } = api.vehicle.getFilterOptions.useQuery();
+  // Fetch filter options with caching (server-side cache + client staleTime)
+  const { data: filterOptions } = api.vehicle.getFilterOptions.useQuery(undefined, {
+    staleTime: 5 * 60 * 1000, // 5 minutes - matches server cache TTL
+  });
 
   // Fetch models when single make is selected
   const { data: models } = api.vehicle.getModelsByMake.useQuery(
     { makeId: makeIds[0]! },
-    { enabled: makeIds.length === 1 }
+    { 
+      enabled: makeIds.length === 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    }
   );
 
   // Transform filter options to FilterOption format

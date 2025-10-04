@@ -8,7 +8,29 @@ import { VehicleStatus } from "@prisma/client";
  * 
  * Handles all vehicle-related operations for the admin interface.
  * All procedures require admin authentication.
+ * 
+ * PERFORMANCE OPTIMIZATIONS:
+ * - Caching for filter options (5 min TTL)
+ * - Parallel queries where possible
+ * - Optional total count in list query
+ * - Raw SQL for DISTINCT queries
+ * - Limited media/specs in detail view
  */
+
+// Cache for filter options (5 minutes TTL)
+const FILTER_OPTIONS_CACHE_TIME = 5 * 60 * 1000; // 5 minutes
+let filterOptionsCache: {
+  data: any;
+  timestamp: number;
+} | null = null;
+
+/**
+ * Invalidate filter options cache
+ * Call this when vehicles, makes, models, or collections are updated
+ */
+export function invalidateFilterOptionsCache() {
+  filterOptionsCache = null;
+}
 
 // Input validation schemas
 const listVehiclesInputSchema = z.object({
@@ -37,6 +59,9 @@ const listVehiclesInputSchema = z.object({
   // Sorting
   sortBy: z.enum(["createdAt", "updatedAt", "price", "year", "name"]).default("createdAt"),
   sortOrder: z.enum(["asc", "desc"]).default("desc"),
+  
+  // OPTIMIZATION: Make total count optional (expensive query)
+  includeTotalCount: z.boolean().default(false),
 });
 
 const getByIdInputSchema = z.object({
@@ -236,8 +261,10 @@ export const vehicleRouter = createTRPCRouter({
         nextCursor = nextItem?.id;
       }
 
-      // Get total count for statistics (optional, can be expensive)
-      const totalCount = await ctx.db.vehicle.count({ where });
+      // OPTIMIZATION: Only get total count if requested (expensive query)
+      const totalCount = input.includeTotalCount
+        ? await ctx.db.vehicle.count({ where })
+        : undefined;
 
       return {
         vehicles,
@@ -248,35 +275,59 @@ export const vehicleRouter = createTRPCRouter({
 
   /**
    * Get a single vehicle by ID with full details
+   * OPTIMIZED: Uses parallel queries to reduce latency from N+1 problem
    */
   getById: adminProcedure
     .input(getByIdInputSchema)
     .query(async ({ ctx, input }) => {
-      const vehicle = await ctx.db.vehicle.findUnique({
-        where: { id: input.id },
-        include: {
-          make: true,
-          model: true,
-          owner: {
-            select: {
-              id: true,
-              email: true,
-              firstName: true,
-              lastName: true,
-              phone: true,
-              userType: true,
-              status: true,
+      // OPTIMIZATION: Execute base vehicle query and relations in parallel
+      // This reduces the total query time by fetching data concurrently
+      const [vehicle, media, sources, specifications, vehicleCollections] = 
+        await Promise.all([
+          // Main vehicle with simple relations (single query)
+          ctx.db.vehicle.findUnique({
+            where: { id: input.id },
+            include: {
+              make: true,
+              model: true,
+              owner: {
+                select: {
+                  id: true,
+                  email: true,
+                  firstName: true,
+                  lastName: true,
+                  phone: true,
+                  userType: true,
+                  status: true,
+                },
+              },
+              steering: true,
             },
-          },
-          steering: true,
-          media: {
+          }),
+          
+          // Fetch media separately with limit
+          ctx.db.media.findMany({
+            where: { vehicleId: input.id },
             orderBy: { order: "asc" },
-          },
-          sources: true,
-          specifications: {
+            take: 100,
+          }),
+          
+          // Fetch sources separately with limit
+          ctx.db.vehicleSource.findMany({
+            where: { vehicleId: input.id },
+            take: 20,
+          }),
+          
+          // Fetch specifications separately with limit
+          ctx.db.vehicleSpecification.findMany({
+            where: { vehicleId: input.id },
             orderBy: { category: "asc" },
-          },
-          collections: {
+            take: 200,
+          }),
+          
+          // Fetch collections with nested data
+          ctx.db.vehicleCollection.findMany({
+            where: { vehicleId: input.id },
             include: {
               collection: {
                 select: {
@@ -286,9 +337,8 @@ export const vehicleRouter = createTRPCRouter({
                 },
               },
             },
-          },
-        },
-      });
+          }),
+        ]);
 
       if (!vehicle) {
         throw new TRPCError({
@@ -297,7 +347,14 @@ export const vehicleRouter = createTRPCRouter({
         });
       }
 
-      return vehicle;
+      // Combine the results to match the expected structure
+      return {
+        ...vehicle,
+        media,
+        sources,
+        specifications,
+        collections: vehicleCollections,
+      };
     }),
 
   /**
@@ -337,6 +394,9 @@ export const vehicleRouter = createTRPCRouter({
         },
       });
 
+      // Invalidate cache since status counts changed
+      invalidateFilterOptionsCache();
+
       return updatedVehicle;
     }),
 
@@ -366,84 +426,107 @@ export const vehicleRouter = createTRPCRouter({
         },
       });
 
+      // Invalidate cache since status counts changed
+      invalidateFilterOptionsCache();
+
       return deletedVehicle;
     }),
 
   /**
    * Get filter options (makes, models, years, etc.)
+   * OPTIMIZED: Cached for 5 minutes, uses parallel queries and raw SQL
    */
   getFilterOptions: adminProcedure.query(async ({ ctx }) => {
-    // Get all makes
-    const makes = await ctx.db.make.findMany({
-      where: { isActive: true },
-      orderBy: { name: "asc" },
-      select: {
-        id: true,
-        name: true,
-      },
-    });
+    // Check cache first
+    const now = Date.now();
+    if (
+      filterOptionsCache &&
+      now - filterOptionsCache.timestamp < FILTER_OPTIONS_CACHE_TIME
+    ) {
+      return filterOptionsCache.data;
+    }
 
-    // Get all collections
-    const collections = await ctx.db.collection.findMany({
-      where: { isActive: true },
-      orderBy: { name: "asc" },
-      select: {
-        id: true,
-        name: true,
-        color: true,
-      },
-    });
-
-    // Get unique exterior colors
-    const exteriorColorsData = await ctx.db.vehicle.findMany({
-      where: {
-        exteriorColour: { not: null },
-      },
-      distinct: ["exteriorColour"],
-      select: { exteriorColour: true },
-      orderBy: { exteriorColour: "asc" },
-    });
-    const exteriorColors = exteriorColorsData
-      .map((v) => v.exteriorColour)
-      .filter((c): c is string => c !== null);
-
-    // Get unique interior colors
-    const interiorColorsData = await ctx.db.vehicle.findMany({
-      where: {
-        interiorColour: { not: null },
-      },
-      distinct: ["interiorColour"],
-      select: { interiorColour: true },
-      orderBy: { interiorColour: "asc" },
-    });
-    const interiorColors = interiorColorsData
-      .map((v) => v.interiorColour)
-      .filter((c): c is string => c !== null);
-
-    // Get unique years
-    const years = await ctx.db.vehicle.findMany({
-      distinct: ["year"],
-      orderBy: { year: "desc" },
-      select: { year: true },
-    });
-
-    // Get status counts
-    const statusCounts = await ctx.db.vehicle.groupBy({
-      by: ["status"],
-      _count: true,
-    });
-
-    return {
+    // OPTIMIZATION: Execute all queries in parallel for better performance
+    const [
       makes,
       collections,
-      exteriorColors,
-      interiorColors,
+      exteriorColorsData,
+      interiorColorsData,
+      years,
+      statusCounts,
+    ] = await Promise.all([
+      // Get all makes
+      ctx.db.make.findMany({
+        where: { isActive: true },
+        orderBy: { name: "asc" },
+        select: {
+          id: true,
+          name: true,
+        },
+      }),
+
+      // Get all collections
+      ctx.db.collection.findMany({
+        where: { isActive: true },
+        orderBy: { name: "asc" },
+        select: {
+          id: true,
+          name: true,
+          color: true,
+        },
+      }),
+
+      // OPTIMIZATION: Use raw SQL for DISTINCT queries (much faster)
+      ctx.db.$queryRaw<Array<{ exteriorColour: string }>>`
+        SELECT DISTINCT "exteriorColour"
+        FROM "Vehicle"
+        WHERE "exteriorColour" IS NOT NULL
+        ORDER BY "exteriorColour" ASC
+      `,
+
+      ctx.db.$queryRaw<Array<{ interiorColour: string }>>`
+        SELECT DISTINCT "interiorColour"
+        FROM "Vehicle"
+        WHERE "interiorColour" IS NOT NULL
+        ORDER BY "interiorColour" ASC
+      `,
+
+      ctx.db.$queryRaw<Array<{ year: string }>>`
+        SELECT DISTINCT "year"
+        FROM "Vehicle"
+        ORDER BY "year" DESC
+      `,
+
+      // Get status counts
+      ctx.db.vehicle.groupBy({
+        by: ["status"],
+        _count: true,
+      }),
+    ]);
+
+    const result = {
+      makes,
+      collections,
+      exteriorColors: exteriorColorsData
+        .map((v) => v.exteriorColour)
+        .filter((c): c is string => c !== null),
+      interiorColors: interiorColorsData
+        .map((v) => v.interiorColour)
+        .filter((c): c is string => c !== null),
       years: years.map((v) => v.year),
       statusCounts: statusCounts.map((sc) => ({
         status: sc.status,
         count: sc._count,
       })),
     };
+
+    // Update cache
+    filterOptionsCache = {
+      data: result,
+      timestamp: now,
+    };
+
+    return result;
   }),
 
   /**
