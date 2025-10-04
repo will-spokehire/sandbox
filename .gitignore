@@ -94,7 +94,9 @@ data-analytics/data/*.json
 !data-analytics/data/sample_*.json
 data-analytics/images/
 data-analytics/catalog_images/
-
+data-analytics/data/car-images/
+data-analytics/data/images-by-coverage/
+data-analytics/data/detections/
 # Pipeline runs
 data-analytics/pipeline/runs/
 

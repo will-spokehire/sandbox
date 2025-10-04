@@ -83,9 +83,11 @@ export function VehicleMediaSection({ vehicle }: VehicleMediaSectionProps) {
 
   return (
     <div className="space-y-4">
-      {/* Main/Hero Image */}
-      <Card className="relative overflow-hidden p-0 group">
-        <div className="relative aspect-video md:aspect-[21/9] bg-muted">
+      {/* Desktop: Side-by-side layout, Mobile: Stacked */}
+      <div className="flex flex-col lg:flex-row gap-4">
+        {/* Main/Hero Image - Fixed height on desktop */}
+        <Card className="relative overflow-hidden p-0 group flex-1 lg:max-w-[900px]">
+          <div className="relative aspect-video lg:aspect-auto lg:h-[506px] bg-muted">
           <Image
             src={
               currentImage?.publishedUrl ||
@@ -94,9 +96,9 @@ export function VehicleMediaSection({ vehicle }: VehicleMediaSectionProps) {
             }
             alt={vehicle.name}
             fill
-            className="object-cover"
+            className="object-contain"
             priority
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 900px"
           />
 
           {/* Status Badge Overlay (Top-Left) */}
@@ -153,12 +155,12 @@ export function VehicleMediaSection({ vehicle }: VehicleMediaSectionProps) {
             </DropdownMenu>
           </div>
 
-          {/* Navigation Arrows - Show on hover or if multiple images */}
+          {/* Navigation Arrows - Always visible on mobile, show on hover on desktop */}
           {sortedMedia.length > 1 && (
             <>
               <button
                 onClick={goToPrevious}
-                className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 md:p-3 transition-all opacity-0 group-hover:opacity-100"
+                className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 md:p-3 transition-all opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
                 aria-label="Previous image"
               >
                 <svg
@@ -177,7 +179,7 @@ export function VehicleMediaSection({ vehicle }: VehicleMediaSectionProps) {
               </button>
               <button
                 onClick={goToNext}
-                className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 md:p-3 transition-all opacity-0 group-hover:opacity-100"
+                className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 md:p-3 transition-all opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
                 aria-label="Next image"
               >
                 <svg
@@ -215,43 +217,60 @@ export function VehicleMediaSection({ vehicle }: VehicleMediaSectionProps) {
         </div>
       </Card>
 
-      {/* Thumbnail Gallery */}
-      {hasImages && (
-        <div className="relative">
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600 scrollbar-track-transparent">
-            {sortedMedia.map((media, index) => (
-              <button
-                key={media.id}
-                onClick={() => openLightbox(index)}
-                className={cn(
-                  "relative flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-md overflow-hidden border-2 transition-all hover:scale-105 hover:shadow-md",
-                  selectedImageIndex === index
-                    ? "border-primary ring-2 ring-primary/20"
-                    : "border-border hover:border-primary/50"
-                )}
-              >
-                <Image
-                  src={media.publishedUrl || media.originalUrl}
-                  alt={media.title || `Image ${index + 1}`}
-                  fill
-                  className="object-cover"
-                  sizes="128px"
-                />
-                {media.isPrimary && (
-                  <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded font-medium">
-                    Primary
-                  </div>
-                )}
-              </button>
-            ))}
+        {/* Thumbnail Gallery - Right side on desktop, below on mobile */}
+        {hasImages && sortedMedia.length > 1 && (
+          <div className="relative lg:w-[280px] xl:w-[300px] 2xl:w-[420px]">
+            {/* Media Count Badge */}
+            <div className="mb-3 flex items-center justify-between lg:justify-center">
+              <div className="bg-muted border rounded-full px-3 py-1 text-sm font-medium">
+                {sortedMedia.length} {sortedMedia.length === 1 ? "photo" : "photos"}
+              </div>
+            </div>
+            
+            {/* Thumbnails - 2 column grid (lg/xl), 3 column grid (2xl+), horizontal scroll on mobile */}
+            <div className="flex lg:grid lg:grid-cols-2 2xl:grid-cols-3 gap-2 overflow-x-auto lg:overflow-y-auto lg:max-h-[600px] pb-2 lg:pb-0 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600 scrollbar-track-transparent">
+              {sortedMedia.slice(0, 12).map((media, index) => {
+                const isLastThumb = index === 11 && sortedMedia.length > 12;
+                const remainingCount = sortedMedia.length - 12;
+                
+                return (
+                  <button
+                    key={media.id}
+                    onClick={() => isLastThumb ? openLightbox(index) : setSelectedImageIndex(index)}
+                    className={cn(
+                      "relative flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 lg:w-full lg:h-28 xl:h-32 rounded-md overflow-hidden border-2 transition-all hover:scale-105 hover:shadow-md",
+                      selectedImageIndex === index
+                        ? "border-primary ring-2 ring-primary/20"
+                        : "border-border hover:border-primary/50"
+                    )}
+                  >
+                    <Image
+                      src={media.publishedUrl || media.originalUrl}
+                      alt={media.title || `Image ${index + 1}`}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 1024px) 96px, 140px"
+                    />
+                    {media.isPrimary && (
+                      <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded font-medium z-10">
+                        Primary
+                      </div>
+                    )}
+                    {isLastThumb && (
+                      <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
+                        <div className="text-white text-center">
+                          <div className="text-2xl font-bold">+{remainingCount}</div>
+                          <div className="text-xs mt-1">more</div>
+                        </div>
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-
-          {/* Media Count Badge */}
-          <div className="absolute -top-2 right-0 bg-background border rounded-full px-3 py-1 text-sm font-medium shadow-sm">
-            {sortedMedia.length} {sortedMedia.length === 1 ? "photo" : "photos"}
-          </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Lightbox - Using simplified custom modal */}
       {hasImages && isLightboxOpen && (
