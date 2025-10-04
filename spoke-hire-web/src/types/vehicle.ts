@@ -40,6 +40,7 @@ export type VehicleDetail = Vehicle & {
     collection: {
       id: string;
       name: string;
+      color: string | null;
     };
   }[];
 };

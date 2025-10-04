@@ -275,7 +275,13 @@ export const vehicleRouter = createTRPCRouter({
           },
           collections: {
             include: {
-              collection: true,
+              collection: {
+                select: {
+                  id: true,
+                  name: true,
+                  color: true,
+                },
+              },
             },
           },
         },
