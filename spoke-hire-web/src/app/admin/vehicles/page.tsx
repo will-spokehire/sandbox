@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, Suspense } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { VehicleStatus } from "@prisma/client";
 import { LayoutGrid, Table as TableIcon } from "lucide-react";
@@ -41,15 +41,15 @@ function VehiclesPageContent() {
   const yearFrom = searchParams.get("yearFrom") ?? undefined;
   const yearTo = searchParams.get("yearTo") ?? undefined;
   const viewMode = (searchParams.get("viewMode") as "table" | "cards") ?? "table";
-  const loadedPages = parseInt(searchParams.get("pages") ?? "1", 10);
+
+  // Local state for pagination - not in URL to avoid reload issues
+  const [cursor, setCursor] = useState<string | undefined>(undefined);
+  const [allVehicles, setAllVehicles] = useState<VehicleListItem[]>([]);
 
   // Debounce search input for better UX
   const debouncedSearch = useDebounce(searchInput, 300);
 
-  // Calculate how many vehicles to fetch (20 per page)
-  const limit = loadedPages * 20;
-
-  // Fetch vehicles - single query that fetches all loaded pages at once
+  // Fetch vehicles - 20 at a time with cursor-based pagination
   const {
     data,
     isLoading: isVehiclesLoading,
@@ -57,8 +57,8 @@ function VehiclesPageContent() {
     error,
   } = api.vehicle.list.useQuery(
     {
-      limit,
-      cursor: undefined, // No cursor needed - we fetch by limit
+      limit: 20,
+      cursor,
       search: debouncedSearch || undefined,
       status,
       makeIds: makeIds.length > 0 ? makeIds : undefined,
@@ -76,9 +76,26 @@ function VehiclesPageContent() {
     }
   );
 
-  const allVehicles = data?.vehicles ?? [];
   const totalCount = data?.totalCount ?? 0;
-  const hasMore = allVehicles.length < totalCount;
+  const hasMore = data?.nextCursor !== undefined;
+
+  // Update vehicles list when data changes
+  useEffect(() => {
+    if (data?.vehicles) {
+      if (cursor) {
+        // Append for pagination (Load More)
+        setAllVehicles((prev: VehicleListItem[]) => [...prev, ...data.vehicles]);
+      } else {
+        // Replace for new search/filter or initial load
+        setAllVehicles(data.vehicles);
+      }
+    }
+  }, [data, cursor]);
+
+  // Reset pagination cursor when filters change
+  useEffect(() => {
+    setCursor(undefined);
+  }, [debouncedSearch, status, makeIds.join(","), modelId, collectionIds.join(","), exteriorColors.join(","), interiorColors.join(","), yearFrom, yearTo]);
 
   // Handle errors
   useEffect(() => {
@@ -104,7 +121,6 @@ function VehiclesPageContent() {
     yearFrom?: string;
     yearTo?: string;
     viewMode?: "table" | "cards";
-    pages?: number;
   }) => {
     const params = new URLSearchParams(searchParams.toString());
 
@@ -139,20 +155,6 @@ function VehiclesPageContent() {
     if (updates.viewMode !== undefined) {
       updates.viewMode !== "table" ? params.set("viewMode", updates.viewMode) : params.delete("viewMode");
     }
-    if (updates.pages !== undefined) {
-      updates.pages > 1 ? params.set("pages", updates.pages.toString()) : params.delete("pages");
-    }
-
-    // When filters change, reset to page 1
-    const isFilterChange = updates.search !== undefined || updates.status !== undefined || 
-                          updates.makeIds !== undefined || updates.modelId !== undefined ||
-                          updates.collectionIds !== undefined || updates.exteriorColors !== undefined ||
-                          updates.interiorColors !== undefined || updates.yearFrom !== undefined ||
-                          updates.yearTo !== undefined;
-    
-    if (isFilterChange && updates.pages === undefined) {
-      params.delete("pages"); // Reset pagination when filters change
-    }
 
     const newUrl = params.toString() ? `?${params.toString()}` : "/admin/vehicles";
     router.push(newUrl, { scroll: false });
@@ -177,8 +179,10 @@ function VehiclesPageContent() {
   };
 
   const handleLoadMore = () => {
-    // Increment the pages parameter
-    updateURL({ pages: loadedPages + 1 });
+    // Set cursor to fetch next page
+    if (data?.nextCursor) {
+      setCursor(data.nextCursor);
+    }
   };
 
   // Check if any filters are active

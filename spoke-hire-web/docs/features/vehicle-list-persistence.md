@@ -72,7 +72,8 @@ All state is in the URL:
 - `yearFrom` - Year range start
 - `yearTo` - Year range end
 - `viewMode` - Table or cards view
-- `pages` - Number of loaded pages (for "Load More")
+
+**Note**: Pagination cursor is NOT in URL - stored in component state for better UX (no scroll jumps on Load More)
 
 ### State Management
 
@@ -124,11 +125,12 @@ When URL changes → query key changes → React Query refetches (or uses cache)
 
 ### Pagination Handling
 
-Pagination uses **"Load More" pattern with pages in URL**:
-- `?pages=3` means "show first 3 pages (60 vehicles)"
-- Stored in URL so state persists on back navigation
-- When you load more, URL updates: `?pages=2`, `?pages=3`, etc.
-- On back navigation, shows same number of loaded pages
+Pagination uses **cursor-based "Load More" pattern**:
+- Uses tRPC cursor for efficient pagination
+- **Not stored in URL** - keeps URL clean and prevents scroll jumps
+- When you click "Load More", fetches next 20 vehicles and appends to list
+- Smooth experience: no page reload, no scroll jump, no image re-rendering
+- On back navigation from detail page, starts fresh from page 1 (acceptable trade-off)
 - Filters reset pagination to page 1
 
 ### Performance
