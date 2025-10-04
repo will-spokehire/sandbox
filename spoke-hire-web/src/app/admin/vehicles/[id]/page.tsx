@@ -1,20 +1,19 @@
-import { notFound, redirect } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { notFound } from "next/navigation";
 import { api } from "~/trpc/server";
-import { Button } from "~/components/ui/button";
 import {
   VehicleMediaSection,
   VehicleBasicInfo,
   VehicleOwnerInfo,
   VehicleCollections,
   VehicleMetadata,
+  VehicleDetailHeader,
 } from "./_components";
 
 /**
  * Vehicle Detail Page
  * 
- * Displays full details of a single vehicle for admin review
+ * Displays full details of a single vehicle for admin review.
+ * Uses client-side back navigation to preserve list state.
  */
 export default async function VehicleDetailPage({
   params,
@@ -37,32 +36,7 @@ export default async function VehicleDetailPage({
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Header */}
-      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              asChild
-              className="gap-2"
-            >
-              <Link href="/admin/vehicles">
-                <ArrowLeft className="h-4 w-4" />
-                Back to Vehicles
-              </Link>
-            </Button>
-            <div className="h-6 w-px bg-border" />
-            <div className="min-w-0 flex-1">
-              <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-50 truncate">
-                {vehicle.name}
-              </h1>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                {vehicle.make.name} {vehicle.model.name} • {vehicle.year}
-              </p>
-            </div>
-          </div>
-        </div>
-      </header>
+      <VehicleDetailHeader vehicle={vehicle} />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 md:py-8">
@@ -91,4 +65,3 @@ export default async function VehicleDetailPage({
     </div>
   );
 }
-

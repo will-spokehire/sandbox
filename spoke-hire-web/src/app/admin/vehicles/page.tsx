@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { VehicleStatus } from "@prisma/client";
 import { LayoutGrid, Table as TableIcon } from "lucide-react";
@@ -17,70 +17,55 @@ import {
 } from "./_components";
 
 /**
- * Vehicles List Page
+ * Vehicles List Page Content
  * 
- * Admin page for viewing and managing all vehicles
+ * Best Practice Approach:
+ * - URL is the single source of truth for all state
+ * - Uses "Load More" pattern that persists in URL via page number
+ * - Browser back/forward works automatically
+ * - State is shareable via URL
  */
-export default function VehiclesPage() {
+function VehiclesPageContent() {
   const { user, isLoading: isAuthLoading } = useRequireAdmin();
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Get filters from URL (default to PUBLISHED status)
-  const [searchInput, setSearchInput] = useState(searchParams.get("search") ?? "");
-  const [status, setStatus] = useState<VehicleStatus | undefined>(
-    (searchParams.get("status") as VehicleStatus) ?? "PUBLISHED"
-  );
-  const [makeIds, setMakeIds] = useState<string[]>(() => {
-    const makeIdsParam = searchParams.get("makeIds");
-    return makeIdsParam ? makeIdsParam.split(",") : [];
-  });
-  const [modelId, setModelId] = useState<string | undefined>(
-    searchParams.get("modelId") ?? undefined
-  );
-  const [collectionIds, setCollectionIds] = useState<string[]>(() => {
-    const collectionIdsParam = searchParams.get("collectionIds");
-    return collectionIdsParam ? collectionIdsParam.split(",") : [];
-  });
-  const [exteriorColors, setExteriorColors] = useState<string[]>(() => {
-    const exteriorColorsParam = searchParams.get("exteriorColors");
-    return exteriorColorsParam ? exteriorColorsParam.split(",") : [];
-  });
-  const [interiorColors, setInteriorColors] = useState<string[]>(() => {
-    const interiorColorsParam = searchParams.get("interiorColors");
-    return interiorColorsParam ? interiorColorsParam.split(",") : [];
-  });
-  const [yearFrom, setYearFrom] = useState<string | undefined>(
-    searchParams.get("yearFrom") ?? undefined
-  );
-  const [yearTo, setYearTo] = useState<string | undefined>(
-    searchParams.get("yearTo") ?? undefined
-  );
-  const [cursor, setCursor] = useState<string | undefined>(undefined);
-  const [allVehicles, setAllVehicles] = useState<VehicleListItem[]>([]);
-  const [viewMode, setViewMode] = useState<"table" | "cards">("table");
+  // Read all state from URL - this is the ONLY source of truth
+  const searchInput = searchParams.get("search") ?? "";
+  const status = (searchParams.get("status") as VehicleStatus) ?? "PUBLISHED";
+  const makeIds = searchParams.get("makeIds")?.split(",").filter(Boolean) ?? [];
+  const modelId = searchParams.get("modelId") ?? undefined;
+  const collectionIds = searchParams.get("collectionIds")?.split(",").filter(Boolean) ?? [];
+  const exteriorColors = searchParams.get("exteriorColors")?.split(",").filter(Boolean) ?? [];
+  const interiorColors = searchParams.get("interiorColors")?.split(",").filter(Boolean) ?? [];
+  const yearFrom = searchParams.get("yearFrom") ?? undefined;
+  const yearTo = searchParams.get("yearTo") ?? undefined;
+  const viewMode = (searchParams.get("viewMode") as "table" | "cards") ?? "table";
+  const loadedPages = parseInt(searchParams.get("pages") ?? "1", 10);
 
-  // Debounce search input
+  // Debounce search input for better UX
   const debouncedSearch = useDebounce(searchInput, 300);
 
-  // Fetch vehicles
+  // Calculate how many vehicles to fetch (20 per page)
+  const limit = loadedPages * 20;
+
+  // Fetch vehicles - single query that fetches all loaded pages at once
   const {
     data,
     isLoading: isVehiclesLoading,
     isFetching,
     error,
-    refetch,
   } = api.vehicle.list.useQuery(
     {
-      limit: 20,
-      cursor,
+      limit,
+      cursor: undefined, // No cursor needed - we fetch by limit
       search: debouncedSearch || undefined,
       status,
-      makeIds: makeIds.length > 0 ? makeIds : undefined, // Multiple makes with OR logic
+      makeIds: makeIds.length > 0 ? makeIds : undefined,
       modelId,
-      collectionIds: collectionIds.length > 0 ? collectionIds : undefined, // Multiple collections with OR logic
-      exteriorColors: exteriorColors.length > 0 ? exteriorColors : undefined, // Multiple exterior colors with OR logic
-      interiorColors: interiorColors.length > 0 ? interiorColors : undefined, // Multiple interior colors with OR logic
+      collectionIds: collectionIds.length > 0 ? collectionIds : undefined,
+      exteriorColors: exteriorColors.length > 0 ? exteriorColors : undefined,
+      interiorColors: interiorColors.length > 0 ? interiorColors : undefined,
       yearFrom,
       yearTo,
       sortBy: "createdAt",
@@ -91,42 +76,9 @@ export default function VehiclesPage() {
     }
   );
 
-  // Update all vehicles when data changes
-  useEffect(() => {
-    if (data?.vehicles) {
-      if (cursor) {
-        // Append to existing vehicles (load more)
-        setAllVehicles((prev) => [...prev, ...data.vehicles]);
-      } else {
-        // Replace vehicles (new search/filter)
-        setAllVehicles(data.vehicles);
-      }
-    }
-  }, [data, cursor]);
-
-  // Reset cursor when filters change
-  useEffect(() => {
-    setCursor(undefined);
-    setAllVehicles([]);
-  }, [debouncedSearch, status, makeIds, modelId, collectionIds, exteriorColors, interiorColors, yearFrom, yearTo]);
-
-  // Update URL when filters change
-  useEffect(() => {
-    const params = new URLSearchParams();
-    
-    if (debouncedSearch) params.set("search", debouncedSearch);
-    if (status) params.set("status", status);
-    if (makeIds.length > 0) params.set("makeIds", makeIds.join(","));
-    if (modelId) params.set("modelId", modelId);
-    if (collectionIds.length > 0) params.set("collectionIds", collectionIds.join(","));
-    if (exteriorColors.length > 0) params.set("exteriorColors", exteriorColors.join(","));
-    if (interiorColors.length > 0) params.set("interiorColors", interiorColors.join(","));
-    if (yearFrom) params.set("yearFrom", yearFrom);
-    if (yearTo) params.set("yearTo", yearTo);
-
-    const newUrl = params.toString() ? `?${params.toString()}` : "/admin/vehicles";
-    router.push(newUrl, { scroll: false });
-  }, [debouncedSearch, status, makeIds, modelId, collectionIds, exteriorColors, interiorColors, yearFrom, yearTo, router]);
+  const allVehicles = data?.vehicles ?? [];
+  const totalCount = data?.totalCount ?? 0;
+  const hasMore = allVehicles.length < totalCount;
 
   // Handle errors
   useEffect(() => {
@@ -137,46 +89,100 @@ export default function VehiclesPage() {
     }
   }, [error]);
 
-  // Handle view vehicle
+  /**
+   * Update URL with new filter values
+   * This is the key function - all state changes go through URL updates
+   */
+  const updateURL = (updates: {
+    search?: string;
+    status?: VehicleStatus;
+    makeIds?: string[];
+    modelId?: string;
+    collectionIds?: string[];
+    exteriorColors?: string[];
+    interiorColors?: string[];
+    yearFrom?: string;
+    yearTo?: string;
+    viewMode?: "table" | "cards";
+    pages?: number;
+  }) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    // Apply updates
+    if (updates.search !== undefined) {
+      updates.search ? params.set("search", updates.search) : params.delete("search");
+    }
+    if (updates.status !== undefined) {
+      updates.status ? params.set("status", updates.status) : params.delete("status");
+    }
+    if (updates.makeIds !== undefined) {
+      updates.makeIds.length > 0 ? params.set("makeIds", updates.makeIds.join(",")) : params.delete("makeIds");
+    }
+    if (updates.modelId !== undefined) {
+      updates.modelId ? params.set("modelId", updates.modelId) : params.delete("modelId");
+    }
+    if (updates.collectionIds !== undefined) {
+      updates.collectionIds.length > 0 ? params.set("collectionIds", updates.collectionIds.join(",")) : params.delete("collectionIds");
+    }
+    if (updates.exteriorColors !== undefined) {
+      updates.exteriorColors.length > 0 ? params.set("exteriorColors", updates.exteriorColors.join(",")) : params.delete("exteriorColors");
+    }
+    if (updates.interiorColors !== undefined) {
+      updates.interiorColors.length > 0 ? params.set("interiorColors", updates.interiorColors.join(",")) : params.delete("interiorColors");
+    }
+    if (updates.yearFrom !== undefined) {
+      updates.yearFrom ? params.set("yearFrom", updates.yearFrom) : params.delete("yearFrom");
+    }
+    if (updates.yearTo !== undefined) {
+      updates.yearTo ? params.set("yearTo", updates.yearTo) : params.delete("yearTo");
+    }
+    if (updates.viewMode !== undefined) {
+      updates.viewMode !== "table" ? params.set("viewMode", updates.viewMode) : params.delete("viewMode");
+    }
+    if (updates.pages !== undefined) {
+      updates.pages > 1 ? params.set("pages", updates.pages.toString()) : params.delete("pages");
+    }
+
+    // When filters change, reset to page 1
+    const isFilterChange = updates.search !== undefined || updates.status !== undefined || 
+                          updates.makeIds !== undefined || updates.modelId !== undefined ||
+                          updates.collectionIds !== undefined || updates.exteriorColors !== undefined ||
+                          updates.interiorColors !== undefined || updates.yearFrom !== undefined ||
+                          updates.yearTo !== undefined;
+    
+    if (isFilterChange && updates.pages === undefined) {
+      params.delete("pages"); // Reset pagination when filters change
+    }
+
+    const newUrl = params.toString() ? `?${params.toString()}` : "/admin/vehicles";
+    router.push(newUrl, { scroll: false });
+  };
+
+  // Navigation handlers - just use regular router.push
   const handleView = (id: string) => {
     router.push(`/admin/vehicles/${id}`);
   };
 
-  // Handle edit vehicle
   const handleEdit = (id: string) => {
     router.push(`/admin/vehicles/${id}/edit`);
   };
 
-  // Handle delete vehicle
   const handleDelete = (id: string) => {
-    // TODO: Implement delete confirmation dialog
     toast.info("Delete functionality coming soon");
   };
 
-  // Clear all filters
   const handleClearFilters = () => {
-    setSearchInput("");
-    setStatus(undefined);
-    setMakeIds([]);
-    setModelId(undefined);
-    setCollectionIds([]);
-    setExteriorColors([]);
-    setInteriorColors([]);
-    setYearFrom(undefined);
-    setYearTo(undefined);
-    setCursor(undefined);
-    setAllVehicles([]);
+    // Clear all filters at once
+    router.push("/admin/vehicles?status=PUBLISHED", { scroll: false });
   };
 
-  // Handle load more
   const handleLoadMore = () => {
-    if (data?.nextCursor) {
-      setCursor(data.nextCursor);
-    }
+    // Increment the pages parameter
+    updateURL({ pages: loadedPages + 1 });
   };
 
   // Check if any filters are active
-  const hasFilters = !!(debouncedSearch || status || makeIds.length > 0 || modelId || collectionIds.length > 0 || exteriorColors.length > 0 || interiorColors.length > 0 || yearFrom || yearTo);
+  const hasFilters = !!(searchInput || status !== "PUBLISHED" || makeIds.length > 0 || modelId || collectionIds.length > 0 || exteriorColors.length > 0 || interiorColors.length > 0 || yearFrom || yearTo);
 
   if (isAuthLoading || !user) {
     return (
@@ -240,15 +246,15 @@ export default function VehiclesPage() {
             interiorColors={interiorColors}
             yearFrom={yearFrom}
             yearTo={yearTo}
-            onSearchChange={setSearchInput}
-            onStatusChange={setStatus}
-            onMakeIdsChange={setMakeIds}
-            onModelChange={setModelId}
-            onCollectionIdsChange={setCollectionIds}
-            onExteriorColorsChange={setExteriorColors}
-            onInteriorColorsChange={setInteriorColors}
-            onYearFromChange={setYearFrom}
-            onYearToChange={setYearTo}
+            onSearchChange={(search) => updateURL({ search })}
+            onStatusChange={(status) => updateURL({ status })}
+            onMakeIdsChange={(makeIds) => updateURL({ makeIds })}
+            onModelChange={(modelId) => updateURL({ modelId })}
+            onCollectionIdsChange={(collectionIds) => updateURL({ collectionIds })}
+            onExteriorColorsChange={(exteriorColors) => updateURL({ exteriorColors })}
+            onInteriorColorsChange={(interiorColors) => updateURL({ interiorColors })}
+            onYearFromChange={(yearFrom) => updateURL({ yearFrom })}
+            onYearToChange={(yearTo) => updateURL({ yearTo })}
             onClearFilters={handleClearFilters}
           />
 
@@ -256,13 +262,13 @@ export default function VehiclesPage() {
           {!isVehiclesLoading && (
             <div className="flex items-center justify-between">
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                {data?.totalCount === 0 ? (
+                {totalCount === 0 ? (
                   "No vehicles found"
                 ) : (
                   <>
-                    Found <span className="font-semibold text-slate-900 dark:text-slate-50">{data?.totalCount}</span> vehicle{data?.totalCount !== 1 ? "s" : ""}
+                    Found <span className="font-semibold text-slate-900 dark:text-slate-50">{totalCount}</span> vehicle{totalCount !== 1 ? "s" : ""}
                     {hasFilters && " matching your criteria"}
-                    {allVehicles.length > 0 && allVehicles.length < (data?.totalCount ?? 0) && (
+                    {allVehicles.length > 0 && allVehicles.length < totalCount && (
                       <span className="ml-2">
                         (Showing <span className="font-semibold">{allVehicles.length}</span>)
                       </span>
@@ -276,7 +282,7 @@ export default function VehiclesPage() {
                 <Button
                   variant={viewMode === "table" ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setViewMode("table")}
+                  onClick={() => updateURL({ viewMode: "table" })}
                   className="gap-2"
                 >
                   <TableIcon className="h-4 w-4" />
@@ -285,7 +291,7 @@ export default function VehiclesPage() {
                 <Button
                   variant={viewMode === "cards" ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setViewMode("cards")}
+                  onClick={() => updateURL({ viewMode: "cards" })}
                   className="gap-2"
                 >
                   <LayoutGrid className="h-4 w-4" />
@@ -298,7 +304,7 @@ export default function VehiclesPage() {
           {/* Table/Cards */}
           <VehicleListTable
             vehicles={allVehicles}
-            isLoading={isVehiclesLoading && !cursor}
+            isLoading={isVehiclesLoading}
             hasFilters={hasFilters}
             viewMode={viewMode}
             onView={handleView}
@@ -308,7 +314,7 @@ export default function VehiclesPage() {
           />
 
           {/* Load More Button */}
-          {data?.nextCursor && (
+          {hasMore && !isVehiclesLoading && (
             <div className="flex justify-center pt-4">
               <Button
                 variant="outline"
@@ -322,7 +328,7 @@ export default function VehiclesPage() {
                     Loading...
                   </>
                 ) : (
-                  `Load More (${data.totalCount - allVehicles.length} remaining)`
+                  `Load More (${totalCount - allVehicles.length} remaining)`
                 )}
               </Button>
             </div>
@@ -333,3 +339,24 @@ export default function VehiclesPage() {
   );
 }
 
+/**
+ * Vehicles Page with Suspense Boundary
+ * 
+ * Wraps the main content in Suspense to handle useSearchParams() properly
+ */
+export default function VehiclesPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <div className="h-12 w-12 border-4 border-slate-200 border-t-slate-600 rounded-full animate-spin mx-auto" />
+            <p className="text-sm text-slate-600">Loading vehicles...</p>
+          </div>
+        </div>
+      }
+    >
+      <VehiclesPageContent />
+    </Suspense>
+  );
+}
