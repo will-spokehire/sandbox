@@ -96,7 +96,7 @@ export function VehicleMediaSection({ vehicle }: VehicleMediaSectionProps) {
             }
             alt={vehicle.name}
             fill
-            className="object-contain"
+            className="object-cover"
             priority
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 900px"
           />
