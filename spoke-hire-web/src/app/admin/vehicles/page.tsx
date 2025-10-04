@@ -329,8 +329,8 @@ function VehiclesPageContent() {
                 Previous
               </Button>
 
-              {/* Page Numbers */}
-              <div className="flex items-center gap-1">
+              {/* Page Numbers - Desktop only */}
+              <div className="hidden md:flex items-center gap-1">
                 {/* First page */}
                 {currentPage > 3 && (
                   <>
@@ -385,6 +385,11 @@ function VehiclesPageContent() {
                     </Button>
                   </>
                 )}
+              </div>
+
+              {/* Page Indicator - Mobile only */}
+              <div className="md:hidden px-3 py-1.5 text-sm font-medium text-muted-foreground">
+                {currentPage} / {totalPages}
               </div>
 
               {/* Next Button */}
