@@ -29,12 +29,12 @@ export default function VehicleDetailLoading() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 md:py-8">
         <div className="space-y-6">
-          {/* Media Section Skeleton */}
+          {/* Media Section Skeleton - 3:2 aspect ratio */}
           <div className="space-y-4">
-            <Skeleton className="aspect-video md:aspect-[21/9] w-full rounded-lg" />
+            <Skeleton className="aspect-[3/2] w-full rounded-lg" />
             <div className="flex gap-2 overflow-hidden">
               {Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className="w-24 h-24 md:w-32 md:h-32 rounded-md flex-shrink-0" />
+                <Skeleton key={i} className="aspect-[3/2] w-28 md:w-32 rounded-md flex-shrink-0" />
               ))}
             </div>
           </div>

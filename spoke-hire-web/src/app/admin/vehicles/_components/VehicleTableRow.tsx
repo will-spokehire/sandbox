@@ -59,7 +59,7 @@ export function VehicleTableRow({
     >
       {/* Image */}
       <TableCell>
-        <div className="relative h-20 w-28 overflow-hidden rounded-md border bg-muted">
+        <div className="relative aspect-[3/2] w-28 overflow-hidden rounded-md border bg-muted">
           <Image
             src={imageUrl}
             alt={vehicle.name}

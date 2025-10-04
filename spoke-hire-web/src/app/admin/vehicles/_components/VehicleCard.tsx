@@ -58,8 +58,8 @@ export function VehicleCard({
       onClick={() => onView?.(vehicle.id)}
     >
       <CardContent className="p-0">
-        {/* Image - Full width for better impact */}
-        <div className="relative h-48 w-full bg-muted">
+        {/* Image - Full width for better impact - 3:2 aspect ratio */}
+        <div className="relative aspect-[3/2] w-full bg-muted">
           <Image
             src={imageUrl}
             alt={vehicle.name}
