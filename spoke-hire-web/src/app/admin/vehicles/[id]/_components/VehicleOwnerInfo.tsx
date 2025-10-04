@@ -1,8 +1,6 @@
-import { Mail, Phone, MapPin, User, ExternalLink } from "lucide-react";
-import Link from "next/link";
+import { Mail, Phone, User } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Separator } from "~/components/ui/separator";
 import { formatOwnerName, getInitials } from "~/lib/vehicles";
@@ -97,22 +95,6 @@ export function VehicleOwnerInfo({ owner, vehicleId }: VehicleOwnerInfoProps) {
           {/* Location - We don't have full address in the owner select, so we'll skip this for now */}
           {/* If you need location, you'll need to update the tRPC query to include it */}
         </dl>
-
-        {/* Actions */}
-        <Separator />
-        <div className="flex flex-col gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full justify-start gap-2"
-            asChild
-          >
-            <Link href={`/admin/vehicles?ownerId=${owner.id}`}>
-              <ExternalLink className="h-4 w-4" />
-              View All Vehicles by This Owner
-            </Link>
-          </Button>
-        </div>
       </CardContent>
     </Card>
   );
