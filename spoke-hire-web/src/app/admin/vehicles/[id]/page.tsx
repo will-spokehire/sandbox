@@ -18,13 +18,16 @@ import {
 export default async function VehicleDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  // Await params as required by Next.js 15
+  const { id } = await params;
+  
   // Fetch vehicle data on the server
   let vehicle;
   
   try {
-    vehicle = await api.vehicle.getById({ id: params.id });
+    vehicle = await api.vehicle.getById({ id });
   } catch (error) {
     notFound();
   }
