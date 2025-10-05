@@ -1,5 +1,6 @@
 "use client";
 
+import { use } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
 import { useRequireAdmin } from "~/providers/auth-provider";
@@ -23,14 +24,17 @@ import { AlertCircle } from "lucide-react";
 export default function VehicleDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const { user, isLoading: isAuthLoading } = useRequireAdmin();
   const router = useRouter();
   
+  // Unwrap params Promise as required by Next.js 15
+  const { id } = use(params);
+  
   // Fetch vehicle data on the client
   const { data: vehicle, isLoading: isVehicleLoading, error } = api.vehicle.getById.useQuery(
-    { id: params.id },
+    { id },
     {
       enabled: !!user, // Only fetch when user is authenticated
       retry: false,
