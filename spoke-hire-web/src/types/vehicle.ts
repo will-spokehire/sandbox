@@ -31,7 +31,9 @@ export type VehicleListItem = Vehicle & {
 export type VehicleDetail = Vehicle & {
   make: Make;
   model: Model;
-  owner: Pick<User, "id" | "email" | "firstName" | "lastName" | "phone" | "userType" | "status">;
+  owner: Pick<User, "id" | "email" | "firstName" | "lastName" | "phone" | "userType" | "status" | "street" | "city" | "county" | "postcode"> & {
+    country: { id: string; name: string } | null;
+  };
   steering: SteeringType | null;
   media: Media[];
   sources: VehicleSource[];

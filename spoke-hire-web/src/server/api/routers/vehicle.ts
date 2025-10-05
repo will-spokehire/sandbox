@@ -301,6 +301,16 @@ export const vehicleRouter = createTRPCRouter({
                   phone: true,
                   userType: true,
                   status: true,
+                  street: true,
+                  city: true,
+                  county: true,
+                  postcode: true,
+                  country: {
+                    select: {
+                      id: true,
+                      name: true,
+                    },
+                  },
                 },
               },
               steering: true,

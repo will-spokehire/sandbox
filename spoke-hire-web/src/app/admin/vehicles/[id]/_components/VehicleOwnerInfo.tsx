@@ -1,4 +1,4 @@
-import { Mail, Phone, User } from "lucide-react";
+import { Mail, Phone, User, MapPin } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
@@ -92,8 +92,22 @@ export function VehicleOwnerInfo({ owner, vehicleId }: VehicleOwnerInfoProps) {
             </div>
           )}
 
-          {/* Location - We don't have full address in the owner select, so we'll skip this for now */}
-          {/* If you need location, you'll need to update the tRPC query to include it */}
+          {/* Address */}
+          {(owner.street || owner.city || owner.county || owner.postcode || owner.country) && (
+            <div className="flex items-start gap-3">
+              <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <dt className="text-xs text-muted-foreground mb-0.5">Address</dt>
+                <dd className="text-sm text-foreground">
+                  {owner.street && <div>{owner.street}</div>}
+                  {owner.city && <div>{owner.city}</div>}
+                  {owner.county && <div>{owner.county}</div>}
+                  {owner.postcode && <div>{owner.postcode}</div>}
+                  {owner.country && <div>{owner.country.name}</div>}
+                </dd>
+              </div>
+            </div>
+          )}
         </dl>
       </CardContent>
     </Card>
