@@ -20,6 +20,9 @@ import { AlertCircle } from "lucide-react";
  * Displays full details of a single vehicle for admin review.
  * Uses client-side back navigation to preserve list state.
  * Protected route - requires admin authentication.
+ * 
+ * OPTIMIZATION: Implements TanStack Query caching for SPA-like performance.
+ * When navigating from the list page, cached data is shown instantly.
  */
 export default function VehicleDetailPage({
   params,
@@ -33,11 +36,18 @@ export default function VehicleDetailPage({
   const { id } = use(params);
   
   // Fetch vehicle data on the client
+  // OPTIMIZATION: Uses TanStack Query cache with staleTime for SPA-like behavior
+  // - If data was recently fetched, shows cached data instantly (no loading spinner)
+  // - Refetches in background if data is older than staleTime
+  // - Provides seamless navigation from list → detail page
   const { data: vehicle, isLoading: isVehicleLoading, error } = api.vehicle.getById.useQuery(
     { id },
     {
       enabled: !!user, // Only fetch when user is authenticated
       retry: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes - reuse cached data if fresh
+      // This makes navigation feel instant when coming from list page
+      // Backend also has Prisma Accelerate caching (60s) for additional performance
     }
   );
 
