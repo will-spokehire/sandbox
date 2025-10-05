@@ -10,7 +10,7 @@ import { Toaster } from "~/components/ui/sonner";
 export const metadata: Metadata = {
   title: "SpokeHire - Admin Interface",
   description: "SpokeHire admin management system",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  icons: [{ rel: "icon", url: "/spoke-hire-logo-1.png" }],
 };
 
 const geist = Geist({
