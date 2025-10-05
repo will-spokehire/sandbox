@@ -17,7 +17,8 @@ import { toast } from 'sonner';
  * Flow:
  * 1. User enters email
  * 2. System sends OTP to email
- * 3. User is redirected to OTP verification page
+ * 3. Email is stored in sessionStorage (not URL) for security
+ * 4. User is redirected to OTP verification page
  * 
  * @example
  * ```tsx
@@ -45,8 +46,10 @@ export function LoginForm() {
       toast.success('Verification code sent!', {
         description: 'Check your email for the code.',
       });
-      // Redirect to OTP verification page with email in state
-      router.push(`/auth/verify-otp?email=${encodeURIComponent(email)}`);
+      // Store email in sessionStorage instead of URL for security
+      sessionStorage.setItem('otp_email', email);
+      // Redirect to OTP verification page without email in URL
+      router.push('/auth/verify-otp');
     },
     onError: (error) => {
       toast.error('Sign in failed', {

@@ -68,9 +68,19 @@ export const authRouter = createTRPCRouter({
 
       if (error) {
         console.error("Supabase OTP error:", error);
+        
+        // Handle rate limiting
+        if (error.status === 429 || error.code === 'over_email_send_rate_limit') {
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message: "Too many requests. Please wait a moment before trying again.",
+          });
+        }
+        
+        // Handle other errors
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to send verification code. Please try again.",
+          message: error.message || "Failed to send verification code. Please try again.",
         });
       }
 
@@ -258,9 +268,19 @@ export const authRouter = createTRPCRouter({
 
       if (error) {
         console.error("Supabase resend OTP error:", error);
+        
+        // Handle rate limiting
+        if (error.status === 429 || error.code === 'over_email_send_rate_limit') {
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message: "Too many requests. Please wait at least 60 seconds between requests.",
+          });
+        }
+        
+        // Handle other errors
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to resend verification code",
+          message: error.message || "Failed to resend verification code",
         });
       }
 

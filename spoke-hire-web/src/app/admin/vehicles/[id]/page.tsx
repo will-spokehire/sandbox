@@ -1,39 +1,76 @@
-import { notFound } from "next/navigation";
-import { api } from "~/trpc/server";
-import {
-  VehicleMediaSection,
-  VehicleBasicInfo,
-  VehicleOwnerInfo,
-  VehicleCollections,
-  VehicleMetadata,
-  VehicleDetailHeader,
-} from "./_components";
+"use client";
+
+import { useRouter } from "next/navigation";
+import { api } from "~/trpc/react";
+import { useRequireAdmin } from "~/providers/auth-provider";
+import { VehicleMediaSection } from "./_components/VehicleMediaSection";
+import { VehicleBasicInfo } from "./_components/VehicleBasicInfo";
+import { VehicleOwnerInfo } from "./_components/VehicleOwnerInfo";
+import { VehicleCollections } from "./_components/VehicleCollections";
+import { VehicleMetadata } from "./_components/VehicleMetadata";
+import { VehicleDetailHeader } from "./_components/VehicleDetailHeader";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import { Button } from "~/components/ui/button";
+import { AlertCircle } from "lucide-react";
 
 /**
  * Vehicle Detail Page
  * 
  * Displays full details of a single vehicle for admin review.
  * Uses client-side back navigation to preserve list state.
+ * Protected route - requires admin authentication.
  */
-export default async function VehicleDetailPage({
+export default function VehicleDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
-  // Await params as required by Next.js 15
-  const { id } = await params;
+  const { user, isLoading: isAuthLoading } = useRequireAdmin();
+  const router = useRouter();
   
-  // Fetch vehicle data on the server
-  let vehicle;
-  
-  try {
-    vehicle = await api.vehicle.getById({ id });
-  } catch (error) {
-    notFound();
+  // Fetch vehicle data on the client
+  const { data: vehicle, isLoading: isVehicleLoading, error } = api.vehicle.getById.useQuery(
+    { id: params.id },
+    {
+      enabled: !!user, // Only fetch when user is authenticated
+      retry: false,
+    }
+  );
+
+  const isLoading = isAuthLoading || isVehicleLoading;
+
+  // Handle loading state
+  if (isLoading || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="h-12 w-12 border-4 border-slate-200 border-t-slate-600 rounded-full animate-spin mx-auto" />
+          <p className="text-sm text-slate-600">Loading vehicle details...</p>
+        </div>
+      </div>
+    );
   }
 
-  if (!vehicle) {
-    notFound();
+  // Handle error state
+  if (error || !vehicle) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+        <div className="container mx-auto px-4 py-8">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Vehicle Not Found</AlertTitle>
+            <AlertDescription>
+              The vehicle you're looking for doesn't exist or you don't have permission to view it.
+            </AlertDescription>
+          </Alert>
+          <div className="mt-4">
+            <Button onClick={() => router.push("/admin/vehicles")}>
+              Back to Vehicles
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

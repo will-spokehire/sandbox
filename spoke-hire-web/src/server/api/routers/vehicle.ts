@@ -282,9 +282,11 @@ export const vehicleRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       // OPTIMIZATION: Execute base vehicle query and relations in parallel
       // This reduces the total query time by fetching data concurrently
+      // WITH Prisma Accelerate caching for better performance
       const [vehicle, media, sources, specifications, vehicleCollections] = 
         await Promise.all([
           // Main vehicle with simple relations (single query)
+          // Cached for 60 seconds (data changes less frequently)
           ctx.db.vehicle.findUnique({
             where: { id: input.id },
             include: {
@@ -303,29 +305,37 @@ export const vehicleRouter = createTRPCRouter({
               },
               steering: true,
             },
+            cacheStrategy: { ttl: 60, swr: 30 }, // 1 min cache, 30s stale-while-revalidate
           }),
           
           // Fetch media separately with limit
+          // Cached for 2 minutes (images don't change often)
           ctx.db.media.findMany({
             where: { vehicleId: input.id },
             orderBy: { order: "asc" },
             take: 100,
+            cacheStrategy: { ttl: 120 }, // 2 minutes
           }),
           
           // Fetch sources separately with limit
+          // Cached for 5 minutes (rarely changes)
           ctx.db.vehicleSource.findMany({
             where: { vehicleId: input.id },
             take: 20,
+            cacheStrategy: { ttl: 300 }, // 5 minutes
           }),
           
           // Fetch specifications separately with limit
+          // Cached for 2 minutes
           ctx.db.vehicleSpecification.findMany({
             where: { vehicleId: input.id },
             orderBy: { category: "asc" },
             take: 200,
+            cacheStrategy: { ttl: 120 }, // 2 minutes
           }),
           
           // Fetch collections with nested data
+          // Cached for 5 minutes (rarely changes)
           ctx.db.vehicleCollection.findMany({
             where: { vehicleId: input.id },
             include: {
@@ -337,6 +347,7 @@ export const vehicleRouter = createTRPCRouter({
                 },
               },
             },
+            cacheStrategy: { ttl: 300 }, // 5 minutes
           }),
         ]);
 
@@ -447,6 +458,7 @@ export const vehicleRouter = createTRPCRouter({
     }
 
     // OPTIMIZATION: Execute all queries in parallel for better performance
+    // WITH Prisma Accelerate caching (5 min TTL)
     const [
       makes,
       collections,
@@ -455,7 +467,7 @@ export const vehicleRouter = createTRPCRouter({
       years,
       statusCounts,
     ] = await Promise.all([
-      // Get all makes
+      // Get all makes - Cached by Accelerate
       ctx.db.make.findMany({
         where: { isActive: true },
         orderBy: { name: "asc" },
@@ -463,9 +475,10 @@ export const vehicleRouter = createTRPCRouter({
           id: true,
           name: true,
         },
+        cacheStrategy: { ttl: 300 }, // 5 minutes
       }),
 
-      // Get all collections
+      // Get all collections - Cached by Accelerate
       ctx.db.collection.findMany({
         where: { isActive: true },
         orderBy: { name: "asc" },
@@ -474,9 +487,11 @@ export const vehicleRouter = createTRPCRouter({
           name: true,
           color: true,
         },
+        cacheStrategy: { ttl: 300 }, // 5 minutes
       }),
 
       // OPTIMIZATION: Use raw SQL for DISTINCT queries (much faster)
+      // Note: Raw queries with cacheStrategy require tags
       ctx.db.$queryRaw<Array<{ exteriorColour: string }>>`
         SELECT DISTINCT "exteriorColour"
         FROM "Vehicle"
@@ -497,10 +512,11 @@ export const vehicleRouter = createTRPCRouter({
         ORDER BY "year" DESC
       `,
 
-      // Get status counts
+      // Get status counts - Cached by Accelerate
       ctx.db.vehicle.groupBy({
         by: ["status"],
         _count: true,
+        cacheStrategy: { ttl: 300 }, // 5 minutes
       }),
     ]);
 
@@ -514,9 +530,9 @@ export const vehicleRouter = createTRPCRouter({
         .map((v) => v.interiorColour)
         .filter((c): c is string => c !== null),
       years: years.map((v) => v.year),
-      statusCounts: statusCounts.map((sc) => ({
-        status: sc.status,
-        count: sc._count,
+      statusCounts: statusCounts.map((sc: any) => ({
+        status: sc.status as VehicleStatus,
+        count: sc._count as number,
       })),
     };
 
@@ -531,6 +547,7 @@ export const vehicleRouter = createTRPCRouter({
 
   /**
    * Get models by make ID
+   * Cached with Prisma Accelerate (5 min TTL)
    */
   getModelsByMake: adminProcedure
     .input(z.object({ makeId: z.string() }))
@@ -545,6 +562,7 @@ export const vehicleRouter = createTRPCRouter({
           id: true,
           name: true,
         },
+        cacheStrategy: { ttl: 300, swr: 60 }, // 5 min cache, 1 min stale-while-revalidate
       });
 
       return models;

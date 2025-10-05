@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
@@ -20,6 +20,7 @@ import { createClient } from '~/lib/supabase/client';
  * OTP Verification Component
  * 
  * Allows users to verify their email with a one-time password.
+ * Email is stored in sessionStorage (not URL) for security.
  * 
  * @example
  * ```tsx
@@ -28,13 +29,20 @@ import { createClient } from '~/lib/supabase/client';
  */
 export function OTPVerification() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const emailFromQuery = searchParams.get('email') || '';
   const supabase = createClient();
 
-  const [email, setEmail] = useState(emailFromQuery);
+  // Get email from sessionStorage instead of URL for security
+  const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Load email from sessionStorage on mount
+  useEffect(() => {
+    const storedEmail = sessionStorage.getItem('otp_email');
+    if (storedEmail) {
+      setEmail(storedEmail);
+    }
+  }, []);
 
   // We still use the tRPC mutation to validate in our database
   const verifyMutation = api.auth.verifyOtp.useMutation({
@@ -42,6 +50,8 @@ export function OTPVerification() {
       toast.success('Successfully authenticated!', {
         description: `Welcome back, ${data.user.email}`,
       });
+      // Clear stored email after successful verification
+      sessionStorage.removeItem('otp_email');
       // Redirect to admin dashboard
       router.push('/admin');
       router.refresh();
@@ -136,10 +146,10 @@ export function OTPVerification() {
 
   // Auto-focus OTP input if email is present
   useEffect(() => {
-    if (emailFromQuery) {
+    if (email) {
       document.getElementById('otp')?.focus();
     }
-  }, [emailFromQuery]);
+  }, [email]);
 
   return (
     <Card className="w-full max-w-md">
@@ -159,7 +169,7 @@ export function OTPVerification() {
               placeholder="admin@spokehire.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              disabled={isLoading || !!emailFromQuery}
+              disabled={isLoading}
               autoComplete="email"
               required
             />
@@ -176,7 +186,7 @@ export function OTPVerification() {
               disabled={isLoading}
               maxLength={6}
               autoComplete="one-time-code"
-              autoFocus={!!emailFromQuery}
+              autoFocus={!!email}
               required
             />
             <p className="text-xs text-muted-foreground">
