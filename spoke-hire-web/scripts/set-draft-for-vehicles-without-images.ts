@@ -1,8 +1,9 @@
 #!/usr/bin/env tsx
 
 /**
- * Set Draft Status for Vehicles Without Images
- * Sets status to DRAFT for vehicles that don't have any images
+ * Set Draft Status for Vehicles Without READY Images
+ * Sets status to DRAFT for vehicles that don't have any images with status: READY
+ * This ensures only vehicles with properly uploaded and processed images are published
  */
 
 import { PrismaClient, VehicleStatus } from '@prisma/client';
@@ -11,23 +12,25 @@ const prisma = new PrismaClient();
 
 interface SetDraftStats {
   totalVehicles: number;
-  vehiclesWithoutImages: number;
+  vehiclesWithoutReadyImages: number;
   vehiclesAlreadyDraft: number;
   vehiclesUpdated: number;
   errors: string[];
 }
 
 /**
- * Get vehicles without any images
+ * Get vehicles without any READY images
  */
-async function getVehiclesWithoutImages(): Promise<Array<{ 
+async function getVehiclesWithoutReadyImages(): Promise<Array<{ 
   id: string; 
   name: string; 
   status: VehicleStatus;
+  totalImages: number;
+  readyImages: number;
 }>> {
-  console.log('🔍 Finding vehicles without any images...\n');
+  console.log('🔍 Finding vehicles without READY images...\n');
   
-  // Get all vehicles
+  // Get all vehicles with their media
   const vehicles = await prisma.vehicle.findMany({
     select: {
       id: true,
@@ -38,22 +41,30 @@ async function getVehiclesWithoutImages(): Promise<Array<{
           type: 'IMAGE'
         },
         select: {
-          id: true
+          id: true,
+          status: true
         }
       }
     }
   });
   
-  // Filter vehicles that don't have any images
-  const vehiclesWithoutImages = vehicles
-    .filter(v => v.media.length === 0)
-    .map(v => ({
-      id: v.id,
-      name: v.name,
-      status: v.status
-    }));
+  // Filter vehicles that don't have any READY images
+  const vehiclesWithoutReadyImages = vehicles
+    .map(v => {
+      const totalImages = v.media.length;
+      const readyImages = v.media.filter(m => m.status === 'READY').length;
+      
+      return {
+        id: v.id,
+        name: v.name,
+        status: v.status,
+        totalImages,
+        readyImages
+      };
+    })
+    .filter(v => v.readyImages === 0); // No READY images
   
-  return vehiclesWithoutImages;
+  return vehiclesWithoutReadyImages;
 }
 
 /**
@@ -80,14 +91,15 @@ async function setVehicleStatusToDraft(vehicleId: string, vehicleName: string, c
 }
 
 /**
- * Set draft status for vehicles without images
+ * Set draft status for vehicles without READY images
  */
-async function setDraftForVehiclesWithoutImages(): Promise<SetDraftStats> {
+async function setDraftForVehiclesWithoutReadyImages(): Promise<SetDraftStats> {
   console.log('🚀 Starting set draft status script...\n');
+  console.log('📋 This script sets vehicles to DRAFT if they have no images with status: READY\n');
   
   const stats: SetDraftStats = {
     totalVehicles: 0,
-    vehiclesWithoutImages: 0,
+    vehiclesWithoutReadyImages: 0,
     vehiclesAlreadyDraft: 0,
     vehiclesUpdated: 0,
     errors: []
@@ -98,27 +110,34 @@ async function setDraftForVehiclesWithoutImages(): Promise<SetDraftStats> {
     stats.totalVehicles = await prisma.vehicle.count();
     console.log(`📊 Total vehicles: ${stats.totalVehicles}\n`);
     
-    // Get vehicles without images
-    const vehiclesWithoutImages = await getVehiclesWithoutImages();
-    stats.vehiclesWithoutImages = vehiclesWithoutImages.length;
+    // Get vehicles without READY images
+    const vehiclesWithoutReadyImages = await getVehiclesWithoutReadyImages();
+    stats.vehiclesWithoutReadyImages = vehiclesWithoutReadyImages.length;
     
-    if (vehiclesWithoutImages.length === 0) {
-      console.log('✅ All vehicles have at least one image!');
+    if (vehiclesWithoutReadyImages.length === 0) {
+      console.log('✅ All vehicles have at least one READY image!');
       return stats;
     }
     
-    console.log(`📸 Found ${vehiclesWithoutImages.length} vehicles without any images\n`);
+    console.log(`📸 Found ${vehiclesWithoutReadyImages.length} vehicles without READY images\n`);
+    
+    // Show breakdown
+    console.log('Breakdown:');
+    vehiclesWithoutReadyImages.forEach(v => {
+      console.log(`  - ${v.name}: ${v.totalImages} total images, ${v.readyImages} READY (Status: ${v.status})`);
+    });
+    console.log('');
     
     // Separate already-draft from needs-update
-    const needsUpdate = vehiclesWithoutImages.filter(v => v.status !== VehicleStatus.DRAFT);
-    stats.vehiclesAlreadyDraft = vehiclesWithoutImages.length - needsUpdate.length;
+    const needsUpdate = vehiclesWithoutReadyImages.filter(v => v.status !== VehicleStatus.DRAFT);
+    stats.vehiclesAlreadyDraft = vehiclesWithoutReadyImages.length - needsUpdate.length;
     
     if (stats.vehiclesAlreadyDraft > 0) {
       console.log(`ℹ️  ${stats.vehiclesAlreadyDraft} vehicle(s) already in DRAFT status\n`);
     }
     
     if (needsUpdate.length === 0) {
-      console.log('✅ All vehicles without images are already in DRAFT status!');
+      console.log('✅ All vehicles without READY images are already in DRAFT status!');
       return stats;
     }
     
@@ -199,8 +218,8 @@ async function getFinalStatistics(): Promise<void> {
  */
 async function main(): Promise<void> {
   try {
-    // Set draft status for vehicles without images
-    const stats = await setDraftForVehiclesWithoutImages();
+    // Set draft status for vehicles without READY images
+    const stats = await setDraftForVehiclesWithoutReadyImages();
     
     // Final statistics
     await getFinalStatistics();
@@ -208,7 +227,7 @@ async function main(): Promise<void> {
     console.log('\n✅ Set draft status completed!');
     console.log('\n📊 Summary:');
     console.log(`  Total Vehicles: ${stats.totalVehicles}`);
-    console.log(`  Vehicles Without Images: ${stats.vehiclesWithoutImages}`);
+    console.log(`  Vehicles Without READY Images: ${stats.vehiclesWithoutReadyImages}`);
     console.log(`  Already in DRAFT: ${stats.vehiclesAlreadyDraft}`);
     console.log(`  Updated to DRAFT: ${stats.vehiclesUpdated}`);
     console.log(`  Errors: ${stats.errors.length}`);

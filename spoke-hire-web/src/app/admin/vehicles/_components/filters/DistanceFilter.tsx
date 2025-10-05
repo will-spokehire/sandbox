@@ -43,10 +43,12 @@ export function DistanceFilter({
 }: DistanceFilterProps) {
   const [postcodeInput, setPostcodeInput] = useState(postcode);
   const [isValidating, setIsValidating] = useState(false);
+  const [isValidPostcode, setIsValidPostcode] = useState(!!postcode); // Track if current input is valid
 
   // Sync internal state when postcode prop changes (e.g., when filters are cleared)
   useEffect(() => {
     setPostcodeInput(postcode);
+    setIsValidPostcode(!!postcode);
   }, [postcode]);
 
   const validatePostcode = async () => {
@@ -73,6 +75,7 @@ export function DistanceFilter({
 
       if (response.ok && data.status === 200 && data.result) {
         // Valid postcode
+        setIsValidPostcode(true); // Mark as valid immediately
         onPostcodeChange(normalized);
         
         // Set default radius to 5 miles if not already set
@@ -85,6 +88,7 @@ export function DistanceFilter({
         });
       } else {
         // Invalid postcode
+        setIsValidPostcode(false); // Mark as invalid
         toast.error("Postcode not found", {
           description: "Please check the postcode and try again",
         });
@@ -134,8 +138,8 @@ export function DistanceFilter({
         </Button>
       </div>
 
-      {/* Distance Radius - Only show when postcode is entered */}
-      {postcode && (
+      {/* Distance Radius - Show when postcode is valid */}
+      {isValidPostcode && (
         <Select
           value={maxDistance?.toString() ?? ""}
           onValueChange={(value) =>
