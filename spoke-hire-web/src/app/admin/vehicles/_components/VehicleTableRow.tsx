@@ -2,6 +2,7 @@
 
 import { MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { type VehicleListItem } from "~/types/vehicle";
 import { TableCell, TableRow } from "~/components/ui/table";
 import { Button } from "~/components/ui/button";
@@ -32,7 +33,8 @@ interface VehicleTableRowProps {
 /**
  * Vehicle Table Row
  * 
- * Individual row in the vehicle list table
+ * Individual row in the vehicle list table.
+ * Uses Link component for proper browser navigation (cmd+click, right-click, etc.)
  */
 export function VehicleTableRow({
   vehicle,
@@ -53,72 +55,85 @@ export function VehicleTableRow({
   );
 
   return (
-    <TableRow
-      className="cursor-pointer hover:bg-muted/50"
-      onClick={() => onView?.(vehicle.id)}
-    >
+    <TableRow className="hover:bg-muted/50">
       {/* Image */}
       <TableCell>
-        <div className="relative aspect-[3/2] w-28 overflow-hidden rounded-md border bg-muted">
-          <Image
-            src={imageUrl}
-            alt={vehicle.name}
-            fill
-            className="object-cover"
-            sizes="112px"
-          />
-        </div>
+        <Link href={`/admin/vehicles/${vehicle.id}`} className="block">
+          <div className="relative aspect-[3/2] w-28 overflow-hidden rounded-md border bg-muted">
+            <Image
+              src={imageUrl}
+              alt={vehicle.name}
+              fill
+              className="object-cover"
+              sizes="112px"
+            />
+          </div>
+        </Link>
       </TableCell>
 
       {/* Name & Make/Model */}
       <TableCell>
-        <div className="flex flex-col">
-          <span className="font-medium text-foreground">{vehicle.name}</span>
-          <span className="text-sm text-muted-foreground">
-            {vehicle.make.name} {vehicle.model.name}
-          </span>
-        </div>
+        <Link href={`/admin/vehicles/${vehicle.id}`} className="block hover:underline">
+          <div className="flex flex-col">
+            <span className="font-medium text-foreground">{vehicle.name}</span>
+            <span className="text-sm text-muted-foreground">
+              {vehicle.make.name} {vehicle.model.name}
+            </span>
+          </div>
+        </Link>
       </TableCell>
 
       {/* Year */}
       <TableCell>
-        <span className="text-sm">{vehicle.year}</span>
+        <Link href={`/admin/vehicles/${vehicle.id}`} className="block">
+          <span className="text-sm">{vehicle.year}</span>
+        </Link>
       </TableCell>
 
       {/* Registration */}
       <TableCell>
-        <span className="text-sm font-mono">
-          {formatRegistration(vehicle.registration)}
-        </span>
+        <Link href={`/admin/vehicles/${vehicle.id}`} className="block">
+          <span className="text-sm font-mono">
+            {formatRegistration(vehicle.registration)}
+          </span>
+        </Link>
       </TableCell>
 
       {/* Status */}
       <TableCell>
-        <VehicleStatusBadge status={vehicle.status} />
+        <Link href={`/admin/vehicles/${vehicle.id}`} className="block">
+          <VehicleStatusBadge status={vehicle.status} />
+        </Link>
       </TableCell>
 
       {/* Price */}
       <TableCell>
-        <span className="font-medium">{formatPrice(vehicle.price)}</span>
+        <Link href={`/admin/vehicles/${vehicle.id}`} className="block">
+          <span className="font-medium">{formatPrice(vehicle.price)}</span>
+        </Link>
       </TableCell>
 
       {/* Location */}
       <TableCell>
-        <span className="text-sm">{location}</span>
+        <Link href={`/admin/vehicles/${vehicle.id}`} className="block">
+          <span className="text-sm">{location}</span>
+        </Link>
       </TableCell>
 
       {/* Owner */}
       <TableCell>
-        <div className="flex flex-col">
-          <span className="text-sm">{ownerName}</span>
-          <span className="text-xs text-muted-foreground truncate max-w-[200px]">
-            {vehicle.owner.email}
-          </span>
-        </div>
+        <Link href={`/admin/vehicles/${vehicle.id}`} className="block">
+          <div className="flex flex-col">
+            <span className="text-sm">{ownerName}</span>
+            <span className="text-xs text-muted-foreground truncate max-w-[200px]">
+              {vehicle.owner.email}
+            </span>
+          </div>
+        </Link>
       </TableCell>
 
       {/* Actions */}
-      <TableCell onClick={(e) => e.stopPropagation()}>
+      <TableCell>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon">
@@ -129,9 +144,11 @@ export function VehicleTableRow({
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => onView?.(vehicle.id)}>
-              <Eye className="mr-2 h-4 w-4" />
-              View Details
+            <DropdownMenuItem asChild>
+              <Link href={`/admin/vehicles/${vehicle.id}`} className="cursor-pointer">
+                <Eye className="mr-2 h-4 w-4" />
+                View Details
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onEdit?.(vehicle.id)}>
               <Edit className="mr-2 h-4 w-4" />

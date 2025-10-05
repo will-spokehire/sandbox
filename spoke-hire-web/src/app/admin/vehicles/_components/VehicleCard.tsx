@@ -2,6 +2,7 @@
 
 import { MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { type VehicleListItem } from "~/types/vehicle";
 import { Button } from "~/components/ui/button";
 import {
@@ -32,7 +33,8 @@ interface VehicleCardProps {
 /**
  * Vehicle Card
  * 
- * Card layout for mobile devices
+ * Card layout for mobile devices.
+ * Uses Link component for proper browser navigation (cmd+click, right-click, etc.)
  */
 export function VehicleCard({
   vehicle,
@@ -53,13 +55,10 @@ export function VehicleCard({
   );
 
   return (
-    <Card
-      className="cursor-pointer hover:shadow-md transition-shadow active:scale-[0.98] transition-transform overflow-hidden py-0"
-      onClick={() => onView?.(vehicle.id)}
-    >
+    <Card className="hover:shadow-md transition-shadow overflow-hidden py-0">
       <CardContent className="p-0">
         {/* Image - Full width for better impact - 3:2 aspect ratio */}
-        <div className="relative aspect-[3/2] w-full bg-muted">
+        <Link href={`/admin/vehicles/${vehicle.id}`} className="block relative aspect-[3/2] w-full bg-muted">
           <Image
             src={imageUrl}
             alt={vehicle.name}
@@ -72,46 +71,48 @@ export function VehicleCard({
           <div className="absolute top-3 left-3">
             <VehicleStatusBadge status={vehicle.status} />
           </div>
-          
-          {/* Actions overlay */}
-          <div className="absolute top-3 right-3" onClick={(e) => e.stopPropagation()}>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="secondary" 
-                  size="icon" 
-                  className="h-9 w-9 shadow-lg backdrop-blur-sm bg-background/80 hover:bg-background/90"
-                >
-                  <MoreHorizontal className="h-4 w-4" />
-                  <span className="sr-only">Open menu</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => onView?.(vehicle.id)}>
+        </Link>
+        
+        {/* Actions overlay */}
+        <div className="absolute top-3 right-3 z-10">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="secondary" 
+                size="icon" 
+                className="h-9 w-9 shadow-lg backdrop-blur-sm bg-background/80 hover:bg-background/90"
+              >
+                <MoreHorizontal className="h-4 w-4" />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href={`/admin/vehicles/${vehicle.id}`} className="cursor-pointer">
                   <Eye className="mr-2 h-4 w-4" />
                   View Details
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onEdit?.(vehicle.id)}>
-                  <Edit className="mr-2 h-4 w-4" />
-                  Edit Vehicle
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => onDelete?.(vehicle.id)}
-                  className="text-destructive focus:text-destructive"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onEdit?.(vehicle.id)}>
+                <Edit className="mr-2 h-4 w-4" />
+                Edit Vehicle
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => onDelete?.(vehicle.id)}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Content */}
-        <div className="p-4">
+        <Link href={`/admin/vehicles/${vehicle.id}`} className="block p-4">
           {/* Title and Price */}
           <div className="mb-3">
             <div className="flex items-start justify-between gap-2 mb-1">
@@ -157,7 +158,7 @@ export function VehicleCard({
               </span>
             </div>
           </div>
-        </div>
+        </Link>
       </CardContent>
     </Card>
   );
