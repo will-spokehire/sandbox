@@ -1,6 +1,6 @@
 "use client";
 
-import { MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
+import { MoreHorizontal, Eye, Edit, Trash2, MapPin } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { type VehicleListItem } from "~/types/vehicle";
@@ -53,62 +53,68 @@ export function VehicleCard({
     vehicle.owner.city,
     vehicle.owner.country
   );
+  
+  // Check if vehicle has distance data (from distance filtering)
+  const distance = (vehicle as any).distance as number | undefined;
 
   return (
-    <Card className="hover:shadow-md transition-shadow overflow-hidden py-0">
+    <Card className="hover:shadow-md transition-shadow overflow-hidden py-0 relative">
       <CardContent className="p-0">
         {/* Image - Full width for better impact - 3:2 aspect ratio */}
-        <Link href={`/admin/vehicles/${vehicle.id}`} className="block relative aspect-[3/2] w-full bg-muted">
-          <Image
-            src={imageUrl}
-            alt={vehicle.name}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 400px"
-          />
+        <div className="relative aspect-[3/2] w-full bg-muted">
+          <Link href={`/admin/vehicles/${vehicle.id}`} className="block w-full h-full">
+            <Image
+              src={imageUrl}
+              alt={vehicle.name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 400px"
+            />
+          </Link>
           
           {/* Status badge overlay */}
-          <div className="absolute top-3 left-3">
+          <div className="absolute top-3 left-3 z-10">
             <VehicleStatusBadge status={vehicle.status} />
           </div>
-        </Link>
-        
-        {/* Actions overlay */}
-        <div className="absolute top-3 right-3 z-10">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="secondary" 
-                size="icon" 
-                className="h-9 w-9 shadow-lg backdrop-blur-sm bg-background/80 hover:bg-background/90"
-              >
-                <MoreHorizontal className="h-4 w-4" />
-                <span className="sr-only">Open menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href={`/admin/vehicles/${vehicle.id}`} className="cursor-pointer">
-                  <Eye className="mr-2 h-4 w-4" />
-                  View Details
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onEdit?.(vehicle.id)}>
-                <Edit className="mr-2 h-4 w-4" />
-                Edit Vehicle
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => onDelete?.(vehicle.id)}
-                className="text-destructive focus:text-destructive"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          
+          {/* Actions overlay */}
+          <div className="absolute top-3 right-3 z-10">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="secondary" 
+                  size="icon" 
+                  className="h-9 w-9 shadow-lg backdrop-blur-sm bg-background/80 hover:bg-background/90"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">Open menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href={`/admin/vehicles/${vehicle.id}`} className="cursor-pointer">
+                    <Eye className="mr-2 h-4 w-4" />
+                    View Details
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onEdit?.(vehicle.id)}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit Vehicle
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => onDelete?.(vehicle.id)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
 
         {/* Content */}
@@ -150,6 +156,19 @@ export function VehicleCard({
                 {location}
               </span>
             </div>
+            
+            {/* Distance (if available) */}
+            {distance !== undefined && (
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground text-xs flex items-center gap-1">
+                  <MapPin className="h-3 w-3" />
+                  Distance
+                </span>
+                <span className="font-medium text-xs text-primary">
+                  {distance.toFixed(1)} miles away
+                </span>
+              </div>
+            )}
             
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground text-xs">Owner</span>

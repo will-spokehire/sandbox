@@ -116,7 +116,14 @@ export function VehicleTableRow({
       {/* Location */}
       <TableCell>
         <Link href={`/admin/vehicles/${vehicle.id}`} className="block">
-          <span className="text-sm">{location}</span>
+          <div className="flex flex-col">
+            <span className="text-sm">{location}</span>
+            {vehicle.distance !== undefined && vehicle.distance !== null && (
+              <span className="text-xs text-muted-foreground">
+                {vehicle.distance.toFixed(1)} miles away
+              </span>
+            )}
+          </div>
         </Link>
       </TableCell>
 

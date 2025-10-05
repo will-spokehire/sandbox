@@ -1,7 +1,9 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
-import { VehicleStatus } from "@prisma/client";
+import { VehicleStatus, Prisma } from "@prisma/client";
+import { geocodePostcode } from "~/lib/services/geocoding";
+import { getPostGISDistanceSQL, getPostGISDWithinFilter } from "~/lib/services/distance";
 
 /**
  * Vehicle Router
@@ -56,8 +58,15 @@ const listVehiclesInputSchema = z.object({
   priceTo: z.number().optional(),
   ownerId: z.string().optional(),
   
+  // Distance filtering (NEW)
+  userPostcode: z.string().optional(),
+  userLatitude: z.number().optional(),
+  userLongitude: z.number().optional(),
+  maxDistanceMiles: z.number().min(1).max(500).optional(),
+  sortByDistance: z.boolean().optional(),
+  
   // Sorting
-  sortBy: z.enum(["createdAt", "updatedAt", "price", "year", "name"]).default("createdAt"),
+  sortBy: z.enum(["createdAt", "updatedAt", "price", "year", "name", "distance"]).default("createdAt"),
   sortOrder: z.enum(["asc", "desc"]).default("desc"),
   
   // OPTIMIZATION: Make total count optional (expensive query)
@@ -101,9 +110,32 @@ export const vehicleRouter = createTRPCRouter({
         priceFrom,
         priceTo,
         ownerId,
+        userPostcode,
+        userLatitude,
+        userLongitude,
+        maxDistanceMiles,
+        sortByDistance,
         sortBy,
         sortOrder,
       } = input;
+
+      // Determine user location for distance filtering
+      let userLat: number | undefined;
+      let userLon: number | undefined;
+
+      if (userPostcode) {
+        try {
+          const geo = await geocodePostcode(userPostcode);
+          userLat = geo.latitude;
+          userLon = geo.longitude;
+        } catch (error) {
+          console.error("Geocoding error:", error);
+          // Continue without distance filtering
+        }
+      } else if (userLatitude && userLongitude) {
+        userLat = userLatitude;
+        userLon = userLongitude;
+      }
 
       // Build where clause
       const where: any = {};
@@ -187,72 +219,186 @@ export const vehicleRouter = createTRPCRouter({
         where.id = { lt: cursor };
       }
 
-      // Build orderBy
-      const orderBy: any = {};
-      if (sortBy === "name" || sortBy === "year") {
-        orderBy[sortBy] = sortOrder;
-      } else if (sortBy === "price") {
-        orderBy.price = sortOrder;
-      } else {
-        orderBy[sortBy] = sortOrder;
+      // Check if we should use distance filtering
+      const useDistanceFilter = userLat && userLon && maxDistanceMiles;
+      
+      if (useDistanceFilter) {
+        // Add requirement that owner has geolocation data
+        where.owner = {
+          ...where.owner,
+          latitude: { not: null },
+          longitude: { not: null },
+        };
       }
 
-      // Fetch vehicles
-      const vehicles = await ctx.db.vehicle.findMany({
-        where,
-        take: limit + 1, // Fetch one extra to determine if there's a next page
-        skip: skip ?? undefined, // Use skip for offset-based pagination
-        orderBy,
-        include: {
-          make: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-          model: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-          owner: {
-            select: {
-              id: true,
-              email: true,
-              firstName: true,
-              lastName: true,
-              postcode: true,
-              city: true,
-              country: {
+      // Build orderBy
+      const orderBy: any = 
+        sortBy === "name"
+          ? { name: sortOrder }
+          : sortBy === "price"
+          ? { price: sortOrder }
+          : { [sortBy]: sortOrder };
+
+      // Fetch vehicles with distance filtering if applicable
+      let vehicles;
+      
+      if (useDistanceFilter) {
+        // Use raw SQL with PostGIS for distance filtering
+        const distanceSQL = getPostGISDistanceSQL(userLat, userLon, "miles", "u");
+        const dwithinFilter = getPostGISDWithinFilter(userLat, userLon, maxDistanceMiles, "miles", "u");
+
+        // Build WHERE conditions
+        const statusCondition = status ? Prisma.sql`AND v.status = ${status}::text::"VehicleStatus"` : Prisma.empty;
+        const makeCondition = makeIds && makeIds.length > 0 
+          ? Prisma.sql`AND v."makeId" = ANY(${makeIds}::text[])` 
+          : makeId 
+          ? Prisma.sql`AND v."makeId" = ${makeId}` 
+          : Prisma.empty;
+        const modelCondition = modelId ? Prisma.sql`AND v."modelId" = ${modelId}` : Prisma.empty;
+        
+        // Build ORDER BY clause
+        let orderByClause;
+        if (sortBy === "distance" || sortByDistance) {
+          orderByClause = Prisma.sql`distance ASC`;
+        } else if (sortBy === "name") {
+          orderByClause = sortOrder === "asc" ? Prisma.sql`v.name ASC` : Prisma.sql`v.name DESC`;
+        } else if (sortBy === "price") {
+          orderByClause = sortOrder === "asc" ? Prisma.sql`v.price ASC NULLS LAST` : Prisma.sql`v.price DESC NULLS LAST`;
+        } else if (sortBy === "updatedAt") {
+          orderByClause = sortOrder === "asc" ? Prisma.sql`v."updatedAt" ASC` : Prisma.sql`v."updatedAt" DESC`;
+        } else {
+          // Default to createdAt
+          orderByClause = sortOrder === "asc" ? Prisma.sql`v."createdAt" ASC` : Prisma.sql`v."createdAt" DESC`;
+        }
+        
+        // Execute raw query with PostGIS
+        const rawVehicles = await ctx.db.$queryRaw<Array<any>>`
+          SELECT 
+            v.*,
+            (${Prisma.raw(distanceSQL)}) as distance
+          FROM "Vehicle" v
+          INNER JOIN "User" u ON v."ownerId" = u.id
+          WHERE 
+            u."latitude" IS NOT NULL 
+            AND u."longitude" IS NOT NULL
+            AND ${Prisma.raw(dwithinFilter)}
+            ${statusCondition}
+            ${makeCondition}
+            ${modelCondition}
+          ORDER BY ${orderByClause}
+          LIMIT ${limit + 1}
+          OFFSET ${skip ?? 0}
+        `;
+
+        // Fetch related data for each vehicle
+        const vehicleIds = rawVehicles.map((v: any) => v.id);
+        
+        if (vehicleIds.length > 0) {
+          const vehiclesWithRelations = await ctx.db.vehicle.findMany({
+            where: { id: { in: vehicleIds } },
+            include: {
+              make: { select: { id: true, name: true } },
+              model: { select: { id: true, name: true } },
+              owner: {
                 select: {
                   id: true,
-                  name: true,
+                  email: true,
+                  firstName: true,
+                  lastName: true,
+                  postcode: true,
+                  city: true,
+                  latitude: true,
+                  longitude: true,
+                  country: { select: { id: true, name: true } },
+                },
+              },
+              media: {
+                where: {
+                  isPrimary: true,
+                  isVisible: true,
+                  status: "READY",
+                },
+                take: 1,
+                select: {
+                  id: true,
+                  publishedUrl: true,
+                  originalUrl: true,
+                  type: true,
+                },
+              },
+              _count: { select: { media: true } },
+            },
+          });
+
+          // Merge distance data with relations, maintaining order
+          const vehicleMap = new Map(vehiclesWithRelations.map(v => [v.id, v]));
+          vehicles = rawVehicles.map((rv: any) => {
+            const vehicle = vehicleMap.get(rv.id);
+            return vehicle ? { ...vehicle, distance: rv.distance } : null;
+          }).filter(Boolean);
+        } else {
+          vehicles = [];
+        }
+      } else {
+        // Standard Prisma query without distance filtering
+        vehicles = await ctx.db.vehicle.findMany({
+          where,
+          take: limit + 1, // Fetch one extra to determine if there's a next page
+          skip: skip ?? undefined, // Use skip for offset-based pagination
+          orderBy,
+          include: {
+            make: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            model: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            owner: {
+              select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                postcode: true,
+                city: true,
+                latitude: true,
+                longitude: true,
+                country: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
                 },
               },
             },
-          },
-          media: {
-            where: {
-              isPrimary: true,
-              isVisible: true,
-              status: "READY",
+            media: {
+              where: {
+                isPrimary: true,
+                isVisible: true,
+                status: "READY",
+              },
+              take: 1,
+              select: {
+                id: true,
+                publishedUrl: true,
+                originalUrl: true,
+                type: true,
+              },
             },
-            take: 1,
-            select: {
-              id: true,
-              publishedUrl: true,
-              originalUrl: true,
-              type: true,
+            _count: {
+              select: {
+                media: true,
+              },
             },
           },
-          _count: {
-            select: {
-              media: true,
-            },
-          },
-        },
-      });
+        });
+      }
 
       // Determine if there's a next page
       let nextCursor: string | undefined = undefined;
@@ -262,9 +408,40 @@ export const vehicleRouter = createTRPCRouter({
       }
 
       // OPTIMIZATION: Only get total count if requested (expensive query)
-      const totalCount = input.includeTotalCount
-        ? await ctx.db.vehicle.count({ where })
-        : undefined;
+      let totalCount: number | undefined = undefined;
+      
+      if (input.includeTotalCount) {
+        if (useDistanceFilter && userLat && userLon && maxDistanceMiles) {
+          // Use raw SQL count query with PostGIS distance filter
+          const dwithinFilter = getPostGISDWithinFilter(userLat, userLon, maxDistanceMiles, "miles", "u");
+          
+          const statusCondition = status ? Prisma.sql`AND v.status = ${status}::text::"VehicleStatus"` : Prisma.empty;
+          const makeCondition = makeIds && makeIds.length > 0 
+            ? Prisma.sql`AND v."makeId" = ANY(${makeIds}::text[])` 
+            : makeId 
+            ? Prisma.sql`AND v."makeId" = ${makeId}` 
+            : Prisma.empty;
+          const modelCondition = modelId ? Prisma.sql`AND v."modelId" = ${modelId}` : Prisma.empty;
+          
+          const countResult = await ctx.db.$queryRaw<Array<{ count: bigint }>>`
+            SELECT COUNT(*) as count
+            FROM "Vehicle" v
+            INNER JOIN "User" u ON v."ownerId" = u.id
+            WHERE 
+              u."latitude" IS NOT NULL 
+              AND u."longitude" IS NOT NULL
+              AND ${Prisma.raw(dwithinFilter)}
+              ${statusCondition}
+              ${makeCondition}
+              ${modelCondition}
+          `;
+          
+          totalCount = Number(countResult[0]?.count ?? 0);
+        } else {
+          // Standard Prisma count without distance filtering
+          totalCount = await ctx.db.vehicle.count({ where });
+        }
+      }
 
       return {
         vehicles,

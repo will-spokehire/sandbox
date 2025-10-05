@@ -23,6 +23,7 @@ export type VehicleListItem = Vehicle & {
   _count: {
     media: number;
   };
+  distance?: number; // Distance in miles (when filtering by location)
 };
 
 /**

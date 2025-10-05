@@ -88,6 +88,13 @@ model User {
     postcode          String?
     countryId         String?    // Reference to Country
     country           Country?   @relation(fields: [countryId], references: [id])
+    
+    // Geolocation (for distance-based filtering)
+    latitude          Float?
+    longitude         Float?
+    geoPoint          Unsupported("geometry(Point, 4326)")?  // PostGIS POINT type
+    geoUpdatedAt      DateTime?  // Track when geocoding was last performed
+    geoSource         String?    // 'postcodes.io', 'manual', etc.
 
     // Metadata
     lastLoginAt       DateTime?
@@ -104,6 +111,8 @@ model User {
     @@index([lastName])
     @@index([phone])
     @@index([postcode])
+    @@index([latitude, longitude])
+    // Note: GIST spatial index on geoPoint is created via raw SQL migration
 }
 
 // Steering Types Lookup Table

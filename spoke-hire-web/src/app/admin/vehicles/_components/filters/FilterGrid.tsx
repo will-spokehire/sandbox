@@ -8,6 +8,8 @@ import { SingleSelectFilter } from "./SingleSelectFilter";
 import { MultiSelectFilter } from "./MultiSelectFilter";
 import { YearRangeFilter } from "./YearRangeFilter";
 import { FilterActions } from "./FilterActions";
+import { DistanceFilter } from "./DistanceFilter";
+import { SortFilter } from "./SortFilter";
 import type { FilterOption } from "./types";
 
 interface FilterGridProps {
@@ -20,6 +22,10 @@ interface FilterGridProps {
   interiorColors: string[];
   yearFrom?: string;
   yearTo?: string;
+  postcode?: string;
+  maxDistance?: number;
+  sortBy: string;
+  sortOrder: "asc" | "desc";
   hasActiveFilters: boolean;
   
   // Handlers
@@ -31,6 +37,9 @@ interface FilterGridProps {
   onInteriorColorsChange: (colors: string[]) => void;
   onYearFromChange: (year?: string) => void;
   onYearToChange: (year?: string) => void;
+  onPostcodeChange: (postcode: string) => void;
+  onMaxDistanceChange: (distance?: number) => void;
+  onSortChange: (sortBy: string, sortOrder: "asc" | "desc") => void;
   onClearFilters: () => void;
 }
 
@@ -48,6 +57,10 @@ export function FilterGrid({
   interiorColors,
   yearFrom,
   yearTo,
+  postcode,
+  maxDistance,
+  sortBy,
+  sortOrder,
   hasActiveFilters,
   onStatusChange,
   onMakeIdsChange,
@@ -57,6 +70,9 @@ export function FilterGrid({
   onInteriorColorsChange,
   onYearFromChange,
   onYearToChange,
+  onPostcodeChange,
+  onMaxDistanceChange,
+  onSortChange,
   onClearFilters,
 }: FilterGridProps) {
   // Fetch filter options with caching (server-side cache + client staleTime)
@@ -226,6 +242,22 @@ export function FilterGrid({
         yearTo={yearTo}
         onYearFromChange={onYearFromChange}
         onYearToChange={onYearToChange}
+      />
+
+      {/* Distance Filter */}
+      <DistanceFilter
+        postcode={postcode}
+        maxDistance={maxDistance}
+        onPostcodeChange={onPostcodeChange}
+        onMaxDistanceChange={onMaxDistanceChange}
+      />
+
+      {/* Sort Filter */}
+      <SortFilter
+        sortBy={sortBy}
+        sortOrder={sortOrder}
+        onSortChange={onSortChange}
+        hasDistanceFilter={!!postcode && !!maxDistance}
       />
 
       {/* Clear Filters */}

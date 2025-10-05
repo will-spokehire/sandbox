@@ -48,7 +48,9 @@
     "migrate-to-production": "tsx scripts/migrate-to-production.ts",
     "verify-production": "tsx scripts/verify-production.ts",
     "fix-schema": "bash scripts/fix-schema-migration.sh",
-    "check-tables": "tsx scripts/check-missing-tables.ts"
+    "check-tables": "tsx scripts/check-missing-tables.ts",
+    "backfill-geolocation": "tsx scripts/backfill-user-geolocation.ts",
+    "test-distance-filtering": "tsx scripts/test-distance-filtering.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

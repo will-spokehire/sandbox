@@ -40,6 +40,11 @@ function VehiclesPageContent() {
   const interiorColors = searchParams.get("interiorColors")?.split(",").filter(Boolean) ?? [];
   const yearFrom = searchParams.get("yearFrom") ?? undefined;
   const yearTo = searchParams.get("yearTo") ?? undefined;
+  const postcode = searchParams.get("postcode") ?? undefined;
+  const maxDistance = searchParams.get("maxDistance") ? parseInt(searchParams.get("maxDistance")!) : undefined;
+  const sortBy = searchParams.get("sortBy") ?? "createdAt";
+  const sortOrder = (searchParams.get("sortOrder") as "asc" | "desc") ?? "desc";
+  const sortByDistance = searchParams.get("sortByDistance") === "true" || sortBy === "distance";
   const viewMode = (searchParams.get("viewMode") as "table" | "cards") ?? "table";
   const currentPage = parseInt(searchParams.get("page") ?? "1", 10);
 
@@ -70,8 +75,11 @@ function VehiclesPageContent() {
       interiorColors: interiorColors.length > 0 ? interiorColors : undefined,
       yearFrom,
       yearTo,
-      sortBy: "createdAt",
-      sortOrder: "desc",
+      userPostcode: postcode,
+      maxDistanceMiles: maxDistance,
+      sortByDistance,
+      sortBy: sortBy as any,
+      sortOrder,
       // OPTIMIZATION: Only get count on first page
       includeTotalCount: currentPage === 1,
     },
@@ -109,6 +117,11 @@ function VehiclesPageContent() {
     interiorColors?: string[];
     yearFrom?: string;
     yearTo?: string;
+    postcode?: string;
+    maxDistance?: number;
+    sortBy?: string;
+    sortOrder?: "asc" | "desc";
+    sortByDistance?: boolean;
     viewMode?: "table" | "cards";
     page?: number;
   }) => {
@@ -142,6 +155,21 @@ function VehiclesPageContent() {
     if (updates.yearTo !== undefined) {
       updates.yearTo ? params.set("yearTo", updates.yearTo) : params.delete("yearTo");
     }
+    if (updates.postcode !== undefined) {
+      updates.postcode ? params.set("postcode", updates.postcode) : params.delete("postcode");
+    }
+    if (updates.maxDistance !== undefined) {
+      updates.maxDistance ? params.set("maxDistance", updates.maxDistance.toString()) : params.delete("maxDistance");
+    }
+    if (updates.sortBy !== undefined) {
+      updates.sortBy !== "createdAt" ? params.set("sortBy", updates.sortBy) : params.delete("sortBy");
+    }
+    if (updates.sortOrder !== undefined) {
+      updates.sortOrder !== "desc" ? params.set("sortOrder", updates.sortOrder) : params.delete("sortOrder");
+    }
+    if (updates.sortByDistance !== undefined) {
+      updates.sortByDistance ? params.set("sortByDistance", "true") : params.delete("sortByDistance");
+    }
     if (updates.viewMode !== undefined) {
       updates.viewMode !== "table" ? params.set("viewMode", updates.viewMode) : params.delete("viewMode");
     }
@@ -154,7 +182,8 @@ function VehiclesPageContent() {
                           updates.makeIds !== undefined || updates.modelId !== undefined ||
                           updates.collectionIds !== undefined || updates.exteriorColors !== undefined ||
                           updates.interiorColors !== undefined || updates.yearFrom !== undefined ||
-                          updates.yearTo !== undefined;
+                          updates.yearTo !== undefined || updates.postcode !== undefined ||
+                          updates.maxDistance !== undefined;
     
     if (isFilterChange && updates.page === undefined) {
       params.delete("page"); // Reset to page 1 when filters change
@@ -178,7 +207,7 @@ function VehiclesPageContent() {
   };
 
   const handleClearFilters = () => {
-    // Clear all filters at once
+    // Clear all filters at once, keeping only the default status
     router.push("/admin/vehicles?status=PUBLISHED", { scroll: false });
   };
 
@@ -189,7 +218,7 @@ function VehiclesPageContent() {
   };
 
   // Check if any filters are active
-  const hasFilters = !!(searchInput || status !== "PUBLISHED" || makeIds.length > 0 || modelId || collectionIds.length > 0 || exteriorColors.length > 0 || interiorColors.length > 0 || yearFrom || yearTo);
+  const hasFilters = !!(searchInput || status !== "PUBLISHED" || makeIds.length > 0 || modelId || collectionIds.length > 0 || exteriorColors.length > 0 || interiorColors.length > 0 || yearFrom || yearTo || postcode || maxDistance);
 
   if (isAuthLoading || !user) {
     return (
@@ -253,6 +282,10 @@ function VehiclesPageContent() {
             interiorColors={interiorColors}
             yearFrom={yearFrom}
             yearTo={yearTo}
+            postcode={postcode}
+            maxDistance={maxDistance}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
             onSearchChange={(search) => updateURL({ search })}
             onStatusChange={(status) => updateURL({ status })}
             onMakeIdsChange={(makeIds) => updateURL({ makeIds })}
@@ -262,6 +295,9 @@ function VehiclesPageContent() {
             onInteriorColorsChange={(interiorColors) => updateURL({ interiorColors })}
             onYearFromChange={(yearFrom) => updateURL({ yearFrom })}
             onYearToChange={(yearTo) => updateURL({ yearTo })}
+            onPostcodeChange={(postcode) => updateURL({ postcode })}
+            onMaxDistanceChange={(maxDistance) => updateURL({ maxDistance })}
+            onSortChange={(sortBy, sortOrder) => updateURL({ sortBy, sortOrder })}
             onClearFilters={handleClearFilters}
           />
 

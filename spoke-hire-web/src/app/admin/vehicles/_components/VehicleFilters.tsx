@@ -20,6 +20,10 @@ interface VehicleFiltersProps {
   interiorColors?: string[];
   yearFrom?: string;
   yearTo?: string;
+  postcode?: string;
+  maxDistance?: number;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
   onSearchChange: (search: string) => void;
   onStatusChange: (status?: VehicleStatus) => void;
   onMakeIdsChange: (makeIds: string[]) => void;
@@ -29,6 +33,9 @@ interface VehicleFiltersProps {
   onInteriorColorsChange: (colors: string[]) => void;
   onYearFromChange: (year?: string) => void;
   onYearToChange: (year?: string) => void;
+  onPostcodeChange: (postcode: string) => void;
+  onMaxDistanceChange: (distance?: number) => void;
+  onSortChange: (sortBy: string, sortOrder: "asc" | "desc") => void;
   onClearFilters: () => void;
 }
 
@@ -48,6 +55,10 @@ export function VehicleFilters({
   interiorColors = [],
   yearFrom,
   yearTo,
+  postcode,
+  maxDistance,
+  sortBy = "createdAt",
+  sortOrder = "desc",
   onSearchChange,
   onStatusChange,
   onMakeIdsChange,
@@ -57,6 +68,9 @@ export function VehicleFilters({
   onInteriorColorsChange,
   onYearFromChange,
   onYearToChange,
+  onPostcodeChange,
+  onMaxDistanceChange,
+  onSortChange,
   onClearFilters,
 }: VehicleFiltersProps) {
   const [searchInput, setSearchInput] = useState(search);
@@ -71,7 +85,9 @@ export function VehicleFilters({
     exteriorColors.length > 0 ||
     interiorColors.length > 0 ||
     yearFrom ||
-    yearTo
+    yearTo ||
+    postcode ||
+    maxDistance
   );
 
   // Count active non-search filters for badge
@@ -83,7 +99,9 @@ export function VehicleFilters({
     exteriorColors.length +
     interiorColors.length +
     (yearFrom ? 1 : 0) +
-    (yearTo ? 1 : 0);
+    (yearTo ? 1 : 0) +
+    (postcode ? 1 : 0) +
+    (maxDistance ? 1 : 0);
 
   const handleSearchChange = (value: string) => {
     setSearchInput(value);
@@ -121,6 +139,10 @@ export function VehicleFilters({
               interiorColors={interiorColors}
               yearFrom={yearFrom}
               yearTo={yearTo}
+              postcode={postcode}
+              maxDistance={maxDistance}
+              sortBy={sortBy}
+              sortOrder={sortOrder}
               hasActiveFilters={hasActiveFilters}
               onStatusChange={onStatusChange}
               onMakeIdsChange={onMakeIdsChange}
@@ -130,6 +152,9 @@ export function VehicleFilters({
               onInteriorColorsChange={onInteriorColorsChange}
               onYearFromChange={onYearFromChange}
               onYearToChange={onYearToChange}
+              onPostcodeChange={onPostcodeChange}
+              onMaxDistanceChange={onMaxDistanceChange}
+              onSortChange={onSortChange}
               onClearFilters={handleClearFilters}
             />
           </MobileFilters>
@@ -145,6 +170,10 @@ export function VehicleFilters({
               interiorColors={interiorColors}
               yearFrom={yearFrom}
               yearTo={yearTo}
+              postcode={postcode}
+              maxDistance={maxDistance}
+              sortBy={sortBy}
+              sortOrder={sortOrder}
               hasActiveFilters={hasActiveFilters}
               onStatusChange={onStatusChange}
               onMakeIdsChange={onMakeIdsChange}
@@ -154,6 +183,9 @@ export function VehicleFilters({
               onInteriorColorsChange={onInteriorColorsChange}
               onYearFromChange={onYearFromChange}
               onYearToChange={onYearToChange}
+              onPostcodeChange={onPostcodeChange}
+              onMaxDistanceChange={onMaxDistanceChange}
+              onSortChange={onSortChange}
               onClearFilters={handleClearFilters}
             />
           </DesktopFilters>
