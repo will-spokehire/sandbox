@@ -35,6 +35,8 @@ export interface ListVehiclesParams {
   numberOfSeats?: number[];
   gearboxTypes?: string[];
   steeringIds?: string[];
+  countryIds?: string[];
+  counties?: string[];
   userPostcode?: string;
   userLatitude?: number;
   userLongitude?: number;
@@ -113,6 +115,8 @@ export class VehicleService {
       numberOfSeats: params.numberOfSeats,
       gearboxTypes: params.gearboxTypes,
       steeringIds: params.steeringIds,
+      countryIds: params.countryIds,
+      counties: params.counties,
       search: params.search,
     };
 

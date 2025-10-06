@@ -24,6 +24,8 @@ export interface VehicleFilters {
   numberOfSeats?: number[];
   gearboxTypes?: string[];
   steeringIds?: string[];
+  countryIds?: string[];
+  counties?: string[];
   search?: string;
 }
 
@@ -118,6 +120,20 @@ export class VehicleQueryBuilder {
     if (filters.steeringIds && filters.steeringIds.length > 0) {
       conditions.push(
         Prisma.sql`v."steeringId" = ANY(${filters.steeringIds}::text[])`
+      );
+    }
+
+    // Country filter (via owner)
+    if (filters.countryIds && filters.countryIds.length > 0) {
+      conditions.push(
+        Prisma.sql`u."countryId" = ANY(${filters.countryIds}::text[])`
+      );
+    }
+
+    // County filter (via owner)
+    if (filters.counties && filters.counties.length > 0) {
+      conditions.push(
+        Prisma.sql`u.county = ANY(${filters.counties}::text[])`
       );
     }
 
@@ -355,6 +371,22 @@ export class VehicleQueryBuilder {
 
     if (filters.steeringIds && filters.steeringIds.length > 0) {
       where.steeringId = { in: filters.steeringIds };
+    }
+
+    // Country filter (via owner)
+    if (filters.countryIds && filters.countryIds.length > 0) {
+      where.owner = {
+        ...where.owner,
+        countryId: { in: filters.countryIds },
+      };
+    }
+
+    // County filter (via owner)
+    if (filters.counties && filters.counties.length > 0) {
+      where.owner = {
+        ...where.owner,
+        county: { in: filters.counties },
+      };
     }
 
     if (filters.search && filters.search.trim()) {

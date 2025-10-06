@@ -23,6 +23,8 @@ interface VehicleFiltersProps {
   numberOfSeats?: number[];
   gearboxTypes?: string[];
   steeringIds?: string[];
+  countryIds?: string[];
+  counties?: string[];
   postcode?: string;
   maxDistance?: number;
   sortBy?: string;
@@ -39,6 +41,8 @@ interface VehicleFiltersProps {
   onNumberOfSeatsChange: (seats: number[]) => void;
   onGearboxTypesChange: (types: string[]) => void;
   onSteeringIdsChange: (ids: string[]) => void;
+  onCountryIdsChange: (ids: string[]) => void;
+  onCountiesChange: (counties: string[]) => void;
   onPostcodeChange: (postcode: string) => void;
   onMaxDistanceChange: (distance?: number) => void;
   onPostcodeAndDistanceChange?: (postcode: string, distance: number) => void;
@@ -65,6 +69,8 @@ export function VehicleFilters({
   numberOfSeats = [],
   gearboxTypes = [],
   steeringIds = [],
+  countryIds = [],
+  counties = [],
   postcode,
   maxDistance,
   sortBy = "createdAt",
@@ -81,6 +87,8 @@ export function VehicleFilters({
   onNumberOfSeatsChange,
   onGearboxTypesChange,
   onSteeringIdsChange,
+  onCountryIdsChange,
+  onCountiesChange,
   onPostcodeChange,
   onMaxDistanceChange,
   onPostcodeAndDistanceChange,
@@ -103,6 +111,8 @@ export function VehicleFilters({
     numberOfSeats.length > 0 ||
     gearboxTypes.length > 0 ||
     steeringIds.length > 0 ||
+    countryIds.length > 0 ||
+    counties.length > 0 ||
     postcode ||
     maxDistance
   );
@@ -120,6 +130,8 @@ export function VehicleFilters({
     numberOfSeats.length +
     gearboxTypes.length +
     steeringIds.length +
+    countryIds.length +
+    counties.length +
     (postcode ? 1 : 0) +
     (maxDistance ? 1 : 0);
 
@@ -162,6 +174,8 @@ export function VehicleFilters({
               numberOfSeats={numberOfSeats}
               gearboxTypes={gearboxTypes}
               steeringIds={steeringIds}
+              countryIds={countryIds}
+              counties={counties}
               postcode={postcode}
               maxDistance={maxDistance}
               sortBy={sortBy}
@@ -178,6 +192,8 @@ export function VehicleFilters({
               onNumberOfSeatsChange={onNumberOfSeatsChange}
               onGearboxTypesChange={onGearboxTypesChange}
               onSteeringIdsChange={onSteeringIdsChange}
+              onCountryIdsChange={onCountryIdsChange}
+              onCountiesChange={onCountiesChange}
               onPostcodeChange={onPostcodeChange}
               onMaxDistanceChange={onMaxDistanceChange}
               onPostcodeAndDistanceChange={onPostcodeAndDistanceChange}
@@ -200,6 +216,8 @@ export function VehicleFilters({
               numberOfSeats={numberOfSeats}
               gearboxTypes={gearboxTypes}
               steeringIds={steeringIds}
+              countryIds={countryIds}
+              counties={counties}
               postcode={postcode}
               maxDistance={maxDistance}
               sortBy={sortBy}
@@ -216,6 +234,8 @@ export function VehicleFilters({
               onNumberOfSeatsChange={onNumberOfSeatsChange}
               onGearboxTypesChange={onGearboxTypesChange}
               onSteeringIdsChange={onSteeringIdsChange}
+              onCountryIdsChange={onCountryIdsChange}
+              onCountiesChange={onCountiesChange}
               onPostcodeChange={onPostcodeChange}
               onMaxDistanceChange={onMaxDistanceChange}
               onPostcodeAndDistanceChange={onPostcodeAndDistanceChange}

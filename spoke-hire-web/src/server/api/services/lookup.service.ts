@@ -42,6 +42,8 @@ export class LookupService {
       seats,
       gearboxTypes,
       steeringTypes,
+      countries,
+      counties,
     ] = await Promise.all([
       this.repository.getAllMakes(),
       this.repository.getAllCollections(),
@@ -52,6 +54,12 @@ export class LookupService {
       this.repository.getDistinctSeats(),
       this.repository.getDistinctGearboxTypes(),
       this.repository.getAllSteeringTypes(),
+
+      // Get all countries
+      this.repository.getAllCountries(),
+
+      // Get distinct counties
+      this.repository.getDistinctCounties(),
     ]);
 
     const result = {
@@ -67,6 +75,8 @@ export class LookupService {
       seats,
       gearboxTypes,
       steeringTypes,
+      countries,
+      counties,
     };
 
     // Cache for 5 minutes

@@ -14,6 +14,7 @@ type DbClient = {
   collection: any;
   steeringType: any;
   vehicle: any;
+  country: any;
   $queryRaw: any;
 };
 
@@ -107,7 +108,7 @@ export class LookupRepository {
         WHERE "exteriorColour" IS NOT NULL
         ORDER BY "exteriorColour" ASC
       `;
-      return result.map((r) => r.exteriorColour).filter(Boolean);
+      return result.map((r: any) => r.exteriorColour).filter(Boolean);
     } catch (error) {
       throw new DatabaseError("Failed to fetch exterior colors", error);
     }
@@ -124,7 +125,7 @@ export class LookupRepository {
         WHERE "interiorColour" IS NOT NULL
         ORDER BY "interiorColour" ASC
       `;
-      return result.map((r) => r.interiorColour).filter(Boolean);
+      return result.map((r: any) => r.interiorColour).filter(Boolean);
     } catch (error) {
       throw new DatabaseError("Failed to fetch interior colors", error);
     }
@@ -140,7 +141,7 @@ export class LookupRepository {
         FROM "Vehicle"
         ORDER BY "year" DESC
       `;
-      return result.map((r) => r.year);
+      return result.map((r: any) => r.year);
     } catch (error) {
       throw new DatabaseError("Failed to fetch years", error);
     }
@@ -157,7 +158,7 @@ export class LookupRepository {
         WHERE "numberOfSeats" IS NOT NULL
         ORDER BY "numberOfSeats" ASC
       `;
-      return result.map((r) => r.numberOfSeats).filter((s) => s !== null);
+      return result.map((r: any) => r.numberOfSeats).filter((s: any) => s !== null);
     } catch (error) {
       throw new DatabaseError("Failed to fetch seat counts", error);
     }
@@ -174,7 +175,7 @@ export class LookupRepository {
         WHERE gearbox IS NOT NULL
         ORDER BY gearbox ASC
       `;
-      return result.map((r) => r.gearbox).filter(Boolean);
+      return result.map((r: any) => r.gearbox).filter(Boolean);
     } catch (error) {
       throw new DatabaseError("Failed to fetch gearbox types", error);
     }
@@ -191,6 +192,43 @@ export class LookupRepository {
       });
     } catch (error) {
       throw new DatabaseError("Failed to fetch status counts", error);
+    }
+  }
+
+  /**
+   * Get all active countries
+   */
+  async getAllCountries() {
+    try {
+      return await this.db.country.findMany({
+        where: { isActive: true },
+        orderBy: { name: "asc" },
+        select: {
+          id: true,
+          name: true,
+          code: true,
+        },
+      });
+    } catch (error) {
+      throw new DatabaseError("Failed to fetch countries", error);
+    }
+  }
+
+  /**
+   * Get distinct counties from users
+   */
+  async getDistinctCounties() {
+    try {
+      const result = await this.db.$queryRaw<Array<{ county: string }>>`
+        SELECT DISTINCT u.county
+        FROM "User" u
+        INNER JOIN "Vehicle" v ON v."ownerId" = u.id
+        WHERE u.county IS NOT NULL
+        ORDER BY u.county ASC
+      `;
+      return result.map((r: any) => r.county).filter(Boolean);
+    } catch (error) {
+      throw new DatabaseError("Failed to fetch counties", error);
     }
   }
 }

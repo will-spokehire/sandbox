@@ -25,6 +25,8 @@ interface FilterGridProps {
   numberOfSeats: number[];
   gearboxTypes: string[];
   steeringIds: string[];
+  countryIds: string[];
+  counties: string[];
   postcode?: string;
   maxDistance?: number;
   sortBy: string;
@@ -43,6 +45,8 @@ interface FilterGridProps {
   onNumberOfSeatsChange: (seats: number[]) => void;
   onGearboxTypesChange: (types: string[]) => void;
   onSteeringIdsChange: (ids: string[]) => void;
+  onCountryIdsChange: (ids: string[]) => void;
+  onCountiesChange: (counties: string[]) => void;
   onPostcodeChange: (postcode: string) => void;
   onMaxDistanceChange: (distance?: number) => void;
   onPostcodeAndDistanceChange?: (postcode: string, distance: number) => void;
@@ -67,6 +71,8 @@ export function FilterGrid({
   numberOfSeats,
   gearboxTypes,
   steeringIds,
+  countryIds,
+  counties,
   postcode,
   maxDistance,
   sortBy,
@@ -83,6 +89,8 @@ export function FilterGrid({
   onNumberOfSeatsChange,
   onGearboxTypesChange,
   onSteeringIdsChange,
+  onCountryIdsChange,
+  onCountiesChange,
   onPostcodeChange,
   onMaxDistanceChange,
   onPostcodeAndDistanceChange,
@@ -151,6 +159,18 @@ export function FilterGrid({
     filterOptions?.steeringTypes.map((steering: { id: string; name: string }) => ({
       id: steering.id,
       name: steering.name,
+    })) ?? [];
+
+  const countryOptions: FilterOption[] =
+    filterOptions?.countries.map((country: { id: string; name: string; code: string | null }) => ({
+      id: country.id,
+      name: country.name,
+    })) ?? [];
+
+  const countyOptions: FilterOption[] =
+    filterOptions?.counties.map((county: string) => ({
+      id: county,
+      name: county,
     })) ?? [];
 
   const handleStatusChange = (value?: string) => {
@@ -309,6 +329,30 @@ export function FilterGrid({
         onChange={onSteeringIdsChange}
         renderOption={renderStandardOption}
         searchPlaceholder="Search steering..."
+        className="md:w-[180px]"
+      />
+
+      {/* Country Filter */}
+      <MultiSelectFilter
+        label="Select Countries"
+        placeholder="Countries..."
+        options={countryOptions}
+        selectedIds={countryIds}
+        onChange={onCountryIdsChange}
+        renderOption={renderStandardOption}
+        searchPlaceholder="Search countries..."
+        className="md:w-[180px]"
+      />
+
+      {/* County Filter */}
+      <MultiSelectFilter
+        label="Select Counties"
+        placeholder="Counties..."
+        options={countyOptions}
+        selectedIds={counties}
+        onChange={onCountiesChange}
+        renderOption={renderStandardOption}
+        searchPlaceholder="Search counties..."
         className="md:w-[180px]"
       />
 

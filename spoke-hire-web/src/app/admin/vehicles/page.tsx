@@ -43,6 +43,8 @@ function VehiclesPageContent() {
   const numberOfSeats = searchParams.get("numberOfSeats")?.split(",").filter(Boolean).map(Number) ?? [];
   const gearboxTypes = searchParams.get("gearboxTypes")?.split(",").filter(Boolean) ?? [];
   const steeringIds = searchParams.get("steeringIds")?.split(",").filter(Boolean) ?? [];
+  const countryIds = searchParams.get("countryIds")?.split(",").filter(Boolean) ?? [];
+  const counties = searchParams.get("counties")?.split(",").filter(Boolean) ?? [];
   const postcode = searchParams.get("postcode") ?? undefined;
   const maxDistance = searchParams.get("maxDistance") ? parseInt(searchParams.get("maxDistance")!) : undefined;
   const sortBy = searchParams.get("sortBy") ?? "createdAt";
@@ -81,6 +83,8 @@ function VehiclesPageContent() {
       numberOfSeats: numberOfSeats.length > 0 ? numberOfSeats : undefined,
       gearboxTypes: gearboxTypes.length > 0 ? gearboxTypes : undefined,
       steeringIds: steeringIds.length > 0 ? steeringIds : undefined,
+      countryIds: countryIds.length > 0 ? countryIds : undefined,
+      counties: counties.length > 0 ? counties : undefined,
       userPostcode: postcode,
       maxDistanceMiles: maxDistance,
       sortByDistance,
@@ -126,6 +130,8 @@ function VehiclesPageContent() {
     numberOfSeats?: number[];
     gearboxTypes?: string[];
     steeringIds?: string[];
+    countryIds?: string[];
+    counties?: string[];
     postcode?: string;
     maxDistance?: number;
     sortBy?: string;
@@ -172,6 +178,12 @@ function VehiclesPageContent() {
     }
     if (updates.steeringIds !== undefined) {
       updates.steeringIds.length > 0 ? params.set("steeringIds", updates.steeringIds.join(",")) : params.delete("steeringIds");
+    }
+    if (updates.countryIds !== undefined) {
+      updates.countryIds.length > 0 ? params.set("countryIds", updates.countryIds.join(",")) : params.delete("countryIds");
+    }
+    if (updates.counties !== undefined) {
+      updates.counties.length > 0 ? params.set("counties", updates.counties.join(",")) : params.delete("counties");
     }
     if (updates.postcode !== undefined) {
       updates.postcode ? params.set("postcode", updates.postcode) : params.delete("postcode");
@@ -304,6 +316,8 @@ function VehiclesPageContent() {
             numberOfSeats={numberOfSeats}
             gearboxTypes={gearboxTypes}
             steeringIds={steeringIds}
+            countryIds={countryIds}
+            counties={counties}
             postcode={postcode}
             maxDistance={maxDistance}
             sortBy={sortBy}
@@ -318,6 +332,8 @@ function VehiclesPageContent() {
             onNumberOfSeatsChange={(numberOfSeats) => updateURL({ numberOfSeats })}
             onGearboxTypesChange={(gearboxTypes) => updateURL({ gearboxTypes })}
             onSteeringIdsChange={(steeringIds) => updateURL({ steeringIds })}
+            onCountryIdsChange={(countryIds) => updateURL({ countryIds })}
+            onCountiesChange={(counties) => updateURL({ counties })}
             onYearFromChange={(yearFrom) => updateURL({ yearFrom })}
             onYearToChange={(yearTo) => updateURL({ yearTo })}
             onPostcodeChange={(postcode) => updateURL({ postcode })}

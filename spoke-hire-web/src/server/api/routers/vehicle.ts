@@ -42,6 +42,8 @@ const listVehiclesInputSchema = z.object({
   numberOfSeats: z.array(z.number()).optional(),
   gearboxTypes: z.array(z.string()).optional(),
   steeringIds: z.array(z.string()).optional(),
+  countryIds: z.array(z.string()).optional(),
+  counties: z.array(z.string()).optional(),
 
   // Distance filtering
   userPostcode: z.string().optional(),
