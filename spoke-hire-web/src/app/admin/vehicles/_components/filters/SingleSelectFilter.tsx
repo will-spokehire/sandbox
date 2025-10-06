@@ -48,7 +48,9 @@ export function SingleSelectFilter({
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="all">{label}</SelectItem>
+        <SelectItem value="all">
+          <span className="font-medium">{label}</span>
+        </SelectItem>
         {options.map((option) => (
           <SelectItem key={option.value} value={option.value}>
             {option.label}

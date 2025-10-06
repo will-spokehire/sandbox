@@ -283,6 +283,31 @@ Check:
 - [PostgreSQL GIST Indexes](https://www.postgresql.org/docs/current/gist.html)
 - [Haversine Formula](https://en.wikipedia.org/wiki/Haversine_formula)
 
+## Bug Fixes
+
+### October 2025 - Filter Combination Issues
+
+**Issue**: When distance filtering was active, other filters (exterior color, interior color, collections, year range, search, etc.) were not being applied correctly. This caused:
+- Filters appearing to not work when distance search was enabled
+- Incorrect "No vehicles found" messages while showing results
+- Inconsistent behavior between distance and non-distance searches
+
+**Root Cause**: The raw SQL queries used for PostGIS distance filtering only included 3 filters (status, make, model) and were missing 7+ other filter types. The count query had the same issue.
+
+**Fix Applied**: Updated `vehicle.ts` router to include all filter conditions in both the main distance query and count query:
+- Added exterior/interior color filters using `ANY()` array matching
+- Added year range filters (yearFrom/yearTo)
+- Added price range filters (priceFrom/priceTo)
+- Added collection filter using `EXISTS` subquery for many-to-many relationship
+- Added search filter with OR logic across vehicle and owner fields
+- Added owner filter
+- Added year sorting option
+
+**Files Changed**:
+- `/spoke-hire-web/src/server/api/routers/vehicle.ts` (Lines 245-545)
+
+**Testing**: All filter combinations now work correctly with distance filtering. See `FILTERING_FIXES.md` for detailed testing recommendations.
+
 ## Support
 
 For issues or questions:

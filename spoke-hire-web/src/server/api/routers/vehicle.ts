@@ -240,14 +240,14 @@ export const vehicleRouter = createTRPCRouter({
           : { [sortBy]: sortOrder };
 
       // Fetch vehicles with distance filtering if applicable
-      let vehicles;
+      let vehicles: any[];
       
       if (useDistanceFilter) {
         // Use raw SQL with PostGIS for distance filtering
-        const distanceSQL = getPostGISDistanceSQL(userLat, userLon, "miles", "u");
-        const dwithinFilter = getPostGISDWithinFilter(userLat, userLon, maxDistanceMiles, "miles", "u");
+        const distanceSQL = getPostGISDistanceSQL(userLat!, userLon!, "miles", "u");
+        const dwithinFilter = getPostGISDWithinFilter(userLat!, userLon!, maxDistanceMiles!, "miles", "u");
 
-        // Build WHERE conditions
+        // Build WHERE conditions for all filters
         const statusCondition = status ? Prisma.sql`AND v.status = ${status}::text::"VehicleStatus"` : Prisma.empty;
         const makeCondition = makeIds && makeIds.length > 0 
           ? Prisma.sql`AND v."makeId" = ANY(${makeIds}::text[])` 
@@ -255,6 +255,49 @@ export const vehicleRouter = createTRPCRouter({
           ? Prisma.sql`AND v."makeId" = ${makeId}` 
           : Prisma.empty;
         const modelCondition = modelId ? Prisma.sql`AND v."modelId" = ${modelId}` : Prisma.empty;
+        
+        // Color filters
+        const exteriorColorCondition = exteriorColors && exteriorColors.length > 0
+          ? Prisma.sql`AND v."exteriorColour" = ANY(${exteriorColors}::text[])`
+          : Prisma.empty;
+        const interiorColorCondition = interiorColors && interiorColors.length > 0
+          ? Prisma.sql`AND v."interiorColour" = ANY(${interiorColors}::text[])`
+          : Prisma.empty;
+        
+        // Year range filter
+        const yearFromCondition = yearFrom ? Prisma.sql`AND v.year >= ${yearFrom}` : Prisma.empty;
+        const yearToCondition = yearTo ? Prisma.sql`AND v.year <= ${yearTo}` : Prisma.empty;
+        
+        // Price range filter
+        const priceFromCondition = priceFrom !== undefined ? Prisma.sql`AND v.price >= ${priceFrom}` : Prisma.empty;
+        const priceToCondition = priceTo !== undefined ? Prisma.sql`AND v.price <= ${priceTo}` : Prisma.empty;
+        
+        // Owner filter
+        const ownerCondition = ownerId ? Prisma.sql`AND v."ownerId" = ${ownerId}` : Prisma.empty;
+        
+        // Collection filter - needs a subquery since it's a many-to-many relationship
+        const collectionCondition = collectionIds && collectionIds.length > 0
+          ? Prisma.sql`AND EXISTS (
+              SELECT 1 FROM "VehicleCollection" vc 
+              WHERE vc."vehicleId" = v.id 
+              AND vc."collectionId" = ANY(${collectionIds}::text[])
+            )`
+          : Prisma.empty;
+        
+        // Search filter - needs OR logic across multiple fields
+        const searchCondition = search && search.trim()
+          ? Prisma.sql`AND (
+              v.name ILIKE ${`%${search}%`}
+              OR v.registration ILIKE ${`%${search}%`}
+              OR v.description ILIKE ${`%${search}%`}
+              OR EXISTS (SELECT 1 FROM "Make" m WHERE m.id = v."makeId" AND m.name ILIKE ${`%${search}%`})
+              OR EXISTS (SELECT 1 FROM "Model" mo WHERE mo.id = v."modelId" AND mo.name ILIKE ${`%${search}%`})
+              OR u.email ILIKE ${`%${search}%`}
+              OR u."firstName" ILIKE ${`%${search}%`}
+              OR u."lastName" ILIKE ${`%${search}%`}
+              OR u.phone ILIKE ${`%${search}%`}
+            )`
+          : Prisma.empty;
         
         // Build ORDER BY clause
         let orderByClause;
@@ -264,6 +307,8 @@ export const vehicleRouter = createTRPCRouter({
           orderByClause = sortOrder === "asc" ? Prisma.sql`v.name ASC` : Prisma.sql`v.name DESC`;
         } else if (sortBy === "price") {
           orderByClause = sortOrder === "asc" ? Prisma.sql`v.price ASC NULLS LAST` : Prisma.sql`v.price DESC NULLS LAST`;
+        } else if (sortBy === "year") {
+          orderByClause = sortOrder === "asc" ? Prisma.sql`v.year ASC NULLS LAST` : Prisma.sql`v.year DESC NULLS LAST`;
         } else if (sortBy === "updatedAt") {
           orderByClause = sortOrder === "asc" ? Prisma.sql`v."updatedAt" ASC` : Prisma.sql`v."updatedAt" DESC`;
         } else {
@@ -285,6 +330,15 @@ export const vehicleRouter = createTRPCRouter({
             ${statusCondition}
             ${makeCondition}
             ${modelCondition}
+            ${exteriorColorCondition}
+            ${interiorColorCondition}
+            ${yearFromCondition}
+            ${yearToCondition}
+            ${priceFromCondition}
+            ${priceToCondition}
+            ${ownerCondition}
+            ${collectionCondition}
+            ${searchCondition}
           ORDER BY ${orderByClause}
           LIMIT ${limit + 1}
           OFFSET ${skip ?? 0}
@@ -415,6 +469,7 @@ export const vehicleRouter = createTRPCRouter({
           // Use raw SQL count query with PostGIS distance filter
           const dwithinFilter = getPostGISDWithinFilter(userLat, userLon, maxDistanceMiles, "miles", "u");
           
+          // Build WHERE conditions for count query (same as main query)
           const statusCondition = status ? Prisma.sql`AND v.status = ${status}::text::"VehicleStatus"` : Prisma.empty;
           const makeCondition = makeIds && makeIds.length > 0 
             ? Prisma.sql`AND v."makeId" = ANY(${makeIds}::text[])` 
@@ -422,6 +477,43 @@ export const vehicleRouter = createTRPCRouter({
             ? Prisma.sql`AND v."makeId" = ${makeId}` 
             : Prisma.empty;
           const modelCondition = modelId ? Prisma.sql`AND v."modelId" = ${modelId}` : Prisma.empty;
+          
+          const exteriorColorCondition = exteriorColors && exteriorColors.length > 0
+            ? Prisma.sql`AND v."exteriorColour" = ANY(${exteriorColors}::text[])`
+            : Prisma.empty;
+          const interiorColorCondition = interiorColors && interiorColors.length > 0
+            ? Prisma.sql`AND v."interiorColour" = ANY(${interiorColors}::text[])`
+            : Prisma.empty;
+          
+          const yearFromCondition = yearFrom ? Prisma.sql`AND v.year >= ${yearFrom}` : Prisma.empty;
+          const yearToCondition = yearTo ? Prisma.sql`AND v.year <= ${yearTo}` : Prisma.empty;
+          
+          const priceFromCondition = priceFrom !== undefined ? Prisma.sql`AND v.price >= ${priceFrom}` : Prisma.empty;
+          const priceToCondition = priceTo !== undefined ? Prisma.sql`AND v.price <= ${priceTo}` : Prisma.empty;
+          
+          const ownerCondition = ownerId ? Prisma.sql`AND v."ownerId" = ${ownerId}` : Prisma.empty;
+          
+          const collectionCondition = collectionIds && collectionIds.length > 0
+            ? Prisma.sql`AND EXISTS (
+                SELECT 1 FROM "VehicleCollection" vc 
+                WHERE vc."vehicleId" = v.id 
+                AND vc."collectionId" = ANY(${collectionIds}::text[])
+              )`
+            : Prisma.empty;
+          
+          const searchCondition = search && search.trim()
+            ? Prisma.sql`AND (
+                v.name ILIKE ${`%${search}%`}
+                OR v.registration ILIKE ${`%${search}%`}
+                OR v.description ILIKE ${`%${search}%`}
+                OR EXISTS (SELECT 1 FROM "Make" m WHERE m.id = v."makeId" AND m.name ILIKE ${`%${search}%`})
+                OR EXISTS (SELECT 1 FROM "Model" mo WHERE mo.id = v."modelId" AND mo.name ILIKE ${`%${search}%`})
+                OR u.email ILIKE ${`%${search}%`}
+                OR u."firstName" ILIKE ${`%${search}%`}
+                OR u."lastName" ILIKE ${`%${search}%`}
+                OR u.phone ILIKE ${`%${search}%`}
+              )`
+            : Prisma.empty;
           
           const countResult = await ctx.db.$queryRaw<Array<{ count: bigint }>>`
             SELECT COUNT(*) as count
@@ -434,6 +526,15 @@ export const vehicleRouter = createTRPCRouter({
               ${statusCondition}
               ${makeCondition}
               ${modelCondition}
+              ${exteriorColorCondition}
+              ${interiorColorCondition}
+              ${yearFromCondition}
+              ${yearToCondition}
+              ${priceFromCondition}
+              ${priceToCondition}
+              ${ownerCondition}
+              ${collectionCondition}
+              ${searchCondition}
           `;
           
           totalCount = Number(countResult[0]?.count ?? 0);

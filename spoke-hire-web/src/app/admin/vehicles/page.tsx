@@ -149,10 +149,10 @@ function VehiclesPageContent() {
     if (updates.interiorColors !== undefined) {
       updates.interiorColors.length > 0 ? params.set("interiorColors", updates.interiorColors.join(",")) : params.delete("interiorColors");
     }
-    if (updates.yearFrom !== undefined) {
+    if ("yearFrom" in updates) {
       updates.yearFrom ? params.set("yearFrom", updates.yearFrom) : params.delete("yearFrom");
     }
-    if (updates.yearTo !== undefined) {
+    if ("yearTo" in updates) {
       updates.yearTo ? params.set("yearTo", updates.yearTo) : params.delete("yearTo");
     }
     if (updates.postcode !== undefined) {
