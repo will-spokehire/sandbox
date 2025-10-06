@@ -15,6 +15,7 @@ import {
 import { api } from '~/trpc/react';
 import { toast } from 'sonner';
 import { createClient } from '~/lib/supabase/client';
+import { useAuth } from '~/providers/auth-provider';
 
 /**
  * OTP Verification Component
@@ -30,6 +31,8 @@ import { createClient } from '~/lib/supabase/client';
 export function OTPVerification() {
   const router = useRouter();
   const supabase = createClient();
+  const { refreshSession } = useAuth();
+  const utils = api.useUtils();
 
   // Get email from sessionStorage instead of URL for security
   const [email, setEmail] = useState('');
@@ -46,15 +49,22 @@ export function OTPVerification() {
 
   // We still use the tRPC mutation to validate in our database
   const verifyMutation = api.auth.verifyOtp.useMutation({
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       toast.success('Successfully authenticated!', {
         description: `Welcome back, ${data.user.email}`,
       });
       // Clear stored email after successful verification
       sessionStorage.removeItem('otp_email');
-      // Redirect to admin dashboard
-      router.push('/admin');
-      router.refresh();
+      
+      // Invalidate and refetch session to update auth state
+      await utils.auth.getSession.invalidate();
+      await refreshSession();
+      
+      // Small delay to ensure auth state is updated
+      setTimeout(() => {
+        router.push('/admin');
+        router.refresh();
+      }, 100);
     },
     onError: (error) => {
       toast.error('Verification failed', {
