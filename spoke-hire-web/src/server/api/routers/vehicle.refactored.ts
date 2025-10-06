@@ -77,7 +77,7 @@ const deleteVehicleInputSchema = z.object({
 // Router Definition
 // ============================================================================
 
-export const vehicleRouter = createTRPCRouter({
+export const vehicleRouterRefactored = createTRPCRouter({
   /**
    * List vehicles with pagination, search, and filters
    */

@@ -41,7 +41,7 @@ const resendOtpInputSchema = z.object({
 // Router Definition
 // ============================================================================
 
-export const authRouter = createTRPCRouter({
+export const authRouterRefactored = createTRPCRouter({
   /**
    * Sign in with email OTP
    * Sends a one-time password to the user's email

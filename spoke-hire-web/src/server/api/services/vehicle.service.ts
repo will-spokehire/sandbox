@@ -1,0 +1,352 @@
+/**
+ * Vehicle Service
+ * 
+ * Business logic layer for vehicle operations.
+ * Orchestrates repositories, builders, and external services.
+ */
+
+import { type VehicleStatus } from "@prisma/client";
+import { VehicleRepository } from "../repositories/vehicle.repository";
+import { VehicleQueryBuilder, type VehicleFilters } from "../builders/vehicle-query.builder";
+import { geocodePostcode } from "~/lib/services/geocoding";
+import { cacheService, CacheKeys, CacheTTL } from "./cache.service";
+import { VehicleNotFoundError } from "../errors/app-errors";
+
+// Use the DB type from context
+type DbClient = any;
+
+export interface ListVehiclesParams {
+  limit: number;
+  cursor?: string;
+  skip?: number;
+  search?: string;
+  status?: VehicleStatus;
+  makeId?: string;
+  makeIds?: string[];
+  modelId?: string;
+  collectionIds?: string[];
+  exteriorColors?: string[];
+  interiorColors?: string[];
+  yearFrom?: string;
+  yearTo?: string;
+  priceFrom?: number;
+  priceTo?: number;
+  ownerId?: string;
+  numberOfSeats?: number[];
+  gearboxTypes?: string[];
+  steeringIds?: string[];
+  userPostcode?: string;
+  userLatitude?: number;
+  userLongitude?: number;
+  maxDistanceMiles?: number;
+  sortByDistance?: boolean;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+  includeTotalCount?: boolean;
+}
+
+export interface ListVehiclesResult {
+  vehicles: any[];
+  nextCursor?: string;
+  totalCount?: number;
+}
+
+export class VehicleService {
+  private repository: VehicleRepository;
+  private queryBuilder: VehicleQueryBuilder;
+
+  constructor(private db: DbClient) {
+    this.repository = new VehicleRepository(db);
+    this.queryBuilder = new VehicleQueryBuilder();
+  }
+
+  /**
+   * List vehicles with pagination, filters, and optional distance-based sorting
+   */
+  async listVehicles(params: ListVehiclesParams): Promise<ListVehiclesResult> {
+    const {
+      limit,
+      cursor,
+      skip,
+      userPostcode,
+      userLatitude,
+      userLongitude,
+      maxDistanceMiles,
+      sortByDistance,
+      sortBy = "createdAt",
+      sortOrder = "desc",
+      includeTotalCount = false,
+    } = params;
+
+    // Determine user location for distance filtering
+    let userLat: number | undefined;
+    let userLon: number | undefined;
+
+    if (userPostcode) {
+      try {
+        const geo = await geocodePostcode(userPostcode);
+        userLat = geo.latitude;
+        userLon = geo.longitude;
+      } catch (error) {
+        console.error("Geocoding error:", error);
+        // Continue without distance filtering
+      }
+    } else if (userLatitude && userLongitude) {
+      userLat = userLatitude;
+      userLon = userLongitude;
+    }
+
+    // Build filters object
+    const filters: VehicleFilters = {
+      status: params.status,
+      makeId: params.makeId,
+      makeIds: params.makeIds,
+      modelId: params.modelId,
+      collectionIds: params.collectionIds,
+      exteriorColors: params.exteriorColors,
+      interiorColors: params.interiorColors,
+      yearFrom: params.yearFrom,
+      yearTo: params.yearTo,
+      priceFrom: params.priceFrom,
+      priceTo: params.priceTo,
+      ownerId: params.ownerId,
+      numberOfSeats: params.numberOfSeats,
+      gearboxTypes: params.gearboxTypes,
+      steeringIds: params.steeringIds,
+      search: params.search,
+    };
+
+    // Check if we should use distance filtering
+    const useDistanceFilter = userLat && userLon && maxDistanceMiles;
+
+    let vehicles: any[];
+    let totalCount: number | undefined;
+
+    if (useDistanceFilter) {
+      // Use distance-based query
+      const result = await this.listWithDistance(
+        userLat!,
+        userLon!,
+        maxDistanceMiles!,
+        filters,
+        limit,
+        skip,
+        sortBy,
+        sortOrder,
+        sortByDistance,
+        includeTotalCount
+      );
+      vehicles = result.vehicles;
+      totalCount = result.totalCount;
+    } else {
+      // Use standard Prisma query
+      const result = await this.listStandard(
+        filters,
+        limit,
+        skip,
+        cursor,
+        sortBy,
+        sortOrder,
+        includeTotalCount
+      );
+      vehicles = result.vehicles;
+      totalCount = result.totalCount;
+    }
+
+    // Determine next cursor
+    let nextCursor: string | undefined = undefined;
+    if (vehicles.length > limit) {
+      const nextItem = vehicles.pop();
+      nextCursor = nextItem?.id;
+    }
+
+    return {
+      vehicles,
+      nextCursor,
+      totalCount,
+    };
+  }
+
+  /**
+   * List vehicles with distance filtering (PostGIS)
+   */
+  private async listWithDistance(
+    userLat: number,
+    userLon: number,
+    maxDistanceMiles: number,
+    filters: VehicleFilters,
+    limit: number,
+    skip: number = 0,
+    sortBy: string = "createdAt",
+    sortOrder: "asc" | "desc" = "desc",
+    sortByDistance: boolean = false,
+    includeTotalCount: boolean = false
+  ) {
+    // Build and execute distance query
+    const query = this.queryBuilder.buildDistanceQuery({
+      userLatitude: userLat,
+      userLongitude: userLon,
+      maxDistanceMiles,
+      filters,
+      limit,
+      skip,
+      sortBy,
+      sortOrder,
+      sortByDistance,
+    });
+
+    const rawVehicles = await this.repository.queryRaw<any>(query);
+
+    // Fetch related data for each vehicle
+    const vehicleIds = rawVehicles.map((v: any) => v.id);
+    let vehicles: any[] = [];
+
+    if (vehicleIds.length > 0) {
+      const vehiclesWithRelations = await this.repository.findManyByIds(vehicleIds);
+
+      // Merge distance data with relations, maintaining order
+      const vehicleMap = new Map(vehiclesWithRelations.map((v) => [v.id, v]));
+      vehicles = rawVehicles
+        .map((rv: any) => {
+          const vehicle = vehicleMap.get(rv.id);
+          return vehicle ? { ...vehicle, distance: rv.distance } : null;
+        })
+        .filter(Boolean);
+    }
+
+    // Get total count if requested
+    let totalCount: number | undefined;
+    if (includeTotalCount) {
+      const countQuery = this.queryBuilder.buildDistanceCountQuery(
+        userLat,
+        userLon,
+        maxDistanceMiles,
+        filters
+      );
+      const countResult = await this.repository.queryRaw<{ count: bigint }>(countQuery);
+      totalCount = Number(countResult[0]?.count ?? 0);
+    }
+
+    return { vehicles, totalCount };
+  }
+
+  /**
+   * List vehicles without distance filtering (standard Prisma)
+   */
+  private async listStandard(
+    filters: VehicleFilters,
+    limit: number,
+    skip: number = 0,
+    cursor?: string,
+    sortBy: string = "createdAt",
+    sortOrder: "asc" | "desc" = "desc",
+    includeTotalCount: boolean = false
+  ) {
+    // Build Prisma where clause
+    const where = this.queryBuilder.buildPrismaWhere(filters);
+
+    // Add cursor if provided
+    if (cursor) {
+      where.id = { lt: cursor };
+    }
+
+    // Build orderBy
+    const orderBy: any =
+      sortBy === "name"
+        ? { name: sortOrder }
+        : sortBy === "price"
+        ? { price: sortOrder }
+        : { [sortBy]: sortOrder };
+
+    // Fetch vehicles
+    const vehicles = await this.repository.findMany(where, {
+      take: limit + 1,
+      skip,
+      orderBy,
+    });
+
+    // Get total count if requested
+    let totalCount: number | undefined;
+    if (includeTotalCount) {
+      totalCount = await this.repository.count(where);
+    }
+
+    return { vehicles, totalCount };
+  }
+
+  /**
+   * Get vehicle by ID with full details
+   */
+  async getVehicleById(id: string) {
+    // Try cache first
+    const cacheKey = CacheKeys.vehicleDetail(id);
+    const cached = cacheService.get<any>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    // Fetch from database in parallel
+    const [vehicle, media, sources, specifications, collections] = await Promise.all([
+      this.repository.findById(id),
+      this.repository.findMediaByVehicleId(id),
+      this.repository.findSourcesByVehicleId(id),
+      this.repository.findSpecificationsByVehicleId(id),
+      this.repository.findCollectionsByVehicleId(id),
+    ]);
+
+    const result = {
+      ...vehicle,
+      media,
+      sources,
+      specifications,
+      collections,
+    };
+
+    // Cache for 1 minute
+    cacheService.set(cacheKey, result, CacheTTL.SHORT);
+
+    return result;
+  }
+
+  /**
+   * Update vehicle status
+   */
+  async updateVehicleStatus(id: string, status: VehicleStatus) {
+    // Check if vehicle exists
+    const exists = await this.repository.findById(id);
+    if (!exists) {
+      throw new VehicleNotFoundError(id);
+    }
+
+    // Update status
+    const updatedVehicle = await this.repository.updateStatus(id, status);
+
+    // Invalidate caches
+    cacheService.delete(CacheKeys.vehicleDetail(id));
+    cacheService.invalidateByPattern("vehicle:list:");
+    cacheService.delete(CacheKeys.vehicleFilterOptions());
+
+    return updatedVehicle;
+  }
+
+  /**
+   * Delete vehicle (soft delete)
+   */
+  async deleteVehicle(id: string) {
+    // Check if vehicle exists
+    const exists = await this.repository.findById(id);
+    if (!exists) {
+      throw new VehicleNotFoundError(id);
+    }
+
+    // Soft delete
+    const deletedVehicle = await this.repository.softDelete(id);
+
+    // Invalidate caches
+    cacheService.delete(CacheKeys.vehicleDetail(id));
+    cacheService.invalidateByPattern("vehicle:list:");
+    cacheService.delete(CacheKeys.vehicleFilterOptions());
+
+    return deletedVehicle;
+  }
+}

@@ -3,9 +3,11 @@
  * 
  * Centralized utilities for managing server-side caches across routers.
  * Import these functions in mutations that should invalidate caches.
+ * 
+ * REFACTORED: Now uses the centralized CacheService
  */
 
-import { invalidateFilterOptionsCache } from "./vehicle";
+import { cacheService, CacheKeys } from "../services/cache.service";
 
 /**
  * Invalidate all vehicle-related caches
@@ -15,7 +17,7 @@ import { invalidateFilterOptionsCache } from "./vehicle";
  * - Updating vehicle colors, years, or other filter-related fields
  */
 export function invalidateVehicleCaches() {
-  invalidateFilterOptionsCache();
+  cacheService.invalidateByPattern("vehicle:");
 }
 
 /**
@@ -27,7 +29,11 @@ export function invalidateVehicleCaches() {
  * - Creating/updating/deleting collections
  */
 export function invalidateLookupCaches() {
-  invalidateFilterOptionsCache();
+  cacheService.delete(CacheKeys.vehicleFilterOptions());
+  cacheService.invalidateByPattern("models:by-make:");
+  cacheService.delete(CacheKeys.makes());
+  cacheService.delete(CacheKeys.collections());
+  cacheService.delete(CacheKeys.steeringTypes());
 }
 
 /**
@@ -36,20 +42,20 @@ export function invalidateLookupCaches() {
  * Use sparingly, only for major data migrations or testing
  */
 export function invalidateAllCaches() {
-  invalidateFilterOptionsCache();
-  // Add other cache invalidations here as needed
+  cacheService.clear();
 }
 
 /**
  * Get cache statistics (for monitoring/debugging)
  */
 export function getCacheStats() {
-  return {
-    filterOptionsCache: {
-      // You could extend this to track hits/misses
-      exists: true,
-      ttl: 300, // 5 minutes in seconds
-    },
-  };
+  return cacheService.getStats();
+}
+
+/**
+ * Clean up expired cache entries
+ */
+export function cleanupExpiredCaches() {
+  return cacheService.cleanup();
 }
 
