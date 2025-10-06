@@ -146,7 +146,7 @@ function VehiclesPageContent() {
     if (updates.search !== undefined) {
       updates.search ? params.set("search", updates.search) : params.delete("search");
     }
-    if (updates.status !== undefined) {
+    if ("status" in updates) {
       updates.status ? params.set("status", updates.status) : params.delete("status");
     }
     if (updates.makeIds !== undefined) {
