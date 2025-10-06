@@ -1,10 +1,15 @@
-import { Mail, Phone, User, MapPin } from "lucide-react";
+"use client";
+
+import { Mail, Phone, User, MapPin, Car } from "lucide-react";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Separator } from "~/components/ui/separator";
-import { formatOwnerName, getInitials } from "~/lib/vehicles";
+import { Button } from "~/components/ui/button";
+import { formatOwnerName, getInitials, formatPrice } from "~/lib/vehicles";
 import { type VehicleDetail } from "~/types/vehicle";
+import { api } from "~/trpc/react";
 
 interface VehicleOwnerInfoProps {
   owner: VehicleDetail["owner"];
@@ -19,6 +24,24 @@ interface VehicleOwnerInfoProps {
 export function VehicleOwnerInfo({ owner, vehicleId }: VehicleOwnerInfoProps) {
   const ownerName = formatOwnerName(owner.firstName, owner.lastName, owner.email);
   const initials = getInitials(owner.firstName, owner.lastName);
+
+  // Fetch other vehicles by this owner
+  const { data: ownerVehicles } = api.vehicle.list.useQuery(
+    {
+      ownerId: owner.id,
+      limit: 10,
+      sortBy: "createdAt",
+      sortOrder: "desc",
+    },
+    {
+      staleTime: 5 * 60 * 1000, // 5 minutes cache
+    }
+  );
+
+  // Filter out the current vehicle and limit to 5
+  const otherVehicles = ownerVehicles?.vehicles
+    .filter((v) => v.id !== vehicleId)
+    .slice(0, 5) ?? [];
 
   return (
     <Card>
@@ -109,6 +132,62 @@ export function VehicleOwnerInfo({ owner, vehicleId }: VehicleOwnerInfoProps) {
             </div>
           )}
         </dl>
+
+        {/* Other Vehicles by Owner */}
+        {otherVehicles.length > 0 && (
+          <>
+            <Separator />
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Car className="h-4 w-4" />
+                  Other Vehicles ({otherVehicles.length})
+                </h4>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  asChild
+                  className="h-8 text-xs"
+                >
+                  <Link href={`/admin/vehicles?ownerId=${owner.id}`}>
+                    View All
+                  </Link>
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {otherVehicles.map((vehicle) => (
+                  <Link
+                    key={vehicle.id}
+                    href={`/admin/vehicles/${vehicle.id}`}
+                    className="block p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">
+                          {vehicle.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {vehicle.make.name} {vehicle.model.name} • {vehicle.year}
+                        </p>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <p className="text-sm font-semibold text-primary">
+                          {formatPrice(vehicle.price)}
+                        </p>
+                        <Badge
+                          variant={vehicle.status === "PUBLISHED" ? "default" : "secondary"}
+                          className="text-xs mt-1"
+                        >
+                          {vehicle.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
       </CardContent>
     </Card>
   );
