@@ -32,7 +32,9 @@ function VehiclesPageContent() {
 
   // Read all state from URL - this is the ONLY source of truth
   const searchInput = searchParams.get("search") ?? "";
-  const status = searchParams.get("status") as VehicleStatus | undefined;
+  // Default to PUBLISHED if no status in URL (first visit or cleared filters)
+  // "ALL" is a special value meaning show all statuses
+  const status = (searchParams.get("status") as VehicleStatus | "ALL" | null) ?? "PUBLISHED";
   const makeIds = searchParams.get("makeIds")?.split(",").filter(Boolean) ?? [];
   const modelId = searchParams.get("modelId") ?? undefined;
   const collectionIds = searchParams.get("collectionIds")?.split(",").filter(Boolean) ?? [];
@@ -72,7 +74,8 @@ function VehiclesPageContent() {
       cursor: undefined, // Not using cursor for offset pagination
       skip, // Add skip parameter for offset
       search: debouncedSearch || undefined,
-      status: status || undefined,
+      // Don't pass status if it's "ALL" (show all statuses)
+      status: status === "ALL" ? undefined : status,
       makeIds: makeIds.length > 0 ? makeIds : undefined,
       modelId,
       collectionIds: collectionIds.length > 0 ? collectionIds : undefined,
@@ -152,7 +155,7 @@ function VehiclesPageContent() {
     if (updates.makeIds !== undefined) {
       updates.makeIds.length > 0 ? params.set("makeIds", updates.makeIds.join(",")) : params.delete("makeIds");
     }
-    if (updates.modelId !== undefined) {
+    if ("modelId" in updates) {
       updates.modelId ? params.set("modelId", updates.modelId) : params.delete("modelId");
     }
     if (updates.collectionIds !== undefined) {
@@ -185,10 +188,10 @@ function VehiclesPageContent() {
     if (updates.counties !== undefined) {
       updates.counties.length > 0 ? params.set("counties", updates.counties.join(",")) : params.delete("counties");
     }
-    if (updates.postcode !== undefined) {
+    if ("postcode" in updates) {
       updates.postcode ? params.set("postcode", updates.postcode) : params.delete("postcode");
     }
-    if (updates.maxDistance !== undefined) {
+    if ("maxDistance" in updates) {
       updates.maxDistance ? params.set("maxDistance", updates.maxDistance.toString()) : params.delete("maxDistance");
     }
     if (updates.sortBy !== undefined) {
@@ -238,8 +241,8 @@ function VehiclesPageContent() {
   };
 
   const handleClearFilters = () => {
-    // Clear all filters - no defaults
-    router.push("/admin/vehicles", { scroll: false });
+    // Clear all filters and reset to default PUBLISHED status
+    router.push("/admin/vehicles?status=PUBLISHED", { scroll: false });
   };
 
   const handlePageChange = (page: number) => {
@@ -248,8 +251,8 @@ function VehiclesPageContent() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Check if any filters are active
-  const hasFilters = !!(searchInput || status || makeIds.length > 0 || modelId || collectionIds.length > 0 || exteriorColors.length > 0 || interiorColors.length > 0 || yearFrom || yearTo || numberOfSeats.length > 0 || gearboxTypes.length > 0 || steeringIds.length > 0 || countryIds.length > 0 || counties.length > 0 || postcode || maxDistance);
+  // Check if any filters are active (PUBLISHED is the default, so not counted as a filter)
+  const hasFilters = !!(searchInput || (status && status !== "PUBLISHED") || makeIds.length > 0 || modelId || collectionIds.length > 0 || exteriorColors.length > 0 || interiorColors.length > 0 || yearFrom || yearTo || numberOfSeats.length > 0 || gearboxTypes.length > 0 || steeringIds.length > 0 || countryIds.length > 0 || counties.length > 0 || postcode || maxDistance);
 
   if (isAuthLoading || !user) {
     return (
@@ -305,7 +308,7 @@ function VehiclesPageContent() {
           {/* Filters */}
           <VehicleFilters
             search={searchInput}
-            status={status}
+            status={status === "ALL" ? undefined : status}
             makeIds={makeIds}
             modelId={modelId}
             collectionIds={collectionIds}

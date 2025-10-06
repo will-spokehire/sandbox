@@ -76,7 +76,7 @@ export default function AdminDashboard() {
                 View, search, and manage all vehicles in the system.
               </p>
               <Button asChild className="w-full">
-                <Link href="/admin/vehicles">
+                <Link href="/admin/vehicles?status=PUBLISHED">
                   View Vehicles
                 </Link>
               </Button>

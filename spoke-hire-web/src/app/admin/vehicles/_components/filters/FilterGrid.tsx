@@ -174,8 +174,8 @@ export function FilterGrid({
     })) ?? [];
 
   const handleStatusChange = (value?: string) => {
-    // Convert empty string to undefined for "All Status"
-    onStatusChange(value && value !== "" ? (value as VehicleStatus) : undefined);
+    // Convert undefined (from "All Status" selection) to "ALL" string for URL
+    onStatusChange(value ? (value as VehicleStatus) : ("ALL" as any));
   };
 
   const handleModelChange = (value?: string) => {
@@ -218,9 +218,8 @@ export function FilterGrid({
       {/* Status Filter */}
       <SingleSelectFilter
         label="All Status"
-        value={status ?? ""}
+        value={(status as any) === "ALL" ? undefined : status}
         options={[
-          { value: "", label: "All Status" },
           { value: "DRAFT", label: "Draft" },
           { value: "PUBLISHED", label: "Published" },
           { value: "DECLINED", label: "Declined" },
