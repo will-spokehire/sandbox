@@ -6,8 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Separator } from "~/components/ui/separator";
-import { Button } from "~/components/ui/button";
-import { formatOwnerName, getInitials, formatPrice } from "~/lib/vehicles";
+import { formatOwnerName, getInitials } from "~/lib/vehicles";
 import { type VehicleDetail } from "~/types/vehicle";
 import { api } from "~/trpc/react";
 
@@ -138,50 +137,31 @@ export function VehicleOwnerInfo({ owner, vehicleId }: VehicleOwnerInfoProps) {
           <>
             <Separator />
             <div>
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                  <Car className="h-4 w-4" />
-                  Other Vehicles ({otherVehicles.length})
-                </h4>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  asChild
-                  className="h-8 text-xs"
-                >
-                  <Link href={`/admin/vehicles?ownerId=${owner.id}`}>
-                    View All
-                  </Link>
-                </Button>
-              </div>
-              <div className="space-y-2">
+              <h4 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
+                <Car className="h-4 w-4" />
+                Other Vehicles ({otherVehicles.length})
+              </h4>
+              <div className="space-y-1.5">
                 {otherVehicles.map((vehicle) => (
                   <Link
                     key={vehicle.id}
                     href={`/admin/vehicles/${vehicle.id}`}
-                    className="block p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                    className="flex items-center gap-2 p-2 rounded-md border bg-card hover:bg-accent/50 transition-colors group"
                   >
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">
-                          {vehicle.name}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {vehicle.make.name} {vehicle.model.name} • {vehicle.year}
-                        </p>
-                      </div>
-                      <div className="text-right flex-shrink-0">
-                        <p className="text-sm font-semibold text-primary">
-                          {formatPrice(vehicle.price)}
-                        </p>
-                        <Badge
-                          variant={vehicle.status === "PUBLISHED" ? "default" : "secondary"}
-                          className="text-xs mt-1"
-                        >
-                          {vehicle.status}
-                        </Badge>
-                      </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-foreground truncate group-hover:text-primary transition-colors">
+                        {vehicle.name}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground truncate">
+                        {vehicle.make.name} {vehicle.model.name} • {vehicle.year}
+                      </p>
                     </div>
+                    <Badge
+                      variant={vehicle.status === "PUBLISHED" ? "default" : "secondary"}
+                      className="text-[10px] px-1.5 py-0 h-5 flex-shrink-0"
+                    >
+                      {vehicle.status}
+                    </Badge>
                   </Link>
                 ))}
               </div>
