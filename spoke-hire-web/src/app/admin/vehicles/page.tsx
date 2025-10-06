@@ -32,7 +32,7 @@ function VehiclesPageContent() {
 
   // Read all state from URL - this is the ONLY source of truth
   const searchInput = searchParams.get("search") ?? "";
-  const status = (searchParams.get("status") as VehicleStatus) ?? "PUBLISHED";
+  const status = searchParams.get("status") as VehicleStatus | undefined;
   const makeIds = searchParams.get("makeIds")?.split(",").filter(Boolean) ?? [];
   const modelId = searchParams.get("modelId") ?? undefined;
   const collectionIds = searchParams.get("collectionIds")?.split(",").filter(Boolean) ?? [];
@@ -72,7 +72,7 @@ function VehiclesPageContent() {
       cursor: undefined, // Not using cursor for offset pagination
       skip, // Add skip parameter for offset
       search: debouncedSearch || undefined,
-      status,
+      status: status || undefined,
       makeIds: makeIds.length > 0 ? makeIds : undefined,
       modelId,
       collectionIds: collectionIds.length > 0 ? collectionIds : undefined,

@@ -138,7 +138,7 @@ export function FilterGrid({
     })) ?? [];
 
   const modelOptions =
-    models?.map((model) => ({
+    models?.map((model: { id: string; name: string }) => ({
       value: model.id,
       label: model.name,
     })) ?? [];
@@ -174,7 +174,8 @@ export function FilterGrid({
     })) ?? [];
 
   const handleStatusChange = (value?: string) => {
-    onStatusChange(value as VehicleStatus | undefined);
+    // Convert empty string to undefined for "All Status"
+    onStatusChange(value && value !== "" ? (value as VehicleStatus) : undefined);
   };
 
   const handleModelChange = (value?: string) => {
@@ -217,15 +218,16 @@ export function FilterGrid({
       {/* Status Filter */}
       <SingleSelectFilter
         label="All Status"
-        value={status}
+        value={status ?? ""}
         options={[
+          { value: "", label: "All Status" },
           { value: "DRAFT", label: "Draft" },
           { value: "PUBLISHED", label: "Published" },
           { value: "DECLINED", label: "Declined" },
           { value: "ARCHIVED", label: "Archived" },
         ]}
         onChange={handleStatusChange}
-        placeholder="Status"
+        placeholder="All Status"
         className="md:w-[160px]"
       />
 
