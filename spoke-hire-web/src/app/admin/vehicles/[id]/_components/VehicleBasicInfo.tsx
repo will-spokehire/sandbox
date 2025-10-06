@@ -36,7 +36,7 @@ export function VehicleBasicInfo({ vehicle }: VehicleBasicInfoProps) {
     },
     {
       label: "Engine Capacity",
-      value: vehicle.engineCapacity ? `${vehicle.engineCapacity.toLocaleString()} cc` : "N/A",
+      value: vehicle.engineCapacity ? `${vehicle.engineCapacity}cc` : "N/A",
     },
     {
       label: "Number of Seats",
@@ -57,10 +57,6 @@ export function VehicleBasicInfo({ vehicle }: VehicleBasicInfoProps) {
     {
       label: "Interior Color",
       value: vehicle.interiorColour || "N/A",
-    },
-    {
-      label: "Condition",
-      value: vehicle.condition || "N/A",
     },
     {
       label: "Road Legal",
