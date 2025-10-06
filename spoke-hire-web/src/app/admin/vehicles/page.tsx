@@ -238,8 +238,8 @@ function VehiclesPageContent() {
   };
 
   const handleClearFilters = () => {
-    // Clear all filters at once, keeping only the default status
-    router.push("/admin/vehicles?status=PUBLISHED", { scroll: false });
+    // Clear all filters - no defaults
+    router.push("/admin/vehicles", { scroll: false });
   };
 
   const handlePageChange = (page: number) => {
@@ -249,7 +249,7 @@ function VehiclesPageContent() {
   };
 
   // Check if any filters are active
-  const hasFilters = !!(searchInput || status !== "PUBLISHED" || makeIds.length > 0 || modelId || collectionIds.length > 0 || exteriorColors.length > 0 || interiorColors.length > 0 || yearFrom || yearTo || numberOfSeats.length > 0 || gearboxTypes.length > 0 || steeringIds.length > 0 || postcode || maxDistance);
+  const hasFilters = !!(searchInput || status || makeIds.length > 0 || modelId || collectionIds.length > 0 || exteriorColors.length > 0 || interiorColors.length > 0 || yearFrom || yearTo || numberOfSeats.length > 0 || gearboxTypes.length > 0 || steeringIds.length > 0 || countryIds.length > 0 || counties.length > 0 || postcode || maxDistance);
 
   if (isAuthLoading || !user) {
     return (
