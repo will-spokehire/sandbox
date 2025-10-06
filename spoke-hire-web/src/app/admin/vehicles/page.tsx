@@ -40,6 +40,9 @@ function VehiclesPageContent() {
   const interiorColors = searchParams.get("interiorColors")?.split(",").filter(Boolean) ?? [];
   const yearFrom = searchParams.get("yearFrom") ?? undefined;
   const yearTo = searchParams.get("yearTo") ?? undefined;
+  const numberOfSeats = searchParams.get("numberOfSeats")?.split(",").filter(Boolean).map(Number) ?? [];
+  const gearboxTypes = searchParams.get("gearboxTypes")?.split(",").filter(Boolean) ?? [];
+  const steeringIds = searchParams.get("steeringIds")?.split(",").filter(Boolean) ?? [];
   const postcode = searchParams.get("postcode") ?? undefined;
   const maxDistance = searchParams.get("maxDistance") ? parseInt(searchParams.get("maxDistance")!) : undefined;
   const sortBy = searchParams.get("sortBy") ?? "createdAt";
@@ -75,6 +78,9 @@ function VehiclesPageContent() {
       interiorColors: interiorColors.length > 0 ? interiorColors : undefined,
       yearFrom,
       yearTo,
+      numberOfSeats: numberOfSeats.length > 0 ? numberOfSeats : undefined,
+      gearboxTypes: gearboxTypes.length > 0 ? gearboxTypes : undefined,
+      steeringIds: steeringIds.length > 0 ? steeringIds : undefined,
       userPostcode: postcode,
       maxDistanceMiles: maxDistance,
       sortByDistance,
@@ -117,6 +123,9 @@ function VehiclesPageContent() {
     interiorColors?: string[];
     yearFrom?: string;
     yearTo?: string;
+    numberOfSeats?: number[];
+    gearboxTypes?: string[];
+    steeringIds?: string[];
     postcode?: string;
     maxDistance?: number;
     sortBy?: string;
@@ -155,6 +164,15 @@ function VehiclesPageContent() {
     if ("yearTo" in updates) {
       updates.yearTo ? params.set("yearTo", updates.yearTo) : params.delete("yearTo");
     }
+    if (updates.numberOfSeats !== undefined) {
+      updates.numberOfSeats.length > 0 ? params.set("numberOfSeats", updates.numberOfSeats.join(",")) : params.delete("numberOfSeats");
+    }
+    if (updates.gearboxTypes !== undefined) {
+      updates.gearboxTypes.length > 0 ? params.set("gearboxTypes", updates.gearboxTypes.join(",")) : params.delete("gearboxTypes");
+    }
+    if (updates.steeringIds !== undefined) {
+      updates.steeringIds.length > 0 ? params.set("steeringIds", updates.steeringIds.join(",")) : params.delete("steeringIds");
+    }
     if (updates.postcode !== undefined) {
       updates.postcode ? params.set("postcode", updates.postcode) : params.delete("postcode");
     }
@@ -182,8 +200,9 @@ function VehiclesPageContent() {
                           updates.makeIds !== undefined || updates.modelId !== undefined ||
                           updates.collectionIds !== undefined || updates.exteriorColors !== undefined ||
                           updates.interiorColors !== undefined || updates.yearFrom !== undefined ||
-                          updates.yearTo !== undefined || updates.postcode !== undefined ||
-                          updates.maxDistance !== undefined;
+                          updates.yearTo !== undefined || updates.numberOfSeats !== undefined ||
+                          updates.gearboxTypes !== undefined || updates.steeringIds !== undefined ||
+                          updates.postcode !== undefined || updates.maxDistance !== undefined;
     
     if (isFilterChange && updates.page === undefined) {
       params.delete("page"); // Reset to page 1 when filters change
@@ -218,7 +237,7 @@ function VehiclesPageContent() {
   };
 
   // Check if any filters are active
-  const hasFilters = !!(searchInput || status !== "PUBLISHED" || makeIds.length > 0 || modelId || collectionIds.length > 0 || exteriorColors.length > 0 || interiorColors.length > 0 || yearFrom || yearTo || postcode || maxDistance);
+  const hasFilters = !!(searchInput || status !== "PUBLISHED" || makeIds.length > 0 || modelId || collectionIds.length > 0 || exteriorColors.length > 0 || interiorColors.length > 0 || yearFrom || yearTo || numberOfSeats.length > 0 || gearboxTypes.length > 0 || steeringIds.length > 0 || postcode || maxDistance);
 
   if (isAuthLoading || !user) {
     return (
@@ -282,6 +301,9 @@ function VehiclesPageContent() {
             interiorColors={interiorColors}
             yearFrom={yearFrom}
             yearTo={yearTo}
+            numberOfSeats={numberOfSeats}
+            gearboxTypes={gearboxTypes}
+            steeringIds={steeringIds}
             postcode={postcode}
             maxDistance={maxDistance}
             sortBy={sortBy}
@@ -293,6 +315,9 @@ function VehiclesPageContent() {
             onCollectionIdsChange={(collectionIds) => updateURL({ collectionIds })}
             onExteriorColorsChange={(exteriorColors) => updateURL({ exteriorColors })}
             onInteriorColorsChange={(interiorColors) => updateURL({ interiorColors })}
+            onNumberOfSeatsChange={(numberOfSeats) => updateURL({ numberOfSeats })}
+            onGearboxTypesChange={(gearboxTypes) => updateURL({ gearboxTypes })}
+            onSteeringIdsChange={(steeringIds) => updateURL({ steeringIds })}
             onYearFromChange={(yearFrom) => updateURL({ yearFrom })}
             onYearToChange={(yearTo) => updateURL({ yearTo })}
             onPostcodeChange={(postcode) => updateURL({ postcode })}

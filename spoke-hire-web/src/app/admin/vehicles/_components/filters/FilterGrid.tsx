@@ -22,6 +22,9 @@ interface FilterGridProps {
   interiorColors: string[];
   yearFrom?: string;
   yearTo?: string;
+  numberOfSeats: number[];
+  gearboxTypes: string[];
+  steeringIds: string[];
   postcode?: string;
   maxDistance?: number;
   sortBy: string;
@@ -37,6 +40,9 @@ interface FilterGridProps {
   onInteriorColorsChange: (colors: string[]) => void;
   onYearFromChange: (year?: string) => void;
   onYearToChange: (year?: string) => void;
+  onNumberOfSeatsChange: (seats: number[]) => void;
+  onGearboxTypesChange: (types: string[]) => void;
+  onSteeringIdsChange: (ids: string[]) => void;
   onPostcodeChange: (postcode: string) => void;
   onMaxDistanceChange: (distance?: number) => void;
   onPostcodeAndDistanceChange?: (postcode: string, distance: number) => void;
@@ -58,6 +64,9 @@ export function FilterGrid({
   interiorColors,
   yearFrom,
   yearTo,
+  numberOfSeats,
+  gearboxTypes,
+  steeringIds,
   postcode,
   maxDistance,
   sortBy,
@@ -71,6 +80,9 @@ export function FilterGrid({
   onInteriorColorsChange,
   onYearFromChange,
   onYearToChange,
+  onNumberOfSeatsChange,
+  onGearboxTypesChange,
+  onSteeringIdsChange,
   onPostcodeChange,
   onMaxDistanceChange,
   onPostcodeAndDistanceChange,
@@ -93,26 +105,26 @@ export function FilterGrid({
 
   // Transform filter options to FilterOption format
   const makeOptions: FilterOption[] =
-    filterOptions?.makes.map((make) => ({
+    filterOptions?.makes.map((make: { id: string; name: string }) => ({
       id: make.id,
       name: make.name,
     })) ?? [];
 
   const collectionOptions: FilterOption[] =
-    filterOptions?.collections.map((collection) => ({
+    filterOptions?.collections.map((collection: { id: string; name: string; color: string | null }) => ({
       id: collection.id,
       name: collection.name,
       color: collection.color ?? undefined,
     })) ?? [];
 
   const exteriorColorOptions: FilterOption[] =
-    filterOptions?.exteriorColors.map((color) => ({
+    filterOptions?.exteriorColors.map((color: string) => ({
       id: color,
       name: color,
     })) ?? [];
 
   const interiorColorOptions: FilterOption[] =
-    filterOptions?.interiorColors.map((color) => ({
+    filterOptions?.interiorColors.map((color: string) => ({
       id: color,
       name: color,
     })) ?? [];
@@ -121,6 +133,24 @@ export function FilterGrid({
     models?.map((model) => ({
       value: model.id,
       label: model.name,
+    })) ?? [];
+
+  const seatsOptions: FilterOption[] =
+    filterOptions?.seats.map((seats: number) => ({
+      id: seats.toString(),
+      name: `${seats} seats`,
+    })) ?? [];
+
+  const gearboxOptions: FilterOption[] =
+    filterOptions?.gearboxTypes.map((type: string) => ({
+      id: type,
+      name: type,
+    })) ?? [];
+
+  const steeringOptions: FilterOption[] =
+    filterOptions?.steeringTypes.map((steering: { id: string; name: string }) => ({
+      id: steering.id,
+      name: steering.name,
     })) ?? [];
 
   const handleStatusChange = (value?: string) => {
@@ -244,6 +274,42 @@ export function FilterGrid({
         yearTo={yearTo}
         onYearFromChange={onYearFromChange}
         onYearToChange={onYearToChange}
+      />
+
+      {/* Number of Seats Filter */}
+      <MultiSelectFilter
+        label="Select Seats"
+        placeholder="Seats..."
+        options={seatsOptions}
+        selectedIds={numberOfSeats.map(String)}
+        onChange={(ids) => onNumberOfSeatsChange(ids.map(Number))}
+        renderOption={renderStandardOption}
+        searchPlaceholder="Search seats..."
+        className="md:w-[150px]"
+      />
+
+      {/* Gearbox Filter */}
+      <MultiSelectFilter
+        label="Select Gearbox"
+        placeholder="Gearbox..."
+        options={gearboxOptions}
+        selectedIds={gearboxTypes}
+        onChange={onGearboxTypesChange}
+        renderOption={renderStandardOption}
+        searchPlaceholder="Search gearbox..."
+        className="md:w-[150px]"
+      />
+
+      {/* Steering Filter */}
+      <MultiSelectFilter
+        label="Select Steering"
+        placeholder="Steering..."
+        options={steeringOptions}
+        selectedIds={steeringIds}
+        onChange={onSteeringIdsChange}
+        renderOption={renderStandardOption}
+        searchPlaceholder="Search steering..."
+        className="md:w-[180px]"
       />
 
       {/* Distance Filter */}

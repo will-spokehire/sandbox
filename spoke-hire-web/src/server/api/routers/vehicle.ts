@@ -57,6 +57,9 @@ const listVehiclesInputSchema = z.object({
   priceFrom: z.number().optional(),
   priceTo: z.number().optional(),
   ownerId: z.string().optional(),
+  numberOfSeats: z.array(z.number()).optional(), // Multiple seat counts with OR logic
+  gearboxTypes: z.array(z.string()).optional(), // Multiple gearbox types with OR logic
+  steeringIds: z.array(z.string()).optional(), // Multiple steering types with OR logic
   
   // Distance filtering (NEW)
   userPostcode: z.string().optional(),
@@ -110,6 +113,9 @@ export const vehicleRouter = createTRPCRouter({
         priceFrom,
         priceTo,
         ownerId,
+        numberOfSeats,
+        gearboxTypes,
+        steeringIds,
         userPostcode,
         userLatitude,
         userLongitude,
@@ -197,6 +203,21 @@ export const vehicleRouter = createTRPCRouter({
         where.ownerId = ownerId;
       }
 
+      // Number of seats filter with OR logic
+      if (numberOfSeats && numberOfSeats.length > 0) {
+        where.numberOfSeats = { in: numberOfSeats };
+      }
+
+      // Gearbox filter with OR logic
+      if (gearboxTypes && gearboxTypes.length > 0) {
+        where.gearbox = { in: gearboxTypes };
+      }
+
+      // Steering filter with OR logic
+      if (steeringIds && steeringIds.length > 0) {
+        where.steeringId = { in: steeringIds };
+      }
+
       // Search across multiple fields including owner information
       if (search && search.trim()) {
         where.OR = [
@@ -275,6 +296,21 @@ export const vehicleRouter = createTRPCRouter({
         // Owner filter
         const ownerCondition = ownerId ? Prisma.sql`AND v."ownerId" = ${ownerId}` : Prisma.empty;
         
+        // Number of seats filter
+        const seatsCondition = numberOfSeats && numberOfSeats.length > 0
+          ? Prisma.sql`AND v."numberOfSeats" = ANY(${numberOfSeats}::integer[])`
+          : Prisma.empty;
+        
+        // Gearbox filter
+        const gearboxCondition = gearboxTypes && gearboxTypes.length > 0
+          ? Prisma.sql`AND v.gearbox = ANY(${gearboxTypes}::text[])`
+          : Prisma.empty;
+        
+        // Steering filter
+        const steeringCondition = steeringIds && steeringIds.length > 0
+          ? Prisma.sql`AND v."steeringId" = ANY(${steeringIds}::text[])`
+          : Prisma.empty;
+        
         // Collection filter - needs a subquery since it's a many-to-many relationship
         const collectionCondition = collectionIds && collectionIds.length > 0
           ? Prisma.sql`AND EXISTS (
@@ -337,6 +373,9 @@ export const vehicleRouter = createTRPCRouter({
             ${priceFromCondition}
             ${priceToCondition}
             ${ownerCondition}
+            ${seatsCondition}
+            ${gearboxCondition}
+            ${steeringCondition}
             ${collectionCondition}
             ${searchCondition}
           ORDER BY ${orderByClause}
@@ -493,6 +532,18 @@ export const vehicleRouter = createTRPCRouter({
           
           const ownerCondition = ownerId ? Prisma.sql`AND v."ownerId" = ${ownerId}` : Prisma.empty;
           
+          const seatsCondition = numberOfSeats && numberOfSeats.length > 0
+            ? Prisma.sql`AND v."numberOfSeats" = ANY(${numberOfSeats}::integer[])`
+            : Prisma.empty;
+          
+          const gearboxCondition = gearboxTypes && gearboxTypes.length > 0
+            ? Prisma.sql`AND v.gearbox = ANY(${gearboxTypes}::text[])`
+            : Prisma.empty;
+          
+          const steeringCondition = steeringIds && steeringIds.length > 0
+            ? Prisma.sql`AND v."steeringId" = ANY(${steeringIds}::text[])`
+            : Prisma.empty;
+          
           const collectionCondition = collectionIds && collectionIds.length > 0
             ? Prisma.sql`AND EXISTS (
                 SELECT 1 FROM "VehicleCollection" vc 
@@ -533,6 +584,9 @@ export const vehicleRouter = createTRPCRouter({
               ${priceFromCondition}
               ${priceToCondition}
               ${ownerCondition}
+              ${seatsCondition}
+              ${gearboxCondition}
+              ${steeringCondition}
               ${collectionCondition}
               ${searchCondition}
           `;
@@ -754,6 +808,9 @@ export const vehicleRouter = createTRPCRouter({
       interiorColorsData,
       years,
       statusCounts,
+      seatsData,
+      gearboxData,
+      steeringTypes,
     ] = await Promise.all([
       // Get all makes - Cached by Accelerate
       ctx.db.make.findMany({
@@ -806,6 +863,33 @@ export const vehicleRouter = createTRPCRouter({
         _count: true,
         cacheStrategy: { ttl: 300 }, // 5 minutes
       }),
+
+      // Get distinct number of seats
+      ctx.db.$queryRaw<Array<{ numberOfSeats: number }>>`
+        SELECT DISTINCT "numberOfSeats"
+        FROM "Vehicle"
+        WHERE "numberOfSeats" IS NOT NULL
+        ORDER BY "numberOfSeats" ASC
+      `,
+
+      // Get distinct gearbox types
+      ctx.db.$queryRaw<Array<{ gearbox: string }>>`
+        SELECT DISTINCT gearbox
+        FROM "Vehicle"
+        WHERE gearbox IS NOT NULL
+        ORDER BY gearbox ASC
+      `,
+
+      // Get all steering types
+      ctx.db.steeringType.findMany({
+        orderBy: { name: "asc" },
+        select: {
+          id: true,
+          name: true,
+          code: true,
+        },
+        cacheStrategy: { ttl: 300 }, // 5 minutes
+      }),
     ]);
 
     const result = {
@@ -822,6 +906,13 @@ export const vehicleRouter = createTRPCRouter({
         status: sc.status as VehicleStatus,
         count: sc._count as number,
       })),
+      seats: seatsData
+        .map((v) => v.numberOfSeats)
+        .filter((s): s is number => s !== null),
+      gearboxTypes: gearboxData
+        .map((v) => v.gearbox)
+        .filter((g): g is string => g !== null),
+      steeringTypes,
     };
 
     // Update cache

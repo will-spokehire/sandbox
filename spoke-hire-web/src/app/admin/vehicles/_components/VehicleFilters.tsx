@@ -20,6 +20,9 @@ interface VehicleFiltersProps {
   interiorColors?: string[];
   yearFrom?: string;
   yearTo?: string;
+  numberOfSeats?: number[];
+  gearboxTypes?: string[];
+  steeringIds?: string[];
   postcode?: string;
   maxDistance?: number;
   sortBy?: string;
@@ -33,6 +36,9 @@ interface VehicleFiltersProps {
   onInteriorColorsChange: (colors: string[]) => void;
   onYearFromChange: (year?: string) => void;
   onYearToChange: (year?: string) => void;
+  onNumberOfSeatsChange: (seats: number[]) => void;
+  onGearboxTypesChange: (types: string[]) => void;
+  onSteeringIdsChange: (ids: string[]) => void;
   onPostcodeChange: (postcode: string) => void;
   onMaxDistanceChange: (distance?: number) => void;
   onPostcodeAndDistanceChange?: (postcode: string, distance: number) => void;
@@ -56,6 +62,9 @@ export function VehicleFilters({
   interiorColors = [],
   yearFrom,
   yearTo,
+  numberOfSeats = [],
+  gearboxTypes = [],
+  steeringIds = [],
   postcode,
   maxDistance,
   sortBy = "createdAt",
@@ -69,6 +78,9 @@ export function VehicleFilters({
   onInteriorColorsChange,
   onYearFromChange,
   onYearToChange,
+  onNumberOfSeatsChange,
+  onGearboxTypesChange,
+  onSteeringIdsChange,
   onPostcodeChange,
   onMaxDistanceChange,
   onPostcodeAndDistanceChange,
@@ -88,6 +100,9 @@ export function VehicleFilters({
     interiorColors.length > 0 ||
     yearFrom ||
     yearTo ||
+    numberOfSeats.length > 0 ||
+    gearboxTypes.length > 0 ||
+    steeringIds.length > 0 ||
     postcode ||
     maxDistance
   );
@@ -102,6 +117,9 @@ export function VehicleFilters({
     interiorColors.length +
     (yearFrom ? 1 : 0) +
     (yearTo ? 1 : 0) +
+    numberOfSeats.length +
+    gearboxTypes.length +
+    steeringIds.length +
     (postcode ? 1 : 0) +
     (maxDistance ? 1 : 0);
 
@@ -141,6 +159,9 @@ export function VehicleFilters({
               interiorColors={interiorColors}
               yearFrom={yearFrom}
               yearTo={yearTo}
+              numberOfSeats={numberOfSeats}
+              gearboxTypes={gearboxTypes}
+              steeringIds={steeringIds}
               postcode={postcode}
               maxDistance={maxDistance}
               sortBy={sortBy}
@@ -154,6 +175,9 @@ export function VehicleFilters({
               onInteriorColorsChange={onInteriorColorsChange}
               onYearFromChange={onYearFromChange}
               onYearToChange={onYearToChange}
+              onNumberOfSeatsChange={onNumberOfSeatsChange}
+              onGearboxTypesChange={onGearboxTypesChange}
+              onSteeringIdsChange={onSteeringIdsChange}
               onPostcodeChange={onPostcodeChange}
               onMaxDistanceChange={onMaxDistanceChange}
               onPostcodeAndDistanceChange={onPostcodeAndDistanceChange}
@@ -173,6 +197,9 @@ export function VehicleFilters({
               interiorColors={interiorColors}
               yearFrom={yearFrom}
               yearTo={yearTo}
+              numberOfSeats={numberOfSeats}
+              gearboxTypes={gearboxTypes}
+              steeringIds={steeringIds}
               postcode={postcode}
               maxDistance={maxDistance}
               sortBy={sortBy}
@@ -186,6 +213,9 @@ export function VehicleFilters({
               onInteriorColorsChange={onInteriorColorsChange}
               onYearFromChange={onYearFromChange}
               onYearToChange={onYearToChange}
+              onNumberOfSeatsChange={onNumberOfSeatsChange}
+              onGearboxTypesChange={onGearboxTypesChange}
+              onSteeringIdsChange={onSteeringIdsChange}
               onPostcodeChange={onPostcodeChange}
               onMaxDistanceChange={onMaxDistanceChange}
               onPostcodeAndDistanceChange={onPostcodeAndDistanceChange}
