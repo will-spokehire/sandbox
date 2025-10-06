@@ -39,6 +39,7 @@ interface FilterGridProps {
   onYearToChange: (year?: string) => void;
   onPostcodeChange: (postcode: string) => void;
   onMaxDistanceChange: (distance?: number) => void;
+  onPostcodeAndDistanceChange?: (postcode: string, distance: number) => void;
   onSortChange: (sortBy: string, sortOrder: "asc" | "desc") => void;
   onClearFilters: () => void;
 }
@@ -72,6 +73,7 @@ export function FilterGrid({
   onYearToChange,
   onPostcodeChange,
   onMaxDistanceChange,
+  onPostcodeAndDistanceChange,
   onSortChange,
   onClearFilters,
 }: FilterGridProps) {
@@ -245,12 +247,13 @@ export function FilterGrid({
       />
 
       {/* Distance Filter */}
-      <DistanceFilter
-        postcode={postcode}
-        maxDistance={maxDistance}
-        onPostcodeChange={onPostcodeChange}
-        onMaxDistanceChange={onMaxDistanceChange}
-      />
+              <DistanceFilter
+                postcode={postcode}
+                maxDistance={maxDistance}
+                onPostcodeChange={onPostcodeChange}
+                onMaxDistanceChange={onMaxDistanceChange}
+                onPostcodeAndDistanceChange={onPostcodeAndDistanceChange}
+              />
 
       {/* Sort Filter */}
       <SortFilter

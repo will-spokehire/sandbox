@@ -18,6 +18,7 @@ interface DistanceFilterProps {
   maxDistance?: number;
   onPostcodeChange: (postcode: string) => void;
   onMaxDistanceChange: (distance?: number) => void;
+  onPostcodeAndDistanceChange?: (postcode: string, distance: number) => void;
 }
 
 const DISTANCE_OPTIONS = [
@@ -40,6 +41,7 @@ export function DistanceFilter({
   maxDistance,
   onPostcodeChange,
   onMaxDistanceChange,
+  onPostcodeAndDistanceChange,
 }: DistanceFilterProps) {
   const [postcodeInput, setPostcodeInput] = useState(postcode);
   const [isValidating, setIsValidating] = useState(false);
@@ -76,11 +78,19 @@ export function DistanceFilter({
       if (response.ok && data.status === 200 && data.result) {
         // Valid postcode
         setIsValidPostcode(true); // Mark as valid immediately
-        onPostcodeChange(normalized);
         
-        // Set default radius to 5 miles if not already set
-        if (!maxDistance) {
-          onMaxDistanceChange(5);
+        // If we have a combined handler and no distance is set, use it to update both atomically
+        if (onPostcodeAndDistanceChange && !maxDistance) {
+          // Update both postcode and distance in a single call
+          onPostcodeAndDistanceChange(normalized, 5);
+        } else {
+          // Fallback to separate calls
+          onPostcodeChange(normalized);
+          
+          // Set default radius to 5 miles if not already set
+          if (!maxDistance) {
+            onMaxDistanceChange(5);
+          }
         }
         
         toast.success("Postcode found!", {

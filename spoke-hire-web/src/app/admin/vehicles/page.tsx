@@ -297,6 +297,7 @@ function VehiclesPageContent() {
             onYearToChange={(yearTo) => updateURL({ yearTo })}
             onPostcodeChange={(postcode) => updateURL({ postcode })}
             onMaxDistanceChange={(maxDistance) => updateURL({ maxDistance })}
+            onPostcodeAndDistanceChange={(postcode, maxDistance) => updateURL({ postcode, maxDistance })}
             onSortChange={(sortBy, sortOrder) => updateURL({ sortBy, sortOrder })}
             onClearFilters={handleClearFilters}
           />

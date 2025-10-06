@@ -35,6 +35,7 @@ interface VehicleFiltersProps {
   onYearToChange: (year?: string) => void;
   onPostcodeChange: (postcode: string) => void;
   onMaxDistanceChange: (distance?: number) => void;
+  onPostcodeAndDistanceChange?: (postcode: string, distance: number) => void;
   onSortChange: (sortBy: string, sortOrder: "asc" | "desc") => void;
   onClearFilters: () => void;
 }
@@ -70,6 +71,7 @@ export function VehicleFilters({
   onYearToChange,
   onPostcodeChange,
   onMaxDistanceChange,
+  onPostcodeAndDistanceChange,
   onSortChange,
   onClearFilters,
 }: VehicleFiltersProps) {
@@ -154,6 +156,7 @@ export function VehicleFilters({
               onYearToChange={onYearToChange}
               onPostcodeChange={onPostcodeChange}
               onMaxDistanceChange={onMaxDistanceChange}
+              onPostcodeAndDistanceChange={onPostcodeAndDistanceChange}
               onSortChange={onSortChange}
               onClearFilters={handleClearFilters}
             />
@@ -185,6 +188,7 @@ export function VehicleFilters({
               onYearToChange={onYearToChange}
               onPostcodeChange={onPostcodeChange}
               onMaxDistanceChange={onMaxDistanceChange}
+              onPostcodeAndDistanceChange={onPostcodeAndDistanceChange}
               onSortChange={onSortChange}
               onClearFilters={handleClearFilters}
             />
