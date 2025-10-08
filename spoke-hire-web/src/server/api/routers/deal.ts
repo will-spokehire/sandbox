@@ -43,8 +43,8 @@ const createDealInputSchema = z.object({
   location: z.string().optional(),
   brief: z.string().optional(),
   fee: z.string().optional(),
-  vehicleIds: z.array(z.string().cuid()).min(1).max(MAX_VEHICLES_PER_DEAL),
-  recipientIds: z.array(z.string().cuid()).min(1).max(MAX_RECIPIENTS_PER_DEAL),
+  vehicleIds: z.array(z.string().cuid()).max(MAX_VEHICLES_PER_DEAL).optional().default([]),
+  recipientIds: z.array(z.string().cuid()).max(MAX_RECIPIENTS_PER_DEAL).optional().default([]),
 });
 
 const sendDealInputSchema = z.object({

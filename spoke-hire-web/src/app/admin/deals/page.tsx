@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Eye, Mail, Archive, ArchiveRestore, Car, User } from "lucide-react";
+import { Eye, Mail, Archive, ArchiveRestore, Car, User, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { useRequireAdmin } from "~/providers/auth-provider";
@@ -20,6 +20,7 @@ import { Card, CardContent } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 import { PageHeader } from "~/app/_components/ui";
 import { api } from "~/trpc/react";
+import { CreateDealDialog } from "./_components/CreateDealDialog";
 
 /**
  * Deals List Content Component
@@ -30,6 +31,9 @@ function DealsListContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const utils = api.useUtils();
+
+  // Dialog state
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   // Get archived status from URL (default to false - show active)
   const showArchived = searchParams.get("archived") === "true";
@@ -141,7 +145,24 @@ function DealsListContent() {
             </>
           )}
         </Button>
+
+        {/* Create Deal Button - Only show when viewing active deals */}
+        {!showArchived && (
+          <Button
+            onClick={() => setShowCreateDialog(true)}
+            className="gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Create Deal
+          </Button>
+        )}
       </div>
+
+      {/* Create Deal Dialog */}
+      <CreateDealDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+      />
 
       {/* Results Count */}
       {!isDealsLoading && (

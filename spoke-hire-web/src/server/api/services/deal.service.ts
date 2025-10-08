@@ -287,14 +287,7 @@ export class DealService {
       });
     }
 
-    // Validate vehicles count
-    if (vehicleIds.length === 0) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: DEAL_VALIDATION_MESSAGES.EMPTY_VEHICLES,
-      });
-    }
-
+    // Validate vehicles count (allow empty for deals created without vehicles)
     if (vehicleIds.length > MAX_VEHICLES_PER_DEAL) {
       throw new TRPCError({
         code: "BAD_REQUEST",
@@ -302,14 +295,7 @@ export class DealService {
       });
     }
 
-    // Validate recipients count
-    if (recipientIds.length === 0) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: DEAL_VALIDATION_MESSAGES.EMPTY_RECIPIENTS,
-      });
-    }
-
+    // Validate recipients count (allow empty for deals created without recipients)
     if (recipientIds.length > MAX_RECIPIENTS_PER_DEAL) {
       throw new TRPCError({
         code: "BAD_REQUEST",
@@ -319,34 +305,38 @@ export class DealService {
 
     // Use transaction to ensure data consistency
     const deal = await this.db.$transaction(async (tx) => {
-      // Validate vehicles exist
-      const vehicles = await tx.vehicle.findMany({
-        where: {
-          id: { in: vehicleIds },
-        },
-        select: { id: true },
-      });
-
-      if (vehicles.length !== vehicleIds.length) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Some vehicles not found",
+      // Validate vehicles exist (only if there are vehicles to validate)
+      if (vehicleIds.length > 0) {
+        const vehicles = await tx.vehicle.findMany({
+          where: {
+            id: { in: vehicleIds },
+          },
+          select: { id: true },
         });
+
+        if (vehicles.length !== vehicleIds.length) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Some vehicles not found",
+          });
+        }
       }
 
-      // Validate recipients exist
-      const users = await tx.user.findMany({
-        where: {
-          id: { in: recipientIds },
-        },
-        select: { id: true },
-      });
-
-      if (users.length !== recipientIds.length) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Some recipients not found",
+      // Validate recipients exist (only if there are recipients to validate)
+      if (recipientIds.length > 0) {
+        const users = await tx.user.findMany({
+          where: {
+            id: { in: recipientIds },
+          },
+          select: { id: true },
         });
+
+        if (users.length !== recipientIds.length) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Some recipients not found",
+          });
+        }
       }
 
       // Create deal with vehicles and recipients
@@ -360,18 +350,18 @@ export class DealService {
           fee,
           status: DealStatus.ACTIVE,
           createdById,
-          vehicles: {
+          vehicles: vehicleIds.length > 0 ? {
             create: vehicleIds.map((vehicleId, index) => ({
               vehicleId,
               order: index,
             })),
-          },
-          recipients: {
+          } : undefined,
+          recipients: recipientIds.length > 0 ? {
             create: recipientIds.map((userId) => ({
               userId,
               status: RecipientStatus.PENDING,
             })),
-          },
+          } : undefined,
         },
         include: {
           createdBy: {
@@ -394,14 +384,16 @@ export class DealService {
       return deal;
     });
     
-    // After transaction completes, send emails to all recipients
+    // After transaction completes, send emails to all recipients (only if there are recipients)
     // Note: Emails are sent AFTER the transaction to avoid holding locks
-    try {
-      await this.sendDealEmails(deal.id, recipientIds);
-    } catch (error) {
-      // Log error but don't fail the deal creation
-      // The deal is created successfully, email sending can be retried
-      console.error(`Failed to send emails for deal ${deal.id}:`, error);
+    if (recipientIds.length > 0) {
+      try {
+        await this.sendDealEmails(deal.id, recipientIds);
+      } catch (error) {
+        // Log error but don't fail the deal creation
+        // The deal is created successfully, email sending can be retried
+        console.error(`Failed to send emails for deal ${deal.id}:`, error);
+      }
     }
     
     return deal;
