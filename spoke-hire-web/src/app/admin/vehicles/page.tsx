@@ -1,19 +1,20 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { VehicleStatus } from "@prisma/client";
-import { LayoutGrid, Table as TableIcon } from "lucide-react";
+import { LayoutGrid, Table as TableIcon, Send } from "lucide-react";
 import { toast } from "sonner";
 import { useRequireAdmin } from "~/providers/auth-provider";
-import { UserMenu } from "~/components/auth/UserMenu";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 import { useDebounce } from "~/hooks/useDebounce";
 import { type VehicleListItem } from "~/types/vehicle";
+import { PageHeader } from "~/app/_components/ui";
 import {
   VehicleListTable,
   VehicleFilters,
+  CreateDealDialog,
 } from "./_components";
 
 /**
@@ -29,6 +30,10 @@ function VehiclesPageContent() {
   const { user, isLoading: isAuthLoading } = useRequireAdmin();
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  // Vehicle selection state for deals
+  const [selectedVehicleIds, setSelectedVehicleIds] = useState<string[]>([]);
+  const [isCreateDealDialogOpen, setIsCreateDealDialogOpen] = useState(false);
 
   // Read all state from URL - this is the ONLY source of truth
   const searchInput = searchParams.get("search") ?? "";
@@ -251,62 +256,53 @@ function VehiclesPageContent() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // Vehicle selection handlers
+  const handleToggleVehicle = useCallback((vehicleId: string) => {
+    setSelectedVehicleIds((prev) =>
+      prev.includes(vehicleId)
+        ? prev.filter((id) => id !== vehicleId)
+        : [...prev, vehicleId]
+    );
+  }, []);
+
+  const handleToggleAll = useCallback((checked: boolean) => {
+    if (checked) {
+      setSelectedVehicleIds(vehicles.map((v) => v.id));
+    } else {
+      setSelectedVehicleIds([]);
+    }
+  }, [vehicles]);
+
+  const handleSendDeal = useCallback(() => {
+    if (selectedVehicleIds.length === 0) {
+      toast.error("Please select at least one vehicle");
+      return;
+    }
+    setIsCreateDealDialogOpen(true);
+  }, [selectedVehicleIds]);
+
+  const handleDealCreated = useCallback(() => {
+    setSelectedVehicleIds([]);
+    setIsCreateDealDialogOpen(false);
+    toast.success("Deal sent successfully!");
+  }, []);
+
   // Check if any filters are active (PUBLISHED is the default, so not counted as a filter)
   const hasFilters = !!(searchInput || (status && status !== "PUBLISHED") || makeIds.length > 0 || modelId || collectionIds.length > 0 || exteriorColors.length > 0 || interiorColors.length > 0 || yearFrom || yearTo || numberOfSeats.length > 0 || gearboxTypes.length > 0 || steeringIds.length > 0 || countryIds.length > 0 || counties.length > 0 || postcode || maxDistance);
 
   if (isAuthLoading || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="h-12 w-12 border-4 border-slate-200 border-t-slate-600 rounded-full animate-spin mx-auto" />
-          <p className="text-sm text-slate-600">Loading...</p>
-        </div>
-      </div>
-    );
+    return null; // Layout handles loading state
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      {/* Header */}
-      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
-        <div className="container mx-auto px-4 py-3 md:py-4">
-          <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-50 truncate">
-                Vehicles
-              </h1>
-              <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400">
-                Manage vehicle listings
-              </p>
-            </div>
-            <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push("/admin")}
-                className="hidden sm:flex"
-              >
-                Back to Dashboard
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => router.push("/admin")}
-                className="sm:hidden"
-              >
-                ←
-              </Button>
-              <UserMenu />
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="space-y-6">
+      <PageHeader
+        title="Vehicles"
+        description="Manage vehicle listings"
+      />
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        <div className="space-y-6">
-          {/* Filters */}
-          <VehicleFilters
+      {/* Filters */}
+      <VehicleFilters
             search={searchInput}
             status={status === "ALL" ? undefined : status}
             makeIds={makeIds}
@@ -346,150 +342,180 @@ function VehiclesPageContent() {
             onClearFilters={handleClearFilters}
           />
 
-          {/* Results Count & View Toggle */}
-          {!isVehiclesLoading && (
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                {totalCount === 0 ? (
-                  "No vehicles found"
-                ) : (
-                  <>
-                    Found <span className="font-semibold text-slate-900 dark:text-slate-50">{totalCount}</span> vehicle{totalCount !== 1 ? "s" : ""}
-                    {hasFilters && " matching your criteria"}
-                    {totalPages > 1 && (
-                      <span className="ml-2">
-                        (Page <span className="font-semibold">{currentPage}</span> of <span className="font-semibold">{totalPages}</span>)
-                      </span>
-                    )}
-                  </>
-                )}
-              </p>
-              
-              {/* Desktop View Toggle */}
-              <div className="hidden md:flex items-center gap-2">
-                <Button
-                  variant={viewMode === "table" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => updateURL({ viewMode: "table" })}
-                  className="gap-2"
-                >
-                  <TableIcon className="h-4 w-4" />
-                  Table
-                </Button>
-                <Button
-                  variant={viewMode === "cards" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => updateURL({ viewMode: "cards" })}
-                  className="gap-2"
-                >
-                  <LayoutGrid className="h-4 w-4" />
-                  Cards
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Table/Cards */}
-          <VehicleListTable
-            vehicles={vehicles}
-            isLoading={isVehiclesLoading}
-            hasFilters={hasFilters}
-            viewMode={viewMode}
-            onView={handleView}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onClearFilters={handleClearFilters}
-          />
-
-          {/* Pagination */}
-          {totalPages > 1 && !isVehiclesLoading && (
-            <div className="flex items-center justify-center gap-2 pt-6">
-              {/* Previous Button */}
+      {/* Action Bar: Results Count, Send Deal Button & View Toggle */}
+      {!isVehiclesLoading && (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              {totalCount === 0 ? (
+                "No vehicles found"
+              ) : (
+                <>
+                  Found <span className="font-semibold text-slate-900 dark:text-slate-50">{totalCount}</span> vehicle{totalCount !== 1 ? "s" : ""}
+                  {hasFilters && " matching your criteria"}
+                  {totalPages > 1 && (
+                    <span className="ml-2">
+                      (Page <span className="font-semibold">{currentPage}</span> of <span className="font-semibold">{totalPages}</span>)
+                    </span>
+                  )}
+                </>
+              )}
+            </p>
+            
+            {/* Send Deal Button - Appears when vehicles are selected */}
+            {selectedVehicleIds.length > 0 && (
               <Button
-                variant="outline"
+                variant="default"
                 size="sm"
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1 || isFetching}
+                onClick={handleSendDeal}
+                className="gap-2"
               >
-                Previous
+                <Send className="h-4 w-4" />
+                <span className="hidden sm:inline">Send Deal</span>
+                <span className="sm:hidden">Send</span>
+                <span className="ml-1 px-1.5 py-0.5 text-xs bg-primary-foreground/20 rounded">
+                  {selectedVehicleIds.length}
+                </span>
               </Button>
-
-              {/* Page Numbers - Desktop only */}
-              <div className="hidden md:flex items-center gap-1">
-                {/* First page */}
-                {currentPage > 3 && (
-                  <>
-                    <Button
-                      variant={1 === currentPage ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => handlePageChange(1)}
-                      disabled={isFetching}
-                      className="w-10"
-                    >
-                      1
-                    </Button>
-                    {currentPage > 4 && (
-                      <span className="px-2 text-muted-foreground">...</span>
-                    )}
-                  </>
-                )}
-
-                {/* Pages around current */}
-                {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .filter((page) => {
-                    // Show current page and 2 pages on each side
-                    return page >= currentPage - 2 && page <= currentPage + 2;
-                  })
-                  .map((page) => (
-                    <Button
-                      key={page}
-                      variant={page === currentPage ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => handlePageChange(page)}
-                      disabled={isFetching}
-                      className="w-10"
-                    >
-                      {page}
-                    </Button>
-                  ))}
-
-                {/* Last page */}
-                {currentPage < totalPages - 2 && (
-                  <>
-                    {currentPage < totalPages - 3 && (
-                      <span className="px-2 text-muted-foreground">...</span>
-                    )}
-                    <Button
-                      variant={totalPages === currentPage ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => handlePageChange(totalPages)}
-                      disabled={isFetching}
-                      className="w-10"
-                    >
-                      {totalPages}
-                    </Button>
-                  </>
-                )}
-              </div>
-
-              {/* Page Indicator - Mobile only */}
-              <div className="md:hidden px-3 py-1.5 text-sm font-medium text-muted-foreground">
-                {currentPage} / {totalPages}
-              </div>
-
-              {/* Next Button */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages || isFetching}
-              >
-                Next
-              </Button>
-            </div>
-          )}
+            )}
+          </div>
+          
+          {/* Desktop View Toggle */}
+          <div className="hidden md:flex items-center gap-2">
+            <Button
+              variant={viewMode === "table" ? "default" : "outline"}
+              size="sm"
+              onClick={() => updateURL({ viewMode: "table" })}
+              className="gap-2"
+            >
+              <TableIcon className="h-4 w-4" />
+              Table
+            </Button>
+            <Button
+              variant={viewMode === "cards" ? "default" : "outline"}
+              size="sm"
+              onClick={() => updateURL({ viewMode: "cards" })}
+              className="gap-2"
+            >
+              <LayoutGrid className="h-4 w-4" />
+              Cards
+            </Button>
+          </div>
         </div>
-      </main>
+      )}
+
+      {/* Table/Cards */}
+      <VehicleListTable
+        vehicles={vehicles}
+        isLoading={isVehiclesLoading}
+        hasFilters={hasFilters}
+        viewMode={viewMode}
+        onView={handleView}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onClearFilters={handleClearFilters}
+        selectedIds={selectedVehicleIds}
+        onToggleVehicle={handleToggleVehicle}
+        onToggleAll={handleToggleAll}
+      />
+
+      {/* Pagination */}
+      {totalPages > 1 && !isVehiclesLoading && (
+        <div className="flex items-center justify-center gap-2 pt-6">
+          {/* Previous Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1 || isFetching}
+          >
+            Previous
+          </Button>
+
+          {/* Page Numbers - Desktop only */}
+          <div className="hidden md:flex items-center gap-1">
+            {/* First page */}
+            {currentPage > 3 && (
+              <>
+                <Button
+                  variant={1 === currentPage ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handlePageChange(1)}
+                  disabled={isFetching}
+                  className="w-10"
+                >
+                  1
+                </Button>
+                {currentPage > 4 && (
+                  <span className="px-2 text-muted-foreground">...</span>
+                )}
+              </>
+            )}
+
+            {/* Pages around current */}
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter((page) => {
+                // Show current page and 2 pages on each side
+                return page >= currentPage - 2 && page <= currentPage + 2;
+              })
+              .map((page) => (
+                <Button
+                  key={page}
+                  variant={page === currentPage ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handlePageChange(page)}
+                  disabled={isFetching}
+                  className="w-10"
+                >
+                  {page}
+                </Button>
+              ))}
+
+            {/* Last page */}
+            {currentPage < totalPages - 2 && (
+              <>
+                {currentPage < totalPages - 3 && (
+                  <span className="px-2 text-muted-foreground">...</span>
+                )}
+                <Button
+                  variant={totalPages === currentPage ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handlePageChange(totalPages)}
+                  disabled={isFetching}
+                  className="w-10"
+                >
+                  {totalPages}
+                </Button>
+              </>
+            )}
+          </div>
+
+          {/* Page Indicator - Mobile only */}
+          <div className="md:hidden px-3 py-1.5 text-sm font-medium text-muted-foreground">
+            {currentPage} / {totalPages}
+          </div>
+
+          {/* Next Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages || isFetching}
+          >
+            Next
+          </Button>
+        </div>
+      )}
+
+      {/* Create Deal Dialog - Only mount when needed */}
+      {isCreateDealDialogOpen && (
+        <CreateDealDialog
+          open={isCreateDealDialogOpen}
+          onOpenChange={setIsCreateDealDialogOpen}
+          selectedVehicleIds={selectedVehicleIds}
+          onSuccess={handleDealCreated}
+        />
+      )}
     </div>
   );
 }
@@ -503,11 +529,9 @@ export default function VehiclesPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center space-y-4">
-            <div className="h-12 w-12 border-4 border-slate-200 border-t-slate-600 rounded-full animate-spin mx-auto" />
-            <p className="text-sm text-slate-600">Loading vehicles...</p>
-          </div>
+        <div className="space-y-6">
+          <div className="h-10 w-48 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+          <div className="h-[400px] w-full bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
         </div>
       }
     >

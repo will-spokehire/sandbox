@@ -32,6 +32,7 @@ export interface ListVehiclesParams {
   priceFrom?: number;
   priceTo?: number;
   ownerId?: string;
+  vehicleIds?: string[]; // Filter by specific vehicle IDs
   numberOfSeats?: number[];
   gearboxTypes?: string[];
   steeringIds?: string[];
@@ -112,6 +113,7 @@ export class VehicleService {
       priceFrom: params.priceFrom,
       priceTo: params.priceTo,
       ownerId: params.ownerId,
+      vehicleIds: params.vehicleIds, // Add vehicleIds filter
       numberOfSeats: params.numberOfSeats,
       gearboxTypes: params.gearboxTypes,
       steeringIds: params.steeringIds,

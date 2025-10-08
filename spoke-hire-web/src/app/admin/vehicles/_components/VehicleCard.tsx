@@ -3,8 +3,10 @@
 import { MoreHorizontal, Eye, Edit, Trash2, MapPin } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { memo } from "react";
 import { type VehicleListItem } from "~/types/vehicle";
 import { Button } from "~/components/ui/button";
+import { Checkbox } from "~/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +30,8 @@ interface VehicleCardProps {
   onView?: (id: string) => void;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
+  selected?: boolean;
+  onToggle?: (id: string) => void;
 }
 
 /**
@@ -35,12 +39,15 @@ interface VehicleCardProps {
  * 
  * Card layout for mobile devices.
  * Uses Link component for proper browser navigation (cmd+click, right-click, etc.)
+ * Memoized to prevent unnecessary re-renders when other cards change.
  */
-export function VehicleCard({
+export const VehicleCard = memo(function VehicleCard({
   vehicle,
   onView,
   onEdit,
   onDelete,
+  selected = false,
+  onToggle,
 }: VehicleCardProps) {
   const imageUrl = getVehicleImageUrl(vehicle.media);
   const ownerName = formatOwnerName(
@@ -58,7 +65,7 @@ export function VehicleCard({
   const distance = (vehicle as any).distance as number | undefined;
 
   return (
-    <Card className="hover:shadow-md transition-shadow overflow-hidden py-0 relative">
+    <Card className={`hover:shadow-md transition-shadow overflow-hidden py-0 relative ${selected ? 'ring-2 ring-primary' : ''}`}>
       <CardContent className="p-0">
         {/* Image - Full width for better impact - 3:2 aspect ratio */}
         <div className="relative aspect-[3/2] w-full bg-muted">
@@ -72,8 +79,24 @@ export function VehicleCard({
             />
           </Link>
           
+          {/* Checkbox overlay - top left */}
+          {onToggle && (
+            <div className="absolute top-3 left-3 z-10">
+              <div 
+                className="bg-background/80 backdrop-blur-sm rounded-md p-1.5 shadow-lg"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Checkbox
+                  checked={selected}
+                  onCheckedChange={() => onToggle(vehicle.id)}
+                  aria-label={`Select ${vehicle.name}`}
+                />
+              </div>
+            </div>
+          )}
+          
           {/* Status badge overlay */}
-          <div className="absolute top-3 left-3 z-10">
+          <div className={`absolute top-3 z-10 ${onToggle ? 'left-16' : 'left-3'}`}>
             <VehicleStatusBadge status={vehicle.status} />
           </div>
           
@@ -181,5 +204,5 @@ export function VehicleCard({
       </CardContent>
     </Card>
   );
-}
+});
 

@@ -122,6 +122,15 @@ export class CollectionNotFoundError extends TRPCError {
   }
 }
 
+export class DealNotFoundError extends TRPCError {
+  constructor(id: string) {
+    super({
+      code: "NOT_FOUND",
+      message: `Deal with ID '${id}' not found`,
+    });
+  }
+}
+
 export class MakeNotFoundError extends TRPCError {
   constructor(id: string) {
     super({

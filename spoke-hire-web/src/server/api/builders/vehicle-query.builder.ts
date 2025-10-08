@@ -21,6 +21,7 @@ export interface VehicleFilters {
   priceFrom?: number;
   priceTo?: number;
   ownerId?: string;
+  vehicleIds?: string[]; // Filter by specific vehicle IDs
   numberOfSeats?: number[];
   gearboxTypes?: string[];
   steeringIds?: string[];
@@ -100,6 +101,11 @@ export class VehicleQueryBuilder {
     // Owner filter
     if (filters.ownerId) {
       conditions.push(Prisma.sql`v."ownerId" = ${filters.ownerId}`);
+    }
+
+    // Vehicle IDs filter - filter by specific vehicle IDs
+    if (filters.vehicleIds && filters.vehicleIds.length > 0) {
+      conditions.push(Prisma.sql`v.id = ANY(${filters.vehicleIds}::text[])`);
     }
 
     // Number of seats filter
@@ -359,6 +365,11 @@ export class VehicleQueryBuilder {
 
     if (filters.ownerId) {
       where.ownerId = filters.ownerId;
+    }
+
+    // Filter by specific vehicle IDs
+    if (filters.vehicleIds && filters.vehicleIds.length > 0) {
+      where.id = { in: filters.vehicleIds };
     }
 
     if (filters.numberOfSeats && filters.numberOfSeats.length > 0) {

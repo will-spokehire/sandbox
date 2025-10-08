@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import { Checkbox } from "~/components/ui/checkbox";
 import { Skeleton } from "~/components/ui/skeleton";
 import { VehicleTableRow } from "./VehicleTableRow";
 import { VehicleCard } from "./VehicleCard";
@@ -23,6 +24,9 @@ interface VehicleListTableProps {
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
   onClearFilters?: () => void;
+  selectedIds?: string[];
+  onToggleVehicle?: (id: string) => void;
+  onToggleAll?: (checked: boolean) => void;
 }
 
 /**
@@ -41,7 +45,12 @@ export function VehicleListTable({
   onEdit,
   onDelete,
   onClearFilters,
+  selectedIds = [],
+  onToggleVehicle,
+  onToggleAll,
 }: VehicleListTableProps) {
+  const allSelected = vehicles.length > 0 && selectedIds.length === vehicles.length;
+  const someSelected = selectedIds.length > 0 && selectedIds.length < vehicles.length;
   // Show empty state when not loading and no vehicles
   if (!isLoading && vehicles.length === 0) {
     return (
@@ -82,6 +91,8 @@ export function VehicleListTable({
               onView={onView}
               onEdit={onEdit}
               onDelete={onDelete}
+              selected={selectedIds.includes(vehicle.id)}
+              onToggle={onToggleVehicle}
             />
           ))
         )}
@@ -100,6 +111,8 @@ export function VehicleListTable({
                 onView={onView}
                 onEdit={onEdit}
                 onDelete={onDelete}
+                selected={selectedIds.includes(vehicle.id)}
+                onToggle={onToggleVehicle}
               />
             ))
           )}
@@ -112,6 +125,13 @@ export function VehicleListTable({
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-[40px]">
+                <Checkbox
+                  checked={allSelected || (someSelected ? "indeterminate" : false)}
+                  onCheckedChange={(checked) => onToggleAll?.(checked === true)}
+                  aria-label="Select all vehicles"
+                />
+              </TableHead>
               <TableHead className="w-[60px]">Image</TableHead>
               <TableHead>Vehicle</TableHead>
               <TableHead className="w-[80px]">Year</TableHead>
@@ -137,6 +157,8 @@ export function VehicleListTable({
                   onView={onView}
                   onEdit={onEdit}
                   onDelete={onDelete}
+                  selected={selectedIds.includes(vehicle.id)}
+                  onToggle={onToggleVehicle}
                 />
               ))}
             </TableBody>

@@ -3,9 +3,11 @@
 import { MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { memo } from "react";
 import { type VehicleListItem } from "~/types/vehicle";
 import { TableCell, TableRow } from "~/components/ui/table";
 import { Button } from "~/components/ui/button";
+import { Checkbox } from "~/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +30,8 @@ interface VehicleTableRowProps {
   onView?: (id: string) => void;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
+  selected?: boolean;
+  onToggle?: (id: string) => void;
 }
 
 /**
@@ -35,12 +39,15 @@ interface VehicleTableRowProps {
  * 
  * Individual row in the vehicle list table.
  * Uses Link component for proper browser navigation (cmd+click, right-click, etc.)
+ * Memoized to prevent unnecessary re-renders when other rows change.
  */
-export function VehicleTableRow({
+export const VehicleTableRow = memo(function VehicleTableRow({
   vehicle,
   onView,
   onEdit,
   onDelete,
+  selected = false,
+  onToggle,
 }: VehicleTableRowProps) {
   const imageUrl = getVehicleImageUrl(vehicle.media);
   const ownerName = formatOwnerName(
@@ -56,6 +63,15 @@ export function VehicleTableRow({
 
   return (
     <TableRow className="hover:bg-muted/50">
+      {/* Checkbox */}
+      <TableCell onClick={(e) => e.stopPropagation()}>
+        <Checkbox
+          checked={selected}
+          onCheckedChange={() => onToggle?.(vehicle.id)}
+          aria-label={`Select ${vehicle.name}`}
+        />
+      </TableCell>
+
       {/* Image */}
       <TableCell>
         <Link href={`/admin/vehicles/${vehicle.id}`} className="block">
@@ -174,5 +190,5 @@ export function VehicleTableRow({
       </TableCell>
     </TableRow>
   );
-}
+});
 

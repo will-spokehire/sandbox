@@ -39,6 +39,7 @@ const listVehiclesInputSchema = z.object({
   priceFrom: z.number().optional(),
   priceTo: z.number().optional(),
   ownerId: z.string().optional(),
+  vehicleIds: z.array(z.string()).optional(), // Filter by specific vehicle IDs
   numberOfSeats: z.array(z.number()).optional(),
   gearboxTypes: z.array(z.string()).optional(),
   steeringIds: z.array(z.string()).optional(),

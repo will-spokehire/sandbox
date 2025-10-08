@@ -46,6 +46,19 @@ enum VehicleStatus {
     ARCHIVED
 }
 
+// Deal Status Enum
+enum DealStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+// Recipient Status Enum
+enum RecipientStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
 // Country Lookup Table
 model Country {
     id          String   @id @default(cuid())
@@ -102,6 +115,8 @@ model User {
 
     // Relationships
     vehicles          Vehicle[]
+    dealsCreated      Deal[]          @relation("DealsCreated")
+    dealRecipients    DealRecipient[]
 
     @@index([email])
     @@index([supabaseId])
@@ -228,6 +243,7 @@ model Vehicle {
     sources           VehicleSource[]
     specifications    VehicleSpecification[]
     collections       VehicleCollection[]
+    dealVehicles      DealVehicle[]  // NEW: Added for deals
     
     // Indexes for performance
     @@index([makeId])
@@ -293,6 +309,22 @@ model Media {
     @@unique([originalUrl, vehicleId])
 }
 
+// Many-to-many relationship between Vehicles and Collections
+model VehicleCollection {
+    id           String     @id @default(cuid())
+    createdAt    DateTime   @default(now())
+    
+    vehicleId    String
+    vehicle      Vehicle    @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+    
+    collectionId String
+    collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+    
+    @@unique([vehicleId, collectionId])
+    @@index([vehicleId])
+    @@index([collectionId])
+}
+
 // Track Data Sources
 model VehicleSource {
     id          String   @id @default(cuid())
@@ -327,19 +359,69 @@ model VehicleSpecification {
     @@index([vehicleId, category])
 }
 
-// Many-to-many relationship between Vehicles and Collections
-model VehicleCollection {
-    id           String     @id @default(cuid())
-    createdAt    DateTime   @default(now())
+// Deals - Job offers sent to users
+model Deal {
+    id          String      @id @default(cuid())
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
     
-    vehicleId    String
-    vehicle      Vehicle    @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+    name        String
+    description String?
+    status      DealStatus  @default(ACTIVE)
     
-    collectionId String
-    collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+    // Metadata
+    createdById String
+    createdBy   User        @relation("DealsCreated", fields: [createdById], references: [id])
     
-    @@unique([vehicleId, collectionId])
+    // Relationships
+    vehicles    DealVehicle[]
+    recipients  DealRecipient[]
+    
+    @@index([status])
+    @@index([createdById])
+    @@index([createdAt])
+}
+
+// Many-to-many relationship between Deals and Vehicles
+model DealVehicle {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    
+    dealId    String
+    deal      Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+    
+    vehicleId String
+    vehicle   Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+    
+    order     Int      @default(0) // Display order in deal
+    
+    @@unique([dealId, vehicleId])
+    @@index([dealId])
     @@index([vehicleId])
-    @@index([collectionId])
+}
+
+// Deal Recipients - Tracks who received the deal and delivery status
+model DealRecipient {
+    id             String          @id @default(cuid())
+    createdAt      DateTime        @default(now())
+    sentAt         DateTime?
+    
+    dealId         String
+    deal           Deal            @relation(fields: [dealId], references: [id], onDelete: Cascade)
+    
+    userId         String
+    user           User            @relation(fields: [userId], references: [id])
+    
+    // Email tracking
+    status         RecipientStatus @default(PENDING)
+    emailSentAt    DateTime?
+    emailOpenedAt  DateTime?
+    emailClickedAt DateTime?
+    errorMessage   String?         // Store error if sending failed
+    
+    @@unique([dealId, userId])
+    @@index([dealId])
+    @@index([userId])
+    @@index([status])
 }
 
