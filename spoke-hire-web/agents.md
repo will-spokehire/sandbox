@@ -51,25 +51,19 @@ src/
    className={cn("base-classes", condition && "conditional-classes")}
    ```
 
-### Layout Patterns
+### Common Layouts
 ```tsx
-// Container pattern
-<div className="container mx-auto px-4">
-  {/* Content */}
-</div>
+// Container
+<div className="container mx-auto px-4">{/* Content */}</div>
 
-// Card pattern
+// Card
 <Card>
-  <CardHeader>
-    <CardTitle>Title</CardTitle>
-  </CardHeader>
+  <CardHeader><CardTitle>Title</CardTitle></CardHeader>
   <CardContent>{/* Content */}</CardContent>
 </Card>
 
-// Grid pattern
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-  {/* Items */}
-</div>
+// Responsive Grid
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">{/* Items */}</div>
 ```
 
 ## Client-Side Development
@@ -97,19 +91,19 @@ src/
 4. **Error handling:** Use `Alert` component or `Sonner` toasts
 
 ### Forms
-1. **Use shadcn/ui Form component** - Wraps React Hook Form
-2. **Validation:** Define Zod schemas in separate files
-3. **Pattern:**
-   ```tsx
-   import { useForm } from "react-hook-form";
-   import { zodResolver } from "@hookform/resolvers/zod";
-   import { Form, FormField, FormItem, FormLabel, FormControl } from "~/components/ui/form";
-   
-   const form = useForm<FormData>({
-     resolver: zodResolver(schema),
-     defaultValues: { ... }
-   });
-   ```
+Use shadcn/ui Form component with React Hook Form + Zod validation.
+
+```tsx
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const form = useForm<FormData>({
+  resolver: zodResolver(schema),
+  defaultValues: { ... }
+});
+```
+
+Define Zod schemas in separate files for reusability.
 
 ## File Organization
 
@@ -185,42 +179,23 @@ docs/
 3. **Format code:** Use Prettier (`npm run format:write`)
 4. **Responsive testing:** Test on mobile, tablet, desktop viewports
 
-## Common Patterns
+## Common UI Patterns
 
-### Loading States
 ```tsx
-{isLoading ? (
-  <Skeleton className="h-20 w-full" />
-) : (
-  <DataDisplay data={data} />
-)}
-```
+// Loading states
+{isLoading ? <Skeleton className="h-20 w-full" /> : <DataDisplay data={data} />}
 
-### Empty States
-```tsx
-import { EmptyState } from "~/app/_components/ui";
-<EmptyState 
-  title="No data found"
-  description="Try adjusting your filters"
-  icon="📭"
-/>
-```
+// Empty states
+<EmptyState title="No data" description="Try adjusting filters" icon="📭" />
 
-### Toasts/Notifications
-```tsx
+// Toasts
 import { toast } from "sonner";
-toast.success("Action completed!");
-toast.error("Something went wrong");
-```
+toast.success("Success!"); toast.error("Error!");
 
-### Dialogs/Modals
-```tsx
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "~/components/ui/dialog";
+// Dialogs
 <Dialog open={open} onOpenChange={setOpen}>
   <DialogContent>
-    <DialogHeader>
-      <DialogTitle>Dialog Title</DialogTitle>
-    </DialogHeader>
+    <DialogHeader><DialogTitle>Title</DialogTitle></DialogHeader>
     {/* Content */}
   </DialogContent>
 </Dialog>
@@ -256,115 +231,26 @@ npm run format:write
 npm run build
 ```
 
-## Documentation Best Practices
+## Quick Reference
 
-### When to Create Documentation
+### Database & Backend
+- **Use Prisma** for database operations
+- **Use tRPC** for API endpoints in `server/api/routers/`
+- **Use services** for business logic in `server/api/services/`
+- **Optimize queries** - Use parallel execution for independent queries (see `docs/architecture/database-optimization.md`)
 
-**Create new documentation when:**
-- ✅ Implementing a new feature (create `docs/features/[feature_name].md`)
-- ✅ Adding new setup/deployment steps (update relevant doc in `docs/setup/`)
-- ✅ Implementing complex technical solutions (add to `docs/architecture/`)
-
-**Update existing documentation when:**
-- ✅ Fixing bugs in existing features
-- ✅ Enhancing existing features
-- ✅ Changing implementation details
-- ✅ Simplifying or refactoring code
-
-### Documentation Content Guidelines
-
-**Feature Documentation (`docs/features/`) should include:**
-1. **Overview** - What the feature does and why it exists
-2. **User Flow** - How users interact with the feature
-3. **Technical Implementation** - Architecture, components, API endpoints
-4. **Database Schema** - Relevant models and relationships (if applicable)
-5. **Configuration** - Environment variables, settings
-6. **Testing** - How to test the feature
-7. **Troubleshooting** - Common issues and solutions
-8. **Change History** - Major changes and iterations (optional)
-
-**Setup Documentation (`docs/setup/`) should include:**
-1. **Prerequisites** - What's needed before starting
-2. **Step-by-step instructions** - Clear, numbered steps
-3. **Configuration examples** - With code blocks
-4. **Verification steps** - How to confirm setup worked
-5. **Troubleshooting** - Common setup issues
-6. **Next steps** - Links to related documentation
-
-**Architecture Documentation (`docs/architecture/`) should include:**
-1. **Problem statement** - What challenge is being addressed
-2. **Solution approach** - High-level strategy
-3. **Implementation details** - Technical specifics
-4. **Examples** - Code examples demonstrating the approach
-5. **Performance impact** - Metrics and improvements (if applicable)
-6. **Alternatives considered** - Other approaches and why not chosen
-7. **References** - External resources and links
-
-### Documentation Format Guidelines
-
-**Use clear headings:**
-```markdown
-# Main Title
-## Major Section
-### Subsection
-#### Detail Section
+### Database Migrations
+```bash
+npm run db:push      # Quick sync for development
+npm run db:migrate   # Create migration for production
 ```
 
-**Include code blocks with syntax highlighting:**
-```markdown
-\`\`\`typescript
-// TypeScript code example
-const example = "value";
-\`\`\`
+Always use `DIRECT_URL` for migrations, `DATABASE_URL` for app queries.
 
-\`\`\`bash
-# Shell commands
-npm run dev
-\`\`\`
-```
-
-**Use tables for comparisons:**
-```markdown
-| Feature | Before | After |
-|---------|--------|-------|
-| Speed   | Slow   | Fast  |
-```
-
-**Use checkboxes for task lists:**
-```markdown
-- [ ] Task to do
-- [x] Completed task
-```
-
-**Use callouts for important info:**
-```markdown
-**Important:** Critical information here
-
-**Note:** Helpful tip here
-
-⚠️ **Warning:** Be careful of this
-```
-
-### Updating CHANGELOG.md
-
-Update `CHANGELOG.md` for:
-- ✅ New features (minor or major version)
-- ✅ Breaking changes (major version)
-- ✅ Significant bug fixes
-- ✅ Performance improvements
-- ✅ Database schema changes
-- ✅ API changes
-
-Don't update for:
-- ❌ Minor typo fixes
-- ❌ Code formatting changes
-- ❌ Internal refactoring with no user impact
-
-### Links Between Documents
-
-- Always use relative links: `[Link](./other-doc.md)`
-- Link to related documentation at the bottom of each doc
-- Keep README.md as the main entry point with links to all major docs
+### Environment Variables
+- Keep secrets in `.env.local` (never commit)
+- Document new env vars in `env.example.txt`
+- Use `~/env.js` for validation
 
 ## Additional Resources
 
