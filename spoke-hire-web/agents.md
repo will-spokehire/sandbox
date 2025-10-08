@@ -137,16 +137,37 @@ server/api/
 ### Documentation Structure
 ```
 docs/
-└── features/
-    └── [feature_short_name].md   # Feature implementation docs
+├── setup/                      # Setup & deployment guides
+│   ├── getting-started.md     # Quick start for new developers
+│   ├── database-setup.md      # Database configuration
+│   ├── supabase-setup.md      # Supabase authentication & hosting
+│   └── deployment.md          # Production deployment guide
+│
+├── features/                   # Feature implementation docs
+│   └── [feature_name].md      # One comprehensive doc per feature
+│
+└── architecture/               # Technical deep-dives
+    ├── database-optimization.md    # Performance, N+1 queries, indexing
+    └── migration-history.md        # Database migration tracking
 ```
 
 **Important Documentation Rules:**
-- ❌ **DO NOT** create implementation description files in the project root
-- ✅ **DO** create feature documentation in `docs/features/[feature_short_name].md`
-- ❌ **DO NOT** create separate MD files for bug fixes or minor changes
-- ✅ **DO** update the existing feature documentation when making fixes or changes
-- Keep documentation organized by feature, not by individual changes
+
+**✅ DO:**
+- Create feature documentation in `docs/features/[feature_name].md`
+- Put setup/deployment guides in `docs/setup/`
+- Put architecture/technical docs in `docs/architecture/`
+- Update existing docs when making changes (don't create new ones)
+- Keep README.md as the entry point with links to docs
+- Update CHANGELOG.md for significant changes
+- Write comprehensive docs that cover the full feature lifecycle
+
+**❌ DO NOT:**
+- Create `*_COMPLETE.md`, `*_SUMMARY.md`, `*_FINAL.md` files in project root
+- Create separate MD files for bug fixes or minor changes
+- Put implementation docs in the project root
+- Duplicate content across multiple files
+- Create documentation without a clear category (setup/features/architecture)
 
 ## Performance Best Practices
 
@@ -235,10 +256,130 @@ npm run format:write
 npm run build
 ```
 
+## Documentation Best Practices
+
+### When to Create Documentation
+
+**Create new documentation when:**
+- ✅ Implementing a new feature (create `docs/features/[feature_name].md`)
+- ✅ Adding new setup/deployment steps (update relevant doc in `docs/setup/`)
+- ✅ Implementing complex technical solutions (add to `docs/architecture/`)
+
+**Update existing documentation when:**
+- ✅ Fixing bugs in existing features
+- ✅ Enhancing existing features
+- ✅ Changing implementation details
+- ✅ Simplifying or refactoring code
+
+### Documentation Content Guidelines
+
+**Feature Documentation (`docs/features/`) should include:**
+1. **Overview** - What the feature does and why it exists
+2. **User Flow** - How users interact with the feature
+3. **Technical Implementation** - Architecture, components, API endpoints
+4. **Database Schema** - Relevant models and relationships (if applicable)
+5. **Configuration** - Environment variables, settings
+6. **Testing** - How to test the feature
+7. **Troubleshooting** - Common issues and solutions
+8. **Change History** - Major changes and iterations (optional)
+
+**Setup Documentation (`docs/setup/`) should include:**
+1. **Prerequisites** - What's needed before starting
+2. **Step-by-step instructions** - Clear, numbered steps
+3. **Configuration examples** - With code blocks
+4. **Verification steps** - How to confirm setup worked
+5. **Troubleshooting** - Common setup issues
+6. **Next steps** - Links to related documentation
+
+**Architecture Documentation (`docs/architecture/`) should include:**
+1. **Problem statement** - What challenge is being addressed
+2. **Solution approach** - High-level strategy
+3. **Implementation details** - Technical specifics
+4. **Examples** - Code examples demonstrating the approach
+5. **Performance impact** - Metrics and improvements (if applicable)
+6. **Alternatives considered** - Other approaches and why not chosen
+7. **References** - External resources and links
+
+### Documentation Format Guidelines
+
+**Use clear headings:**
+```markdown
+# Main Title
+## Major Section
+### Subsection
+#### Detail Section
+```
+
+**Include code blocks with syntax highlighting:**
+```markdown
+\`\`\`typescript
+// TypeScript code example
+const example = "value";
+\`\`\`
+
+\`\`\`bash
+# Shell commands
+npm run dev
+\`\`\`
+```
+
+**Use tables for comparisons:**
+```markdown
+| Feature | Before | After |
+|---------|--------|-------|
+| Speed   | Slow   | Fast  |
+```
+
+**Use checkboxes for task lists:**
+```markdown
+- [ ] Task to do
+- [x] Completed task
+```
+
+**Use callouts for important info:**
+```markdown
+**Important:** Critical information here
+
+**Note:** Helpful tip here
+
+⚠️ **Warning:** Be careful of this
+```
+
+### Updating CHANGELOG.md
+
+Update `CHANGELOG.md` for:
+- ✅ New features (minor or major version)
+- ✅ Breaking changes (major version)
+- ✅ Significant bug fixes
+- ✅ Performance improvements
+- ✅ Database schema changes
+- ✅ API changes
+
+Don't update for:
+- ❌ Minor typo fixes
+- ❌ Code formatting changes
+- ❌ Internal refactoring with no user impact
+
+### Links Between Documents
+
+- Always use relative links: `[Link](./other-doc.md)`
+- Link to related documentation at the bottom of each doc
+- Keep README.md as the main entry point with links to all major docs
+
 ## Additional Resources
 
+### Project Documentation
+- [README.md](../README.md) - Project overview and quick start
+- [CHANGELOG.md](../CHANGELOG.md) - Version history
+- [Setup Guides](../docs/setup/) - Getting started and configuration
+- [Feature Docs](../docs/features/) - Feature implementation details
+- [Architecture Docs](../docs/architecture/) - Technical deep-dives
+
+### External Resources
 - [shadcn/ui Documentation](https://ui.shadcn.com)
 - [Next.js App Router](https://nextjs.org/docs/app)
 - [tRPC Documentation](https://trpc.io)
 - [Tailwind CSS](https://tailwindcss.com)
+- [Prisma Docs](https://www.prisma.io/docs)
+- [Supabase Docs](https://supabase.com/docs)
 
