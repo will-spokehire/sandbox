@@ -20,6 +20,7 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "analyze-data": "tsx scripts/analyze-data.ts",
+    "analyze-non-imported": "tsx scripts/analyze-non-imported-vehicles.ts",
     "migrate-data": "tsx scripts/migrate-data.ts",
     "remigrate-data": "tsx scripts/remigrate-data.ts",
     "migrate-processed": "tsx scripts/migrate-processed-catalog.ts",
