@@ -29,7 +29,11 @@ import { api } from "~/trpc/react";
 
 const createDealSchema = z.object({
   name: z.string().optional(),
-  description: z.string().optional(),
+  date: z.string().optional(),
+  time: z.string().optional(),
+  location: z.string().optional(),
+  brief: z.string().optional(),
+  fee: z.string().optional(),
 });
 
 type CreateDealFormData = z.infer<typeof createDealSchema>;
@@ -63,7 +67,11 @@ export function CreateDealDialog({
     resolver: zodResolver(createDealSchema),
     defaultValues: {
       name: "",
-      description: "",
+      date: "",
+      time: "",
+      location: "",
+      brief: "",
+      fee: "",
     },
   });
 
@@ -244,7 +252,11 @@ export function CreateDealDialog({
       // Create new deal
       createDealMutation.mutate({
         name: data.name!,
-        description: data.description,
+        date: data.date,
+        time: data.time,
+        location: data.location,
+        brief: data.brief,
+        fee: data.fee,
         vehicleIds: selectedVehicleIds,
         recipientIds: vehicleOwners.map((o) => o.id),
       });
@@ -417,14 +429,51 @@ export function CreateDealDialog({
                 )}
               </div>
 
-              {/* Deal Description */}
+              {/* Production Details */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="dealDate">Date(s)</Label>
+                  <Input
+                    id="dealDate"
+                    placeholder="e.g., 15-17 March 2025"
+                    {...form.register("date")}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="dealTime">Time(s)</Label>
+                  <Input
+                    id="dealTime"
+                    placeholder="e.g., 9am-5pm"
+                    {...form.register("time")}
+                  />
+                </div>
+              </div>
+
               <div>
-                <Label htmlFor="dealDescription">Description (Optional)</Label>
+                <Label htmlFor="dealLocation">Location(s)</Label>
+                <Input
+                  id="dealLocation"
+                  placeholder="e.g., London, UK"
+                  {...form.register("location")}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="dealBrief">Brief</Label>
                 <Textarea
-                  id="dealDescription"
-                  placeholder="Add details about this job offer..."
+                  id="dealBrief"
+                  placeholder="Brief description of the production..."
                   rows={3}
-                  {...form.register("description")}
+                  {...form.register("brief")}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="dealFee">Fee Guide</Label>
+                <Input
+                  id="dealFee"
+                  placeholder="e.g., £500-£750"
+                  {...form.register("fee")}
                 />
               </div>
 

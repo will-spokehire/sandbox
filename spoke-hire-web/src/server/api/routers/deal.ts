@@ -38,7 +38,11 @@ const getDealByIdInputSchema = z.object({
 
 const createDealInputSchema = z.object({
   name: z.string().min(DEAL_NAME_MIN_LENGTH).max(DEAL_NAME_MAX_LENGTH),
-  description: z.string().optional(),
+  date: z.string().optional(),
+  time: z.string().optional(),
+  location: z.string().optional(),
+  brief: z.string().optional(),
+  fee: z.string().optional(),
   vehicleIds: z.array(z.string().cuid()).min(1).max(MAX_VEHICLES_PER_DEAL),
   recipientIds: z.array(z.string().cuid()).min(1).max(MAX_RECIPIENTS_PER_DEAL),
 });
@@ -112,7 +116,11 @@ export const dealRouter = createTRPCRouter({
 
       return await service.createDeal({
         name: input.name,
-        description: input.description,
+        date: input.date,
+        time: input.time,
+        location: input.location,
+        brief: input.brief,
+        fee: input.fee,
         vehicleIds: input.vehicleIds,
         recipientIds: input.recipientIds,
         createdById: userId,
@@ -160,7 +168,11 @@ export const dealRouter = createTRPCRouter({
           to: recipient.user.email,
           userName,
           dealName: deal.name,
-          dealDescription: deal.description,
+          date: deal.date,
+          time: deal.time,
+          location: deal.location,
+          brief: deal.brief,
+          fee: deal.fee,
           vehicleNames,
           dealUrl: undefined,
         };

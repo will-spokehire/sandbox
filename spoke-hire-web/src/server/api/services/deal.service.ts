@@ -27,7 +27,11 @@ type DbClient = PrismaClient;
  */
 export interface CreateDealParams {
   name: string;
-  description?: string;
+  date?: string;
+  time?: string;
+  location?: string;
+  brief?: string;
+  fee?: string;
   vehicleIds: string[];
   recipientIds: string[];
   createdById: string;
@@ -54,7 +58,11 @@ export interface ListDealsParams {
 export interface DealWithDetails {
   id: string;
   name: string;
-  description: string | null;
+  date: string | null;
+  time: string | null;
+  location: string | null;
+  brief: string | null;
+  fee: string | null;
   status: DealStatus;
   createdAt: Date;
   updatedAt: Date;
@@ -255,7 +263,7 @@ export class DealService {
    * Create a new deal
    */
   async createDeal(params: CreateDealParams) {
-    const { name, description, vehicleIds, recipientIds, createdById } = params;
+    const { name, date, time, location, brief, fee, vehicleIds, recipientIds, createdById } = params;
 
     // Validate deal name
     if (!name || name.trim().length === 0) {
@@ -345,7 +353,11 @@ export class DealService {
       const deal = await tx.deal.create({
         data: {
           name,
-          description,
+          date,
+          time,
+          location,
+          brief,
+          fee,
           status: DealStatus.ACTIVE,
           createdById,
           vehicles: {
@@ -689,7 +701,11 @@ export class DealService {
         to: recipient.user.email,
         userName,
         dealName: deal.name,
-        dealDescription: deal.description,
+        date: deal.date,
+        time: deal.time,
+        location: deal.location,
+        brief: deal.brief,
+        fee: deal.fee,
         vehicleNames,
         dealUrl: undefined,
       };

@@ -242,9 +242,9 @@ function DealsListContent() {
                               <h3 className="font-semibold text-base mb-1 truncate">
                                 {deal.name}
                               </h3>
-                              {deal.description && (
-                                <p className="text-sm text-muted-foreground line-clamp-2">
-                                  {deal.description}
+                              {(deal.date || deal.location) && (
+                                <p className="text-sm text-muted-foreground line-clamp-1">
+                                  {deal.date && deal.location ? `${deal.date} • ${deal.location}` : deal.date || deal.location}
                                 </p>
                               )}
                             </div>
@@ -305,9 +305,9 @@ function DealsListContent() {
                           <div className="font-medium text-foreground">
                             {deal.name}
                           </div>
-                          {deal.description && (
+                          {(deal.date || deal.location) && (
                             <div className="text-sm text-muted-foreground line-clamp-1">
-                              {deal.description}
+                              {deal.date && deal.location ? `${deal.date} • ${deal.location}` : deal.date || deal.location}
                             </div>
                           )}
                         </TableCell>

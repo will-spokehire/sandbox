@@ -28,7 +28,11 @@ export interface SendDealEmailParams {
   to: string;
   userName: string;
   dealName: string;
-  dealDescription: string | null;
+  date: string | null;
+  time: string | null;
+  location: string | null;
+  brief: string | null;
+  fee: string | null;
   vehicleNames: string;
   dealUrl?: string;
 }
@@ -72,7 +76,7 @@ export class EmailService {
    * Send deal notification email
    */
   async sendDealEmail(params: SendDealEmailParams): Promise<{ success: boolean; messageId?: string; error?: string }> {
-    const { to, userName, dealName, dealDescription, vehicleNames, dealUrl } = params;
+    const { to, userName, dealName, date, time, location, brief, fee, vehicleNames, dealUrl } = params;
     
     // Determine actual recipient email (use override if set)
     const originalRecipient = to;
@@ -91,7 +95,11 @@ export class EmailService {
         console.log("(Using test email override)");
       }
       console.log("Deal Name:", dealName);
-      console.log("Deal Description:", dealDescription || "(none)");
+      console.log("Date:", date || "(none)");
+      console.log("Time:", time || "(none)");
+      console.log("Location:", location || "(none)");
+      console.log("Brief:", brief || "(none)");
+      console.log("Fee:", fee || "(none)");
       console.log("Vehicle Names:", vehicleNames);
       console.log("Deal URL:", dealUrl || "(none)");
       console.log("=".repeat(80) + "\n");
@@ -124,7 +132,11 @@ export class EmailService {
           dataVariables: {
             userName,
             dealName,
-            dealDescription: dealDescription || "",
+            date: date || "",
+            time: time || "",
+            location: location || "",
+            brief: brief || "",
+            fee: fee || "",
             vehicleNames,
             dealUrl: dealUrl || "",
           },

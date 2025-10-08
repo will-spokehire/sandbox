@@ -62,12 +62,17 @@ Dialog shows:
 - ✅ Selected vehicles count
 - ✅ **Automatically detected vehicle owners** (read-only display)
 - ✅ Deal name field (required)
-- ✅ Description field (optional)
+- ✅ Production detail fields (optional):
+  - Date(s) - e.g., "15-17 March 2025"
+  - Time(s) - e.g., "9am-5pm"
+  - Location(s) - e.g., "London, UK"
+  - Brief - Production description
+  - Fee Guide - e.g., "£500-£750"
 - ✅ **Option to create new or add to existing deal**
 
 Actions:
 - Fill in deal name (e.g., "Classic Cars - March 2025")
-- Add optional description
+- Add production details (all optional but recommended)
 - Choose "Create new deal" or "Add to existing deal"
 - Click **"Send Deal to Owners"**
 - System creates deal and **automatically sends emails** via Loops (server-side)
@@ -84,7 +89,7 @@ Actions:
 #### 3. View Deals
 1. Navigate to `/admin/deals`
 2. View all deals in a table:
-   - Deal name & description
+   - Deal name with date & location preview
    - Status badge (ACTIVE/ARCHIVED)
    - Vehicle count
    - Recipient count
@@ -95,10 +100,12 @@ Actions:
 
 #### 4. View Deal Details
 Navigate to `/admin/deals/[id]` to see:
-- Basic deal info (name, description, status, dates)
+- Basic deal info (name, status, dates)
+- Production details (date, time, location, brief, fee) in a formatted card
 - List of vehicles included with images
 - Recipients list with delivery status
 - Email tracking (sent, opened, clicked timestamps)
+- WhatsApp integration per vehicle owner with templated messages
 
 ---
 
@@ -112,7 +119,14 @@ model Deal {
   updatedAt   DateTime    @updatedAt
   
   name        String
-  description String?
+  
+  // Template fields for WhatsApp and Email messages
+  date        String?     // Production date(s) - free text
+  time        String?     // Production time(s) - free text
+  location    String?     // Production location(s) - free text
+  brief       String?     // Production brief - free text
+  fee         String?     // Fee guide (e.g., "£500-£750") - free text
+  
   status      DealStatus  @default(ACTIVE)
   
   createdById String
@@ -122,6 +136,17 @@ model Deal {
   recipients  DealRecipient[]
 }
 ```
+
+**Template Fields:**
+The Deal model includes template fields that are used to generate personalized WhatsApp and email messages:
+
+- `date`: Production date(s) as free-form text (e.g., "15-17 March 2025")
+- `time`: Production time(s) as free-form text (e.g., "9am-5pm")
+- `location`: Production location(s) as free-form text (e.g., "London, UK")
+- `brief`: Brief description of the production
+- `fee`: Fee guide as free-form text (e.g., "£500-£750")
+
+All template fields are optional and stored as plain text, allowing flexible input for various production scenarios.
 
 ### Deal Status Enum (Simplified)
 ```prisma
@@ -374,25 +399,61 @@ Auth: Admin only
    - Use template variables:
      - `{{userName}}` - Recipient's first name (or email username as fallback)
      - `{{dealName}}` - Deal name
-     - `{{dealDescription}}` - Deal description
+     - `{{date}}` - Production date(s)
+     - `{{time}}` - Production time(s)
+     - `{{location}}` - Production location(s)
+     - `{{brief}}` - Production brief
+     - `{{fee}}` - Fee guide
      - `{{vehicleNames}}` - Comma-separated list of recipient's vehicle names
      - `{{dealUrl}}` - Optional deal URL
 
 3. **Example Template:**
    ```html
-   <p>Dear {{userName}},</p>
+   Subject: Your {{vehicleNames}} – film opportunity with Spoke Hire
+
+   <p>Hi {{userName}},</p>
    
-   <p>I'm contacting you regarding your {{vehicleNames}}.</p>
+   <p>We've got an exciting production coming up that we think your {{vehicleNames}} would be a great fit for.</p>
    
-   <p>Please review the following deal:</p>
-   <p>{{dealDescription}}</p>
+   <p><strong>Production details:</strong><br>
+   Date: {{date}}<br>
+   Time: {{time}}<br>
+   Location: {{location}}<br>
+   Brief: {{brief}}</p>
    
-   <p>Just reply to let me know if you would like to participate.</p>
+   <p>If you're interested in being involved, please let us know your availability and your fee. As a guide, other vehicles are being put forward at {{fee}}, but we're happy to take your lead.</p>
    
-   <p>Thanks,<br>SpokeHire Team</p>
+   <p>Best,<br>George</p>
    ```
 
 **Note:** Each recipient receives a personalized email containing ONLY their own vehicles from the deal, not all vehicles in the deal.
+
+### WhatsApp Message Template
+
+WhatsApp messages are generated client-side using the `generateDealMessage()` function in `/src/lib/whatsapp.ts`. The template format is:
+
+```
+Hey {ownerName}, we've got an exciting production coming up that we think your {vehicleName} would be great for.
+
+Details:
+- Date: {date}
+- Time: {time}
+- Location: {location}
+- Brief: {brief}
+
+If you're interested, please let us know your availability and fee. Other vehicles are being put forward at around {fee}, but we'll take your lead.
+
+Cheers,
+George
+```
+
+**Note:** Emojis are not used in WhatsApp messages as they don't encode properly in deep links.
+
+**Key differences from Email:**
+- WhatsApp sends **one message per vehicle** (not per owner)
+- Messages are opened in user's WhatsApp app (not sent automatically)
+- Template fields are populated from the Deal model
+- Admin clicks "Send Deal via WhatsApp" from deal detail page
 
 ### Development Mode
 

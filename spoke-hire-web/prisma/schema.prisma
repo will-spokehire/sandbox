@@ -366,7 +366,14 @@ model Deal {
     updatedAt   DateTime    @updatedAt
     
     name        String
-    description String?
+    
+    // Template fields for WhatsApp and Email messages
+    date        String?     // Production date(s) - free text
+    time        String?     // Production time(s) - free text
+    location    String?     // Production location(s) - free text
+    brief       String?     // Production brief - free text
+    fee         String?     // Fee guide (e.g., "£500-£750") - free text
+    
     status      DealStatus  @default(ACTIVE)
     
     // Metadata

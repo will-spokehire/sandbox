@@ -23,10 +23,12 @@ import {
 import { api } from "~/trpc/react";
 import { 
   getWhatsAppMessageUrl, 
-  generateDealMessage 
+  generateDealMessage,
+  getWhatsAppChatUrl
 } from "~/lib/whatsapp";
 import { formatOwnerName } from "~/lib/vehicles";
 import { OwnerContactDropdownItems } from "~/components/contact/OwnerContactActions";
+import { useClipboard } from "~/hooks/useClipboard";
 
 /**
  * Deal Detail Page
@@ -42,6 +44,7 @@ export default function DealDetailPage({
   const router = useRouter();
   const resolvedParams = use(params);
   const utils = api.useUtils();
+  const { copyToClipboard } = useClipboard();
 
   // Fetch deal details
   const {
@@ -202,16 +205,52 @@ export default function DealDetailPage({
             <Card>
               <CardHeader>
                 <div className="flex items-start justify-between">
-                  <div>
+                  <div className="flex-1">
                     <CardTitle>{deal.name}</CardTitle>
-                    <CardDescription className="mt-2">
-                      {deal.description || "No description provided"}
-                    </CardDescription>
                   </div>
                   {getStatusBadge(deal.status)}
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Production Details */}
+                {(deal.date || deal.time || deal.location || deal.brief || deal.fee) && (
+                  <div className="rounded-lg border p-4 space-y-3">
+                    <h3 className="font-semibold text-sm">Production Details</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                      {deal.date && (
+                        <div>
+                          <p className="text-muted-foreground">📅 Date(s)</p>
+                          <p className="font-medium">{deal.date}</p>
+                        </div>
+                      )}
+                      {deal.time && (
+                        <div>
+                          <p className="text-muted-foreground">🕐 Time(s)</p>
+                          <p className="font-medium">{deal.time}</p>
+                        </div>
+                      )}
+                      {deal.location && (
+                        <div>
+                          <p className="text-muted-foreground">📍 Location(s)</p>
+                          <p className="font-medium">{deal.location}</p>
+                        </div>
+                      )}
+                      {deal.fee && (
+                        <div>
+                          <p className="text-muted-foreground">💰 Fee Guide</p>
+                          <p className="font-medium">{deal.fee}</p>
+                        </div>
+                      )}
+                      {deal.brief && (
+                        <div className="md:col-span-2">
+                          <p className="text-muted-foreground">🎬 Brief</p>
+                          <p className="font-medium whitespace-pre-wrap">{deal.brief}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <p className="text-sm text-muted-foreground">Created</p>
@@ -342,10 +381,13 @@ export default function DealDetailPage({
                                           onClick={(e) => {
                                             e.stopPropagation();
                                             const message = generateDealMessage({
-                                              dealName: deal.name,
-                                              dealDescription: deal.description,
                                               vehicleName: dv.vehicle.name,
                                               ownerName,
+                                              date: deal.date,
+                                              time: deal.time,
+                                              location: deal.location,
+                                              brief: deal.brief,
+                                              fee: deal.fee,
                                             });
                                             window.open(getWhatsAppMessageUrl(dv.vehicle.owner.phone!, message), '_blank');
                                           }}
@@ -518,10 +560,13 @@ export default function DealDetailPage({
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         const message = generateDealMessage({
-                                          dealName: deal.name,
-                                          dealDescription: deal.description,
                                           vehicleName: dv.vehicle.name,
                                           ownerName,
+                                          date: deal.date,
+                                          time: deal.time,
+                                          location: deal.location,
+                                          brief: deal.brief,
+                                          fee: deal.fee,
                                         });
                                         window.open(getWhatsAppMessageUrl(dv.vehicle.owner.phone!, message), '_blank');
                                       }}
