@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Edit, Trash2, MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Mail, Phone, MessageCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Card } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
@@ -15,10 +15,11 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { VehicleStatusBadge } from "../../_components/VehicleStatusBadge";
-import { VehicleStatusActions } from "./VehicleStatusActions";
 import { getVehicleImageUrl } from "~/lib/vehicles";
 import { cn } from "~/lib/utils";
 import { type VehicleDetail } from "~/types/vehicle";
+import { toast } from "sonner";
+import { getWhatsAppChatUrl } from "~/lib/whatsapp";
 
 interface VehicleMediaSectionProps {
   vehicle: VehicleDetail;
@@ -49,13 +50,13 @@ export function VehicleMediaSection({ vehicle }: VehicleMediaSectionProps) {
   const mainImage = sortedMedia[0];
   const hasImages = sortedMedia.length > 0;
 
-  const handleEdit = () => {
-    router.push(`/admin/vehicles/${vehicle.id}/edit`);
-  };
-
-  const handleDelete = () => {
-    // TODO: Implement delete confirmation dialog
-    console.log("Delete vehicle:", vehicle.id);
+  const copyToClipboard = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success(`${label} copied to clipboard`);
+    } catch (err) {
+      toast.error(`Failed to copy ${label}`);
+    }
   };
 
   const openLightbox = (index: number) => {
@@ -106,25 +107,8 @@ export function VehicleMediaSection({ vehicle }: VehicleMediaSectionProps) {
             <VehicleStatusBadge status={vehicle.status} />
           </div>
 
-          {/* Action Buttons (Top-Right) - Desktop */}
-          <div className="hidden md:flex absolute top-4 right-4 z-10 gap-2">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleEdit}
-              className="gap-2 shadow-lg backdrop-blur-sm bg-background/90 hover:bg-background"
-            >
-              <Edit className="h-4 w-4" />
-              Edit
-            </Button>
-            <VehicleStatusActions
-              vehicleId={vehicle.id}
-              currentStatus={vehicle.status}
-            />
-          </div>
-
-          {/* Action Menu (Top-Right) - Mobile */}
-          <div className="md:hidden absolute top-3 right-3 z-10">
+          {/* Action Menu (Top-Right) - All Screens */}
+          <div className="absolute top-3 right-3 md:top-4 md:right-4 z-10">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -137,20 +121,48 @@ export function VehicleMediaSection({ vehicle }: VehicleMediaSectionProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuLabel>Contact Owner</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleEdit}>
-                  <Edit className="mr-2 h-4 w-4" />
-                  Edit Vehicle
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
+                
+                {/* Copy Email */}
                 <DropdownMenuItem
-                  onClick={handleDelete}
-                  className="text-destructive focus:text-destructive"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    copyToClipboard(vehicle.owner.email, 'Email');
+                  }}
                 >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
+                  <Mail className="mr-2 h-4 w-4" />
+                  Copy Email
                 </DropdownMenuItem>
+                
+                {/* Copy Phone */}
+                {vehicle.owner.phone && (
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      copyToClipboard(vehicle.owner.phone!, 'Phone number');
+                    }}
+                  >
+                    <Phone className="mr-2 h-4 w-4" />
+                    Copy Phone
+                  </DropdownMenuItem>
+                )}
+                
+                {/* WhatsApp Chat */}
+                {vehicle.owner.phone && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(getWhatsAppChatUrl(vehicle.owner.phone!), '_blank');
+                      }}
+                    >
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      WhatsApp Chat
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

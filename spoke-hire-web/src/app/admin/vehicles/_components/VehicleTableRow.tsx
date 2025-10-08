@@ -1,6 +1,6 @@
 "use client";
 
-import { MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
+import { MoreHorizontal, Eye, Mail, Phone, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { memo } from "react";
@@ -24,6 +24,7 @@ import {
   formatLocation,
   getVehicleImageUrl,
 } from "~/lib/vehicles";
+import { getWhatsAppChatUrl } from "~/lib/whatsapp";
 
 interface VehicleTableRowProps {
   vehicle: VehicleListItem;
@@ -32,6 +33,8 @@ interface VehicleTableRowProps {
   onDelete?: (id: string) => void;
   selected?: boolean;
   onToggle?: (id: string) => void;
+  onCopyEmail?: (email: string) => void;
+  onCopyPhone?: (phone: string) => void;
 }
 
 /**
@@ -48,6 +51,8 @@ export const VehicleTableRow = memo(function VehicleTableRow({
   onDelete,
   selected = false,
   onToggle,
+  onCopyEmail,
+  onCopyPhone,
 }: VehicleTableRowProps) {
   const imageUrl = getVehicleImageUrl(vehicle.media);
   const ownerName = formatOwnerName(
@@ -173,18 +178,49 @@ export const VehicleTableRow = memo(function VehicleTableRow({
                 View Details
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onEdit?.(vehicle.id)}>
-              <Edit className="mr-2 h-4 w-4" />
-              Edit Vehicle
-            </DropdownMenuItem>
+            
             <DropdownMenuSeparator />
+            <DropdownMenuLabel>Contact Owner</DropdownMenuLabel>
+            
+            {/* Copy Email */}
             <DropdownMenuItem
-              onClick={() => onDelete?.(vehicle.id)}
-              className="text-destructive focus:text-destructive"
+              onClick={(e) => {
+                e.stopPropagation();
+                onCopyEmail?.(vehicle.owner.email);
+              }}
             >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
+              <Mail className="mr-2 h-4 w-4" />
+              Copy Email
             </DropdownMenuItem>
+            
+            {/* Copy Phone */}
+            {vehicle.owner.phone && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCopyPhone?.(vehicle.owner.phone!);
+                }}
+              >
+                <Phone className="mr-2 h-4 w-4" />
+                Copy Phone
+              </DropdownMenuItem>
+            )}
+            
+            {/* WhatsApp Actions */}
+            {vehicle.owner.phone && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(getWhatsAppChatUrl(vehicle.owner.phone!), '_blank');
+                  }}
+                >
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  WhatsApp Chat
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </TableCell>

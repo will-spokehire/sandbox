@@ -16,7 +16,7 @@ import {
 export type VehicleListItem = Vehicle & {
   make: Pick<Make, "id" | "name">;
   model: Pick<Model, "id" | "name">;
-  owner: Pick<User, "id" | "email" | "firstName" | "lastName" | "postcode" | "city"> & {
+  owner: Pick<User, "id" | "email" | "firstName" | "lastName" | "phone" | "postcode" | "city"> & {
     country: { id: string; name: string } | null;
   };
   media: Pick<Media, "id" | "publishedUrl" | "originalUrl" | "type">[];

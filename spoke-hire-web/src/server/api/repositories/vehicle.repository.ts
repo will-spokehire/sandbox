@@ -39,6 +39,7 @@ export interface VehicleWithRelations {
     email: string;
     firstName: string | null;
     lastName: string | null;
+    phone: string | null;
     postcode: string | null;
     city: string | null;
     latitude: number | null;
@@ -91,6 +92,7 @@ export class VehicleRepository {
               email: true,
               firstName: true,
               lastName: true,
+              phone: true,
               postcode: true,
               city: true,
               latitude: true,

@@ -74,6 +74,13 @@ export interface DealWithDetails {
       registration: string | null;
       make: { name: string };
       model: { name: string };
+      owner: {
+        id: string;
+        email: string;
+        firstName: string | null;
+        lastName: string | null;
+        phone: string | null;
+      };
       media: Array<{
         id: string;
         publishedUrl: string | null;
@@ -184,6 +191,15 @@ export class DealService {
               include: {
                 make: { select: { name: true } },
                 model: { select: { name: true } },
+                owner: {
+                  select: {
+                    id: true,
+                    email: true,
+                    firstName: true,
+                    lastName: true,
+                    phone: true,
+                  },
+                },
                 media: {
                   where: {
                     status: "READY",

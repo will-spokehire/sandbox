@@ -9,7 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Owner contact actions (Copy Email, Copy Phone, WhatsApp Chat) across all vehicle/deal pages
+- `useClipboard` custom hook for clipboard operations with toast feedback
+- `OwnerContactActions` reusable component for consistent contact UI
+- WhatsApp integration utilities (`getWhatsAppChatUrl`, `generateDealMessage`)
+- "Send Deal via WhatsApp" action on deal detail page with templated messages
+- Responsive dropdown menus for contact actions on mobile devices
+
+### Changed
+- Refactored duplicated contact action code into shared utilities
+- Updated `VehicleListItem` type to include owner phone number
+- Enhanced deal detail page with owner information and contact actions
+- Improved vehicle card layouts with better visual hierarchy
+
 ### Documentation
+- Added comprehensive Owner Contact Actions feature documentation
 - Reorganized documentation structure into `docs/setup/`, `docs/features/`, and `docs/architecture/`
 - Consolidated performance documentation into single comprehensive guide
 - Consolidated deals documentation into single comprehensive guide

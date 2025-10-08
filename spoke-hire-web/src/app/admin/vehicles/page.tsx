@@ -245,6 +245,23 @@ function VehiclesPageContent() {
     toast.info("Delete functionality coming soon");
   };
 
+  const copyToClipboard = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success(`${label} copied to clipboard`);
+    } catch (err) {
+      toast.error(`Failed to copy ${label}`);
+    }
+  };
+
+  const handleCopyEmail = (email: string) => {
+    copyToClipboard(email, 'Email');
+  };
+
+  const handleCopyPhone = (phone: string) => {
+    copyToClipboard(phone, 'Phone number');
+  };
+
   const handleClearFilters = () => {
     // Clear all filters and reset to default PUBLISHED status
     router.push("/admin/vehicles?status=PUBLISHED", { scroll: false });
@@ -417,6 +434,8 @@ function VehiclesPageContent() {
         selectedIds={selectedVehicleIds}
         onToggleVehicle={handleToggleVehicle}
         onToggleAll={handleToggleAll}
+        onCopyEmail={handleCopyEmail}
+        onCopyPhone={handleCopyPhone}
       />
 
       {/* Pagination */}

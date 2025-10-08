@@ -27,6 +27,8 @@ interface VehicleListTableProps {
   selectedIds?: string[];
   onToggleVehicle?: (id: string) => void;
   onToggleAll?: (checked: boolean) => void;
+  onCopyEmail?: (email: string) => void;
+  onCopyPhone?: (phone: string) => void;
 }
 
 /**
@@ -48,6 +50,8 @@ export function VehicleListTable({
   selectedIds = [],
   onToggleVehicle,
   onToggleAll,
+  onCopyEmail,
+  onCopyPhone,
 }: VehicleListTableProps) {
   const allSelected = vehicles.length > 0 && selectedIds.length === vehicles.length;
   const someSelected = selectedIds.length > 0 && selectedIds.length < vehicles.length;
@@ -93,6 +97,8 @@ export function VehicleListTable({
               onDelete={onDelete}
               selected={selectedIds.includes(vehicle.id)}
               onToggle={onToggleVehicle}
+              onCopyEmail={onCopyEmail}
+              onCopyPhone={onCopyPhone}
             />
           ))
         )}
@@ -113,6 +119,8 @@ export function VehicleListTable({
                 onDelete={onDelete}
                 selected={selectedIds.includes(vehicle.id)}
                 onToggle={onToggleVehicle}
+                onCopyEmail={onCopyEmail}
+                onCopyPhone={onCopyPhone}
               />
             ))
           )}
@@ -159,6 +167,8 @@ export function VehicleListTable({
                   onDelete={onDelete}
                   selected={selectedIds.includes(vehicle.id)}
                   onToggle={onToggleVehicle}
+                  onCopyEmail={onCopyEmail}
+                  onCopyPhone={onCopyPhone}
                 />
               ))}
             </TableBody>

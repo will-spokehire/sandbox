@@ -2,7 +2,7 @@
 
 import { use } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Car, Archive, ArchiveRestore } from "lucide-react";
+import { ArrowLeft, Car, Archive, ArchiveRestore, MessageCircle, MoreHorizontal, Eye, User, Mail, Phone, Copy } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { useRequireAdmin } from "~/providers/auth-provider";
@@ -12,7 +12,21 @@ import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import { api } from "~/trpc/react";
+import { 
+  getWhatsAppMessageUrl, 
+  generateDealMessage 
+} from "~/lib/whatsapp";
+import { formatOwnerName } from "~/lib/vehicles";
+import { OwnerContactDropdownItems } from "~/components/contact/OwnerContactActions";
 
 /**
  * Deal Detail Page
@@ -102,6 +116,7 @@ export default function DealDetailPage({
       maximumFractionDigits: 0,
     }).format(numPrice);
   };
+
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -235,42 +250,294 @@ export default function DealDetailPage({
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {deal.vehicles.map((dv) => (
-                    <div
-                      key={dv.id}
-                      className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50 cursor-pointer"
-                      onClick={() => router.push(`/admin/vehicles/${dv.vehicle.id}`)}
-                    >
-                      {/* Vehicle Image */}
-                      {dv.vehicle.media[0]?.publishedUrl && (
-                        <div className="relative aspect-[4/3] w-24 rounded-md overflow-hidden border flex-shrink-0">
-                          <img
-                            src={dv.vehicle.media[0].publishedUrl}
-                            alt={dv.vehicle.name}
-                            className="object-cover w-full h-full"
-                          />
+                  {deal.vehicles.map((dv) => {
+                    const ownerName = formatOwnerName(
+                      dv.vehicle.owner.firstName,
+                      dv.vehicle.owner.lastName,
+                      dv.vehicle.owner.email
+                    );
+
+                    return (
+                      <div
+                        key={dv.id}
+                        className="group relative border rounded-lg hover:shadow-md transition-shadow overflow-hidden bg-card"
+                      >
+                        {/* Mobile Layout: Vertical Card */}
+                        <div className="md:hidden">
+                          {/* Image */}
+                          {dv.vehicle.media[0]?.publishedUrl && (
+                            <div className="relative aspect-[3/2] w-full bg-muted">
+                              <img
+                                src={dv.vehicle.media[0].publishedUrl}
+                                alt={dv.vehicle.name}
+                                className="object-cover w-full h-full cursor-pointer"
+                                onClick={() => router.push(`/admin/vehicles/${dv.vehicle.id}`)}
+                              />
+                              
+                              {/* Actions Overlay - Mobile */}
+                              <div className="absolute top-3 right-3 z-10">
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      variant="secondary"
+                                      size="icon"
+                                      className="h-9 w-9 shadow-lg backdrop-blur-sm bg-background/80 hover:bg-background/90"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      <MoreHorizontal className="h-4 w-4" />
+                                      <span className="sr-only">Open menu</span>
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      onClick={() => router.push(`/admin/vehicles/${dv.vehicle.id}`)}
+                                    >
+                                      <Eye className="mr-2 h-4 w-4" />
+                                      View Details
+                                    </DropdownMenuItem>
+                                    
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuLabel>Contact Owner</DropdownMenuLabel>
+                                    
+                                    {/* Copy Email */}
+                                    <DropdownMenuItem
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        copyToClipboard(dv.vehicle.owner.email, 'Email');
+                                      }}
+                                    >
+                                      <Mail className="mr-2 h-4 w-4" />
+                                      Copy Email
+                                    </DropdownMenuItem>
+                                    
+                                    {/* Copy Phone */}
+                                    {dv.vehicle.owner?.phone && (
+                                      <DropdownMenuItem
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          copyToClipboard(dv.vehicle.owner.phone!, 'Phone number');
+                                        }}
+                                      >
+                                        <Phone className="mr-2 h-4 w-4" />
+                                        Copy Phone
+                                      </DropdownMenuItem>
+                                    )}
+                                    
+                                    {/* WhatsApp Actions */}
+                                    {dv.vehicle.owner?.phone && (
+                                      <>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            window.open(getWhatsAppChatUrl(dv.vehicle.owner.phone!), '_blank');
+                                          }}
+                                        >
+                                          <MessageCircle className="mr-2 h-4 w-4" />
+                                          WhatsApp Chat
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            const message = generateDealMessage({
+                                              dealName: deal.name,
+                                              dealDescription: deal.description,
+                                              vehicleName: dv.vehicle.name,
+                                              ownerName,
+                                            });
+                                            window.open(getWhatsAppMessageUrl(dv.vehicle.owner.phone!, message), '_blank');
+                                          }}
+                                        >
+                                          <MessageCircle className="mr-2 h-4 w-4" />
+                                          Send Deal via WhatsApp
+                                        </DropdownMenuItem>
+                                      </>
+                                    )}
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+
+                              {/* Registration Badge - Mobile */}
+                              {dv.vehicle.registration && (
+                                <div className="absolute bottom-3 left-3 z-10">
+                                  <Badge variant="secondary" className="font-mono shadow-lg backdrop-blur-sm">
+                                    {dv.vehicle.registration}
+                                  </Badge>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Content - Mobile */}
+                          <div className="p-4 space-y-3">
+                            {/* Title & Price */}
+                            <div 
+                              className="cursor-pointer"
+                              onClick={() => router.push(`/admin/vehicles/${dv.vehicle.id}`)}
+                            >
+                              <div className="flex items-start justify-between gap-2 mb-1">
+                                <h3 className="font-semibold text-lg leading-tight flex-1">
+                                  {dv.vehicle.name}
+                                </h3>
+                                <span className="font-bold text-lg text-primary whitespace-nowrap">
+                                  {formatPrice(dv.vehicle.price)}
+                                </span>
+                              </div>
+                              <p className="text-sm text-muted-foreground">
+                                {dv.vehicle.make.name} {dv.vehicle.model.name} • {dv.vehicle.year}
+                              </p>
+                            </div>
+
+                            {/* Owner Info */}
+                            <div className="flex items-center gap-2 text-sm pt-2 border-t">
+                              <User className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-muted-foreground">Owner:</span>
+                              <span className="font-medium">{ownerName}</span>
+                            </div>
+                          </div>
                         </div>
-                      )}
 
-                      {/* Vehicle Info */}
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{dv.vehicle.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {dv.vehicle.make.name} {dv.vehicle.model.name} • {dv.vehicle.year}
-                        </p>
-                        <p className="text-sm font-semibold text-primary mt-1">
-                          {formatPrice(dv.vehicle.price)}
-                        </p>
+                        {/* Desktop Layout: Horizontal */}
+                        <div className="hidden md:flex items-center gap-4 p-4">
+                          {/* Image */}
+                          {dv.vehicle.media[0]?.publishedUrl && (
+                            <div 
+                              className="relative aspect-[4/3] w-32 rounded-md overflow-hidden border flex-shrink-0 cursor-pointer hover:opacity-90 transition-opacity"
+                              onClick={() => router.push(`/admin/vehicles/${dv.vehicle.id}`)}
+                            >
+                              <img
+                                src={dv.vehicle.media[0].publishedUrl}
+                                alt={dv.vehicle.name}
+                                className="object-cover w-full h-full"
+                              />
+                            </div>
+                          )}
+
+                          {/* Vehicle Info */}
+                          <div 
+                            className="flex-1 min-w-0 cursor-pointer space-y-2"
+                            onClick={() => router.push(`/admin/vehicles/${dv.vehicle.id}`)}
+                          >
+                            <div>
+                              <h3 className="font-semibold text-lg leading-tight mb-1">
+                                {dv.vehicle.name}
+                              </h3>
+                              <p className="text-sm text-muted-foreground">
+                                {dv.vehicle.make.name} {dv.vehicle.model.name} • {dv.vehicle.year}
+                              </p>
+                            </div>
+                            
+                            {/* Owner Info - Desktop */}
+                            <div className="flex items-center gap-2 text-sm">
+                              <User className="h-3.5 w-3.5 text-muted-foreground" />
+                              <span className="text-muted-foreground">Owner:</span>
+                              <span className="font-medium">{ownerName}</span>
+                            </div>
+                          </div>
+
+                          {/* Price */}
+                          <div className="flex-shrink-0">
+                            <p className="text-xl font-bold text-primary">
+                              {formatPrice(dv.vehicle.price)}
+                            </p>
+                          </div>
+
+                          {/* Registration */}
+                          {dv.vehicle.registration && (
+                            <Badge variant="secondary" className="font-mono flex-shrink-0">
+                              {dv.vehicle.registration}
+                            </Badge>
+                          )}
+
+                          {/* Actions Dropdown - Desktop */}
+                          <div className="flex-shrink-0">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                  <span className="sr-only">Open menu</span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  onClick={() => router.push(`/admin/vehicles/${dv.vehicle.id}`)}
+                                >
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  View Details
+                                </DropdownMenuItem>
+                                
+                                <DropdownMenuSeparator />
+                                <DropdownMenuLabel>Contact Owner</DropdownMenuLabel>
+                                
+                                {/* Copy Email */}
+                                <DropdownMenuItem
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    copyToClipboard(dv.vehicle.owner.email, 'Email');
+                                  }}
+                                >
+                                  <Mail className="mr-2 h-4 w-4" />
+                                  Copy Email
+                                </DropdownMenuItem>
+                                
+                                {/* Copy Phone */}
+                                {dv.vehicle.owner?.phone && (
+                                  <DropdownMenuItem
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      copyToClipboard(dv.vehicle.owner.phone!, 'Phone number');
+                                    }}
+                                  >
+                                    <Phone className="mr-2 h-4 w-4" />
+                                    Copy Phone
+                                  </DropdownMenuItem>
+                                )}
+                                
+                                {/* WhatsApp Actions */}
+                                {dv.vehicle.owner?.phone && (
+                                  <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        window.open(getWhatsAppChatUrl(dv.vehicle.owner.phone!), '_blank');
+                                      }}
+                                    >
+                                      <MessageCircle className="mr-2 h-4 w-4" />
+                                      WhatsApp Chat
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        const message = generateDealMessage({
+                                          dealName: deal.name,
+                                          dealDescription: deal.description,
+                                          vehicleName: dv.vehicle.name,
+                                          ownerName,
+                                        });
+                                        window.open(getWhatsAppMessageUrl(dv.vehicle.owner.phone!, message), '_blank');
+                                      }}
+                                    >
+                                      <MessageCircle className="mr-2 h-4 w-4" />
+                                      Send Deal via WhatsApp
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </div>
                       </div>
-
-                      {/* Registration */}
-                      {dv.vehicle.registration && (
-                        <Badge variant="secondary" className="font-mono">
-                          {dv.vehicle.registration}
-                        </Badge>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>

@@ -1,14 +1,17 @@
 "use client";
 
-import { Mail, Phone, User, MapPin, Car } from "lucide-react";
+import { Mail, Phone, User, MapPin, Car, Copy, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Separator } from "~/components/ui/separator";
 import { formatOwnerName, getInitials } from "~/lib/vehicles";
 import { type VehicleDetail } from "~/types/vehicle";
 import { api } from "~/trpc/react";
+import { toast } from "sonner";
+import { getWhatsAppChatUrl } from "~/lib/whatsapp";
 
 interface VehicleOwnerInfoProps {
   owner: VehicleDetail["owner"];
@@ -41,6 +44,15 @@ export function VehicleOwnerInfo({ owner, vehicleId }: VehicleOwnerInfoProps) {
   const otherVehicles = ownerVehicles?.vehicles
     .filter((v) => v.id !== vehicleId)
     .slice(0, 5) ?? [];
+
+  const copyToClipboard = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success(`${label} copied to clipboard`);
+    } catch (err) {
+      toast.error(`Failed to copy ${label}`);
+    }
+  };
 
   return (
     <Card>
@@ -131,6 +143,50 @@ export function VehicleOwnerInfo({ owner, vehicleId }: VehicleOwnerInfoProps) {
             </div>
           )}
         </dl>
+
+        {/* Contact Actions */}
+        <Separator />
+        <div className="space-y-2">
+          <h4 className="text-sm font-semibold text-foreground mb-3">Quick Actions</h4>
+          <div className="flex flex-col gap-2">
+            {/* Copy Email */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => copyToClipboard(owner.email, 'Email')}
+              className="w-full justify-start gap-2"
+            >
+              <Mail className="h-4 w-4" />
+              <span>Copy Email</span>
+            </Button>
+
+            {/* Copy Phone */}
+            {owner.phone && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => copyToClipboard(owner.phone!, 'Phone number')}
+                className="w-full justify-start gap-2"
+              >
+                <Phone className="h-4 w-4" />
+                <span>Copy Phone</span>
+              </Button>
+            )}
+
+            {/* WhatsApp Chat */}
+            {owner.phone && (
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => window.open(getWhatsAppChatUrl(owner.phone!), '_blank')}
+                className="w-full justify-start gap-2"
+              >
+                <MessageCircle className="h-4 w-4" />
+                <span>WhatsApp Chat</span>
+              </Button>
+            )}
+          </div>
+        </div>
 
         {/* Other Vehicles by Owner */}
         {otherVehicles.length > 0 && (
