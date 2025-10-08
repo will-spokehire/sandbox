@@ -13,8 +13,7 @@ import { z } from "zod";
 import { RecipientStatus } from "@prisma/client";
 import { createTRPCRouter, adminProcedure } from "~/server/api/trpc";
 import { DealService } from "~/server/api/services/deal.service";
-import { EmailService, formatPrice } from "~/server/api/services/email.service";
-import type { EmailVehicleData } from "~/server/api/services/email.service";
+import { EmailService } from "~/server/api/services/email.service";
 import {
   MAX_VEHICLES_PER_DEAL,
   MAX_RECIPIENTS_PER_DEAL,
@@ -121,7 +120,10 @@ export const dealRouter = createTRPCRouter({
     }),
 
   /**
-   * Send deal to recipients via email
+   * Send deal to recipients via email (Manual Resend)
+   * 
+   * Note: This endpoint is primarily for manual intervention/resending.
+   * Emails are automatically sent when deals are created or vehicles are added.
    */
   send: adminProcedure
     .input(sendDealInputSchema)
@@ -141,26 +143,28 @@ export const dealRouter = createTRPCRouter({
         input.recipientIds
       );
 
-      // Prepare vehicle data for email
-      const vehicleData: EmailVehicleData[] = vehicles.map((vehicle: any) => ({
-        id: vehicle.id,
-        name: vehicle.name,
-        year: vehicle.year,
-        price: formatPrice(vehicle.price),
-        registration: vehicle.registration,
-        make: vehicle.make.name,
-        model: vehicle.model.name,
-        imageUrl: vehicle.media[0]?.publishedUrl || null,
-      }));
-
-      // Prepare emails for bulk sending
-      const emails = recipients.map((recipient: any) => ({
-        to: recipient.user.email,
-        dealName: deal.name,
-        dealDescription: deal.description,
-        vehicles: vehicleData,
-        dealUrl: undefined,
-      }));
+      // Prepare emails for bulk sending - personalized per recipient
+      const emails = recipients.map((recipient: any) => {
+        // Filter vehicles to only include those owned by this recipient
+        const recipientVehicles = vehicles.filter(
+          (vehicle: any) => vehicle.ownerId === recipient.userId
+        );
+        
+        // Format vehicle names as comma-separated string
+        const vehicleNames = recipientVehicles.map((v: any) => v.name).join(", ");
+        
+        // Get user name (firstName or fallback to email username)
+        const userName = recipient.user.firstName || recipient.user.email.split("@")[0];
+        
+        return {
+          to: recipient.user.email,
+          userName,
+          dealName: deal.name,
+          dealDescription: deal.description,
+          vehicleNames,
+          dealUrl: undefined,
+        };
+      });
 
       // Send emails in bulk (parallel)
       const emailResults = await emailService.sendBulkEmails(emails);

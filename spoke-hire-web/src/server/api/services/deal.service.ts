@@ -17,6 +17,7 @@ import {
   DEAL_NAME_MIN_LENGTH,
   DEAL_NAME_MAX_LENGTH,
 } from "../constants/deals";
+import { EmailService } from "./email.service";
 
 // Use PrismaClient directly as the type
 type DbClient = PrismaClient;
@@ -309,7 +310,7 @@ export class DealService {
     }
 
     // Use transaction to ensure data consistency
-    return await this.db.$transaction(async (tx) => {
+    const deal = await this.db.$transaction(async (tx) => {
       // Validate vehicles exist
       const vehicles = await tx.vehicle.findMany({
         where: {
@@ -380,6 +381,18 @@ export class DealService {
 
       return deal;
     });
+    
+    // After transaction completes, send emails to all recipients
+    // Note: Emails are sent AFTER the transaction to avoid holding locks
+    try {
+      await this.sendDealEmails(deal.id, recipientIds);
+    } catch (error) {
+      // Log error but don't fail the deal creation
+      // The deal is created successfully, email sending can be retried
+      console.error(`Failed to send emails for deal ${deal.id}:`, error);
+    }
+    
+    return deal;
   }
 
   /**
@@ -389,7 +402,7 @@ export class DealService {
     const { dealId, vehicleIds, recipientIds } = params;
 
     // Use transaction for consistency
-    return await this.db.$transaction(async (tx) => {
+    const result = await this.db.$transaction(async (tx) => {
       // Validate deal exists and is not archived
       const deal = await tx.deal.findUnique({
         where: { id: dealId },
@@ -488,9 +501,23 @@ export class DealService {
         },
       });
 
-      // Return updated deal
-      return await this.getDealById(dealId);
+      // Store newRecipientIds for email sending after transaction
+      return { dealId, newRecipientIds };
     });
+    
+    // After transaction completes, send emails ONLY to new recipients
+    // Note: Emails are sent AFTER the transaction to avoid holding locks
+    if (result.newRecipientIds.length > 0) {
+      try {
+        await this.sendDealEmails(result.dealId, result.newRecipientIds);
+      } catch (error) {
+        // Log error but don't fail the operation
+        console.error(`Failed to send emails for deal ${result.dealId}:`, error);
+      }
+    }
+    
+    // Return updated deal for client
+    return await this.getDealById(result.dealId);
   }
 
   /**
@@ -557,6 +584,14 @@ export class DealService {
           include: {
             make: { select: { name: true } },
             model: { select: { name: true } },
+            owner: { 
+              select: { 
+                id: true, 
+                email: true, 
+                firstName: true, 
+                lastName: true 
+              } 
+            },
             media: {
               where: {
                 status: "READY",
@@ -619,6 +654,79 @@ export class DealService {
       where: { id: recipientId },
       data,
     });
+  }
+
+  /**
+   * Send deal emails to specified recipients (internal helper)
+   * This is called automatically by createDeal and addVehiclesToDeal
+   */
+  private async sendDealEmails(dealId: string, recipientIds: string[]) {
+    const emailService = new EmailService();
+    
+    // Get deal details
+    const deal = await this.getDealById(dealId);
+    
+    // Get vehicles for the deal
+    const vehicles = await this.getDealVehicles(dealId);
+    
+    // Get recipients to send to
+    const recipients = await this.getDealRecipients(dealId, recipientIds);
+    
+    // Prepare emails for bulk sending - personalized per recipient
+    const emails = recipients.map((recipient: any) => {
+      // Filter vehicles to only include those owned by this recipient
+      const recipientVehicles = vehicles.filter(
+        (vehicle: any) => vehicle.ownerId === recipient.userId
+      );
+      
+      // Format vehicle names as comma-separated string
+      const vehicleNames = recipientVehicles.map((v: any) => v.name).join(", ");
+      
+      // Get user name (firstName or fallback to email username)
+      const userName = recipient.user.firstName || recipient.user.email.split("@")[0];
+      
+      return {
+        to: recipient.user.email,
+        userName,
+        dealName: deal.name,
+        dealDescription: deal.description,
+        vehicleNames,
+        dealUrl: undefined,
+      };
+    });
+    
+    // Send emails in bulk (parallel)
+    const emailResults = await emailService.sendBulkEmails(emails);
+    
+    // Update recipient statuses based on results
+    const statusUpdates = emailResults.map(async (result, index) => {
+      const recipient = recipients[index];
+      if (!recipient) return null;
+      
+      if (result.success) {
+        await this.updateRecipientStatus(
+          recipient.id,
+          RecipientStatus.SENT
+        );
+      } else {
+        await this.updateRecipientStatus(
+          recipient.id,
+          RecipientStatus.FAILED,
+          result.error
+        );
+      }
+      
+      return {
+        userId: recipient.userId,
+        email: recipient.user.email,
+        success: result.success,
+        error: result.error,
+        messageId: result.messageId,
+      };
+    });
+    
+    // Wait for all status updates to complete
+    await Promise.all(statusUpdates);
   }
 
   /**

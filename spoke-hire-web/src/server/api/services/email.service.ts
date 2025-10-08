@@ -26,9 +26,10 @@ export interface EmailVehicleData {
  */
 export interface SendDealEmailParams {
   to: string;
+  userName: string;
   dealName: string;
   dealDescription: string | null;
-  vehicles: EmailVehicleData[];
+  vehicleNames: string;
   dealUrl?: string;
 }
 
@@ -40,12 +41,15 @@ export class EmailService {
   private transactionalId: string;
   private apiUrl = "https://app.loops.so/api/v1";
   private isDebugMode: boolean;
+  private testEmailOverride: string | undefined;
 
   constructor() {
     this.apiKey = process.env.LOOPS_API_KEY || "";
     this.transactionalId = process.env.LOOPS_TRANSACTIONAL_ID || "deal-notification";
     // Only enable debug mode if explicitly set to "true", not in all development
     this.isDebugMode = process.env.EMAIL_DEBUG === "true";
+    // Test email override - if set, all emails will be sent to this address
+    this.testEmailOverride = process.env.TEST_EMAIL_OVERRIDE?.trim() || undefined;
     
     if (!this.apiKey) {
       console.warn("⚠️ LOOPS_API_KEY not configured. Email sending will be simulated.");
@@ -58,30 +62,38 @@ export class EmailService {
     if (this.isDebugMode) {
       console.log("🐛 EMAIL DEBUG MODE: Emails will be logged to console instead of being sent");
     }
+    
+    if (this.testEmailOverride) {
+      console.log(`🧪 TEST EMAIL OVERRIDE: All deal emails will be sent to: ${this.testEmailOverride}`);
+    }
   }
 
   /**
    * Send deal notification email
    */
   async sendDealEmail(params: SendDealEmailParams): Promise<{ success: boolean; messageId?: string; error?: string }> {
-    const { to, dealName, dealDescription, vehicles, dealUrl } = params;
+    const { to, userName, dealName, dealDescription, vehicleNames, dealUrl } = params;
+    
+    // Determine actual recipient email (use override if set)
+    const originalRecipient = to;
+    const actualRecipient = this.testEmailOverride || to;
+    const isOverrideActive = this.testEmailOverride && this.testEmailOverride !== to;
 
     // If debug mode or no API key, log instead of sending
     if (this.isDebugMode || !this.apiKey) {
       console.log("\n" + "=".repeat(80));
       console.log("📧 [EMAIL DEBUG] Email Details:");
       console.log("=".repeat(80));
-      console.log("To:", to);
+      console.log("To:", actualRecipient);
+      console.log("User Name:", userName);
+      if (isOverrideActive) {
+        console.log("Original Recipient:", originalRecipient);
+        console.log("(Using test email override)");
+      }
       console.log("Deal Name:", dealName);
       console.log("Deal Description:", dealDescription || "(none)");
+      console.log("Vehicle Names:", vehicleNames);
       console.log("Deal URL:", dealUrl || "(none)");
-      console.log("Number of Vehicles:", vehicles.length);
-      console.log("\nVehicles:");
-      vehicles.forEach((v, idx) => {
-        console.log(`  ${idx + 1}. ${v.year} ${v.make} ${v.model} - ${v.price}`);
-        console.log(`     Registration: ${v.registration || "N/A"}`);
-        console.log(`     Image: ${v.imageUrl || "(no image)"}`);
-      });
       console.log("=".repeat(80) + "\n");
       
       // Simulate delay
@@ -94,18 +106,12 @@ export class EmailService {
     }
 
     try {
-      // Format vehicles for email template
-      const vehiclesList = vehicles.map(v => ({
-        name: v.name,
-        year: v.year,
-        make: v.make,
-        model: v.model,
-        price: v.price,
-        registration: v.registration || "N/A",
-        imageUrl: v.imageUrl || "",
-      }));
+      // Log when using test email override
+      if (isOverrideActive) {
+        console.log(`🧪 [TEST EMAIL OVERRIDE] Redirecting email from ${originalRecipient} to ${actualRecipient}`);
+      }
 
-      // Send via Loops transactional API
+      // Send via Loops transactional API (using actualRecipient which may be overridden)
       const response = await fetch(`${this.apiUrl}/transactional`, {
         method: "POST",
         headers: {
@@ -114,12 +120,12 @@ export class EmailService {
         },
         body: JSON.stringify({
           transactionalId: this.transactionalId,
-          email: to,
+          email: actualRecipient,
           dataVariables: {
+            userName,
             dealName,
             dealDescription: dealDescription || "",
-            vehiclesCount: vehicles.length,
-            vehicles: vehiclesList,
+            vehicleNames,
             dealUrl: dealUrl || "",
           },
         }),

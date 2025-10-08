@@ -43,9 +43,11 @@ The Deals Workflow feature allows administrators to send vehicle job offers to u
 
 **Result:**
 - **3 emails sent** (not 5!)
-- John gets 1 email with Vehicles 1 & 3
-- Jane gets 1 email with Vehicles 2 & 5
-- Bob gets 1 email with Vehicle 4
+- John gets 1 email: "Dear John, I'm contacting you regarding your Vehicle 1, Vehicle 3..."
+- Jane gets 1 email: "Dear Jane, I'm contacting you regarding your Vehicle 2, Vehicle 5..."
+- Bob gets 1 email: "Dear Bob, I'm contacting you regarding your Vehicle 4..."
+
+Each recipient only sees their own vehicles in their personalized email.
 
 ### Detailed Steps
 
@@ -68,8 +70,16 @@ Actions:
 - Add optional description
 - Choose "Create new deal" or "Add to existing deal"
 - Click **"Send Deal to Owners"**
-- System sends emails via Loops
-- Success toast shows number of emails sent
+- System creates deal and **automatically sends emails** via Loops (server-side)
+- Success toast confirms deal creation and email delivery
+
+**Email Behavior (Automatic Server-Side):**
+- ✅ **Creating a new deal** → All recipients receive personalized emails automatically
+- ✅ **Adding vehicles to existing deal** → Only NEW vehicle owners receive emails
+- ✅ **Existing recipients are NOT re-notified** when new vehicles are added
+- ✅ **Each email is personalized** → Recipients only see their own vehicles from the deal
+- ✅ **Atomic operation** → Deal creation and email sending happen together on the server
+- ✅ **Error handling** → If emails fail, deal is still created (emails can be manually resent)
 
 #### 3. View Deals
 1. Navigate to `/admin/deals`
@@ -362,32 +372,27 @@ Auth: Admin only
    - Go to Loops dashboard → Transactional Emails
    - Create new template with ID: `deal-notification`
    - Use template variables:
+     - `{{userName}}` - Recipient's first name (or email username as fallback)
      - `{{dealName}}` - Deal name
      - `{{dealDescription}}` - Deal description
-     - `{{vehiclesCount}}` - Number of vehicles
-     - `{{vehicles}}` - Array of vehicle objects
-     - Each vehicle has: `name`, `year`, `make`, `model`, `price`, `registration`, `imageUrl`
+     - `{{vehicleNames}}` - Comma-separated list of recipient's vehicle names
+     - `{{dealUrl}}` - Optional deal URL
 
 3. **Example Template:**
    ```html
-   <h2>New Job Offer: {{dealName}}</h2>
-   <p>{{dealDescription}}</p>
-   <p>We have {{vehiclesCount}} vehicles available for you:</p>
+   <p>Dear {{userName}},</p>
    
-   {{#each vehicles}}
-     <div style="border: 1px solid #ccc; padding: 16px; margin: 16px 0;">
-       {{#if this.imageUrl}}
-         <img src="{{this.imageUrl}}" alt="{{this.name}}" style="max-width: 300px;" />
-       {{/if}}
-       <h3>{{this.name}}</h3>
-       <p>{{this.make}} {{this.model}} ({{this.year}})</p>
-       <p><strong>Price:</strong> {{this.price}}</p>
-       {{#if this.registration}}
-         <p><strong>Registration:</strong> {{this.registration}}</p>
-       {{/if}}
-     </div>
-   {{/each}}
+   <p>I'm contacting you regarding your {{vehicleNames}}.</p>
+   
+   <p>Please review the following deal:</p>
+   <p>{{dealDescription}}</p>
+   
+   <p>Just reply to let me know if you would like to participate.</p>
+   
+   <p>Thanks,<br>SpokeHire Team</p>
    ```
+
+**Note:** Each recipient receives a personalized email containing ONLY their own vehicles from the deal, not all vehicles in the deal.
 
 ### Development Mode
 
@@ -414,7 +419,51 @@ NODE_ENV=development
 
 ---
 
+## Architecture
+
+### Email Sending Flow (Server-Side)
+
+**Modern Architecture (Current)**
+```
+Client → createDeal/addVehicles (tRPC)
+         ↓
+Server:  Create deal in database
+         ↓
+         Send personalized emails (automatic)
+         ↓
+Client ← Success response
+```
+
+**Benefits:**
+- ✅ Atomic operation - deal creation + email sending happen together
+- ✅ No race conditions - server handles everything reliably
+- ✅ Automatic retry capability - emails sent after transaction commits
+- ✅ Better error handling - deal saved even if emails fail
+- ✅ Simpler client code - one mutation does everything
+
+**Technical Details:**
+- Emails are sent AFTER the database transaction commits (to avoid holding locks)
+- Email failures don't fail the deal creation (but are logged)
+- Manual resend endpoint available for admin intervention if needed
+- All email personalization (filtering vehicles per owner) happens server-side
+
+---
+
 ## Change History
+
+### Version 2.1 (October 2025) - Architecture Improvements
+
+**1. Server-Side Email Sending**
+- Moved email sending from client to server
+- Emails now sent automatically when deals are created/modified
+- Improved reliability and error handling
+- Removed client-side orchestration complexity
+
+**2. Personalized Emails**
+- Each recipient only sees their own vehicles
+- Vehicle names formatted as comma-separated list
+- Personalized greeting using recipient's first name
+- Simplified email template format
 
 ### Version 2.0 (January 2025) - Major Simplifications
 

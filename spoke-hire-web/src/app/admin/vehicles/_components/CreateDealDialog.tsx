@@ -173,22 +173,16 @@ export function CreateDealDialog({
   }, [vehicles, newItemsData, selectedVehicleIds, activeTab, selectedDealId, open]);
 
   // Create deal mutation
+  // Note: Emails are sent automatically on the server after deal creation
   const createDealMutation = api.deal.create.useMutation({
     onSuccess: async (deal) => {
       // Invalidate deals list to refresh
       await utils.deal.list.invalidate();
       
-      // Now send the deal
-      try {
-        await sendDealMutation.mutateAsync({
-          dealId: deal.id,
-        });
-      } catch (error) {
-        console.error("Failed to send deal:", error);
-        toast.error("Deal created but failed to send emails");
-        onOpenChange(false);
-        form.reset();
-      }
+      toast.success("Deal created and emails sent successfully!");
+      onSuccess();
+      onOpenChange(false);
+      form.reset();
     },
     onError: (error) => {
       toast.error(error.message || "Failed to create deal");
@@ -196,54 +190,24 @@ export function CreateDealDialog({
   });
 
   // Add vehicles to existing deal mutation
+  // Note: Emails are sent automatically on the server to new recipients only
   const addVehiclesMutation = api.deal.addVehiclesToDeal.useMutation({
     onSuccess: async (deal) => {
       // Invalidate deals list and specific deal to refresh
       await utils.deal.list.invalidate();
       await utils.deal.getById.invalidate({ id: deal.id });
       
-      // Now send the deal
-      try {
-        await sendDealMutation.mutateAsync({
-          dealId: deal.id,
-        });
-      } catch (error) {
-        console.error("Failed to send deal:", error);
-        toast.error("Vehicles added but failed to send emails");
-        onOpenChange(false);
-        setSelectedDealId("");
-      }
+      toast.success("Vehicles added and emails sent to new recipients!");
+      onSuccess();
+      onOpenChange(false);
+      setSelectedDealId("");
     },
     onError: (error) => {
       toast.error(error.message || "Failed to add vehicles to deal");
     },
   });
 
-  // Send deal mutation
-  const sendDealMutation = api.deal.send.useMutation({
-    onSuccess: (result) => {
-      if (result.success) {
-        toast.success(
-          `Deal sent successfully! ${result.sent} email(s) sent to vehicle owners.`,
-          {
-            description:
-              result.failed > 0
-                ? `${result.failed} email(s) failed to send.`
-                : undefined,
-          }
-        );
-        onSuccess();
-        form.reset();
-      } else {
-        toast.error("Failed to send deal emails");
-      }
-    },
-    onError: (error) => {
-      toast.error(error.message || "Failed to send deal");
-    },
-  });
-
-  const isSubmitting = createDealMutation.isPending || addVehiclesMutation.isPending || sendDealMutation.isPending;
+  const isSubmitting = createDealMutation.isPending || addVehiclesMutation.isPending;
 
   const handleAddToDeal = (dealId: string) => {
     if (newVehicleCount === 0) {
@@ -482,7 +446,7 @@ export function CreateDealDialog({
                   {isSubmitting ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      {sendDealMutation.isPending ? "Sending..." : "Creating..."}
+                      Creating & Sending...
                     </>
                   ) : isCalculating ? (
                     <>
