@@ -105,28 +105,149 @@ const form = useForm<FormData>({
 
 Define Zod schemas in separate files for reusability.
 
-## File Organization
+## Architecture Overview
 
-### Route Structure
+### Server vs Client
+
+**Server-Side (~/server/):**
+- tRPC routers - API endpoints
+- Services - Business logic
+- Prisma - Database access
+- Authentication checks
+- Data validation
+
+**Client-Side (~/app/):**
+- React Server Components (default)
+- Client Components ("use client") - Only when needed
+- tRPC queries/mutations - API calls
+- UI state management
+- User interactions
+
+**Data Flow:**
+```
+Client → tRPC Router → Service → Prisma → Database
+                ↓
+         Validation (Zod)
+         Auth Check
+         Business Logic
+```
+
+### Backend Architecture Pattern
+
+**Use the Service Layer pattern - keep routers thin:**
+
+```typescript
+// ✅ GOOD: Router delegates to service
+// server/api/routers/vehicle.ts
+export const vehicleRouter = createTRPCRouter({
+  list: protectedProcedure
+    .input(listVehiclesInputSchema)
+    .query(async ({ ctx, input }) => {
+      return await VehicleService.listVehicles(ctx.db, input);
+    }),
+});
+
+// ✅ GOOD: Service contains business logic
+// server/api/services/vehicle.service.ts
+export class VehicleService {
+  static async listVehicles(db: PrismaClient, params: ListParams) {
+    // Build filters
+    const where = this.buildFilters(params);
+    
+    // Execute query with optimizations
+    const vehicles = await db.vehicle.findMany({
+      where,
+      include: { make: true, model: true },
+      take: params.limit,
+    });
+    
+    return { vehicles, nextCursor: ... };
+  }
+  
+  private static buildFilters(params: ListParams) {
+    // Filter logic here
+  }
+}
+
+// ❌ BAD: Business logic in router
+export const vehicleRouter = createTRPCRouter({
+  list: protectedProcedure
+    .input(listVehiclesInputSchema)
+    .query(async ({ ctx, input }) => {
+      // Don't put complex logic here!
+      const where = {};
+      if (input.status) where.status = input.status;
+      if (input.search) where.name = { contains: input.search };
+      // ... lots of logic ...
+      return await ctx.db.vehicle.findMany({ where });
+    }),
+});
+```
+
+**Benefits:**
+- ✅ Routers are thin and easy to read
+- ✅ Business logic is reusable
+- ✅ Easier to test services independently
+- ✅ Clear separation of concerns
+
+### File Organization
+
+**Frontend (Next.js App Router):**
 ```
 app/
-├── page.tsx                    # Home/dashboard
+├── page.tsx                    # Home/dashboard (Server Component)
 ├── layout.tsx                  # Root layout
 ├── _components/                # Shared components
 └── [feature]/                  # Feature routes
-    ├── page.tsx               # Feature page
+    ├── page.tsx               # Feature page (Server Component)
     ├── layout.tsx             # Feature layout (optional)
     └── _components/           # Feature components
+        ├── FeatureList.tsx    # Server Component
+        └── FeatureForm.tsx    # "use client" (has state/events)
 ```
 
-### API Routes (tRPC)
+**Backend (tRPC + Services):**
 ```
 server/api/
-├── root.ts                     # Main router
-├── trpc.ts                     # tRPC config
-└── routers/
-    └── [feature].ts           # Feature router
+├── root.ts                     # Main router (combines all routers)
+├── trpc.ts                     # tRPC config (auth, context)
+├── routers/
+│   ├── vehicle.ts             # Vehicle endpoints (thin)
+│   ├── deal.ts                # Deal endpoints (thin)
+│   └── user.ts                # User endpoints (thin)
+└── services/
+    ├── vehicle.service.ts     # Vehicle business logic
+    ├── deal.service.ts        # Deal business logic
+    └── email.service.ts       # Email sending logic
 ```
+
+### When to Use What
+
+**Server Components (default):**
+- ✅ Displaying data
+- ✅ Static content
+- ✅ SEO-important pages
+- ✅ Initial data fetching
+
+**Client Components ("use client"):**
+- ✅ Interactive forms
+- ✅ onClick, onChange handlers
+- ✅ useState, useEffect
+- ✅ Browser APIs
+- ✅ Real-time updates
+
+**tRPC Routers:**
+- ✅ Define API endpoints
+- ✅ Input validation (Zod)
+- ✅ Auth checks
+- ✅ Delegate to services
+
+**Services:**
+- ✅ Business logic
+- ✅ Complex queries
+- ✅ Data transformations
+- ✅ Multi-step operations
+- ✅ Reusable functions
 
 ### Documentation Structure
 ```
