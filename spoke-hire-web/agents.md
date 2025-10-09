@@ -322,6 +322,33 @@ toast.success("Success!"); toast.error("Error!");
 </Dialog>
 ```
 
+### Actions Menu Pattern
+
+**Always use DropdownMenu with MoreHorizontal icon (...) for item actions.**
+
+**Standard Structure:**
+```tsx
+<DropdownMenuLabel>Actions</DropdownMenuLabel>
+<DropdownMenuSeparator />
+{/* Primary: View, Edit */}
+<DropdownMenuSeparator />
+{/* Secondary: Archive, Delete */}
+```
+
+**Three Placements:**
+
+1. **Table rows:** Right-aligned column, `variant="ghost"`
+2. **Mobile cards:** Absolute `top-3 right-3` with `variant="secondary"` and backdrop-blur
+3. **Detail cards:** In header with badges, `variant="ghost"`
+
+**Key Rules:**
+- Icon-only trigger: `<MoreHorizontal className="h-4 w-4" />`
+- Always: `onClick={(e) => e.stopPropagation()}` on trigger
+- Always: `<span className="sr-only">Open menu</span>`
+- Menu: `align="end"`
+
+**Examples:** See `/admin/vehicles`, `/admin/deals` pages
+
 ## Don't Do This
 
 ❌ Modify shadcn/ui components in `src/components/ui/` directly  

@@ -58,6 +58,16 @@ const addVehiclesToDealInputSchema = z.object({
   recipientIds: z.array(z.string().cuid()).min(1).max(MAX_RECIPIENTS_PER_DEAL),
 });
 
+const updateDealInputSchema = z.object({
+  id: z.string().cuid(),
+  name: z.string().min(DEAL_NAME_MIN_LENGTH).max(DEAL_NAME_MAX_LENGTH).optional(),
+  date: z.string().optional(),
+  time: z.string().optional(),
+  location: z.string().optional(),
+  brief: z.string().optional(),
+  fee: z.string().optional(),
+});
+
 const updateDealStatusInputSchema = z.object({
   id: z.string().cuid(),
   status: z.enum(["ACTIVE", "ARCHIVED"]),
@@ -236,6 +246,17 @@ export const dealRouter = createTRPCRouter({
         vehicleIds: input.vehicleIds,
         recipientIds: input.recipientIds,
       });
+    }),
+
+  /**
+   * Update deal details
+   */
+  update: adminProcedure
+    .input(updateDealInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const service = new DealService(ctx.db as any);
+      const { id, ...updateParams } = input;
+      return await service.updateDeal(id, updateParams);
     }),
 
   /**

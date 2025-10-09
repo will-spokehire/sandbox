@@ -1,8 +1,8 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Car, Archive, ArchiveRestore, MessageCircle, MoreHorizontal, Eye, User, Mail, Phone, Copy } from "lucide-react";
+import { ArrowLeft, Car, Archive, ArchiveRestore, MessageCircle, MoreHorizontal, Eye, User, Mail, Phone, Copy, Pencil } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { useRequireAdmin } from "~/providers/auth-provider";
@@ -29,6 +29,7 @@ import {
 import { formatOwnerName } from "~/lib/vehicles";
 import { OwnerContactDropdownItems } from "~/components/contact/OwnerContactActions";
 import { useClipboard } from "~/hooks/useClipboard";
+import { CreateDealDialog } from "../_components/CreateDealDialog";
 
 /**
  * Deal Detail Page
@@ -45,6 +46,7 @@ export default function DealDetailPage({
   const resolvedParams = use(params);
   const utils = api.useUtils();
   const { copyToClipboard } = useClipboard();
+  const [showEditDialog, setShowEditDialog] = useState(false);
 
   // Fetch deal details
   const {
@@ -151,33 +153,6 @@ export default function DealDetailPage({
               </div>
             </div>
             <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
-              {deal && (
-                <>
-                  {deal.status === "ACTIVE" ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => archiveMutation.mutate({ id: deal.id })}
-                      disabled={archiveMutation.isPending}
-                      className="gap-2"
-                    >
-                      <Archive className="h-4 w-4" />
-                      <span className="hidden sm:inline">Archive</span>
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => unarchiveMutation.mutate({ id: deal.id })}
-                      disabled={unarchiveMutation.isPending}
-                      className="gap-2"
-                    >
-                      <ArchiveRestore className="h-4 w-4" />
-                      <span className="hidden sm:inline">Unarchive</span>
-                    </Button>
-                  )}
-                </>
-              )}
               <UserMenu />
             </div>
           </div>
@@ -204,11 +179,51 @@ export default function DealDetailPage({
             {/* Deal Info Card */}
             <Card>
               <CardHeader>
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between gap-3">
                   <div className="flex-1">
                     <CardTitle>{deal.name}</CardTitle>
                   </div>
-                  {getStatusBadge(deal.status)}
+                  <div className="flex items-center gap-2">
+                    {getStatusBadge(deal.status)}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal className="h-4 w-4" />
+                          <span className="sr-only">Open menu</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        {deal.status === "ACTIVE" && (
+                          <DropdownMenuItem
+                            onClick={() => setShowEditDialog(true)}
+                          >
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Edit Deal
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuSeparator />
+                        {deal.status === "ACTIVE" ? (
+                          <DropdownMenuItem
+                            onClick={() => archiveMutation.mutate({ id: deal.id })}
+                            disabled={archiveMutation.isPending}
+                          >
+                            <Archive className="mr-2 h-4 w-4" />
+                            Archive
+                          </DropdownMenuItem>
+                        ) : (
+                          <DropdownMenuItem
+                            onClick={() => unarchiveMutation.mutate({ id: deal.id })}
+                            disabled={unarchiveMutation.isPending}
+                          >
+                            <ArchiveRestore className="mr-2 h-4 w-4" />
+                            Unarchive
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -589,6 +604,15 @@ export default function DealDetailPage({
           </div>
         )}
       </main>
+
+      {/* Edit Deal Dialog */}
+      {deal && (
+        <CreateDealDialog
+          open={showEditDialog}
+          onOpenChange={setShowEditDialog}
+          dealId={deal.id}
+        />
+      )}
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Eye, Mail, Archive, ArchiveRestore, Car, User, Plus } from "lucide-react";
+import { Eye, Mail, Archive, ArchiveRestore, Car, User, Plus, Pencil, MoreHorizontal } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { useRequireAdmin } from "~/providers/auth-provider";
@@ -16,6 +16,14 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import { Card, CardContent } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 import { PageHeader } from "~/app/_components/ui";
@@ -34,6 +42,7 @@ function DealsListContent() {
 
   // Dialog state
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [editingDealId, setEditingDealId] = useState<string | undefined>();
 
   // Get archived status from URL (default to false - show active)
   const showArchived = searchParams.get("archived") === "true";
@@ -83,6 +92,11 @@ function DealsListContent() {
 
   const handleView = (dealId: string) => {
     router.push(`/admin/deals/${dealId}`);
+  };
+
+  const handleEdit = (dealId: string) => {
+    setEditingDealId(dealId);
+    setShowCreateDialog(true);
   };
 
   const handleArchive = (dealId: string) => {
@@ -161,7 +175,16 @@ function DealsListContent() {
       {/* Create Deal Dialog */}
       <CreateDealDialog
         open={showCreateDialog}
-        onOpenChange={setShowCreateDialog}
+        onOpenChange={(open) => {
+          setShowCreateDialog(open);
+          if (!open) {
+            setEditingDealId(undefined);
+          }
+        }}
+        onSuccess={() => {
+          setEditingDealId(undefined);
+        }}
+        dealId={editingDealId}
       />
 
       {/* Results Count */}
@@ -253,47 +276,100 @@ function DealsListContent() {
                   return (
                     <Card key={deal.id} className="overflow-hidden">
                       <CardContent className="p-0">
-                        <button
-                          onClick={() => handleView(deal.id)}
-                          className="w-full text-left p-4 hover:bg-muted/50 transition-colors"
-                        >
-                          {/* Header */}
-                          <div className="flex items-start justify-between gap-3 mb-3">
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-base mb-1 truncate">
-                                {deal.name}
-                              </h3>
-                              {(deal.date || deal.location) && (
-                                <p className="text-sm text-muted-foreground line-clamp-1">
-                                  {deal.date && deal.location ? `${deal.date} • ${deal.location}` : deal.date || deal.location}
-                                </p>
-                              )}
+                        <div className="relative">
+                          <button
+                            onClick={() => handleView(deal.id)}
+                            className="w-full text-left p-4 hover:bg-muted/50 transition-colors"
+                          >
+                            {/* Header */}
+                            <div className="flex items-start justify-between gap-3 mb-3">
+                              <div className="flex-1 min-w-0 pr-8">
+                                <h3 className="font-semibold text-base mb-1 truncate">
+                                  {deal.name}
+                                </h3>
+                                {(deal.date || deal.location) && (
+                                  <p className="text-sm text-muted-foreground line-clamp-1">
+                                    {deal.date && deal.location ? `${deal.date} • ${deal.location}` : deal.date || deal.location}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="flex-shrink-0">
+                                {getStatusBadge(deal.status)}
+                              </div>
                             </div>
-                            <div className="flex-shrink-0">
-                              {getStatusBadge(deal.status)}
-                            </div>
-                          </div>
 
-                          {/* Stats */}
-                          <div className="flex items-center gap-4 mb-3 text-sm">
-                            <div className="flex items-center gap-1.5">
-                              <Car className="h-4 w-4 text-muted-foreground" />
-                              <span className="font-medium">{deal._count.vehicles}</span>
-                              <span className="text-muted-foreground">vehicle{deal._count.vehicles !== 1 ? "s" : ""}</span>
+                            {/* Stats */}
+                            <div className="flex items-center gap-4 mb-3 text-sm">
+                              <div className="flex items-center gap-1.5">
+                                <Car className="h-4 w-4 text-muted-foreground" />
+                                <span className="font-medium">{deal._count.vehicles}</span>
+                                <span className="text-muted-foreground">vehicle{deal._count.vehicles !== 1 ? "s" : ""}</span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <User className="h-4 w-4 text-muted-foreground" />
+                                <span className="font-medium">{deal._count.recipients}</span>
+                                <span className="text-muted-foreground">owner{deal._count.recipients !== 1 ? "s" : ""}</span>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-1.5">
-                              <User className="h-4 w-4 text-muted-foreground" />
-                              <span className="font-medium">{deal._count.recipients}</span>
-                              <span className="text-muted-foreground">owner{deal._count.recipients !== 1 ? "s" : ""}</span>
-                            </div>
-                          </div>
 
-                          {/* Footer */}
-                          <div className="flex items-center justify-between text-xs text-muted-foreground">
-                            <span>By {creatorName}</span>
-                            <span>{format(new Date(deal.createdAt), "MMM d, yyyy")}</span>
+                            {/* Footer */}
+                            <div className="flex items-center justify-between text-xs text-muted-foreground">
+                              <span>By {creatorName}</span>
+                              <span>{format(new Date(deal.createdAt), "MMM d, yyyy")}</span>
+                            </div>
+                          </button>
+
+                          {/* Actions Dropdown */}
+                          <div className="absolute top-3 right-3 z-10">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="secondary"
+                                  size="icon"
+                                  className="h-8 w-8 shadow-lg backdrop-blur-sm bg-background/90 hover:bg-background"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                  <span className="sr-only">Open menu</span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  onClick={() => handleView(deal.id)}
+                                >
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  View Details
+                                </DropdownMenuItem>
+                                {!showArchived && (
+                                  <DropdownMenuItem
+                                    onClick={() => handleEdit(deal.id)}
+                                  >
+                                    <Pencil className="mr-2 h-4 w-4" />
+                                    Edit Deal
+                                  </DropdownMenuItem>
+                                )}
+                                <DropdownMenuSeparator />
+                                {showArchived ? (
+                                  <DropdownMenuItem
+                                    onClick={() => handleUnarchive(deal.id)}
+                                  >
+                                    <ArchiveRestore className="mr-2 h-4 w-4" />
+                                    Unarchive
+                                  </DropdownMenuItem>
+                                ) : (
+                                  <DropdownMenuItem
+                                    onClick={() => handleArchive(deal.id)}
+                                  >
+                                    <Archive className="mr-2 h-4 w-4" />
+                                    Archive
+                                  </DropdownMenuItem>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
-                        </button>
+                        </div>
                       </CardContent>
                     </Card>
                   );
@@ -311,6 +387,7 @@ function DealsListContent() {
                     <TableHead>Recipients</TableHead>
                     <TableHead>Created</TableHead>
                     <TableHead>Created By</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -321,8 +398,8 @@ function DealsListContent() {
                         : deal.createdBy.email;
 
                     return (
-                      <TableRow key={deal.id} className="hover:bg-muted/50 cursor-pointer" onClick={() => handleView(deal.id)}>
-                        <TableCell>
+                      <TableRow key={deal.id} className="hover:bg-muted/50">
+                        <TableCell className="cursor-pointer" onClick={() => handleView(deal.id)}>
                           <div className="font-medium text-foreground">
                             {deal.name}
                           </div>
@@ -332,22 +409,70 @@ function DealsListContent() {
                             </div>
                           )}
                         </TableCell>
-                        <TableCell>{getStatusBadge(deal.status)}</TableCell>
-                        <TableCell>
+                        <TableCell className="cursor-pointer" onClick={() => handleView(deal.id)}>{getStatusBadge(deal.status)}</TableCell>
+                        <TableCell className="cursor-pointer" onClick={() => handleView(deal.id)}>
                           <Badge variant="secondary">
                             {deal._count.vehicles}
                           </Badge>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="cursor-pointer" onClick={() => handleView(deal.id)}>
                           <Badge variant="secondary">
                             {deal._count.recipients}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
+                        <TableCell className="text-sm text-muted-foreground cursor-pointer" onClick={() => handleView(deal.id)}>
                           {format(new Date(deal.createdAt), "MMM d, yyyy")}
                         </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
+                        <TableCell className="text-sm text-muted-foreground cursor-pointer" onClick={() => handleView(deal.id)}>
                           {creatorName}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                                <span className="sr-only">Open menu</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => handleView(deal.id)}
+                              >
+                                <Eye className="mr-2 h-4 w-4" />
+                                View Details
+                              </DropdownMenuItem>
+                              {!showArchived && (
+                                <DropdownMenuItem
+                                  onClick={() => handleEdit(deal.id)}
+                                >
+                                  <Pencil className="mr-2 h-4 w-4" />
+                                  Edit Deal
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuSeparator />
+                              {showArchived ? (
+                                <DropdownMenuItem
+                                  onClick={() => handleUnarchive(deal.id)}
+                                >
+                                  <ArchiveRestore className="mr-2 h-4 w-4" />
+                                  Unarchive
+                                </DropdownMenuItem>
+                              ) : (
+                                <DropdownMenuItem
+                                  onClick={() => handleArchive(deal.id)}
+                                >
+                                  <Archive className="mr-2 h-4 w-4" />
+                                  Archive
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </TableCell>
                       </TableRow>
                     );

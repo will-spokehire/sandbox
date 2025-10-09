@@ -48,6 +48,15 @@ export interface AddVehiclesToDealParams {
   recipientIds: string[]; // New recipients to add
 }
 
+export interface UpdateDealParams {
+  name?: string;
+  date?: string;
+  time?: string;
+  location?: string;
+  brief?: string;
+  fee?: string;
+}
+
 export interface ListDealsParams {
   limit?: number;
   cursor?: string;
@@ -522,6 +531,68 @@ export class DealService {
     
     // Return updated deal for client
     return await this.getDealById(result.dealId);
+  }
+
+  /**
+   * Update deal details
+   */
+  async updateDeal(dealId: string, params: UpdateDealParams) {
+    const { name, date, time, location, brief, fee } = params;
+
+    // Validate deal exists
+    const deal = await this.db.deal.findUnique({
+      where: { id: dealId },
+    });
+
+    if (!deal) {
+      throw new DealNotFoundError(dealId);
+    }
+
+    // Validate name if provided
+    if (name !== undefined && name.length < DEAL_NAME_MIN_LENGTH) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: `Deal name must be at least ${DEAL_NAME_MIN_LENGTH} characters`,
+      });
+    }
+
+    if (name !== undefined && name.length > DEAL_NAME_MAX_LENGTH) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: `Deal name must be less than ${DEAL_NAME_MAX_LENGTH} characters`,
+      });
+    }
+
+    // Update deal with provided fields
+    const updatedDeal = await this.db.deal.update({
+      where: { id: dealId },
+      data: {
+        ...(name !== undefined && { name }),
+        ...(date !== undefined && { date }),
+        ...(time !== undefined && { time }),
+        ...(location !== undefined && { location }),
+        ...(brief !== undefined && { brief }),
+        ...(fee !== undefined && { fee }),
+      },
+      include: {
+        createdBy: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+        _count: {
+          select: {
+            vehicles: true,
+            recipients: true,
+          },
+        },
+      },
+    });
+
+    return updatedDeal;
   }
 
   /**

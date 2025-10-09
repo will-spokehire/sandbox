@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -34,12 +35,14 @@ interface CreateDealDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
+  dealId?: string; // If provided, edit this deal instead of creating new
 }
 
 export function CreateDealDialog({
   open,
   onOpenChange,
   onSuccess,
+  dealId,
 }: CreateDealDialogProps) {
   const utils = api.useUtils();
 
@@ -54,6 +57,36 @@ export function CreateDealDialog({
       fee: "",
     },
   });
+
+  // Fetch existing deal data when editing
+  const { data: existingDeal, isLoading: isLoadingDeal } = api.deal.getById.useQuery(
+    { id: dealId! },
+    { enabled: open && !!dealId }
+  );
+
+  // Populate form with existing deal data
+  useEffect(() => {
+    if (existingDeal && dealId) {
+      form.reset({
+        name: existingDeal.name,
+        date: existingDeal.date ?? "",
+        time: existingDeal.time ?? "",
+        location: existingDeal.location ?? "",
+        brief: existingDeal.brief ?? "",
+        fee: existingDeal.fee ?? "",
+      });
+    } else if (!dealId) {
+      // Reset to empty when creating new deal
+      form.reset({
+        name: "",
+        date: "",
+        time: "",
+        location: "",
+        brief: "",
+        fee: "",
+      });
+    }
+  }, [existingDeal, dealId, form]);
 
   // Create deal mutation
   const createDealMutation = api.deal.create.useMutation({
@@ -71,28 +104,65 @@ export function CreateDealDialog({
     },
   });
 
-  const isSubmitting = createDealMutation.isPending;
+  // Update deal mutation
+  const updateDealMutation = api.deal.update.useMutation({
+    onSuccess: async () => {
+      // Invalidate deals list and specific deal to refresh
+      await utils.deal.list.invalidate();
+      if (dealId) {
+        await utils.deal.getById.invalidate({ id: dealId });
+      }
+      
+      toast.success("Deal updated successfully!");
+      form.reset();
+      onOpenChange(false);
+      onSuccess?.();
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to update deal");
+    },
+  });
+
+  const isSubmitting = createDealMutation.isPending || updateDealMutation.isPending;
+  const isLoading = isLoadingDeal;
 
   const handleSubmit = form.handleSubmit((data) => {
-    createDealMutation.mutate({
-      name: data.name,
-      date: data.date,
-      time: data.time,
-      location: data.location,
-      brief: data.brief,
-      fee: data.fee,
-      vehicleIds: [], // Empty array - vehicles will be added later
-      recipientIds: [], // Empty array - recipients will be added with vehicles
-    });
+    if (dealId) {
+      // Update existing deal
+      updateDealMutation.mutate({
+        id: dealId,
+        name: data.name,
+        date: data.date,
+        time: data.time,
+        location: data.location,
+        brief: data.brief,
+        fee: data.fee,
+      });
+    } else {
+      // Create new deal
+      createDealMutation.mutate({
+        name: data.name,
+        date: data.date,
+        time: data.time,
+        location: data.location,
+        brief: data.brief,
+        fee: data.fee,
+        vehicleIds: [], // Empty array - vehicles will be added later
+        recipientIds: [], // Empty array - recipients will be added with vehicles
+      });
+    }
   });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Create New Deal</DialogTitle>
+          <DialogTitle>{dealId ? "Edit Deal" : "Create New Deal"}</DialogTitle>
           <DialogDescription>
-            Create a deal without vehicles. You can add vehicles later from the vehicles page.
+            {dealId 
+              ? "Update the deal details below."
+              : "Create a deal without vehicles. You can add vehicles later from the vehicles page."
+            }
           </DialogDescription>
         </DialogHeader>
 
@@ -172,18 +242,23 @@ export function CreateDealDialog({
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isLoading}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? (
+            <Button type="submit" disabled={isSubmitting || isLoading}>
+              {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating...
+                  Loading...
+                </>
+              ) : isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {dealId ? "Updating..." : "Creating..."}
                 </>
               ) : (
-                "Create Deal"
+                dealId ? "Update Deal" : "Create Deal"
               )}
             </Button>
           </DialogFooter>
