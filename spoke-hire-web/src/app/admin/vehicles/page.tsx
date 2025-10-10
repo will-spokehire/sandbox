@@ -2,14 +2,14 @@
 
 import { useEffect, useState, Suspense, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { VehicleStatus } from "@prisma/client";
+import type { VehicleStatus } from "@prisma/client";
 import { LayoutGrid, Table as TableIcon, Send } from "lucide-react";
 import { toast } from "sonner";
 import { useRequireAdmin } from "~/providers/auth-provider";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 import { useDebounce } from "~/hooks/useDebounce";
-import { type VehicleListItem } from "~/types/vehicle";
+// Removed unused VehicleListItem import
 import { PageHeader } from "~/app/_components/ui";
 import {
   VehicleListTable,
@@ -78,7 +78,7 @@ function VehiclesPageContent() {
       limit: itemsPerPage,
       cursor: undefined, // Not using cursor for offset pagination
       skip, // Add skip parameter for offset
-      search: debouncedSearch || undefined,
+      search: debouncedSearch ?? undefined,
       // Don't pass status if it's "ALL" (show all statuses)
       status: status === "ALL" ? undefined : status,
       makeIds: makeIds.length > 0 ? makeIds : undefined,
@@ -96,10 +96,10 @@ function VehiclesPageContent() {
       userPostcode: postcode,
       maxDistanceMiles: maxDistance,
       sortByDistance,
-      sortBy: sortBy as any,
+      sortBy: sortBy as "name" | "createdAt" | "updatedAt" | "price" | "year" | "distance",
       sortOrder,
-      // OPTIMIZATION: Only get count on first page
-      includeTotalCount: currentPage === 1,
+      // Always fetch total count to ensure pagination works on all pages
+      includeTotalCount: true,
     },
     {
       enabled: !isAuthLoading && !!user,
@@ -152,67 +152,151 @@ function VehiclesPageContent() {
 
     // Apply updates
     if (updates.search !== undefined) {
-      updates.search ? params.set("search", updates.search) : params.delete("search");
+      if (updates.search) {
+        params.set("search", updates.search);
+      } else {
+        params.delete("search");
+      }
     }
     if ("status" in updates) {
-      updates.status ? params.set("status", updates.status) : params.delete("status");
+      if (updates.status) {
+        params.set("status", updates.status);
+      } else {
+        params.delete("status");
+      }
     }
     if (updates.makeIds !== undefined) {
-      updates.makeIds.length > 0 ? params.set("makeIds", updates.makeIds.join(",")) : params.delete("makeIds");
+      if (updates.makeIds.length > 0) {
+        params.set("makeIds", updates.makeIds.join(","));
+      } else {
+        params.delete("makeIds");
+      }
     }
     if ("modelId" in updates) {
-      updates.modelId ? params.set("modelId", updates.modelId) : params.delete("modelId");
+      if (updates.modelId) {
+        params.set("modelId", updates.modelId);
+      } else {
+        params.delete("modelId");
+      }
     }
     if (updates.collectionIds !== undefined) {
-      updates.collectionIds.length > 0 ? params.set("collectionIds", updates.collectionIds.join(",")) : params.delete("collectionIds");
+      if (updates.collectionIds.length > 0) {
+        params.set("collectionIds", updates.collectionIds.join(","));
+      } else {
+        params.delete("collectionIds");
+      }
     }
     if (updates.exteriorColors !== undefined) {
-      updates.exteriorColors.length > 0 ? params.set("exteriorColors", updates.exteriorColors.join(",")) : params.delete("exteriorColors");
+      if (updates.exteriorColors.length > 0) {
+        params.set("exteriorColors", updates.exteriorColors.join(","));
+      } else {
+        params.delete("exteriorColors");
+      }
     }
     if (updates.interiorColors !== undefined) {
-      updates.interiorColors.length > 0 ? params.set("interiorColors", updates.interiorColors.join(",")) : params.delete("interiorColors");
+      if (updates.interiorColors.length > 0) {
+        params.set("interiorColors", updates.interiorColors.join(","));
+      } else {
+        params.delete("interiorColors");
+      }
     }
     if ("yearFrom" in updates) {
-      updates.yearFrom ? params.set("yearFrom", updates.yearFrom) : params.delete("yearFrom");
+      if (updates.yearFrom) {
+        params.set("yearFrom", updates.yearFrom);
+      } else {
+        params.delete("yearFrom");
+      }
     }
     if ("yearTo" in updates) {
-      updates.yearTo ? params.set("yearTo", updates.yearTo) : params.delete("yearTo");
+      if (updates.yearTo) {
+        params.set("yearTo", updates.yearTo);
+      } else {
+        params.delete("yearTo");
+      }
     }
     if (updates.numberOfSeats !== undefined) {
-      updates.numberOfSeats.length > 0 ? params.set("numberOfSeats", updates.numberOfSeats.join(",")) : params.delete("numberOfSeats");
+      if (updates.numberOfSeats.length > 0) {
+        params.set("numberOfSeats", updates.numberOfSeats.join(","));
+      } else {
+        params.delete("numberOfSeats");
+      }
     }
     if (updates.gearboxTypes !== undefined) {
-      updates.gearboxTypes.length > 0 ? params.set("gearboxTypes", updates.gearboxTypes.join(",")) : params.delete("gearboxTypes");
+      if (updates.gearboxTypes.length > 0) {
+        params.set("gearboxTypes", updates.gearboxTypes.join(","));
+      } else {
+        params.delete("gearboxTypes");
+      }
     }
     if (updates.steeringIds !== undefined) {
-      updates.steeringIds.length > 0 ? params.set("steeringIds", updates.steeringIds.join(",")) : params.delete("steeringIds");
+      if (updates.steeringIds.length > 0) {
+        params.set("steeringIds", updates.steeringIds.join(","));
+      } else {
+        params.delete("steeringIds");
+      }
     }
     if (updates.countryIds !== undefined) {
-      updates.countryIds.length > 0 ? params.set("countryIds", updates.countryIds.join(",")) : params.delete("countryIds");
+      if (updates.countryIds.length > 0) {
+        params.set("countryIds", updates.countryIds.join(","));
+      } else {
+        params.delete("countryIds");
+      }
     }
     if (updates.counties !== undefined) {
-      updates.counties.length > 0 ? params.set("counties", updates.counties.join(",")) : params.delete("counties");
+      if (updates.counties.length > 0) {
+        params.set("counties", updates.counties.join(","));
+      } else {
+        params.delete("counties");
+      }
     }
     if ("postcode" in updates) {
-      updates.postcode ? params.set("postcode", updates.postcode) : params.delete("postcode");
+      if (updates.postcode) {
+        params.set("postcode", updates.postcode);
+      } else {
+        params.delete("postcode");
+      }
     }
     if ("maxDistance" in updates) {
-      updates.maxDistance ? params.set("maxDistance", updates.maxDistance.toString()) : params.delete("maxDistance");
+      if (updates.maxDistance) {
+        params.set("maxDistance", updates.maxDistance.toString());
+      } else {
+        params.delete("maxDistance");
+      }
     }
     if (updates.sortBy !== undefined) {
-      updates.sortBy !== "createdAt" ? params.set("sortBy", updates.sortBy) : params.delete("sortBy");
+      if (updates.sortBy !== "createdAt") {
+        params.set("sortBy", updates.sortBy);
+      } else {
+        params.delete("sortBy");
+      }
     }
     if (updates.sortOrder !== undefined) {
-      updates.sortOrder !== "desc" ? params.set("sortOrder", updates.sortOrder) : params.delete("sortOrder");
+      if (updates.sortOrder !== "desc") {
+        params.set("sortOrder", updates.sortOrder);
+      } else {
+        params.delete("sortOrder");
+      }
     }
     if (updates.sortByDistance !== undefined) {
-      updates.sortByDistance ? params.set("sortByDistance", "true") : params.delete("sortByDistance");
+      if (updates.sortByDistance) {
+        params.set("sortByDistance", "true");
+      } else {
+        params.delete("sortByDistance");
+      }
     }
     if (updates.viewMode !== undefined) {
-      updates.viewMode !== "table" ? params.set("viewMode", updates.viewMode) : params.delete("viewMode");
+      if (updates.viewMode !== "table") {
+        params.set("viewMode", updates.viewMode);
+      } else {
+        params.delete("viewMode");
+      }
     }
     if (updates.page !== undefined) {
-      updates.page > 1 ? params.set("page", updates.page.toString()) : params.delete("page");
+      if (updates.page > 1) {
+        params.set("page", updates.page.toString());
+      } else {
+        params.delete("page");
+      }
     }
 
     // When filters change, reset to page 1
@@ -241,7 +325,7 @@ function VehiclesPageContent() {
     router.push(`/admin/vehicles/${id}/edit`);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = (_id: string) => {
     toast.info("Delete functionality coming soon");
   };
 
@@ -249,17 +333,17 @@ function VehiclesPageContent() {
     try {
       await navigator.clipboard.writeText(text);
       toast.success(`${label} copied to clipboard`);
-    } catch (err) {
+    } catch (_err) {
       toast.error(`Failed to copy ${label}`);
     }
   };
 
   const handleCopyEmail = (email: string) => {
-    copyToClipboard(email, 'Email');
+    void copyToClipboard(email, 'Email');
   };
 
   const handleCopyPhone = (phone: string) => {
-    copyToClipboard(phone, 'Phone number');
+    void copyToClipboard(phone, 'Phone number');
   };
 
   const handleClearFilters = () => {
