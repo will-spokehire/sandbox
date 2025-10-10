@@ -22,7 +22,7 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title={`Welcome back, ${user.firstName || user.email}!`}
+        title={`Welcome back, ${user.firstName ?? user.email}!`}
         description="Manage your vehicle listings and deals."
       />
 

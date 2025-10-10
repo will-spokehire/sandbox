@@ -125,6 +125,6 @@ function getDisplayName(
     return lastName;
   }
   // Fallback to email username
-  return email.split('@')[0] || email;
+  return email.split('@')[0] ?? email;
 }
 

@@ -51,7 +51,6 @@ function DealsListContent() {
   const {
     data,
     isLoading: isDealsLoading,
-    error,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
@@ -72,10 +71,10 @@ function DealsListContent() {
   const archiveMutation = api.deal.archive.useMutation({
     onSuccess: () => {
       toast.success("Deal archived successfully");
-      utils.deal.list.invalidate();
+      void utils.deal.list.invalidate();
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to archive deal");
+      toast.error(error.message ?? "Failed to archive deal");
     },
   });
 
@@ -83,10 +82,10 @@ function DealsListContent() {
   const unarchiveMutation = api.deal.unarchive.useMutation({
     onSuccess: () => {
       toast.success("Deal unarchived successfully");
-      utils.deal.list.invalidate();
+      void utils.deal.list.invalidate();
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to unarchive deal");
+      toast.error(error.message ?? "Failed to unarchive deal");
     },
   });
 
@@ -122,14 +121,14 @@ function DealsListContent() {
   }
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, { variant: any; label: string }> = {
+    const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; label: string }> = {
       ACTIVE: { variant: "default", label: "Active" },
       ARCHIVED: { variant: "secondary", label: "Archived" },
     };
 
-    const config = variants[status] || { variant: "secondary", label: status };
+    const config = variants[status] ?? { variant: "secondary", label: status };
     return (
-      <Badge variant={config.variant as any}>{config.label}</Badge>
+      <Badge variant={config.variant}>{config.label}</Badge>
     );
   };
 
@@ -257,7 +256,7 @@ function DealsListContent() {
             No deals yet
           </h3>
           <p className="text-muted-foreground mb-6">
-            Create your first deal by selecting vehicles and clicking "Send Deal"
+            Create your first deal by selecting vehicles and clicking &quot;Send Deal&quot;
           </p>
           <Button onClick={() => router.push("/admin/vehicles")}>
             Go to Vehicles
@@ -269,7 +268,7 @@ function DealsListContent() {
           <div className="md:hidden space-y-4">
                 {deals.map((deal) => {
                   const creatorName =
-                    deal.createdBy.firstName || deal.createdBy.lastName
+                    deal.createdBy.firstName ?? deal.createdBy.lastName
                       ? `${deal.createdBy.firstName} ${deal.createdBy.lastName}`.trim()
                       : deal.createdBy.email;
 
@@ -287,9 +286,9 @@ function DealsListContent() {
                                 <h3 className="font-semibold text-base mb-1 truncate">
                                   {deal.name}
                                 </h3>
-                                {(deal.date || deal.location) && (
+                                {(deal.date ?? deal.location) && (
                                   <p className="text-sm text-muted-foreground line-clamp-1">
-                                    {deal.date && deal.location ? `${deal.date} • ${deal.location}` : deal.date || deal.location}
+                                    {deal.date && deal.location ? `${deal.date} • ${deal.location}` : deal.date ?? deal.location}
                                   </p>
                                 )}
                               </div>
@@ -393,7 +392,7 @@ function DealsListContent() {
                 <TableBody>
                   {deals.map((deal) => {
                     const creatorName =
-                      deal.createdBy.firstName || deal.createdBy.lastName
+                      deal.createdBy.firstName ?? deal.createdBy.lastName
                         ? `${deal.createdBy.firstName} ${deal.createdBy.lastName}`.trim()
                         : deal.createdBy.email;
 
@@ -403,9 +402,9 @@ function DealsListContent() {
                           <div className="font-medium text-foreground">
                             {deal.name}
                           </div>
-                          {(deal.date || deal.location) && (
+                          {(deal.date ?? deal.location) && (
                             <div className="text-sm text-muted-foreground line-clamp-1">
-                              {deal.date && deal.location ? `${deal.date} • ${deal.location}` : deal.date || deal.location}
+                              {deal.date && deal.location ? `${deal.date} • ${deal.location}` : deal.date ?? deal.location}
                             </div>
                           )}
                         </TableCell>

@@ -46,9 +46,9 @@ interface VehicleCardProps {
  */
 export const VehicleCard = memo(function VehicleCard({
   vehicle,
-  onView,
-  onEdit,
-  onDelete,
+  onView: _onView,
+  onEdit: _onEdit,
+  onDelete: _onDelete,
   selected = false,
   onToggle,
   onCopyEmail,
@@ -67,7 +67,7 @@ export const VehicleCard = memo(function VehicleCard({
   );
   
   // Check if vehicle has distance data (from distance filtering)
-  const distance = (vehicle as any).distance as number | undefined;
+  const distance = (vehicle as VehicleListItem & { distance?: number }).distance;
 
   return (
     <Card className={`hover:shadow-md transition-shadow overflow-hidden py-0 relative ${selected ? 'ring-2 ring-primary' : ''}`}>

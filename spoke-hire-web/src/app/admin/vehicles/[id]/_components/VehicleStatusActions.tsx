@@ -164,7 +164,7 @@ export function VehicleStatusActions({
               Cancel
             </Button>
             <Button
-              variant={selectedOption?.variant || "default"}
+              variant={selectedOption?.variant ?? "default"}
               onClick={confirmStatusChange}
               disabled={updateStatusMutation.isPending}
             >

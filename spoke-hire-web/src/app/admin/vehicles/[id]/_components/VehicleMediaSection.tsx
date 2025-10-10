@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Image from "next/image";
 import { MoreHorizontal, Mail, Phone, MessageCircle } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { Card } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import {
@@ -31,7 +30,6 @@ interface VehicleMediaSectionProps {
  * Displays the main hero image with action buttons and a thumbnail gallery below
  */
 export function VehicleMediaSection({ vehicle }: VehicleMediaSectionProps) {
-  const router = useRouter();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxImages, setLightboxImages] = useState<string[]>([]);
@@ -54,13 +52,13 @@ export function VehicleMediaSection({ vehicle }: VehicleMediaSectionProps) {
     try {
       await navigator.clipboard.writeText(text);
       toast.success(`${label} copied to clipboard`);
-    } catch (err) {
+    } catch {
       toast.error(`Failed to copy ${label}`);
     }
   };
 
   const openLightbox = (index: number) => {
-    const images = sortedMedia.map((m) => m.publishedUrl || m.originalUrl);
+    const images = sortedMedia.map((m) => m.publishedUrl ?? m.originalUrl);
     setLightboxImages(images);
     setSelectedImageIndex(index);
     setIsLightboxOpen(true);
@@ -80,7 +78,7 @@ export function VehicleMediaSection({ vehicle }: VehicleMediaSectionProps) {
     );
   };
 
-  const currentImage = sortedMedia[selectedImageIndex] || mainImage;
+  const currentImage = sortedMedia[selectedImageIndex] ?? mainImage;
 
   return (
     <div className="space-y-4">
@@ -91,8 +89,8 @@ export function VehicleMediaSection({ vehicle }: VehicleMediaSectionProps) {
           <div className="relative aspect-[3/2] bg-muted">
           <Image
             src={
-              currentImage?.publishedUrl ||
-              currentImage?.originalUrl ||
+              currentImage?.publishedUrl ??
+              currentImage?.originalUrl ??
               getVehicleImageUrl([])
             }
             alt={vehicle.name}
@@ -128,7 +126,7 @@ export function VehicleMediaSection({ vehicle }: VehicleMediaSectionProps) {
                 <DropdownMenuItem
                   onClick={(e) => {
                     e.stopPropagation();
-                    copyToClipboard(vehicle.owner.email, 'Email');
+                    void copyToClipboard(vehicle.owner.email, 'Email');
                   }}
                 >
                   <Mail className="mr-2 h-4 w-4" />
@@ -140,7 +138,7 @@ export function VehicleMediaSection({ vehicle }: VehicleMediaSectionProps) {
                   <DropdownMenuItem
                     onClick={(e) => {
                       e.stopPropagation();
-                      copyToClipboard(vehicle.owner.phone!, 'Phone number');
+                      void copyToClipboard(vehicle.owner.phone!, 'Phone number');
                     }}
                   >
                     <Phone className="mr-2 h-4 w-4" />
@@ -257,8 +255,8 @@ export function VehicleMediaSection({ vehicle }: VehicleMediaSectionProps) {
                     )}
                   >
                     <Image
-                      src={media.publishedUrl || media.originalUrl}
-                      alt={media.title || `Image ${index + 1}`}
+                      src={media.publishedUrl ?? media.originalUrl}
+                      alt={media.title ?? `Image ${index + 1}`}
                       fill
                       className="object-cover"
                       sizes="(max-width: 1024px) 96px, 140px"
@@ -304,7 +302,7 @@ export function VehicleMediaSection({ vehicle }: VehicleMediaSectionProps) {
           <div className="max-w-4xl max-h-full flex flex-col items-center">
             <div className="relative max-w-full max-h-[80vh] flex items-center justify-center">
               <Image
-                src={lightboxImages[selectedImageIndex] || ""}
+                src={lightboxImages[selectedImageIndex] ?? ""}
                 alt={`${vehicle.name} - Image ${selectedImageIndex + 1}`}
                 width={1200}
                 height={800}

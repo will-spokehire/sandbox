@@ -1,6 +1,6 @@
 "use client";
 
-import { Mail, Phone, User, MapPin, Car, Copy, MessageCircle } from "lucide-react";
+import { Mail, Phone, User, MapPin, Car, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
@@ -41,15 +41,15 @@ export function VehicleOwnerInfo({ owner, vehicleId }: VehicleOwnerInfoProps) {
   );
 
   // Filter out the current vehicle and limit to 5
-  const otherVehicles = ownerVehicles?.vehicles
-    .filter((v) => v.id !== vehicleId)
+  const otherVehicles = (ownerVehicles?.vehicles as Array<{ id: string; name: string; make?: { name: string }; model?: { name: string }; year: number; status: string }> | undefined)
+    ?.filter((v) => v.id !== vehicleId)
     .slice(0, 5) ?? [];
 
   const copyToClipboard = async (text: string, label: string) => {
     try {
       await navigator.clipboard.writeText(text);
       toast.success(`${label} copied to clipboard`);
-    } catch (err) {
+    } catch {
       toast.error(`Failed to copy ${label}`);
     }
   };
@@ -127,7 +127,7 @@ export function VehicleOwnerInfo({ owner, vehicleId }: VehicleOwnerInfoProps) {
           )}
 
           {/* Address */}
-          {(owner.street || owner.city || owner.county || owner.postcode || owner.country) && (
+          {(owner.street ?? owner.city ?? owner.county ?? owner.postcode ?? owner.country) && (
             <div className="flex items-start gap-3">
               <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
               <div className="flex-1 min-w-0">
@@ -198,7 +198,7 @@ export function VehicleOwnerInfo({ owner, vehicleId }: VehicleOwnerInfoProps) {
                 Other Vehicles ({otherVehicles.length})
               </h4>
               <div className="space-y-1.5">
-                {otherVehicles.map((vehicle) => (
+                {otherVehicles.map((vehicle: { id: string; name: string; make?: { name: string }; model?: { name: string }; year: number; status: string }) => (
                   <Link
                     key={vehicle.id}
                     href={`/admin/vehicles/${vehicle.id}`}
@@ -209,7 +209,7 @@ export function VehicleOwnerInfo({ owner, vehicleId }: VehicleOwnerInfoProps) {
                         {vehicle.name}
                       </p>
                       <p className="text-[10px] text-muted-foreground truncate">
-                        {vehicle.make.name} {vehicle.model.name} • {vehicle.year}
+                        {vehicle.make?.name} {vehicle.model?.name} • {vehicle.year}
                       </p>
                     </div>
                     <Badge

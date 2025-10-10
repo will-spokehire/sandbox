@@ -13,6 +13,7 @@ import { VehicleDetailHeader } from "./_components/VehicleDetailHeader";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { AlertCircle } from "lucide-react";
+import type { VehicleDetail } from "~/types/vehicle";
 
 /**
  * Vehicle Detail Page
@@ -33,14 +34,15 @@ export default function VehicleDetailPage({
   const router = useRouter();
   
   // Unwrap params Promise as required by Next.js 15
-  const { id } = use(params);
+  const resolvedParams = use(params);
+  const { id } = resolvedParams;
   
   // Fetch vehicle data on the client
   // OPTIMIZATION: Uses TanStack Query cache with staleTime for SPA-like behavior
   // - If data was recently fetched, shows cached data instantly (no loading spinner)
   // - Refetches in background if data is older than staleTime
   // - Provides seamless navigation from list → detail page
-  const { data: vehicle, isLoading: isVehicleLoading, error } = api.vehicle.getById.useQuery(
+  const { data: vehicleData, isLoading: isVehicleLoading, error } = api.vehicle.getById.useQuery(
     { id },
     {
       enabled: !!user, // Only fetch when user is authenticated
@@ -49,7 +51,9 @@ export default function VehicleDetailPage({
       // This makes navigation feel instant when coming from list page
       // Backend also has Prisma Accelerate caching (60s) for additional performance
     }
-  );
+  ) as { data: VehicleDetail | undefined; isLoading: boolean; error: Error | null };
+  
+  const vehicle: VehicleDetail | undefined = vehicleData;
 
   const isLoading = isAuthLoading || isVehicleLoading;
 
@@ -74,7 +78,7 @@ export default function VehicleDetailPage({
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Vehicle Not Found</AlertTitle>
             <AlertDescription>
-              The vehicle you're looking for doesn't exist or you don't have permission to view it.
+              The vehicle you&apos;re looking for doesn&apos;t exist or you don&apos;t have permission to view it.
             </AlertDescription>
           </Alert>
           <div className="mt-4">

@@ -12,7 +12,7 @@ export function useClipboard() {
       await navigator.clipboard.writeText(text);
       toast.success(`${label} copied to clipboard`);
       return true;
-    } catch (err) {
+    } catch {
       toast.error(`Failed to copy ${label}`);
       return false;
     }

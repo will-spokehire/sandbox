@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Car, Mail, LayoutDashboard, Menu, X } from "lucide-react";
+import { Car, Mail, LayoutDashboard, Menu } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "~/components/ui/sheet";
 import { UserMenu } from "~/components/auth/UserMenu";
@@ -117,7 +117,7 @@ export default function AdminLayout({
             <div className="flex items-center gap-3">
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-slate-900 dark:text-slate-50 truncate">
-                  {user.firstName || user.email}
+                  {user.firstName ?? user.email}
                 </p>
                 <p className="text-xs text-slate-600 dark:text-slate-400 truncate">
                   {user.email}
@@ -173,7 +173,7 @@ export default function AdminLayout({
                       <div className="flex items-center gap-3">
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate">
-                            {user.firstName || user.email}
+                            {user.firstName ?? user.email}
                           </p>
                           <p className="text-xs text-muted-foreground truncate">
                             {user.email}

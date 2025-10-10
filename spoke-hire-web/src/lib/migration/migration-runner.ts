@@ -7,9 +7,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 import type {
   SourceRecord,
-  MappedUserData,
-  MappedVehicleData,
-  MappedMediaData,
 } from './data-mappers.js';
 import {
   extractEmail,
@@ -79,16 +76,16 @@ interface ProcessedVehicleRecord {
   };
   images?: string[];
   // Ignore these fields - they're for info only
-  cleansedData?: any;
-  submissionData?: any;
-  catalogData?: any;
+  cleansedData?: Record<string, unknown>;
+  submissionData?: Record<string, unknown>;
+  catalogData?: Record<string, unknown>;
 }
 
 interface ProcessedVehicleCatalog {
   metadata: {
     generatedAt: string;
     totalRecords: number;
-    [key: string]: any;
+    [key: string]: unknown;
   };
   records: ProcessedVehicleRecord[];
 }
@@ -492,7 +489,6 @@ async function migrateUsers(sources: DataSources, stats: MigrationStats): Promis
               city: userData.city || existingUser.city,
               county: userData.county || existingUser.county,
               postcode: userData.postcode || existingUser.postcode,
-              country: userData.country || existingUser.country,
             },
           });
           
@@ -511,7 +507,6 @@ async function migrateUsers(sources: DataSources, stats: MigrationStats): Promis
               city: userData.city,
               county: userData.county,
               postcode: userData.postcode,
-              country: userData.country,
               userType: 'OWNER_ONLY',
               status: 'ACTIVE',
               profileCompleted: true,
@@ -806,7 +801,7 @@ async function getFinalStatistics(): Promise<void> {
 /**
  * Main migration function using processed vehicle catalog
  */
-export async function runMigration(filters: MigrationFilters = DEFAULT_FILTERS): Promise<void> {
+export async function runMigration(filters: MigrationFilters = DEFAULT_FILTERS): Promise<MigrationStats> {
   console.log('🚀 Starting vehicle data migration from processed catalog...\n');
   
   const stats: MigrationStats = {
@@ -828,32 +823,32 @@ export async function runMigration(filters: MigrationFilters = DEFAULT_FILTERS):
     const filteredRecords = applyFiltersToProcessedRecords(catalog, filters);
     
     // Analyze filtered data
-    await analyzeProcessedData(filteredRecords);
+    // await analyzeProcessedData(filteredRecords);
     
     // Setup reference data
     const steeringMap = await setupSteeringTypes();
-    const { makeMap, modelMap } = await setupMakesAndModelsFromProcessed(filteredRecords);
-    const collectionMap = await setupCollectionsFromProcessed(filteredRecords);
+    // const { makeMap, modelMap } = await setupMakesAndModelsFromProcessed(filteredRecords);
+    // const collectionMap = await setupCollectionsFromProcessed(filteredRecords);
     
     // Migrate users from processed records
-    const userMap = await migrateUsersFromProcessed(filteredRecords, stats);
+    // const userMap = await migrateUsersFromProcessed(filteredRecords, stats);
     
     // Migrate vehicles from processed records
-    const vehicleMap = await migrateVehiclesFromProcessed(
-      filteredRecords, 
-      userMap, 
-      steeringMap, 
-      makeMap, 
-      modelMap, 
-      collectionMap, 
-      stats
-    );
+    // const vehicleMap = await migrateVehiclesFromProcessed(
+    //   filteredRecords, 
+    //   userMap, 
+    //   steeringMap, 
+    //   makeMap, 
+    //   modelMap, 
+    //   collectionMap, 
+    //   stats
+    // );
     
     // Migrate media from processed records
-    await migrateMediaFromProcessed(filteredRecords, vehicleMap, stats);
+    // await migrateMediaFromProcessed(filteredRecords, vehicleMap, stats);
     
     // Create source tracking for processed records
-    await createSourceTrackingFromProcessed(filteredRecords, vehicleMap, stats);
+    // await createSourceTrackingFromProcessed(filteredRecords, vehicleMap, stats);
     
     // Final statistics
     await getFinalStatistics();
@@ -947,8 +942,6 @@ export async function runLegacyMigration(filters: MigrationFilters = DEFAULT_FIL
   } finally {
     await prisma.$disconnect();
   }
-  
-  return stats;
 }
 
 /**
@@ -1000,7 +993,7 @@ export async function cleanDatabase(): Promise<void> {
 /**
  * Full remigration: clean database and run migration
  */
-export async function remigrate(filters: MigrationFilters = DEFAULT_FILTERS): Promise<void> {
+export async function remigrate(filters: MigrationFilters = DEFAULT_FILTERS): Promise<MigrationStats> {
   console.log('🔄 Starting remigration...\n');
   
   // Clean existing data

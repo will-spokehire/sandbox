@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { VehicleStatus } from "@prisma/client";
+import type { VehicleStatus } from "@prisma/client";
 import { Card, CardContent } from "~/components/ui/card";
 import {
   SearchInput,
@@ -99,22 +99,22 @@ export function VehicleFilters({
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const hasActiveFilters = !!(
-    search ||
-    status ||
+    (search ?? "") ||
+    (status !== undefined) ||
     makeIds.length > 0 ||
-    modelId ||
+    (modelId ?? "") ||
     collectionIds.length > 0 ||
     exteriorColors.length > 0 ||
     interiorColors.length > 0 ||
-    yearFrom ||
-    yearTo ||
+    (yearFrom ?? "") ||
+    (yearTo ?? "") ||
     numberOfSeats.length > 0 ||
     gearboxTypes.length > 0 ||
     steeringIds.length > 0 ||
     countryIds.length > 0 ||
     counties.length > 0 ||
-    postcode ||
-    maxDistance
+    (postcode ?? "") ||
+    (maxDistance ?? 0)
   );
 
   // Count active non-search filters for badge

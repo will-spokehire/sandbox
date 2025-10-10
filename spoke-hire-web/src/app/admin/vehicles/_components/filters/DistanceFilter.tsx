@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import type { PostcodeResponse } from "~/types/vehicle";
 
 interface DistanceFilterProps {
   postcode?: string;
@@ -73,7 +74,7 @@ export function DistanceFilter({
     try {
       // Call postcodes.io API to validate
       const response = await fetch(`https://api.postcodes.io/postcodes/${normalized}`);
-      const data = await response.json();
+      const data = await response.json() as PostcodeResponse;
 
       if (response.ok && data.status === 200 && data.result) {
         // Valid postcode
@@ -94,7 +95,7 @@ export function DistanceFilter({
         }
         
         toast.success("Postcode found!", {
-          description: `${data.result.admin_district}, ${data.result.region}`,
+          description: `${data.result?.admin_district}, ${data.result?.region}`,
         });
       } else {
         // Invalid postcode
@@ -104,7 +105,7 @@ export function DistanceFilter({
         });
         onPostcodeChange("");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to validate postcode", {
         description: "Please check your internet connection and try again",
       });
@@ -116,7 +117,7 @@ export function DistanceFilter({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      validatePostcode();
+      void validatePostcode();
     }
   };
 

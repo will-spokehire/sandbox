@@ -51,7 +51,7 @@ export function CreateDealDialog({
   selectedVehicleIds,
   onSuccess,
 }: CreateDealDialogProps) {
-  const [selectedDealId, setSelectedDealId] = useState<string>("");
+  const [_selectedDealId, setSelectedDealId] = useState<string>("");
   const [activeTab, setActiveTab] = useState<string>("existing");
   const [vehicleOwners, setVehicleOwners] = useState<Array<{
     id: string;
@@ -95,12 +95,12 @@ export function CreateDealDialog({
   }, [isLoadingDeals, dealsData]);
 
   // Fetch selected deal details to check for duplicates
-  const { data: selectedDeal, isLoading: isLoadingSelectedDeal } = api.deal.getById.useQuery(
+  const { isLoading: isLoadingSelectedDeal } = api.deal.getById.useQuery(
     {
-      id: selectedDealId,
+      id: _selectedDealId,
     },
     {
-      enabled: open && !!selectedDealId,
+      enabled: open && !!_selectedDealId,
     }
   );
 
@@ -119,18 +119,18 @@ export function CreateDealDialog({
   const { data: newItemsData, isLoading: isLoadingNewItems } = 
     api.deal.getNewVehiclesAndOwners.useQuery(
       {
-        dealId: selectedDealId,
+        dealId: _selectedDealId,
         vehicleIds: selectedVehicleIds,
       },
       {
-        enabled: open && !!selectedDealId && selectedVehicleIds.length > 0,
+        enabled: open && !!_selectedDealId && selectedVehicleIds.length > 0,
       }
     );
 
   // Check if we're calculating counts
   const isCalculating = 
     isLoadingVehicles || 
-    (!!selectedDealId && (isLoadingSelectedDeal || isLoadingNewItems));
+    (!!_selectedDealId && (isLoadingSelectedDeal || isLoadingNewItems));
 
   // Extract unique owners from vehicles
   useEffect(() => {
@@ -146,11 +146,11 @@ export function CreateDealDialog({
 
     // Extract all owners from selected vehicles
     const ownersMap = new Map();
-    vehicles.vehicles.forEach((vehicle: any) => {
+    vehicles.vehicles.forEach((vehicle: { owner?: { id: string; firstName?: string; lastName?: string; email: string } }) => {
       if (vehicle.owner && !ownersMap.has(vehicle.owner.id)) {
         const name =
-          vehicle.owner.firstName || vehicle.owner.lastName
-            ? `${vehicle.owner.firstName || ""} ${vehicle.owner.lastName || ""}`.trim()
+          vehicle.owner.firstName ?? vehicle.owner.lastName
+            ? `${vehicle.owner.firstName ?? ""} ${vehicle.owner.lastName ?? ""}`.trim()
             : vehicle.owner.email;
         ownersMap.set(vehicle.owner.id, {
           id: vehicle.owner.id,
@@ -163,12 +163,12 @@ export function CreateDealDialog({
     const allOwners = Array.from(ownersMap.values());
 
     // Use backend-filtered data if available (for existing deals)
-    if (activeTab === "existing" && selectedDealId && newItemsData) {
+    if (activeTab === "existing" && _selectedDealId && newItemsData) {
       setNewVehicleCount(newItemsData.newVehicleCount);
       setNewOwnerCount(newItemsData.newOwnerCount);
       
       // Filter owners to only show new ones
-      const newOwners = allOwners.filter((owner) =>
+      const newOwners = allOwners.filter((owner: { id: string; email: string; name: string }) =>
         newItemsData.newOwnerIds.includes(owner.id)
       );
       setVehicleOwners(newOwners);
@@ -178,12 +178,12 @@ export function CreateDealDialog({
       setNewVehicleCount(selectedVehicleIds.length);
       setNewOwnerCount(allOwners.length);
     }
-  }, [vehicles, newItemsData, selectedVehicleIds, activeTab, selectedDealId, open]);
+  }, [vehicles, newItemsData, selectedVehicleIds, activeTab, _selectedDealId, open]);
 
   // Create deal mutation
   // Note: Emails are sent automatically on the server after deal creation
   const createDealMutation = api.deal.create.useMutation({
-    onSuccess: async (deal) => {
+    onSuccess: async (_deal) => {
       // Invalidate deals list to refresh
       await utils.deal.list.invalidate();
       
@@ -193,7 +193,7 @@ export function CreateDealDialog({
       form.reset();
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to create deal");
+      toast.error(error.message ?? "Failed to create deal");
     },
   });
 
@@ -211,7 +211,7 @@ export function CreateDealDialog({
       setSelectedDealId("");
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to add vehicles to deal");
+      toast.error(error.message ?? "Failed to add vehicles to deal");
     },
   });
 
@@ -251,7 +251,7 @@ export function CreateDealDialog({
 
       // Create new deal
       createDealMutation.mutate({
-        name: data.name!,
+        name: data.name ?? "",
         date: data.date,
         time: data.time,
         location: data.location,
@@ -261,7 +261,8 @@ export function CreateDealDialog({
         recipientIds: vehicleOwners.map((o) => o.id),
       });
     },
-    (errors) => {
+    (_errors) => {
+      // Handle form errors if needed
     }
   );
 
@@ -308,12 +309,12 @@ export function CreateDealDialog({
               </div>
             ) : dealsData?.deals && dealsData.deals.length > 0 ? (
               <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-2">
-                {dealsData.deals.map((deal: any) => {
+                {dealsData.deals.map((deal: { id: string; name: string; description?: string; _count: { vehicles: number; recipients: number } }) => {
                   // Calculate stats when this deal is selected
-                  const isSelected = selectedDealId === deal.id;
+                  const isSelected = _selectedDealId === deal.id;
                   
                   // Show stats from the selected deal state if this deal is selected
-                  const showNewStats = isSelected && selectedDealId === deal.id;
+                  const showNewStats = isSelected;
                   
                   return (
                     <div

@@ -46,9 +46,9 @@ interface VehicleTableRowProps {
  */
 export const VehicleTableRow = memo(function VehicleTableRow({
   vehicle,
-  onView,
-  onEdit,
-  onDelete,
+  onView: _onView,
+  onEdit: _onEdit,
+  onDelete: _onDelete,
   selected = false,
   onToggle,
   onCopyEmail,

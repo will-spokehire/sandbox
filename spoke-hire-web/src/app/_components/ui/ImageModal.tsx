@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 
 interface ImageModalProps {
   isOpen: boolean;
@@ -111,9 +112,11 @@ export function ImageModal({
       <div className="max-w-4xl max-h-full flex flex-col items-center">
         <div className="relative max-w-full max-h-[80vh] flex items-center justify-center">
           {!imageError ? (
-            <img
+            <Image
               src={currentImage}
               alt={`${vehicleName} - Image ${currentIndex + 1}`}
+              width={1200}
+              height={800}
               className="max-w-full max-h-full object-contain rounded-lg"
               onError={() => setImageError(true)}
             />
@@ -156,9 +159,11 @@ export function ImageModal({
                     : 'border-transparent hover:border-gray-400'
                 }`}
               >
-                <img
+                <Image
                   src={image}
                   alt={`Thumbnail ${index + 1}`}
+                  width={100}
+                  height={100}
                   className="w-full h-full object-cover"
                 />
               </button>

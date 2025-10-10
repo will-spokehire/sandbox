@@ -5,18 +5,11 @@
  * Handles all Prisma queries related to vehicles.
  */
 
-import { type Prisma, type VehicleStatus } from "@prisma/client";
+import { type Prisma, type VehicleStatus, type PrismaClient } from "@prisma/client";
 import { DatabaseError, VehicleNotFoundError } from "../errors/app-errors";
 
-// Use the DB type from context instead of PrismaClient directly
-type DbClient = {
-  vehicle: any;
-  media: any;
-  vehicleSource: any;
-  vehicleSpecification: any;
-  vehicleCollection: any;
-  $queryRaw: any;
-};
+// Use the proper Prisma client type
+type DbClient = PrismaClient;
 
 export interface FindManyOptions {
   take?: number;
@@ -29,7 +22,7 @@ export interface VehicleWithRelations {
   id: string;
   name: string;
   status: VehicleStatus;
-  price: any;
+  price: Prisma.Decimal | null;
   year: string;
   registration: string | null;
   make: { id: string; name: string };
@@ -66,7 +59,7 @@ export class VehicleRepository {
   async findMany(
     where: Prisma.VehicleWhereInput,
     options: FindManyOptions = {}
-  ): Promise<VehicleWithRelations[]> {
+  ) {
     try {
       const vehicles = await this.db.vehicle.findMany({
         where,
@@ -127,7 +120,7 @@ export class VehicleRepository {
         },
       });
 
-      return vehicles as VehicleWithRelations[];
+      return vehicles;
     } catch (error) {
       throw new DatabaseError("Failed to fetch vehicles", error);
     }
@@ -309,7 +302,7 @@ export class VehicleRepository {
   /**
    * Execute raw SQL query
    */
-  async queryRaw<T = any>(query: Prisma.Sql): Promise<T[]> {
+  async queryRaw<T = unknown>(query: Prisma.Sql): Promise<T[]> {
     try {
       return await this.db.$queryRaw<T[]>(query);
     } catch (error) {
@@ -320,7 +313,7 @@ export class VehicleRepository {
   /**
    * Get vehicles with relations by IDs (for merging with raw query results)
    */
-  async findManyByIds(ids: string[]): Promise<VehicleWithRelations[]> {
+  async findManyByIds(ids: string[]) {
     if (ids.length === 0) return [];
 
     try {
@@ -360,7 +353,7 @@ export class VehicleRepository {
         },
       });
 
-      return vehicles as VehicleWithRelations[];
+      return vehicles;
     } catch (error) {
       throw new DatabaseError("Failed to fetch vehicles by IDs", error);
     }

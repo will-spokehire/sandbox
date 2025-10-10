@@ -51,7 +51,7 @@ export function LoginForm() {
       // Redirect to OTP verification page without email in URL
       router.push('/auth/verify-otp');
     },
-    onError: (error) => {
+    onError: (error: { message: string }) => {
       toast.error('Sign in failed', {
         description: error.message,
       });
@@ -80,7 +80,7 @@ export function LoginForm() {
         email,
         redirectTo: `${window.location.origin}/auth/callback`,
       });
-    } catch (error) {
+    } catch (error: unknown) {
       // Error handled by onError callback
       console.error('Sign in error:', error);
     }

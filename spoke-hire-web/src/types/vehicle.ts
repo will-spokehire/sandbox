@@ -82,3 +82,41 @@ export interface VehiclePagination {
   cursor?: string;
 }
 
+/**
+ * Filter options response from API
+ */
+export interface FilterOptions {
+  makes: Array<{ id: string; name: string }>;
+  collections: Array<{ id: string; name: string; color: string | null }>;
+  exteriorColors: string[];
+  interiorColors: string[];
+  years: string[];
+  statusCounts: Array<{ status: VehicleStatus; count: number }>;
+  seats: number[];
+  gearboxTypes: string[];
+  steeringTypes: Array<{ id: string; name: string; code: string }>;
+  countries: Array<{ id: string; name: string; code: string | null }>;
+  counties: string[];
+}
+
+/**
+ * Models by make response from API
+ */
+export interface ModelsByMake {
+  id: string;
+  name: string;
+}
+
+/**
+ * Postcodes.io API response
+ */
+export interface PostcodeResponse {
+  status: number;
+  result?: {
+    postcode: string;
+    admin_district: string;
+    region: string;
+    [key: string]: any;
+  };
+}
+

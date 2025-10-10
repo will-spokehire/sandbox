@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
 
 interface RawDataModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  data: any;
+  data: unknown;
 }
 
 export function RawDataModal({ isOpen, onClose, title, data }: RawDataModalProps) {
@@ -48,7 +47,7 @@ export function RawDataModal({ isOpen, onClose, title, data }: RawDataModalProps
         <div className="flex items-center justify-between p-4 border-t border-gray-200">
           <button
             onClick={() => {
-              navigator.clipboard.writeText(JSON.stringify(data, null, 2));
+              void navigator.clipboard.writeText(JSON.stringify(data, null, 2));
               alert("Raw data copied to clipboard!");
             }}
             className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors"

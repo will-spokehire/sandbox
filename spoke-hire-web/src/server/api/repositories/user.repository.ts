@@ -5,12 +5,11 @@
  * Handles all Prisma queries related to users.
  */
 
+import { type PrismaClient } from "@prisma/client";
 import { DatabaseError, UserNotFoundError } from "../errors/app-errors";
 
-// Use the DB type from context instead of PrismaClient directly
-type DbClient = {
-  user: any;
-};
+// Use the proper Prisma client type
+type DbClient = PrismaClient;
 
 export class UserRepository {
   constructor(private db: DbClient) {}

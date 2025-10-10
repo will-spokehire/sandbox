@@ -5,18 +5,11 @@
  * Handles all Prisma queries related to reference data.
  */
 
+import { type PrismaClient } from "@prisma/client";
 import { DatabaseError } from "../errors/app-errors";
 
-// Use the DB type from context instead of PrismaClient directly
-type DbClient = {
-  make: any;
-  model: any;
-  collection: any;
-  steeringType: any;
-  vehicle: any;
-  country: any;
-  $queryRaw: any;
-};
+// Use the proper Prisma client type
+type DbClient = PrismaClient;
 
 export class LookupRepository {
   constructor(private db: DbClient) {}
@@ -100,7 +93,7 @@ export class LookupRepository {
   /**
    * Get distinct exterior colors
    */
-  async getDistinctExteriorColors() {
+  async getDistinctExteriorColors(): Promise<string[]> {
     try {
       const result = await this.db.$queryRaw<Array<{ exteriorColour: string }>>`
         SELECT DISTINCT "exteriorColour"
@@ -108,7 +101,7 @@ export class LookupRepository {
         WHERE "exteriorColour" IS NOT NULL
         ORDER BY "exteriorColour" ASC
       `;
-      return result.map((r: any) => r.exteriorColour).filter(Boolean);
+      return result.map((r) => r.exteriorColour).filter(Boolean);
     } catch (error) {
       throw new DatabaseError("Failed to fetch exterior colors", error);
     }
@@ -117,7 +110,7 @@ export class LookupRepository {
   /**
    * Get distinct interior colors
    */
-  async getDistinctInteriorColors() {
+  async getDistinctInteriorColors(): Promise<string[]> {
     try {
       const result = await this.db.$queryRaw<Array<{ interiorColour: string }>>`
         SELECT DISTINCT "interiorColour"
@@ -125,7 +118,7 @@ export class LookupRepository {
         WHERE "interiorColour" IS NOT NULL
         ORDER BY "interiorColour" ASC
       `;
-      return result.map((r: any) => r.interiorColour).filter(Boolean);
+      return result.map((r) => r.interiorColour).filter(Boolean);
     } catch (error) {
       throw new DatabaseError("Failed to fetch interior colors", error);
     }
@@ -134,14 +127,14 @@ export class LookupRepository {
   /**
    * Get distinct years
    */
-  async getDistinctYears() {
+  async getDistinctYears(): Promise<string[]> {
     try {
       const result = await this.db.$queryRaw<Array<{ year: string }>>`
         SELECT DISTINCT "year"
         FROM "Vehicle"
         ORDER BY "year" DESC
       `;
-      return result.map((r: any) => r.year);
+      return result.map((r) => r.year);
     } catch (error) {
       throw new DatabaseError("Failed to fetch years", error);
     }
@@ -150,7 +143,7 @@ export class LookupRepository {
   /**
    * Get distinct number of seats
    */
-  async getDistinctSeats() {
+  async getDistinctSeats(): Promise<number[]> {
     try {
       const result = await this.db.$queryRaw<Array<{ numberOfSeats: number }>>`
         SELECT DISTINCT "numberOfSeats"
@@ -158,7 +151,7 @@ export class LookupRepository {
         WHERE "numberOfSeats" IS NOT NULL
         ORDER BY "numberOfSeats" ASC
       `;
-      return result.map((r: any) => r.numberOfSeats).filter((s: any) => s !== null);
+      return result.map((r) => r.numberOfSeats).filter((s) => s !== null);
     } catch (error) {
       throw new DatabaseError("Failed to fetch seat counts", error);
     }
@@ -167,7 +160,7 @@ export class LookupRepository {
   /**
    * Get distinct gearbox types
    */
-  async getDistinctGearboxTypes() {
+  async getDistinctGearboxTypes(): Promise<string[]> {
     try {
       const result = await this.db.$queryRaw<Array<{ gearbox: string }>>`
         SELECT DISTINCT gearbox
@@ -175,7 +168,7 @@ export class LookupRepository {
         WHERE gearbox IS NOT NULL
         ORDER BY gearbox ASC
       `;
-      return result.map((r: any) => r.gearbox).filter(Boolean);
+      return result.map((r) => r.gearbox).filter(Boolean);
     } catch (error) {
       throw new DatabaseError("Failed to fetch gearbox types", error);
     }
@@ -217,7 +210,7 @@ export class LookupRepository {
   /**
    * Get distinct counties from users
    */
-  async getDistinctCounties() {
+  async getDistinctCounties(): Promise<string[]> {
     try {
       const result = await this.db.$queryRaw<Array<{ county: string }>>`
         SELECT DISTINCT u.county
@@ -226,7 +219,7 @@ export class LookupRepository {
         WHERE u.county IS NOT NULL
         ORDER BY u.county ASC
       `;
-      return result.map((r: any) => r.county).filter(Boolean);
+      return result.map((r) => r.county).filter(Boolean);
     } catch (error) {
       throw new DatabaseError("Failed to fetch counties", error);
     }

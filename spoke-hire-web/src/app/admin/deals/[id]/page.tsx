@@ -2,7 +2,8 @@
 
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Car, Archive, ArchiveRestore, MessageCircle, MoreHorizontal, Eye, User, Mail, Phone, Copy, Pencil } from "lucide-react";
+import Image from "next/image";
+import { ArrowLeft, Car, Archive, ArchiveRestore, MessageCircle, MoreHorizontal, Eye, User, Mail, Phone, Pencil } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { useRequireAdmin } from "~/providers/auth-provider";
@@ -10,7 +11,6 @@ import { UserMenu } from "~/components/auth/UserMenu";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
-import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import {
   DropdownMenu,
@@ -27,7 +27,6 @@ import {
   getWhatsAppChatUrl
 } from "~/lib/whatsapp";
 import { formatOwnerName } from "~/lib/vehicles";
-import { OwnerContactDropdownItems } from "~/components/contact/OwnerContactActions";
 import { useClipboard } from "~/hooks/useClipboard";
 import { CreateDealDialog } from "../_components/CreateDealDialog";
 
@@ -52,7 +51,6 @@ export default function DealDetailPage({
   const {
     data: deal,
     isLoading: isDealLoading,
-    error,
   } = api.deal.getById.useQuery(
     {
       id: resolvedParams.id,
@@ -66,11 +64,11 @@ export default function DealDetailPage({
   const archiveMutation = api.deal.archive.useMutation({
     onSuccess: () => {
       toast.success("Deal archived successfully");
-      utils.deal.getById.invalidate({ id: resolvedParams.id });
-      utils.deal.list.invalidate();
+      void utils.deal.getById.invalidate({ id: resolvedParams.id });
+      void utils.deal.list.invalidate();
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to archive deal");
+      toast.error(error.message ?? "Failed to archive deal");
     },
   });
 
@@ -78,11 +76,11 @@ export default function DealDetailPage({
   const unarchiveMutation = api.deal.unarchive.useMutation({
     onSuccess: () => {
       toast.success("Deal unarchived successfully");
-      utils.deal.getById.invalidate({ id: resolvedParams.id });
-      utils.deal.list.invalidate();
+      void utils.deal.getById.invalidate({ id: resolvedParams.id });
+      void utils.deal.list.invalidate();
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to unarchive deal");
+      toast.error(error.message ?? "Failed to unarchive deal");
     },
   });
 
@@ -98,16 +96,16 @@ export default function DealDetailPage({
   }
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, { variant: any; label: string }> = {
+    const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; label: string }> = {
       ACTIVE: { variant: "default", label: "Active" },
       ARCHIVED: { variant: "secondary", label: "Archived" },
     };
 
-    const config = variants[status] || { variant: "secondary", label: status };
-    return <Badge variant={config.variant as any}>{config.label}</Badge>;
+    const config = variants[status] ?? { variant: "secondary", label: status };
+    return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
-  const formatPrice = (price: any): string => {
+  const formatPrice = (price: unknown): string => {
     if (!price) return "POA";
     
     const numPrice = typeof price === "string" ? parseFloat(price) : Number(price);
@@ -228,7 +226,7 @@ export default function DealDetailPage({
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Production Details */}
-                {(deal.date || deal.time || deal.location || deal.brief || deal.fee) && (
+                {(deal.date ?? deal.time ?? deal.location ?? deal.brief ?? deal.fee) && (
                   <div className="rounded-lg border p-4 space-y-3">
                     <h3 className="font-semibold text-sm">Production Details</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
@@ -276,7 +274,7 @@ export default function DealDetailPage({
                   <div>
                     <p className="text-sm text-muted-foreground">Created By</p>
                     <p className="font-medium">
-                      {deal.createdBy.firstName || deal.createdBy.lastName
+                      {deal.createdBy.firstName ?? deal.createdBy.lastName
                         ? `${deal.createdBy.firstName} ${deal.createdBy.lastName}`.trim()
                         : deal.createdBy.email}
                     </p>
@@ -321,10 +319,11 @@ export default function DealDetailPage({
                           {/* Image */}
                           {dv.vehicle.media[0]?.publishedUrl && (
                             <div className="relative aspect-[3/2] w-full bg-muted">
-                              <img
+                              <Image
                                 src={dv.vehicle.media[0].publishedUrl}
                                 alt={dv.vehicle.name}
-                                className="object-cover w-full h-full cursor-pointer"
+                                fill
+                                className="object-cover cursor-pointer"
                                 onClick={() => router.push(`/admin/vehicles/${dv.vehicle.id}`)}
                               />
                               
@@ -359,7 +358,7 @@ export default function DealDetailPage({
                                     <DropdownMenuItem
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        copyToClipboard(dv.vehicle.owner.email, 'Email');
+                                        void copyToClipboard(dv.vehicle.owner.email, 'Email');
                                       }}
                                     >
                                       <Mail className="mr-2 h-4 w-4" />
@@ -371,7 +370,7 @@ export default function DealDetailPage({
                                       <DropdownMenuItem
                                         onClick={(e) => {
                                           e.stopPropagation();
-                                          copyToClipboard(dv.vehicle.owner.phone!, 'Phone number');
+                                          void copyToClipboard(dv.vehicle.owner.phone!, 'Phone number');
                                         }}
                                       >
                                         <Phone className="mr-2 h-4 w-4" />
@@ -464,10 +463,11 @@ export default function DealDetailPage({
                               className="relative aspect-[4/3] w-32 rounded-md overflow-hidden border flex-shrink-0 cursor-pointer hover:opacity-90 transition-opacity"
                               onClick={() => router.push(`/admin/vehicles/${dv.vehicle.id}`)}
                             >
-                              <img
+                              <Image
                                 src={dv.vehicle.media[0].publishedUrl}
                                 alt={dv.vehicle.name}
-                                className="object-cover w-full h-full"
+                                fill
+                                className="object-cover"
                               />
                             </div>
                           )}
@@ -538,7 +538,7 @@ export default function DealDetailPage({
                                 <DropdownMenuItem
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    copyToClipboard(dv.vehicle.owner.email, 'Email');
+                                    void copyToClipboard(dv.vehicle.owner.email, 'Email');
                                   }}
                                 >
                                   <Mail className="mr-2 h-4 w-4" />
@@ -550,7 +550,7 @@ export default function DealDetailPage({
                                   <DropdownMenuItem
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      copyToClipboard(dv.vehicle.owner.phone!, 'Phone number');
+                                      void copyToClipboard(dv.vehicle.owner.phone!, 'Phone number');
                                     }}
                                   >
                                     <Phone className="mr-2 h-4 w-4" />

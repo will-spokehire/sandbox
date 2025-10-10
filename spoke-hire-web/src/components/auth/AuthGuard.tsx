@@ -44,15 +44,15 @@ export function AuthGuard({
   }, [isLoading, isAuthenticated, requireAdmin, user, router]);
 
   if (isLoading) {
-    return fallback || <AuthGuardLoading />;
+    return fallback ?? <AuthGuardLoading />;
   }
 
   if (!isAuthenticated) {
-    return fallback || <AuthGuardLoading />;
+    return fallback ?? <AuthGuardLoading />;
   }
 
   if (requireAdmin && user?.userType !== 'ADMIN') {
-    return fallback || <AuthGuardLoading />;
+    return fallback ?? <AuthGuardLoading />;
   }
 
   return <>{children}</>;

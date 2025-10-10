@@ -52,7 +52,7 @@ export function OwnerContactDropdownItems({
       <DropdownMenuItem
         onClick={(e) => {
           e.stopPropagation();
-          copyToClipboard(owner.email, 'Email');
+          void copyToClipboard(owner.email, 'Email');
         }}
       >
         <Mail className="mr-2 h-4 w-4" />
@@ -64,7 +64,7 @@ export function OwnerContactDropdownItems({
         <DropdownMenuItem
           onClick={(e) => {
             e.stopPropagation();
-            copyToClipboard(owner.phone!, 'Phone number');
+            void copyToClipboard(owner.phone!, 'Phone number');
           }}
         >
           <Phone className="mr-2 h-4 w-4" />

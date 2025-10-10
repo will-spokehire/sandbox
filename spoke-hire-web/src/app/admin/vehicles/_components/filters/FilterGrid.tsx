@@ -1,6 +1,6 @@
 "use client";
 
-import { VehicleStatus } from "@prisma/client";
+import type { VehicleStatus } from "@prisma/client";
 import { Check } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
@@ -11,6 +11,7 @@ import { FilterActions } from "./FilterActions";
 import { DistanceFilter } from "./DistanceFilter";
 import { SortFilter } from "./SortFilter";
 import type { FilterOption } from "./types";
+import type { FilterOptions, ModelsByMake } from "~/types/vehicle";
 
 interface FilterGridProps {
   // Filter values
@@ -100,7 +101,7 @@ export function FilterGrid({
   // Fetch filter options with caching (server-side cache + client staleTime)
   const { data: filterOptions } = api.vehicle.getFilterOptions.useQuery(undefined, {
     staleTime: 5 * 60 * 1000, // 5 minutes - matches server cache TTL
-  });
+  }) as { data: FilterOptions | undefined };
 
   // Fetch models when single make is selected
   const { data: models } = api.vehicle.getModelsByMake.useQuery(
@@ -109,73 +110,73 @@ export function FilterGrid({
       enabled: makeIds.length === 1,
       staleTime: 5 * 60 * 1000, // 5 minutes
     }
-  );
+  ) as { data: ModelsByMake[] | undefined };
 
   // Transform filter options to FilterOption format
   const makeOptions: FilterOption[] =
-    filterOptions?.makes.map((make: { id: string; name: string }) => ({
+    filterOptions?.makes.map((make) => ({
       id: make.id,
       name: make.name,
     })) ?? [];
 
   const collectionOptions: FilterOption[] =
-    filterOptions?.collections.map((collection: { id: string; name: string; color: string | null }) => ({
+    filterOptions?.collections.map((collection) => ({
       id: collection.id,
       name: collection.name,
       color: collection.color ?? undefined,
     })) ?? [];
 
   const exteriorColorOptions: FilterOption[] =
-    filterOptions?.exteriorColors.map((color: string) => ({
+    filterOptions?.exteriorColors.map((color) => ({
       id: color,
       name: color,
     })) ?? [];
 
   const interiorColorOptions: FilterOption[] =
-    filterOptions?.interiorColors.map((color: string) => ({
+    filterOptions?.interiorColors.map((color) => ({
       id: color,
       name: color,
     })) ?? [];
 
   const modelOptions =
-    models?.map((model: { id: string; name: string }) => ({
+    models?.map((model) => ({
       value: model.id,
       label: model.name,
     })) ?? [];
 
   const seatsOptions: FilterOption[] =
-    filterOptions?.seats.map((seats: number) => ({
+    filterOptions?.seats.map((seats) => ({
       id: seats.toString(),
       name: `${seats} seats`,
     })) ?? [];
 
   const gearboxOptions: FilterOption[] =
-    filterOptions?.gearboxTypes.map((type: string) => ({
+    filterOptions?.gearboxTypes.map((type) => ({
       id: type,
       name: type,
     })) ?? [];
 
   const steeringOptions: FilterOption[] =
-    filterOptions?.steeringTypes.map((steering: { id: string; name: string }) => ({
+    filterOptions?.steeringTypes.map((steering) => ({
       id: steering.id,
       name: steering.name,
     })) ?? [];
 
   const countryOptions: FilterOption[] =
-    filterOptions?.countries.map((country: { id: string; name: string; code: string | null }) => ({
+    filterOptions?.countries.map((country) => ({
       id: country.id,
       name: country.name,
     })) ?? [];
 
   const countyOptions: FilterOption[] =
-    filterOptions?.counties.map((county: string) => ({
+    filterOptions?.counties.map((county) => ({
       id: county,
       name: county,
     })) ?? [];
 
   const handleStatusChange = (value?: string) => {
     // Convert undefined (from "All Status" selection) to "ALL" string for URL
-    onStatusChange(value ? (value as VehicleStatus) : ("ALL" as any));
+    onStatusChange(value ? (value as VehicleStatus) : undefined);
   };
 
   const handleModelChange = (value?: string) => {
@@ -218,7 +219,7 @@ export function FilterGrid({
       {/* Status Filter */}
       <SingleSelectFilter
         label="All Status"
-        value={(status as any) === "ALL" ? undefined : status}
+        value={status}
         options={[
           { value: "DRAFT", label: "Draft" },
           { value: "PUBLISHED", label: "Published" },

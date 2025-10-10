@@ -35,8 +35,8 @@ export function VehicleCollections({ collections }: VehicleCollectionsProps) {
                   backgroundColor: collection.color
                     ? `${collection.color}20`
                     : undefined,
-                  borderColor: collection.color || undefined,
-                  color: collection.color || undefined,
+                  borderColor: collection.color ?? undefined,
+                  color: collection.color ?? undefined,
                 }}
               >
                 {collection.name}

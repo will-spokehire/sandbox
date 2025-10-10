@@ -44,19 +44,19 @@ export function VehicleBasicInfo({ vehicle }: VehicleBasicInfoProps) {
     },
     {
       label: "Steering",
-      value: vehicle.steering?.name || "N/A",
+      value: vehicle.steering?.name ?? "N/A",
     },
     {
       label: "Gearbox",
-      value: vehicle.gearbox || "N/A",
+      value: vehicle.gearbox ?? "N/A",
     },
     {
       label: "Exterior Color",
-      value: vehicle.exteriorColour || "N/A",
+      value: vehicle.exteriorColour ?? "N/A",
     },
     {
       label: "Interior Color",
-      value: vehicle.interiorColour || "N/A",
+      value: vehicle.interiorColour ?? "N/A",
     },
     {
       label: "Road Legal",
@@ -89,7 +89,7 @@ export function VehicleBasicInfo({ vehicle }: VehicleBasicInfoProps) {
                   } ${detail.mono ? "font-mono" : ""}`}
                 >
                   {detail.badge ? (
-                    <Badge variant={detail.badgeVariant as any}>
+                    <Badge variant={detail.badgeVariant as "default" | "secondary" | "destructive" | "outline"}>
                       {detail.value}
                     </Badge>
                   ) : (
