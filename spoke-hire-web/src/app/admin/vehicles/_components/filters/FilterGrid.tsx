@@ -1,9 +1,9 @@
 "use client";
 
-import type { VehicleStatus } from "@prisma/client";
 import { Check } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
+import { useVehicleFiltersContext } from "~/contexts";
 import { SingleSelectFilter } from "./SingleSelectFilter";
 import { MultiSelectFilter } from "./MultiSelectFilter";
 import { YearRangeFilter } from "./YearRangeFilter";
@@ -13,91 +13,15 @@ import { SortFilter } from "./SortFilter";
 import type { FilterOption } from "./types";
 import type { FilterOptions, ModelsByMake } from "~/types/vehicle";
 
-interface FilterGridProps {
-  // Filter values
-  status?: VehicleStatus;
-  makeIds: string[];
-  modelId?: string;
-  collectionIds: string[];
-  exteriorColors: string[];
-  interiorColors: string[];
-  yearFrom?: string;
-  yearTo?: string;
-  numberOfSeats: number[];
-  gearboxTypes: string[];
-  steeringIds: string[];
-  countryIds: string[];
-  counties: string[];
-  postcode?: string;
-  maxDistance?: number;
-  sortBy: string;
-  sortOrder: "asc" | "desc";
-  hasActiveFilters: boolean;
-  
-  // Handlers
-  onStatusChange: (status?: VehicleStatus) => void;
-  onMakeIdsChange: (makeIds: string[]) => void;
-  onModelChange: (modelId?: string) => void;
-  onCollectionIdsChange: (collectionIds: string[]) => void;
-  onExteriorColorsChange: (colors: string[]) => void;
-  onInteriorColorsChange: (colors: string[]) => void;
-  onYearFromChange: (year?: string) => void;
-  onYearToChange: (year?: string) => void;
-  onNumberOfSeatsChange: (seats: number[]) => void;
-  onGearboxTypesChange: (types: string[]) => void;
-  onSteeringIdsChange: (ids: string[]) => void;
-  onCountryIdsChange: (ids: string[]) => void;
-  onCountiesChange: (counties: string[]) => void;
-  onPostcodeChange: (postcode: string) => void;
-  onMaxDistanceChange: (distance?: number) => void;
-  onPostcodeAndDistanceChange?: (postcode: string, distance: number) => void;
-  onSortChange: (sortBy: string, sortOrder: "asc" | "desc") => void;
-  onClearFilters: () => void;
-}
 
 /**
  * Filter Grid
  * 
  * Contains all individual filter controls
+ * Now uses context to eliminate props drilling
  */
-export function FilterGrid({
-  status,
-  makeIds,
-  modelId,
-  collectionIds,
-  exteriorColors,
-  interiorColors,
-  yearFrom,
-  yearTo,
-  numberOfSeats,
-  gearboxTypes,
-  steeringIds,
-  countryIds,
-  counties,
-  postcode,
-  maxDistance,
-  sortBy,
-  sortOrder,
-  hasActiveFilters,
-  onStatusChange,
-  onMakeIdsChange,
-  onModelChange,
-  onCollectionIdsChange,
-  onExteriorColorsChange,
-  onInteriorColorsChange,
-  onYearFromChange,
-  onYearToChange,
-  onNumberOfSeatsChange,
-  onGearboxTypesChange,
-  onSteeringIdsChange,
-  onCountryIdsChange,
-  onCountiesChange,
-  onPostcodeChange,
-  onMaxDistanceChange,
-  onPostcodeAndDistanceChange,
-  onSortChange,
-  onClearFilters,
-}: FilterGridProps) {
+export function FilterGrid() {
+  const { filters, updateFilters, clearFilters, hasActiveFilters } = useVehicleFiltersContext();
   // Fetch filter options with caching (server-side cache + client staleTime)
   const { data: filterOptions } = api.vehicle.getFilterOptions.useQuery(undefined, {
     staleTime: 5 * 60 * 1000, // 5 minutes - matches server cache TTL
@@ -105,9 +29,9 @@ export function FilterGrid({
 
   // Fetch models when single make is selected
   const { data: models } = api.vehicle.getModelsByMake.useQuery(
-    { makeId: makeIds[0]! },
+    { makeId: filters.makeIds?.[0]! },
     { 
-      enabled: makeIds.length === 1,
+      enabled: (filters.makeIds?.length ?? 0) === 1,
       staleTime: 5 * 60 * 1000, // 5 minutes
     }
   ) as { data: ModelsByMake[] | undefined };
@@ -176,15 +100,15 @@ export function FilterGrid({
 
   const handleStatusChange = (value?: string) => {
     // Convert undefined (from "All Status" selection) to "ALL" string for URL
-    onStatusChange(value ? (value as VehicleStatus) : undefined);
+    updateFilters({ status: value ? (value as any) : "ALL" });
   };
 
   const handleModelChange = (value?: string) => {
     // Clear model if no makes or multiple makes selected
-    if (makeIds.length !== 1) {
-      onModelChange(undefined);
+    if ((filters.makeIds?.length ?? 0) !== 1) {
+      updateFilters({ modelId: undefined });
     } else {
-      onModelChange(value);
+      updateFilters({ modelId: value });
     }
   };
 
@@ -219,7 +143,7 @@ export function FilterGrid({
       {/* Status Filter */}
       <SingleSelectFilter
         label="All Status"
-        value={status}
+        value={filters.status}
         options={[
           { value: "DRAFT", label: "Draft" },
           { value: "PUBLISHED", label: "Published" },
@@ -236,8 +160,8 @@ export function FilterGrid({
         label="Select Makes"
         placeholder="Select makes..."
         options={makeOptions}
-        selectedIds={makeIds}
-        onChange={onMakeIdsChange}
+        selectedIds={filters.makeIds ?? []}
+        onChange={(makeIds) => updateFilters({ makeIds })}
         renderOption={renderStandardOption}
         searchPlaceholder="Search makes..."
         className="md:w-[200px]"
@@ -246,11 +170,11 @@ export function FilterGrid({
       {/* Model Filter */}
       <SingleSelectFilter
         label="All Models"
-        value={modelId}
+        value={filters.modelId}
         options={modelOptions}
         onChange={handleModelChange}
         placeholder="Model"
-        disabled={makeIds.length !== 1}
+        disabled={(filters.makeIds?.length ?? 0) !== 1}
         className="md:w-[160px]"
       />
 
@@ -259,8 +183,8 @@ export function FilterGrid({
         label="Select Collections"
         placeholder="Select collections..."
         options={collectionOptions}
-        selectedIds={collectionIds}
-        onChange={onCollectionIdsChange}
+        selectedIds={filters.collectionIds ?? []}
+        onChange={(collectionIds) => updateFilters({ collectionIds })}
         renderOption={renderCollectionOption}
         searchPlaceholder="Search collections..."
         className="md:w-[200px]"
@@ -271,8 +195,8 @@ export function FilterGrid({
         label="Select Exterior Colors"
         placeholder="Exterior colors..."
         options={exteriorColorOptions}
-        selectedIds={exteriorColors}
-        onChange={onExteriorColorsChange}
+        selectedIds={filters.exteriorColors ?? []}
+        onChange={(exteriorColors) => updateFilters({ exteriorColors })}
         renderOption={renderStandardOption}
         searchPlaceholder="Search colors..."
         className="md:w-[180px]"
@@ -283,8 +207,8 @@ export function FilterGrid({
         label="Select Interior Colors"
         placeholder="Interior colors..."
         options={interiorColorOptions}
-        selectedIds={interiorColors}
-        onChange={onInteriorColorsChange}
+        selectedIds={filters.interiorColors ?? []}
+        onChange={(interiorColors) => updateFilters({ interiorColors })}
         renderOption={renderStandardOption}
         searchPlaceholder="Search colors..."
         className="md:w-[180px]"
@@ -292,10 +216,10 @@ export function FilterGrid({
 
       {/* Year Range Filter */}
       <YearRangeFilter
-        yearFrom={yearFrom}
-        yearTo={yearTo}
-        onYearFromChange={onYearFromChange}
-        onYearToChange={onYearToChange}
+        yearFrom={filters.yearFrom}
+        yearTo={filters.yearTo}
+        onYearFromChange={(yearFrom) => updateFilters({ yearFrom })}
+        onYearToChange={(yearTo) => updateFilters({ yearTo })}
       />
 
       {/* Number of Seats Filter */}
@@ -303,8 +227,8 @@ export function FilterGrid({
         label="Select Seats"
         placeholder="Seats..."
         options={seatsOptions}
-        selectedIds={numberOfSeats.map(String)}
-        onChange={(ids) => onNumberOfSeatsChange(ids.map(Number))}
+        selectedIds={(filters.numberOfSeats ?? []).map(String)}
+        onChange={(ids) => updateFilters({ numberOfSeats: ids.map(Number) })}
         renderOption={renderStandardOption}
         searchPlaceholder="Search seats..."
         className="md:w-[150px]"
@@ -315,8 +239,8 @@ export function FilterGrid({
         label="Select Gearbox"
         placeholder="Gearbox..."
         options={gearboxOptions}
-        selectedIds={gearboxTypes}
-        onChange={onGearboxTypesChange}
+        selectedIds={filters.gearboxTypes ?? []}
+        onChange={(gearboxTypes) => updateFilters({ gearboxTypes })}
         renderOption={renderStandardOption}
         searchPlaceholder="Search gearbox..."
         className="md:w-[150px]"
@@ -327,8 +251,8 @@ export function FilterGrid({
         label="Select Steering"
         placeholder="Steering..."
         options={steeringOptions}
-        selectedIds={steeringIds}
-        onChange={onSteeringIdsChange}
+        selectedIds={filters.steeringIds ?? []}
+        onChange={(steeringIds) => updateFilters({ steeringIds })}
         renderOption={renderStandardOption}
         searchPlaceholder="Search steering..."
         className="md:w-[180px]"
@@ -339,8 +263,8 @@ export function FilterGrid({
         label="Select Countries"
         placeholder="Countries..."
         options={countryOptions}
-        selectedIds={countryIds}
-        onChange={onCountryIdsChange}
+        selectedIds={filters.countryIds ?? []}
+        onChange={(countryIds) => updateFilters({ countryIds })}
         renderOption={renderStandardOption}
         searchPlaceholder="Search countries..."
         className="md:w-[180px]"
@@ -351,34 +275,34 @@ export function FilterGrid({
         label="Select Counties"
         placeholder="Counties..."
         options={countyOptions}
-        selectedIds={counties}
-        onChange={onCountiesChange}
+        selectedIds={filters.counties ?? []}
+        onChange={(counties) => updateFilters({ counties })}
         renderOption={renderStandardOption}
         searchPlaceholder="Search counties..."
         className="md:w-[180px]"
       />
 
       {/* Distance Filter */}
-              <DistanceFilter
-                postcode={postcode}
-                maxDistance={maxDistance}
-                onPostcodeChange={onPostcodeChange}
-                onMaxDistanceChange={onMaxDistanceChange}
-                onPostcodeAndDistanceChange={onPostcodeAndDistanceChange}
-              />
+      <DistanceFilter
+        postcode={filters.postcode}
+        maxDistance={filters.maxDistance}
+        onPostcodeChange={(postcode) => updateFilters({ postcode })}
+        onMaxDistanceChange={(maxDistance) => updateFilters({ maxDistance })}
+        onPostcodeAndDistanceChange={(postcode, maxDistance) => updateFilters({ postcode, maxDistance })}
+      />
 
       {/* Sort Filter */}
       <SortFilter
-        sortBy={sortBy}
-        sortOrder={sortOrder}
-        onSortChange={onSortChange}
-        hasDistanceFilter={!!postcode && !!maxDistance}
+        sortBy={filters.sortBy ?? "createdAt"}
+        sortOrder={filters.sortOrder ?? "desc"}
+        onSortChange={(sortBy, sortOrder) => updateFilters({ sortBy, sortOrder })}
+        hasDistanceFilter={!!filters.postcode && !!filters.maxDistance}
       />
 
       {/* Clear Filters */}
       <FilterActions
         hasActiveFilters={hasActiveFilters}
-        onClear={onClearFilters}
+        onClear={clearFilters}
       />
     </>
   );

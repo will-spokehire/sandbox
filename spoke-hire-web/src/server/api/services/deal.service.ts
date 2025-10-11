@@ -186,6 +186,8 @@ export class DealService {
   async addVehiclesToDeal(params: AddVehiclesToDealParams) {
     const { dealId, vehicleIds, recipientIds } = params;
 
+    console.log(`Adding ${vehicleIds.length} vehicles and ${recipientIds.length} recipients to deal ${dealId}`);
+
     // Use transaction for consistency
     const result = await this.repository.transaction(async (tx) => {
       const repo = new DealRepository(tx);
@@ -224,7 +226,7 @@ export class DealService {
         });
       }
 
-      // Get existing relations to avoid duplicates
+      // Get existing relations to track what's new
       const existing = await repo.getExistingRelations(dealId);
       const existingVehicleIds = new Set(existing.vehicleIds);
       const existingRecipientIds = new Set(existing.recipientIds);
@@ -232,12 +234,15 @@ export class DealService {
       const newVehicleIds = vehicleIds.filter((id) => !existingVehicleIds.has(id));
       const newRecipientIds = recipientIds.filter((id) => !existingRecipientIds.has(id));
 
+      console.log(`Deal ${dealId}: Found ${existingVehicleIds.size} existing vehicles, ${existingRecipientIds.size} existing recipients`);
+      console.log(`Deal ${dealId}: Adding ${newVehicleIds.length} new vehicles, ${newRecipientIds.length} new recipients`);
+
       // Get max order for vehicles
       const maxOrder = await repo.getMaxVehicleOrder(dealId);
       const startOrder = maxOrder + 1;
 
-      // Add new vehicles and recipients
-      await repo.addVehiclesAndRecipients(dealId, newVehicleIds, newRecipientIds, startOrder);
+      // Add vehicles and recipients (repository now uses upsert to handle duplicates gracefully)
+      await repo.addVehiclesAndRecipients(dealId, vehicleIds, recipientIds, startOrder);
 
       // Store newRecipientIds for email sending after transaction
       return { dealId, newRecipientIds };

@@ -28,7 +28,7 @@ import {
 } from "~/lib/whatsapp";
 import { formatOwnerName } from "~/lib/vehicles";
 import { useClipboard } from "~/hooks/useClipboard";
-import { CreateDealDialog } from "../_components/CreateDealDialog";
+import { CreateEditDealDialog } from "~/components/deals";
 
 /**
  * Deal Detail Page
@@ -607,7 +607,7 @@ export default function DealDetailPage({
 
       {/* Edit Deal Dialog */}
       {deal && (
-        <CreateDealDialog
+        <CreateEditDealDialog
           open={showEditDialog}
           onOpenChange={setShowEditDialog}
           dealId={deal.id}

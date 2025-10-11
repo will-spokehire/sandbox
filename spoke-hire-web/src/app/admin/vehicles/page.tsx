@@ -1,21 +1,23 @@
 "use client";
 
 import { useEffect, useState, Suspense, useCallback, useMemo } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import type { VehicleStatus } from "@prisma/client";
+import { useRouter } from "next/navigation";
 import { LayoutGrid, Table as TableIcon, Send } from "lucide-react";
 import { toast } from "sonner";
 import { useRequireAdmin } from "~/providers/auth-provider";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 import { useDebounce } from "~/hooks/useDebounce";
-// Removed unused VehicleListItem import
+import { useVehicleSelection } from "~/hooks/useVehicleSelection";
+import { useVehiclePagination } from "~/hooks/useVehiclePagination";
 import { PageHeader } from "~/app/_components/ui";
+import { PageLoading } from "~/components/loading";
+import { VehicleFiltersProvider, useVehicleFiltersContext } from "~/contexts";
 import {
   VehicleListTable,
   VehicleFilters,
-  CreateDealDialog,
 } from "./_components";
+import { SendDealToVehiclesDialog } from "~/components/deals";
 
 /**
  * Vehicles List Page Content
@@ -29,43 +31,27 @@ import {
 function VehiclesPageContent() {
   const { user, isLoading: isAuthLoading } = useRequireAdmin();
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   // Vehicle selection state for deals
-  const [selectedVehicleIds, setSelectedVehicleIds] = useState<string[]>([]);
   const [isCreateDealDialogOpen, setIsCreateDealDialogOpen] = useState(false);
 
-  // Read all state from URL - this is the ONLY source of truth
-  const searchInput = searchParams.get("search") ?? "";
-  // Default to PUBLISHED if no status in URL (first visit or cleared filters)
-  // "ALL" is a special value meaning show all statuses
-  const status = (searchParams.get("status") as VehicleStatus | "ALL" | null) ?? "PUBLISHED";
-  const makeIds = searchParams.get("makeIds")?.split(",").filter(Boolean) ?? [];
-  const modelId = searchParams.get("modelId") ?? undefined;
-  const collectionIds = searchParams.get("collectionIds")?.split(",").filter(Boolean) ?? [];
-  const exteriorColors = searchParams.get("exteriorColors")?.split(",").filter(Boolean) ?? [];
-  const interiorColors = searchParams.get("interiorColors")?.split(",").filter(Boolean) ?? [];
-  const yearFrom = searchParams.get("yearFrom") ?? undefined;
-  const yearTo = searchParams.get("yearTo") ?? undefined;
-  const numberOfSeats = searchParams.get("numberOfSeats")?.split(",").filter(Boolean).map(Number) ?? [];
-  const gearboxTypes = searchParams.get("gearboxTypes")?.split(",").filter(Boolean) ?? [];
-  const steeringIds = searchParams.get("steeringIds")?.split(",").filter(Boolean) ?? [];
-  const countryIds = searchParams.get("countryIds")?.split(",").filter(Boolean) ?? [];
-  const counties = searchParams.get("counties")?.split(",").filter(Boolean) ?? [];
-  const postcode = searchParams.get("postcode") ?? undefined;
-  const maxDistance = searchParams.get("maxDistance") ? parseInt(searchParams.get("maxDistance")!) : undefined;
-  const sortBy = searchParams.get("sortBy") ?? "createdAt";
-  const sortOrder = (searchParams.get("sortOrder") as "asc" | "desc") ?? "desc";
-  const sortByDistance = searchParams.get("sortByDistance") === "true" || sortBy === "distance";
-  const viewMode = (searchParams.get("viewMode") as "table" | "cards") ?? "table";
-  const currentPage = parseInt(searchParams.get("page") ?? "1", 10);
+  // Use custom hooks for state management
+  const { filters, updateFilters, clearFilters, hasActiveFilters } = useVehicleFiltersContext();
+  const { 
+    selectedIds: selectedVehicleIds, 
+    toggleVehicle, 
+    toggleAll, 
+    clearSelection 
+  } = useVehicleSelection();
 
   // Debounce search input for better UX
-  const debouncedSearch = useDebounce(searchInput, 300);
+  const debouncedSearch = useDebounce(filters.search ?? "", 300);
 
   // Pagination settings
   const itemsPerPage = 30;
-  const skip = (currentPage - 1) * itemsPerPage;
+
+  // Calculate skip for pagination
+  const skip = ((filters.page ?? 1) - 1) * itemsPerPage;
 
   // Fetch vehicles with offset-based pagination
   const {
@@ -80,24 +66,24 @@ function VehiclesPageContent() {
       skip, // Add skip parameter for offset
       search: debouncedSearch ?? undefined,
       // Don't pass status if it's "ALL" (show all statuses)
-      status: status === "ALL" ? undefined : status,
-      makeIds: makeIds.length > 0 ? makeIds : undefined,
-      modelId,
-      collectionIds: collectionIds.length > 0 ? collectionIds : undefined,
-      exteriorColors: exteriorColors.length > 0 ? exteriorColors : undefined,
-      interiorColors: interiorColors.length > 0 ? interiorColors : undefined,
-      yearFrom,
-      yearTo,
-      numberOfSeats: numberOfSeats.length > 0 ? numberOfSeats : undefined,
-      gearboxTypes: gearboxTypes.length > 0 ? gearboxTypes : undefined,
-      steeringIds: steeringIds.length > 0 ? steeringIds : undefined,
-      countryIds: countryIds.length > 0 ? countryIds : undefined,
-      counties: counties.length > 0 ? counties : undefined,
-      userPostcode: postcode,
-      maxDistanceMiles: maxDistance,
-      sortByDistance,
-      sortBy: sortBy as "name" | "createdAt" | "updatedAt" | "price" | "year" | "distance",
-      sortOrder,
+      status: filters.status === "ALL" ? undefined : filters.status,
+      makeIds: filters.makeIds && filters.makeIds.length > 0 ? filters.makeIds : undefined,
+      modelId: filters.modelId,
+      collectionIds: filters.collectionIds && filters.collectionIds.length > 0 ? filters.collectionIds : undefined,
+      exteriorColors: filters.exteriorColors && filters.exteriorColors.length > 0 ? filters.exteriorColors : undefined,
+      interiorColors: filters.interiorColors && filters.interiorColors.length > 0 ? filters.interiorColors : undefined,
+      yearFrom: filters.yearFrom,
+      yearTo: filters.yearTo,
+      numberOfSeats: filters.numberOfSeats && filters.numberOfSeats.length > 0 ? filters.numberOfSeats : undefined,
+      gearboxTypes: filters.gearboxTypes && filters.gearboxTypes.length > 0 ? filters.gearboxTypes : undefined,
+      steeringIds: filters.steeringIds && filters.steeringIds.length > 0 ? filters.steeringIds : undefined,
+      countryIds: filters.countryIds && filters.countryIds.length > 0 ? filters.countryIds : undefined,
+      counties: filters.counties && filters.counties.length > 0 ? filters.counties : undefined,
+      userPostcode: filters.postcode,
+      maxDistanceMiles: filters.maxDistance,
+      sortByDistance: filters.sortByDistance,
+      sortBy: filters.sortBy as "name" | "createdAt" | "updatedAt" | "price" | "year" | "distance",
+      sortOrder: filters.sortOrder,
       // Always fetch total count to ensure pagination works on all pages
       includeTotalCount: true,
     },
@@ -108,9 +94,18 @@ function VehiclesPageContent() {
     }
   );
 
-  const vehicles = useMemo(() => data?.vehicles ?? [], [data?.vehicles]);
+  const vehicles = useMemo(() => (data?.vehicles ?? []) as any[], [data?.vehicles]);
   const totalCount = data?.totalCount ?? 0;
-  const totalPages = Math.ceil(totalCount / itemsPerPage);
+
+  // Get pagination info after data is available
+  const { totalPages, handlePageChange } = useVehiclePagination(
+    {
+      itemsPerPage,
+      totalCount,
+      currentPage: filters.page ?? 1,
+    },
+    (page) => updateFilters({ page })
+  );
 
   // Handle errors
   useEffect(() => {
@@ -121,200 +116,6 @@ function VehiclesPageContent() {
     }
   }, [error]);
 
-  /**
-   * Update URL with new filter values
-   * This is the key function - all state changes go through URL updates
-   */
-  const updateURL = (updates: {
-    search?: string;
-    status?: VehicleStatus;
-    makeIds?: string[];
-    modelId?: string;
-    collectionIds?: string[];
-    exteriorColors?: string[];
-    interiorColors?: string[];
-    yearFrom?: string;
-    yearTo?: string;
-    numberOfSeats?: number[];
-    gearboxTypes?: string[];
-    steeringIds?: string[];
-    countryIds?: string[];
-    counties?: string[];
-    postcode?: string;
-    maxDistance?: number;
-    sortBy?: string;
-    sortOrder?: "asc" | "desc";
-    sortByDistance?: boolean;
-    viewMode?: "table" | "cards";
-    page?: number;
-  }) => {
-    const params = new URLSearchParams(searchParams.toString());
-
-    // Apply updates
-    if (updates.search !== undefined) {
-      if (updates.search) {
-        params.set("search", updates.search);
-      } else {
-        params.delete("search");
-      }
-    }
-    if ("status" in updates) {
-      if (updates.status) {
-        params.set("status", updates.status);
-      } else {
-        params.delete("status");
-      }
-    }
-    if (updates.makeIds !== undefined) {
-      if (updates.makeIds.length > 0) {
-        params.set("makeIds", updates.makeIds.join(","));
-      } else {
-        params.delete("makeIds");
-      }
-    }
-    if ("modelId" in updates) {
-      if (updates.modelId) {
-        params.set("modelId", updates.modelId);
-      } else {
-        params.delete("modelId");
-      }
-    }
-    if (updates.collectionIds !== undefined) {
-      if (updates.collectionIds.length > 0) {
-        params.set("collectionIds", updates.collectionIds.join(","));
-      } else {
-        params.delete("collectionIds");
-      }
-    }
-    if (updates.exteriorColors !== undefined) {
-      if (updates.exteriorColors.length > 0) {
-        params.set("exteriorColors", updates.exteriorColors.join(","));
-      } else {
-        params.delete("exteriorColors");
-      }
-    }
-    if (updates.interiorColors !== undefined) {
-      if (updates.interiorColors.length > 0) {
-        params.set("interiorColors", updates.interiorColors.join(","));
-      } else {
-        params.delete("interiorColors");
-      }
-    }
-    if ("yearFrom" in updates) {
-      if (updates.yearFrom) {
-        params.set("yearFrom", updates.yearFrom);
-      } else {
-        params.delete("yearFrom");
-      }
-    }
-    if ("yearTo" in updates) {
-      if (updates.yearTo) {
-        params.set("yearTo", updates.yearTo);
-      } else {
-        params.delete("yearTo");
-      }
-    }
-    if (updates.numberOfSeats !== undefined) {
-      if (updates.numberOfSeats.length > 0) {
-        params.set("numberOfSeats", updates.numberOfSeats.join(","));
-      } else {
-        params.delete("numberOfSeats");
-      }
-    }
-    if (updates.gearboxTypes !== undefined) {
-      if (updates.gearboxTypes.length > 0) {
-        params.set("gearboxTypes", updates.gearboxTypes.join(","));
-      } else {
-        params.delete("gearboxTypes");
-      }
-    }
-    if (updates.steeringIds !== undefined) {
-      if (updates.steeringIds.length > 0) {
-        params.set("steeringIds", updates.steeringIds.join(","));
-      } else {
-        params.delete("steeringIds");
-      }
-    }
-    if (updates.countryIds !== undefined) {
-      if (updates.countryIds.length > 0) {
-        params.set("countryIds", updates.countryIds.join(","));
-      } else {
-        params.delete("countryIds");
-      }
-    }
-    if (updates.counties !== undefined) {
-      if (updates.counties.length > 0) {
-        params.set("counties", updates.counties.join(","));
-      } else {
-        params.delete("counties");
-      }
-    }
-    if ("postcode" in updates) {
-      if (updates.postcode) {
-        params.set("postcode", updates.postcode);
-      } else {
-        params.delete("postcode");
-      }
-    }
-    if ("maxDistance" in updates) {
-      if (updates.maxDistance) {
-        params.set("maxDistance", updates.maxDistance.toString());
-      } else {
-        params.delete("maxDistance");
-      }
-    }
-    if (updates.sortBy !== undefined) {
-      if (updates.sortBy !== "createdAt") {
-        params.set("sortBy", updates.sortBy);
-      } else {
-        params.delete("sortBy");
-      }
-    }
-    if (updates.sortOrder !== undefined) {
-      if (updates.sortOrder !== "desc") {
-        params.set("sortOrder", updates.sortOrder);
-      } else {
-        params.delete("sortOrder");
-      }
-    }
-    if (updates.sortByDistance !== undefined) {
-      if (updates.sortByDistance) {
-        params.set("sortByDistance", "true");
-      } else {
-        params.delete("sortByDistance");
-      }
-    }
-    if (updates.viewMode !== undefined) {
-      if (updates.viewMode !== "table") {
-        params.set("viewMode", updates.viewMode);
-      } else {
-        params.delete("viewMode");
-      }
-    }
-    if (updates.page !== undefined) {
-      if (updates.page > 1) {
-        params.set("page", updates.page.toString());
-      } else {
-        params.delete("page");
-      }
-    }
-
-    // When filters change, reset to page 1
-    const isFilterChange = updates.search !== undefined || updates.status !== undefined || 
-                          updates.makeIds !== undefined || updates.modelId !== undefined ||
-                          updates.collectionIds !== undefined || updates.exteriorColors !== undefined ||
-                          updates.interiorColors !== undefined || updates.yearFrom !== undefined ||
-                          updates.yearTo !== undefined || updates.numberOfSeats !== undefined ||
-                          updates.gearboxTypes !== undefined || updates.steeringIds !== undefined ||
-                          updates.postcode !== undefined || updates.maxDistance !== undefined;
-    
-    if (isFilterChange && updates.page === undefined) {
-      params.delete("page"); // Reset to page 1 when filters change
-    }
-
-    const newUrl = params.toString() ? `?${params.toString()}` : "/admin/vehicles";
-    router.push(newUrl, { scroll: false });
-  };
 
   // Navigation handlers - just use regular router.push
   const handleView = (id: string) => {
@@ -346,33 +147,10 @@ function VehiclesPageContent() {
     void copyToClipboard(phone, 'Phone number');
   };
 
-  const handleClearFilters = () => {
-    // Clear all filters and reset to default PUBLISHED status
-    router.push("/admin/vehicles?status=PUBLISHED", { scroll: false });
-  };
-
-  const handlePageChange = (page: number) => {
-    updateURL({ page });
-    // Scroll to top of list smoothly
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
   // Vehicle selection handlers
-  const handleToggleVehicle = useCallback((vehicleId: string) => {
-    setSelectedVehicleIds((prev) =>
-      prev.includes(vehicleId)
-        ? prev.filter((id) => id !== vehicleId)
-        : [...prev, vehicleId]
-    );
-  }, []);
-
   const handleToggleAll = useCallback((checked: boolean) => {
-    if (checked) {
-      setSelectedVehicleIds(vehicles.map((v) => v.id));
-    } else {
-      setSelectedVehicleIds([]);
-    }
-  }, [vehicles]);
+    toggleAll(checked, vehicles.map((v) => v.id));
+  }, [vehicles, toggleAll]);
 
   const handleSendDeal = useCallback(() => {
     if (selectedVehicleIds.length === 0) {
@@ -383,13 +161,11 @@ function VehiclesPageContent() {
   }, [selectedVehicleIds]);
 
   const handleDealCreated = useCallback(() => {
-    setSelectedVehicleIds([]);
+    clearSelection();
     setIsCreateDealDialogOpen(false);
     toast.success("Deal sent successfully!");
-  }, []);
+  }, [clearSelection]);
 
-  // Check if any filters are active (PUBLISHED is the default, so not counted as a filter)
-  const hasFilters = !!(searchInput ?? (status && status !== "PUBLISHED") ?? makeIds.length > 0 ?? modelId ?? collectionIds.length > 0 ?? exteriorColors.length > 0 ?? interiorColors.length > 0 ?? yearFrom ?? yearTo ?? numberOfSeats.length > 0 ?? gearboxTypes.length > 0 ?? steeringIds.length > 0 ?? countryIds.length > 0 ?? counties.length > 0 ?? postcode ?? maxDistance);
 
   if (isAuthLoading || !user) {
     return null; // Layout handles loading state
@@ -403,45 +179,7 @@ function VehiclesPageContent() {
       />
 
       {/* Filters */}
-      <VehicleFilters
-            search={searchInput}
-            status={status === "ALL" ? undefined : status}
-            makeIds={makeIds}
-            modelId={modelId}
-            collectionIds={collectionIds}
-            exteriorColors={exteriorColors}
-            interiorColors={interiorColors}
-            yearFrom={yearFrom}
-            yearTo={yearTo}
-            numberOfSeats={numberOfSeats}
-            gearboxTypes={gearboxTypes}
-            steeringIds={steeringIds}
-            countryIds={countryIds}
-            counties={counties}
-            postcode={postcode}
-            maxDistance={maxDistance}
-            sortBy={sortBy}
-            sortOrder={sortOrder}
-            onSearchChange={(search) => updateURL({ search })}
-            onStatusChange={(status) => updateURL({ status })}
-            onMakeIdsChange={(makeIds) => updateURL({ makeIds })}
-            onModelChange={(modelId) => updateURL({ modelId })}
-            onCollectionIdsChange={(collectionIds) => updateURL({ collectionIds })}
-            onExteriorColorsChange={(exteriorColors) => updateURL({ exteriorColors })}
-            onInteriorColorsChange={(interiorColors) => updateURL({ interiorColors })}
-            onNumberOfSeatsChange={(numberOfSeats) => updateURL({ numberOfSeats })}
-            onGearboxTypesChange={(gearboxTypes) => updateURL({ gearboxTypes })}
-            onSteeringIdsChange={(steeringIds) => updateURL({ steeringIds })}
-            onCountryIdsChange={(countryIds) => updateURL({ countryIds })}
-            onCountiesChange={(counties) => updateURL({ counties })}
-            onYearFromChange={(yearFrom) => updateURL({ yearFrom })}
-            onYearToChange={(yearTo) => updateURL({ yearTo })}
-            onPostcodeChange={(postcode) => updateURL({ postcode })}
-            onMaxDistanceChange={(maxDistance) => updateURL({ maxDistance })}
-            onPostcodeAndDistanceChange={(postcode, maxDistance) => updateURL({ postcode, maxDistance })}
-            onSortChange={(sortBy, sortOrder) => updateURL({ sortBy, sortOrder })}
-            onClearFilters={handleClearFilters}
-          />
+      <VehicleFilters />
 
       {/* Action Bar: Results Count, Send Deal Button & View Toggle */}
       {!isVehiclesLoading && (
@@ -453,10 +191,10 @@ function VehiclesPageContent() {
               ) : (
                 <>
                   Found <span className="font-semibold text-slate-900 dark:text-slate-50">{totalCount}</span> vehicle{totalCount !== 1 ? "s" : ""}
-                  {hasFilters && " matching your criteria"}
+                  {hasActiveFilters && " matching your criteria"}
                   {totalPages > 1 && (
                     <span className="ml-2">
-                      (Page <span className="font-semibold">{currentPage}</span> of <span className="font-semibold">{totalPages}</span>)
+                      (Page <span className="font-semibold">{filters.page ?? 1}</span> of <span className="font-semibold">{totalPages}</span>)
                     </span>
                   )}
                 </>
@@ -484,18 +222,18 @@ function VehiclesPageContent() {
           {/* Desktop View Toggle */}
           <div className="hidden md:flex items-center gap-2">
             <Button
-              variant={viewMode === "table" ? "default" : "outline"}
+              variant={filters.viewMode === "table" ? "default" : "outline"}
               size="sm"
-              onClick={() => updateURL({ viewMode: "table" })}
+              onClick={() => updateFilters({ viewMode: "table" })}
               className="gap-2"
             >
               <TableIcon className="h-4 w-4" />
               Table
             </Button>
             <Button
-              variant={viewMode === "cards" ? "default" : "outline"}
+              variant={filters.viewMode === "cards" ? "default" : "outline"}
               size="sm"
-              onClick={() => updateURL({ viewMode: "cards" })}
+              onClick={() => updateFilters({ viewMode: "cards" })}
               className="gap-2"
             >
               <LayoutGrid className="h-4 w-4" />
@@ -509,14 +247,14 @@ function VehiclesPageContent() {
       <VehicleListTable
         vehicles={vehicles}
         isLoading={isVehiclesLoading}
-        hasFilters={hasFilters}
-        viewMode={viewMode}
+        hasFilters={hasActiveFilters}
+        viewMode={filters.viewMode}
         onView={handleView}
         onEdit={handleEdit}
         onDelete={handleDelete}
-        onClearFilters={handleClearFilters}
+        onClearFilters={clearFilters}
         selectedIds={selectedVehicleIds}
-        onToggleVehicle={handleToggleVehicle}
+        onToggleVehicle={toggleVehicle}
         onToggleAll={handleToggleAll}
         onCopyEmail={handleCopyEmail}
         onCopyPhone={handleCopyPhone}
@@ -529,8 +267,8 @@ function VehiclesPageContent() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1 || isFetching}
+            onClick={() => handlePageChange((filters.page ?? 1) - 1)}
+            disabled={(filters.page ?? 1) === 1 || isFetching}
           >
             Previous
           </Button>
@@ -538,10 +276,10 @@ function VehiclesPageContent() {
           {/* Page Numbers - Desktop only */}
           <div className="hidden md:flex items-center gap-1">
             {/* First page */}
-            {currentPage > 3 && (
+            {(filters.page ?? 1) > 3 && (
               <>
                 <Button
-                  variant={1 === currentPage ? "default" : "outline"}
+                  variant={1 === (filters.page ?? 1) ? "default" : "outline"}
                   size="sm"
                   onClick={() => handlePageChange(1)}
                   disabled={isFetching}
@@ -549,7 +287,7 @@ function VehiclesPageContent() {
                 >
                   1
                 </Button>
-                {currentPage > 4 && (
+                {(filters.page ?? 1) > 4 && (
                   <span className="px-2 text-muted-foreground">...</span>
                 )}
               </>
@@ -559,12 +297,12 @@ function VehiclesPageContent() {
             {Array.from({ length: totalPages }, (_, i) => i + 1)
               .filter((page) => {
                 // Show current page and 2 pages on each side
-                return page >= currentPage - 2 && page <= currentPage + 2;
+                return page >= (filters.page ?? 1) - 2 && page <= (filters.page ?? 1) + 2;
               })
               .map((page) => (
                 <Button
                   key={page}
-                  variant={page === currentPage ? "default" : "outline"}
+                  variant={page === (filters.page ?? 1) ? "default" : "outline"}
                   size="sm"
                   onClick={() => handlePageChange(page)}
                   disabled={isFetching}
@@ -575,13 +313,13 @@ function VehiclesPageContent() {
               ))}
 
             {/* Last page */}
-            {currentPage < totalPages - 2 && (
+            {(filters.page ?? 1) < totalPages - 2 && (
               <>
-                {currentPage < totalPages - 3 && (
+                {(filters.page ?? 1) < totalPages - 3 && (
                   <span className="px-2 text-muted-foreground">...</span>
                 )}
                 <Button
-                  variant={totalPages === currentPage ? "default" : "outline"}
+                  variant={totalPages === (filters.page ?? 1) ? "default" : "outline"}
                   size="sm"
                   onClick={() => handlePageChange(totalPages)}
                   disabled={isFetching}
@@ -595,15 +333,15 @@ function VehiclesPageContent() {
 
           {/* Page Indicator - Mobile only */}
           <div className="md:hidden px-3 py-1.5 text-sm font-medium text-muted-foreground">
-            {currentPage} / {totalPages}
+            {filters.page ?? 1} / {totalPages}
           </div>
 
           {/* Next Button */}
           <Button
             variant="outline"
             size="sm"
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages || isFetching}
+            onClick={() => handlePageChange((filters.page ?? 1) + 1)}
+            disabled={(filters.page ?? 1) === totalPages || isFetching}
           >
             Next
           </Button>
@@ -612,7 +350,7 @@ function VehiclesPageContent() {
 
       {/* Create Deal Dialog - Only mount when needed */}
       {isCreateDealDialogOpen && (
-        <CreateDealDialog
+        <SendDealToVehiclesDialog
           open={isCreateDealDialogOpen}
           onOpenChange={setIsCreateDealDialogOpen}
           selectedVehicleIds={selectedVehicleIds}
@@ -630,15 +368,10 @@ function VehiclesPageContent() {
  */
 export default function VehiclesPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="space-y-6">
-          <div className="h-10 w-48 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
-          <div className="h-[400px] w-full bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
-        </div>
-      }
-    >
-      <VehiclesPageContent />
+    <Suspense fallback={<PageLoading />}>
+      <VehicleFiltersProvider>
+        <VehiclesPageContent />
+      </VehicleFiltersProvider>
     </Suspense>
   );
 }

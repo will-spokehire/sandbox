@@ -28,7 +28,8 @@ import { Card, CardContent } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 import { PageHeader } from "~/app/_components/ui";
 import { api } from "~/trpc/react";
-import { CreateDealDialog } from "./_components/CreateDealDialog";
+import { CreateEditDealDialog } from "~/components/deals";
+import { PageLoading } from "~/components/loading";
 
 /**
  * Deals List Content Component
@@ -172,7 +173,7 @@ function DealsListContent() {
       </div>
 
       {/* Create Deal Dialog */}
-      <CreateDealDialog
+      <CreateEditDealDialog
         open={showCreateDialog}
         onOpenChange={(open) => {
           setShowCreateDialog(open);
@@ -506,12 +507,7 @@ function DealsListContent() {
  */
 export default function DealsPage() {
   return (
-    <Suspense fallback={
-      <div className="space-y-6">
-        <Skeleton className="h-10 w-48" />
-        <Skeleton className="h-[400px] w-full" />
-      </div>
-    }>
+    <Suspense fallback={<PageLoading />}>
       <DealsListContent />
     </Suspense>
   );

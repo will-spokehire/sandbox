@@ -5,7 +5,7 @@
  * Handles all Prisma queries related to deals, vehicles, and recipients.
  */
 
-import { type Prisma, type DealStatus, type RecipientStatus } from "@prisma/client";
+import { type Prisma, type DealStatus, RecipientStatus } from "@prisma/client";
 import { BaseRepository } from "./base.repository";
 import { DatabaseError, DealNotFoundError } from "../errors/app-errors";
 
@@ -380,23 +380,47 @@ export class DealRepository extends BaseRepository {
     startOrder: number
   ) {
     try {
-      await this.db.deal.update({
-        where: { id: dealId },
-        data: {
-          vehicles: {
-            create: vehicleIds.map((vehicleId, index) => ({
+      // Use upsert to handle potential duplicates gracefully
+      const vehiclePromises = vehicleIds.map((vehicleId, index) =>
+        this.db.dealVehicle.upsert({
+          where: {
+            dealId_vehicleId: {
+              dealId,
               vehicleId,
-              order: startOrder + index,
-            })),
+            },
           },
-          recipients: {
-            create: recipientIds.map((userId) => ({
+          update: {
+            order: startOrder + index,
+          },
+          create: {
+            dealId,
+            vehicleId,
+            order: startOrder + index,
+          },
+        })
+      );
+
+      const recipientPromises = recipientIds.map((userId) =>
+        this.db.dealRecipient.upsert({
+          where: {
+            dealId_userId: {
+              dealId,
               userId,
-              status: RecipientStatus.PENDING,
-            })),
+            },
           },
-        },
-      });
+          update: {
+            // Keep existing status if already exists
+          },
+          create: {
+            dealId,
+            userId,
+            status: RecipientStatus.PENDING,
+          },
+        })
+      );
+
+      // Execute all upserts in parallel
+      await Promise.all([...vehiclePromises, ...recipientPromises]);
     } catch (error) {
       throw new DatabaseError("Failed to add vehicles and recipients to deal", error);
     }

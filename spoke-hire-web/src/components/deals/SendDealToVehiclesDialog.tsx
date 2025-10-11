@@ -29,25 +29,29 @@ import { api } from "~/trpc/react";
 
 const createDealSchema = z.object({
   name: z.string().optional(),
-  description: z.string().optional(),
+  date: z.string().optional(),
+  time: z.string().optional(),
+  location: z.string().optional(),
+  brief: z.string().optional(),
+  fee: z.string().optional(),
 });
 
 type CreateDealFormData = z.infer<typeof createDealSchema>;
 
-interface CreateDealDialogProps {
+interface SendDealToVehiclesDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   selectedVehicleIds: string[];
   onSuccess: () => void;
 }
 
-export function CreateDealDialog({
+export function SendDealToVehiclesDialog({
   open,
   onOpenChange,
   selectedVehicleIds,
   onSuccess,
-}: CreateDealDialogProps) {
-  const [selectedDealId, setSelectedDealId] = useState<string>("");
+}: SendDealToVehiclesDialogProps) {
+  const [_selectedDealId, setSelectedDealId] = useState<string>("");
   const [activeTab, setActiveTab] = useState<string>("existing");
   const [vehicleOwners, setVehicleOwners] = useState<Array<{
     id: string;
@@ -63,7 +67,11 @@ export function CreateDealDialog({
     resolver: zodResolver(createDealSchema),
     defaultValues: {
       name: "",
-      description: "",
+      date: "",
+      time: "",
+      location: "",
+      brief: "",
+      fee: "",
     },
   });
 
@@ -87,12 +95,12 @@ export function CreateDealDialog({
   }, [isLoadingDeals, dealsData]);
 
   // Fetch selected deal details to check for duplicates
-  const { data: selectedDeal, isLoading: isLoadingSelectedDeal } = api.deal.getById.useQuery(
+  const { isLoading: isLoadingSelectedDeal } = api.deal.getById.useQuery(
     {
-      id: selectedDealId,
+      id: _selectedDealId,
     },
     {
-      enabled: open && !!selectedDealId,
+      enabled: open && !!_selectedDealId,
     }
   );
 
@@ -107,20 +115,27 @@ export function CreateDealDialog({
     }
   );
 
-  // Check if we're calculating counts
-  const isCalculating = isLoadingVehicles || (!!selectedDealId && isLoadingSelectedDeal);
+  // Fetch new vehicles/owners for existing deal using backend filtering
+  const { data: newItemsData, isLoading: isLoadingNewItems } = 
+    api.deal.getNewVehiclesAndOwners.useQuery(
+      {
+        dealId: _selectedDealId,
+        vehicleIds: selectedVehicleIds,
+      },
+      {
+        enabled: open && !!_selectedDealId && selectedVehicleIds.length > 0,
+      }
+    );
 
-  // Extract unique owners and filter duplicates based on selected deal
+  // Check if we're calculating counts
+  const isCalculating = 
+    isLoadingVehicles || 
+    (!!_selectedDealId && (isLoadingSelectedDeal || isLoadingNewItems));
+
+  // Extract unique owners from vehicles
   useEffect(() => {
     // Only run when dialog is open
     if (!open) return;
-    
-    console.log("useEffect triggered", { 
-      hasVehicles: !!vehicles?.vehicles, 
-      hasSelectedDeal: !!selectedDeal,
-      selectedVehicleIds,
-      activeTab
-    });
 
     if (!vehicles?.vehicles) {
       setVehicleOwners([]);
@@ -129,12 +144,13 @@ export function CreateDealDialog({
       return;
     }
 
+    // Extract all owners from selected vehicles
     const ownersMap = new Map();
-    vehicles.vehicles.forEach((vehicle: any) => {
+    vehicles.vehicles.forEach((vehicle) => {
       if (vehicle.owner && !ownersMap.has(vehicle.owner.id)) {
         const name =
-          vehicle.owner.firstName || vehicle.owner.lastName
-            ? `${vehicle.owner.firstName || ""} ${vehicle.owner.lastName || ""}`.trim()
+          vehicle.owner.firstName ?? vehicle.owner.lastName
+            ? `${vehicle.owner.firstName ?? ""} ${vehicle.owner.lastName ?? ""}`.trim()
             : vehicle.owner.email;
         ownersMap.set(vehicle.owner.id, {
           id: vehicle.owner.id,
@@ -143,126 +159,63 @@ export function CreateDealDialog({
         });
       }
     });
-    
-    const allOwners = Array.from(ownersMap.values());
-    console.log("All owners extracted", allOwners);
-    
-    // Only filter for existing deals if we're on the "existing" tab AND a deal is selected
-    if (activeTab === "existing" && selectedDeal) {
-      console.log("Filtering for existing deal", {
-        dealVehicles: selectedDeal.vehicles?.length,
-        dealRecipients: selectedDeal.recipients?.length
-      });
 
-      // Filter out vehicles and owners already in the deal
-      const existingVehicleIds = new Set(
-        selectedDeal.vehicles.map((dv: any) => dv.vehicle.id)
-      );
-      const existingRecipientIds = new Set(
-        selectedDeal.recipients.map((r: any) => r.user.id)
-      );
+    const allOwners = Array.from(ownersMap.values());
+
+    // Use backend-filtered data if available (for existing deals)
+    if (activeTab === "existing" && _selectedDealId && newItemsData) {
+      setNewVehicleCount(newItemsData.newVehicleCount);
+      setNewOwnerCount(newItemsData.newOwnerCount);
       
-      console.log("Existing IDs", {
-        existingVehicleIds: Array.from(existingVehicleIds),
-        existingRecipientIds: Array.from(existingRecipientIds),
-        selectedVehicleIds
-      });
-      
-      // Count new vehicles (not already in deal)
-      const newVehicles = selectedVehicleIds.filter(
-        (id) => !existingVehicleIds.has(id)
+      // Filter owners to only show new ones
+      const newOwners = allOwners.filter((owner) =>
+        newItemsData.newOwnerIds.includes(owner.id)
       );
-      console.log("New vehicles after filter", newVehicles);
-      setNewVehicleCount(newVehicles.length);
-      
-      // Filter to only new owners (not already recipients)
-      const newOwners = allOwners.filter(
-        (owner) => !existingRecipientIds.has(owner.id)
-      );
-      console.log("New owners after filter", newOwners);
       setVehicleOwners(newOwners);
-      setNewOwnerCount(newOwners.length);
     } else {
-      console.log("New deal mode - using all");
-      // For new deals or when on "new" tab, all vehicles and owners are new
+      // For new deals, all vehicles and owners are new
       setVehicleOwners(allOwners);
       setNewVehicleCount(selectedVehicleIds.length);
       setNewOwnerCount(allOwners.length);
     }
-  }, [vehicles, selectedDeal, selectedVehicleIds, activeTab, open]);
+  }, [vehicles, newItemsData, selectedVehicleIds, activeTab, _selectedDealId, open]);
 
   // Create deal mutation
+  // Note: Emails are sent automatically on the server after deal creation
   const createDealMutation = api.deal.create.useMutation({
-    onSuccess: async (deal) => {
+    onSuccess: async (_deal) => {
       // Invalidate deals list to refresh
       await utils.deal.list.invalidate();
       
-      // Now send the deal
-      try {
-        await sendDealMutation.mutateAsync({
-          dealId: deal.id,
-        });
-      } catch (error) {
-        console.error("Failed to send deal:", error);
-        toast.error("Deal created but failed to send emails");
-        onOpenChange(false);
-        form.reset();
-      }
+      toast.success("Deal created and emails sent successfully!");
+      onSuccess();
+      onOpenChange(false);
+      form.reset();
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to create deal");
+      toast.error(error.message ?? "Failed to create deal");
     },
   });
 
   // Add vehicles to existing deal mutation
+  // Note: Emails are sent automatically on the server to new recipients only
   const addVehiclesMutation = api.deal.addVehiclesToDeal.useMutation({
     onSuccess: async (deal) => {
       // Invalidate deals list and specific deal to refresh
       await utils.deal.list.invalidate();
       await utils.deal.getById.invalidate({ id: deal.id });
       
-      // Now send the deal
-      try {
-        await sendDealMutation.mutateAsync({
-          dealId: deal.id,
-        });
-      } catch (error) {
-        console.error("Failed to send deal:", error);
-        toast.error("Vehicles added but failed to send emails");
-        onOpenChange(false);
-        setSelectedDealId("");
-      }
+      toast.success("Vehicles added and emails sent to new recipients!");
+      onSuccess();
+      onOpenChange(false);
+      setSelectedDealId("");
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to add vehicles to deal");
+      toast.error(error.message ?? "Failed to add vehicles to deal");
     },
   });
 
-  // Send deal mutation
-  const sendDealMutation = api.deal.send.useMutation({
-    onSuccess: (result) => {
-      if (result.success) {
-        toast.success(
-          `Deal sent successfully! ${result.sent} email(s) sent to vehicle owners.`,
-          {
-            description:
-              result.failed > 0
-                ? `${result.failed} email(s) failed to send.`
-                : undefined,
-          }
-        );
-        onSuccess();
-        form.reset();
-      } else {
-        toast.error("Failed to send deal emails");
-      }
-    },
-    onError: (error) => {
-      toast.error(error.message || "Failed to send deal");
-    },
-  });
-
-  const isSubmitting = createDealMutation.isPending || addVehiclesMutation.isPending || sendDealMutation.isPending;
+  const isSubmitting = createDealMutation.isPending || addVehiclesMutation.isPending;
 
   const handleAddToDeal = (dealId: string) => {
     if (newVehicleCount === 0) {
@@ -284,7 +237,6 @@ export function CreateDealDialog({
 
   const handleSubmit = form.handleSubmit(
     (data) => {
-      console.log("Submit triggered - SUCCESS - Creating new deal", { data, vehicleOwners });
       
       // For new deals - validate name is provided
       if (!data.name || data.name.trim() === "") {
@@ -299,14 +251,18 @@ export function CreateDealDialog({
 
       // Create new deal
       createDealMutation.mutate({
-        name: data.name!,
-        description: data.description,
+        name: data.name ?? "",
+        date: data.date,
+        time: data.time,
+        location: data.location,
+        brief: data.brief,
+        fee: data.fee,
         vehicleIds: selectedVehicleIds,
         recipientIds: vehicleOwners.map((o) => o.id),
       });
     },
-    (errors) => {
-      console.log("Submit triggered - VALIDATION ERRORS", errors);
+    (_errors) => {
+      // Handle form errors if needed
     }
   );
 
@@ -353,12 +309,12 @@ export function CreateDealDialog({
               </div>
             ) : dealsData?.deals && dealsData.deals.length > 0 ? (
               <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-2">
-                {dealsData.deals.map((deal: any) => {
+                {dealsData.deals.map((deal) => {
                   // Calculate stats when this deal is selected
-                  const isSelected = selectedDealId === deal.id;
+                  const isSelected = _selectedDealId === deal.id;
                   
                   // Show stats from the selected deal state if this deal is selected
-                  const showNewStats = isSelected && selectedDealId === deal.id;
+                  const showNewStats = isSelected;
                   
                   return (
                     <div
@@ -371,9 +327,9 @@ export function CreateDealDialog({
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1 min-w-0">
                           <h4 className="font-semibold truncate">{deal.name}</h4>
-                          {deal.description && (
+                          {deal.brief && (
                             <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                              {deal.description}
+                              {deal.brief}
                             </p>
                           )}
                           <div className="flex items-center gap-2 mt-3 flex-wrap">
@@ -474,14 +430,51 @@ export function CreateDealDialog({
                 )}
               </div>
 
-              {/* Deal Description */}
+              {/* Production Details */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="dealDate">Date(s)</Label>
+                  <Input
+                    id="dealDate"
+                    placeholder="e.g., 15-17 March 2025"
+                    {...form.register("date")}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="dealTime">Time(s)</Label>
+                  <Input
+                    id="dealTime"
+                    placeholder="e.g., 9am-5pm"
+                    {...form.register("time")}
+                  />
+                </div>
+              </div>
+
               <div>
-                <Label htmlFor="dealDescription">Description (Optional)</Label>
+                <Label htmlFor="dealLocation">Location(s)</Label>
+                <Input
+                  id="dealLocation"
+                  placeholder="e.g., London, UK"
+                  {...form.register("location")}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="dealBrief">Brief</Label>
                 <Textarea
-                  id="dealDescription"
-                  placeholder="Add details about this job offer..."
+                  id="dealBrief"
+                  placeholder="Brief description of the production..."
                   rows={3}
-                  {...form.register("description")}
+                  {...form.register("brief")}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="dealFee">Fee Guide</Label>
+                <Input
+                  id="dealFee"
+                  placeholder="e.g., £500-£750"
+                  {...form.register("fee")}
                 />
               </div>
 
@@ -503,7 +496,7 @@ export function CreateDealDialog({
                   {isSubmitting ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      {sendDealMutation.isPending ? "Sending..." : "Creating..."}
+                      Creating & Sending...
                     </>
                   ) : isCalculating ? (
                     <>
@@ -525,4 +518,3 @@ export function CreateDealDialog({
     </Dialog>
   );
 }
-

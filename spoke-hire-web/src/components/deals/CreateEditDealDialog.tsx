@@ -31,19 +31,19 @@ const createDealSchema = z.object({
 
 type CreateDealFormData = z.infer<typeof createDealSchema>;
 
-interface CreateDealDialogProps {
+interface CreateEditDealDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
   dealId?: string; // If provided, edit this deal instead of creating new
 }
 
-export function CreateDealDialog({
+export function CreateEditDealDialog({
   open,
   onOpenChange,
   onSuccess,
   dealId,
-}: CreateDealDialogProps) {
+}: CreateEditDealDialogProps) {
   const utils = api.useUtils();
 
   const form = useForm<CreateDealFormData>({
@@ -267,4 +267,3 @@ export function CreateDealDialog({
     </Dialog>
   );
 }
-
