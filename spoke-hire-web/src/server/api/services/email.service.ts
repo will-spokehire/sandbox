@@ -3,27 +3,15 @@
  * 
  * Handles email sending via Loops
  * https://loops.so
+ * 
+ * REFACTORED: Now uses shared types where applicable.
  */
-
 
 /**
- * Vehicle data for email
+ * Loops-specific deal email parameters
+ * (Different from shared SendDealEmailParams which is more comprehensive)
  */
-export interface EmailVehicleData {
-  id: string;
-  name: string;
-  year: string;
-  price: string;
-  registration: string | null;
-  make: string;
-  model: string;
-  imageUrl: string | null;
-}
-
-/**
- * Deal email parameters
- */
-export interface SendDealEmailParams {
+export interface LoopsDealEmailParams {
   to: string;
   userName: string;
   dealName: string;
@@ -74,7 +62,7 @@ export class EmailService {
   /**
    * Send deal notification email
    */
-  async sendDealEmail(params: SendDealEmailParams): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  async sendDealEmail(params: LoopsDealEmailParams): Promise<{ success: boolean; messageId?: string; error?: string }> {
     const { to, userName, dealName, date, time, location, brief, fee, vehicleNames, dealUrl } = params;
     
     // Determine actual recipient email (use override if set)
@@ -173,7 +161,7 @@ export class EmailService {
    * Send bulk emails with Promise.allSettled for better performance
    */
   async sendBulkEmails(
-    emails: SendDealEmailParams[]
+    emails: LoopsDealEmailParams[]
   ): Promise<Array<{ email: string; success: boolean; error?: string; messageId?: string }>> {
     // Use Promise.allSettled for concurrent sending
     const promises = emails.map(async (emailParams) => {

@@ -224,6 +224,100 @@ export const vehicleRouter = createTRPCRouter({
 - ✅ Easier to test services independently
 - ✅ Clear separation of concerns
 
+### Service Creation Pattern
+
+**Always use ServiceFactory to create services:**
+
+```typescript
+// ✅ GOOD: Use ServiceFactory in routers
+import { ServiceFactory } from "../services/service-factory";
+
+list: adminProcedure
+  .query(async ({ ctx, input }) => {
+    const service = ServiceFactory.createVehicleService(ctx.db);
+    return await service.listVehicles(input);
+  }),
+
+// ❌ BAD: Don't instantiate services directly
+const service = new VehicleService(ctx.db); // Don't do this
+```
+
+**Benefits:**
+- ✅ Consistent dependency injection
+- ✅ Easy to test (mock factory)
+- ✅ Single place to update service creation
+
+### Service Constructors Pattern
+
+**Services must accept dependencies via constructor (no instantiation inside):**
+
+```typescript
+// ✅ GOOD: Dependencies injected via constructor
+export class VehicleService {
+  constructor(
+    private repository: VehicleRepository,
+    private queryBuilder: VehicleQueryBuilder,
+    private cache: CacheService
+  ) {}
+}
+
+// ❌ BAD: Creating dependencies inside constructor
+export class VehicleService {
+  private repository: VehicleRepository;
+  
+  constructor(private db: DbClient) {
+    this.repository = new VehicleRepository(db); // Don't do this
+  }
+}
+```
+
+**Benefits:**
+- ✅ True dependency injection
+- ✅ Easier to test with mocks
+- ✅ Services don't know how dependencies are created
+- ✅ Repositories can be reused across services
+
+### Shared Types Pattern
+
+**Always import types from `~/server/types`:**
+
+```typescript
+// ✅ GOOD: Import from shared types
+import type { 
+  ListVehiclesParams, 
+  VehicleWithRelations, 
+  DealWithDetails 
+} from "~/server/types";
+
+export class VehicleService {
+  async listVehicles(params: ListVehiclesParams): Promise<ListVehiclesResult> {
+    // Implementation
+  }
+}
+
+// ❌ BAD: Define types locally in services
+export interface ListVehiclesParams { // Don't do this
+  limit: number;
+  cursor?: string;
+  // ...
+}
+```
+
+**Type organization:**
+- `common.ts` - Pagination, filters, sorting (used across domains)
+- `database.ts` - DB client, transaction types
+- `vehicle.ts` - Vehicle domain types
+- `deal.ts` - Deal domain types  
+- `user.ts` - User/auth types
+- `email.ts` - Email-related types
+
+**Benefits:**
+- ✅ Single source of truth for types
+- ✅ Consistency across services and routers
+- ✅ Easier refactoring (change once, update everywhere)
+- ✅ Better IDE auto-completion
+- ✅ Clear domain boundaries
+
 ### File Organization
 
 **Frontend (Next.js App Router):**
@@ -242,17 +336,32 @@ app/
 
 **Backend (tRPC + Services):**
 ```
-server/api/
-├── root.ts                     # Main router (combines all routers)
-├── trpc.ts                     # tRPC config (auth, context)
-├── routers/
-│   ├── vehicle.ts             # Vehicle endpoints (thin)
-│   ├── deal.ts                # Deal endpoints (thin)
-│   └── user.ts                # User endpoints (thin)
-└── services/
-    ├── vehicle.service.ts     # Vehicle business logic
-    ├── deal.service.ts        # Deal business logic
-    └── email.service.ts       # Email sending logic
+server/
+├── api/
+│   ├── root.ts                     # Main router (combines all routers)
+│   ├── trpc.ts                     # tRPC config (auth, context)
+│   ├── routers/
+│   │   ├── vehicle.ts              # Vehicle endpoints (thin)
+│   │   ├── deal.ts                 # Deal endpoints (thin)
+│   │   └── auth.ts                 # Auth endpoints (thin)
+│   ├── services/
+│   │   ├── service-factory.ts     # Service creation (DI)
+│   │   ├── vehicle.service.ts     # Vehicle business logic
+│   │   ├── deal.service.ts        # Deal business logic
+│   │   └── email.service.ts       # Email sending logic
+│   ├── repositories/
+│   │   ├── base.repository.ts     # Base CRUD operations
+│   │   ├── vehicle.repository.ts  # Vehicle data access
+│   │   └── deal.repository.ts     # Deal data access
+│   └── errors/
+│       └── app-errors.ts           # Custom error classes
+└── types/
+    ├── index.ts                    # Re-exports all types
+    ├── common.ts                   # Pagination, filters, sorting
+    ├── database.ts                 # DB client, repository types
+    ├── vehicle.ts                  # Vehicle-related types
+    ├── deal.ts                     # Deal-related types
+    └── user.ts                     # User-related types
 ```
 
 ### When to Use What

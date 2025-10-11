@@ -7,15 +7,9 @@
 
 import { type Prisma, type VehicleStatus } from "@prisma/client";
 import { DatabaseError, VehicleNotFoundError } from "../errors/app-errors";
-import { type db } from "~/server/db";
+import { BaseRepository, type FindManyOptions as BaseFindManyOptions } from "./base.repository";
 
-// Use the actual DB client type (with extensions)
-type DbClient = typeof db;
-
-export interface FindManyOptions {
-  take?: number;
-  skip?: number;
-  cursor?: string;
+export interface FindManyOptions extends BaseFindManyOptions {
   orderBy?: Prisma.VehicleOrderByWithRelationInput;
 }
 
@@ -51,8 +45,12 @@ export interface VehicleWithRelations {
   };
 }
 
-export class VehicleRepository {
-  constructor(private db: DbClient) {}
+export class VehicleRepository extends BaseRepository {
+  protected get model() {
+    return this.db.vehicle;
+  }
+
+  protected readonly entityName = "Vehicle" as const;
 
   /**
    * Find many vehicles with filters and pagination
@@ -124,17 +122,6 @@ export class VehicleRepository {
       return vehicles;
     } catch (error) {
       throw new DatabaseError("Failed to fetch vehicles", error);
-    }
-  }
-
-  /**
-   * Count vehicles matching filter
-   */
-  async count(where: Prisma.VehicleWhereInput): Promise<number> {
-    try {
-      return await this.db.vehicle.count({ where });
-    } catch (error) {
-      throw new DatabaseError("Failed to count vehicles", error);
     }
   }
 
@@ -297,17 +284,6 @@ export class VehicleRepository {
       });
     } catch (error) {
       throw new DatabaseError("Failed to delete vehicle", error);
-    }
-  }
-
-  /**
-   * Execute raw SQL query
-   */
-  async queryRaw<T = unknown>(query: Prisma.Sql): Promise<T[]> {
-    try {
-      return await this.db.$queryRaw<T[]>(query);
-    } catch (error) {
-      throw new DatabaseError("Failed to execute raw query", error);
     }
   }
 

@@ -5,14 +5,15 @@
  * Handles all Prisma queries related to users.
  */
 
-import { DatabaseError, UserNotFoundError } from "../errors/app-errors";
-import { type db } from "~/server/db";
+import { DatabaseError } from "../errors/app-errors";
+import { BaseRepository } from "./base.repository";
 
-// Use the actual DB client type (with extensions)
-type DbClient = typeof db;
+export class UserRepository extends BaseRepository {
+  protected get model() {
+    return this.db.user;
+  }
 
-export class UserRepository {
-  constructor(private db: DbClient) {}
+  protected readonly entityName = "User" as const;
 
   /**
    * Find user by email
@@ -37,28 +38,6 @@ export class UserRepository {
       });
     } catch (error) {
       throw new DatabaseError("Failed to fetch user by Supabase ID", error);
-    }
-  }
-
-  /**
-   * Find user by ID
-   */
-  async findById(id: string) {
-    try {
-      const user = await this.db.user.findUnique({
-        where: { id },
-      });
-
-      if (!user) {
-        throw new UserNotFoundError(id);
-      }
-
-      return user;
-    } catch (error) {
-      if (error instanceof UserNotFoundError) {
-        throw error;
-      }
-      throw new DatabaseError("Failed to fetch user", error);
     }
   }
 

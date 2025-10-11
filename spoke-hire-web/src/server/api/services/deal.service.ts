@@ -5,6 +5,8 @@
  * - Create and manage deals
  * - Send deals to users via email
  * - Track delivery status
+ * 
+ * REFACTORED: Now uses dependency injection and shared types.
  */
 
 import { TRPCError } from "@trpc/server";
@@ -18,121 +20,20 @@ import {
   DEAL_NAME_MAX_LENGTH,
 } from "../constants/deals";
 import { EmailService } from "./email.service";
-import { type db } from "~/server/db";
-
-// Use the actual DB client type (with extensions)
-type DbClient = typeof db;
-
-/**
- * Deal Service Parameters
- */
-export interface CreateDealParams {
-  name: string;
-  date?: string;
-  time?: string;
-  location?: string;
-  brief?: string;
-  fee?: string;
-  vehicleIds: string[];
-  recipientIds: string[];
-  createdById: string;
-}
-
-export interface SendDealParams {
-  dealId: string;
-  recipientIds?: string[]; // Optional: send to specific recipients, or all if not provided
-}
-
-export interface AddVehiclesToDealParams {
-  dealId: string;
-  vehicleIds: string[];
-  recipientIds: string[]; // New recipients to add
-}
-
-export interface UpdateDealParams {
-  name?: string;
-  date?: string;
-  time?: string;
-  location?: string;
-  brief?: string;
-  fee?: string;
-}
-
-export interface ListDealsParams {
-  limit?: number;
-  cursor?: string;
-  status?: DealStatus;
-  createdById?: string;
-}
-
-export interface DealWithDetails {
-  id: string;
-  name: string;
-  date: string | null;
-  time: string | null;
-  location: string | null;
-  brief: string | null;
-  fee: string | null;
-  status: DealStatus;
-  createdAt: Date;
-  updatedAt: Date;
-  createdBy: {
-    id: string;
-    email: string;
-    firstName: string | null;
-    lastName: string | null;
-  };
-  vehicles: Array<{
-    id: string;
-    order: number;
-    vehicle: {
-      id: string;
-      name: string;
-      year: string;
-      price: string | number | null;
-      registration: string | null;
-      make: { name: string };
-      model: { name: string };
-      owner: {
-        id: string;
-        email: string;
-        firstName: string | null;
-        lastName: string | null;
-        phone: string | null;
-      };
-      media: Array<{
-        id: string;
-        publishedUrl: string | null;
-        isPrimary: boolean;
-      }>;
-    };
-  }>;
-  recipients: Array<{
-    id: string;
-    status: RecipientStatus;
-    emailSentAt: Date | null;
-    emailOpenedAt: Date | null;
-    emailClickedAt: Date | null;
-    errorMessage: string | null;
-    user: {
-      id: string;
-      email: string;
-      firstName: string | null;
-      lastName: string | null;
-      phone: string | null;
-    };
-  }>;
-  _count: {
-    vehicles: number;
-    recipients: number;
-  };
-}
+import { DealRepository } from "../repositories/deal.repository";
+import type {
+  CreateDealParams,
+  UpdateDealParams,
+  AddVehiclesToDealParams,
+  ListDealsParams,
+  DealWithDetails,
+} from "~/server/types";
 
 /**
  * Deal Service Class
  */
 export class DealService {
-  constructor(private db: DbClient) {}
+  constructor(private repository: DealRepository) {}
 
   /**
    * List deals with pagination
@@ -150,31 +51,7 @@ export class DealService {
       where.createdById = createdById;
     }
 
-    const deals = await this.db.deal.findMany({
-      take: limit + 1,
-      ...(cursor && {
-        skip: 1,
-        cursor: { id: cursor },
-      }),
-      where,
-      orderBy: { createdAt: "desc" },
-      include: {
-        createdBy: {
-          select: {
-            id: true,
-            email: true,
-            firstName: true,
-            lastName: true,
-          },
-        },
-        _count: {
-          select: {
-            vehicles: true,
-            recipients: true,
-          },
-        },
-      },
-    });
+    const deals = await this.repository.findManyWithPagination(where, limit, cursor);
 
     let nextCursor: string | undefined = undefined;
     if (deals.length > limit) {
@@ -192,81 +69,7 @@ export class DealService {
    * Get deal by ID with full details
    */
   async getDealById(dealId: string): Promise<DealWithDetails> {
-    const deal = await this.db.deal.findUnique({
-      where: { id: dealId },
-      include: {
-        createdBy: {
-          select: {
-            id: true,
-            email: true,
-            firstName: true,
-            lastName: true,
-          },
-        },
-        vehicles: {
-          orderBy: { order: "asc" },
-          include: {
-            vehicle: {
-              include: {
-                make: { select: { name: true } },
-                model: { select: { name: true } },
-                owner: {
-                  select: {
-                    id: true,
-                    email: true,
-                    firstName: true,
-                    lastName: true,
-                    phone: true,
-                  },
-                },
-                media: {
-                  where: {
-                    status: "READY",
-                    isVisible: true,
-                  },
-                  orderBy: [
-                    { isPrimary: "desc" },
-                    { order: "asc" },
-                  ],
-                  take: 1,
-                  select: {
-                    id: true,
-                    publishedUrl: true,
-                    isPrimary: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-        recipients: {
-          orderBy: { createdAt: "desc" },
-          include: {
-            user: {
-              select: {
-                id: true,
-                email: true,
-                firstName: true,
-                lastName: true,
-                phone: true,
-              },
-            },
-          },
-        },
-        _count: {
-          select: {
-            vehicles: true,
-            recipients: true,
-          },
-        },
-      },
-    });
-
-    if (!deal) {
-      throw new DealNotFoundError(dealId);
-    }
-
-    return deal as unknown as DealWithDetails;
+    return await this.repository.findByIdWithDetails(dealId);
   }
 
   /**
@@ -276,6 +79,85 @@ export class DealService {
     const { name, date, time, location, brief, fee, vehicleIds, recipientIds, createdById } = params;
 
     // Validate deal name
+    this.validateDealName(name);
+
+    // Validate vehicles count (allow empty for deals created without vehicles)
+    if (vehicleIds.length > MAX_VEHICLES_PER_DEAL) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: DEAL_VALIDATION_MESSAGES.TOO_MANY_VEHICLES,
+      });
+    }
+
+    // Validate recipients count (allow empty for deals created without recipients)
+    if (recipientIds.length > MAX_RECIPIENTS_PER_DEAL) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: DEAL_VALIDATION_MESSAGES.TOO_MANY_RECIPIENTS,
+      });
+    }
+
+    // Use transaction to ensure data consistency
+    const deal = await this.repository.transaction(async (tx) => {
+      const repo = new DealRepository(tx);
+      
+      // Validate vehicles exist (only if there are vehicles to validate)
+      if (vehicleIds.length > 0) {
+        const valid = await repo.validateVehiclesExist(vehicleIds);
+        if (!valid) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Some vehicles not found",
+          });
+        }
+      }
+
+      // Validate recipients exist (only if there are recipients to validate)
+      if (recipientIds.length > 0) {
+        const valid = await repo.validateUsersExist(recipientIds);
+        if (!valid) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Some recipients not found",
+          });
+        }
+      }
+
+      // Create deal with vehicles and recipients
+      return await repo.createWithRelations({
+        name,
+        date,
+        time,
+        location,
+        brief,
+        fee,
+        status: DealStatus.ACTIVE,
+        createdById,
+        vehicleIds,
+        recipientIds,
+      });
+    });
+    
+    // After transaction completes, send emails to all recipients (only if there are recipients)
+    // Note: Emails are sent AFTER the transaction to avoid holding locks
+    if (recipientIds.length > 0) {
+      try {
+        await this.sendDealEmails(deal.id, recipientIds);
+      } catch (error) {
+        // Log error but don't fail the deal creation
+        // The deal is created successfully, email sending can be retried
+        console.error(`Failed to send emails for deal ${deal.id}:`, error);
+      }
+    }
+    
+    return deal;
+  }
+
+  /**
+   * Validate deal name
+   * @private
+   */
+  private validateDealName(name: string) {
     if (!name || name.trim().length === 0) {
       throw new TRPCError({
         code: "BAD_REQUEST",
@@ -296,117 +178,6 @@ export class DealService {
         message: DEAL_VALIDATION_MESSAGES.NAME_TOO_LONG,
       });
     }
-
-    // Validate vehicles count (allow empty for deals created without vehicles)
-    if (vehicleIds.length > MAX_VEHICLES_PER_DEAL) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: DEAL_VALIDATION_MESSAGES.TOO_MANY_VEHICLES,
-      });
-    }
-
-    // Validate recipients count (allow empty for deals created without recipients)
-    if (recipientIds.length > MAX_RECIPIENTS_PER_DEAL) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: DEAL_VALIDATION_MESSAGES.TOO_MANY_RECIPIENTS,
-      });
-    }
-
-    // Use transaction to ensure data consistency
-    const deal = await this.db.$transaction(async (tx) => {
-      // Validate vehicles exist (only if there are vehicles to validate)
-      if (vehicleIds.length > 0) {
-        const vehicles = await tx.vehicle.findMany({
-          where: {
-            id: { in: vehicleIds },
-          },
-          select: { id: true },
-        });
-
-        if (vehicles.length !== vehicleIds.length) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Some vehicles not found",
-          });
-        }
-      }
-
-      // Validate recipients exist (only if there are recipients to validate)
-      if (recipientIds.length > 0) {
-        const users = await tx.user.findMany({
-          where: {
-            id: { in: recipientIds },
-          },
-          select: { id: true },
-        });
-
-        if (users.length !== recipientIds.length) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Some recipients not found",
-          });
-        }
-      }
-
-      // Create deal with vehicles and recipients
-      const deal = await tx.deal.create({
-        data: {
-          name,
-          date,
-          time,
-          location,
-          brief,
-          fee,
-          status: DealStatus.ACTIVE,
-          createdById,
-          vehicles: vehicleIds.length > 0 ? {
-            create: vehicleIds.map((vehicleId, index) => ({
-              vehicleId,
-              order: index,
-            })),
-          } : undefined,
-          recipients: recipientIds.length > 0 ? {
-            create: recipientIds.map((userId) => ({
-              userId,
-              status: RecipientStatus.PENDING,
-            })),
-          } : undefined,
-        },
-        include: {
-          createdBy: {
-            select: {
-              id: true,
-              email: true,
-              firstName: true,
-              lastName: true,
-            },
-          },
-          _count: {
-            select: {
-              vehicles: true,
-              recipients: true,
-            },
-          },
-        },
-      });
-
-      return deal;
-    });
-    
-    // After transaction completes, send emails to all recipients (only if there are recipients)
-    // Note: Emails are sent AFTER the transaction to avoid holding locks
-    if (recipientIds.length > 0) {
-      try {
-        await this.sendDealEmails(deal.id, recipientIds);
-      } catch (error) {
-        // Log error but don't fail the deal creation
-        // The deal is created successfully, email sending can be retried
-        console.error(`Failed to send emails for deal ${deal.id}:`, error);
-      }
-    }
-    
-    return deal;
   }
 
   /**
@@ -416,11 +187,11 @@ export class DealService {
     const { dealId, vehicleIds, recipientIds } = params;
 
     // Use transaction for consistency
-    const result = await this.db.$transaction(async (tx) => {
+    const result = await this.repository.transaction(async (tx) => {
+      const repo = new DealRepository(tx);
+      
       // Validate deal exists and is not archived
-      const deal = await tx.deal.findUnique({
-        where: { id: dealId },
-      });
+      const deal = await repo.findById(dealId) as { status: DealStatus } | null;
 
       if (!deal) {
         throw new DealNotFoundError(dealId);
@@ -433,87 +204,40 @@ export class DealService {
         });
       }
 
-      // Validate vehicles exist
-      const vehicles = await tx.vehicle.findMany({
-        where: {
-          id: { in: vehicleIds },
-        },
-        select: { id: true },
-      });
+      // Validate vehicles and users exist
+      const [vehiclesValid, usersValid] = await Promise.all([
+        repo.validateVehiclesExist(vehicleIds),
+        repo.validateUsersExist(recipientIds),
+      ]);
 
-      if (vehicles.length !== vehicleIds.length) {
+      if (!vehiclesValid) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Some vehicles not found",
         });
       }
 
-      // Get current max order
-      const maxOrder = await tx.dealVehicle.findFirst({
-        where: { dealId },
-        orderBy: { order: "desc" },
-        select: { order: true },
-      });
-
-      const startOrder = (maxOrder?.order ?? -1) + 1;
-
-      // Get existing vehicle IDs and recipient IDs to avoid duplicates (OPTIMIZED)
-      const [existingVehicles, existingRecipients] = await Promise.all([
-        tx.dealVehicle.findMany({
-          where: {
-            dealId,
-            vehicleId: { in: vehicleIds },
-          },
-          select: { vehicleId: true },
-        }),
-        tx.dealRecipient.findMany({
-          where: {
-            dealId,
-            userId: { in: recipientIds },
-          },
-          select: { userId: true },
-        }),
-      ]);
-
-      const existingVehicleIds = new Set(existingVehicles.map((v) => v.vehicleId));
-      const newVehicleIds = vehicleIds.filter((id) => !existingVehicleIds.has(id));
-
-      // Validate recipients exist
-      const users = await tx.user.findMany({
-        where: {
-          id: { in: recipientIds },
-        },
-        select: { id: true },
-      });
-
-      if (users.length !== recipientIds.length) {
+      if (!usersValid) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Some recipients not found",
         });
       }
 
-      const existingRecipientIds = new Set(existingRecipients.map((r) => r.userId));
+      // Get existing relations to avoid duplicates
+      const existing = await repo.getExistingRelations(dealId);
+      const existingVehicleIds = new Set(existing.vehicleIds);
+      const existingRecipientIds = new Set(existing.recipientIds);
+
+      const newVehicleIds = vehicleIds.filter((id) => !existingVehicleIds.has(id));
       const newRecipientIds = recipientIds.filter((id) => !existingRecipientIds.has(id));
 
+      // Get max order for vehicles
+      const maxOrder = await repo.getMaxVehicleOrder(dealId);
+      const startOrder = maxOrder + 1;
+
       // Add new vehicles and recipients
-      await tx.deal.update({
-        where: { id: dealId },
-        data: {
-          vehicles: {
-            create: newVehicleIds.map((vehicleId, index) => ({
-              vehicleId,
-              order: startOrder + index,
-            })),
-          },
-          recipients: {
-            create: newRecipientIds.map((userId) => ({
-              userId,
-              status: RecipientStatus.PENDING,
-            })),
-          },
-        },
-      });
+      await repo.addVehiclesAndRecipients(dealId, newVehicleIds, newRecipientIds, startOrder);
 
       // Store newRecipientIds for email sending after transaction
       return { dealId, newRecipientIds };
@@ -541,104 +265,59 @@ export class DealService {
     const { name, date, time, location, brief, fee } = params;
 
     // Validate deal exists
-    const deal = await this.db.deal.findUnique({
-      where: { id: dealId },
-    });
+    const deal = await this.repository.findById(dealId);
 
     if (!deal) {
       throw new DealNotFoundError(dealId);
     }
 
     // Validate name if provided
-    if (name !== undefined && name.length < DEAL_NAME_MIN_LENGTH) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: `Deal name must be at least ${DEAL_NAME_MIN_LENGTH} characters`,
-      });
-    }
-
-    if (name !== undefined && name.length > DEAL_NAME_MAX_LENGTH) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: `Deal name must be less than ${DEAL_NAME_MAX_LENGTH} characters`,
-      });
+    if (name !== undefined) {
+      this.validateDealName(name);
     }
 
     // Update deal with provided fields
-    const updatedDeal = await this.db.deal.update({
-      where: { id: dealId },
-      data: {
-        ...(name !== undefined && { name }),
-        ...(date !== undefined && { date }),
-        ...(time !== undefined && { time }),
-        ...(location !== undefined && { location }),
-        ...(brief !== undefined && { brief }),
-        ...(fee !== undefined && { fee }),
-      },
-      include: {
-        createdBy: {
-          select: {
-            id: true,
-            email: true,
-            firstName: true,
-            lastName: true,
-          },
-        },
-        _count: {
-          select: {
-            vehicles: true,
-            recipients: true,
-          },
-        },
-      },
+    return await this.repository.updateDetails(dealId, {
+      name,
+      date,
+      time,
+      location,
+      brief,
+      fee,
     });
-
-    return updatedDeal;
   }
 
   /**
    * Archive a deal
    */
   async archiveDeal(dealId: string) {
-    const deal = await this.db.deal.findUnique({
-      where: { id: dealId },
-    });
+    const deal = await this.repository.findById(dealId);
 
     if (!deal) {
       throw new DealNotFoundError(dealId);
     }
 
-    return await this.db.deal.update({
-      where: { id: dealId },
-      data: { status: DealStatus.ARCHIVED },
-    });
+    return await this.repository.updateStatus(dealId, DealStatus.ARCHIVED);
   }
 
   /**
    * Unarchive a deal
    */
   async unarchiveDeal(dealId: string) {
-    const deal = await this.db.deal.findUnique({
-      where: { id: dealId },
-    });
+    const deal = await this.repository.findById(dealId);
 
     if (!deal) {
       throw new DealNotFoundError(dealId);
     }
 
-    return await this.db.deal.update({
-      where: { id: dealId },
-      data: { status: DealStatus.ACTIVE },
-    });
+    return await this.repository.updateStatus(dealId, DealStatus.ACTIVE);
   }
 
   /**
    * Delete deal (soft delete by archiving)
    */
   async deleteDeal(dealId: string) {
-    const deal = await this.db.deal.findUnique({
-      where: { id: dealId },
-    });
+    const deal = await this.repository.findById(dealId);
 
     if (!deal) {
       throw new DealNotFoundError(dealId);
@@ -652,67 +331,14 @@ export class DealService {
    * Get vehicles for deal (for sending emails)
    */
   async getDealVehicles(dealId: string) {
-    const dealVehicles = (await this.db.dealVehicle.findMany({
-      where: { dealId },
-      orderBy: { order: "asc" },
-      include: {
-        vehicle: {
-          include: {
-            make: { select: { name: true } },
-            model: { select: { name: true } },
-            owner: { 
-              select: { 
-                id: true, 
-                email: true, 
-                firstName: true, 
-                lastName: true 
-              } 
-            },
-            media: {
-              where: {
-                status: "READY",
-                isVisible: true,
-              },
-              orderBy: [
-                { isPrimary: "desc" },
-                { order: "asc" },
-              ],
-              take: 1,
-            },
-          },
-        },
-      },
-    })) as unknown as Array<{
-      vehicle: {
-        id: string;
-        name: string;
-        ownerId: string;
-        make: { name: string };
-        model: { name: string };
-        owner: { id: string; email: string; firstName: string | null; lastName: string | null };
-        media: Array<{ id: string; publishedUrl: string | null; originalUrl: string }>;
-      };
-    }>;
-
-    return dealVehicles.map((dv) => dv.vehicle);
+    return await this.repository.findDealVehicles(dealId);
   }
 
   /**
    * Get recipients for deal
    */
   async getDealRecipients(dealId: string, recipientIds?: string[]) {
-    const where: Prisma.DealRecipientWhereInput = { dealId };
-    
-    if (recipientIds && recipientIds.length > 0) {
-      where.userId = { in: recipientIds };
-    }
-
-    return await this.db.dealRecipient.findMany({
-      where,
-      include: {
-        user: true,
-      },
-    });
+    return await this.repository.findDealRecipients(dealId, recipientIds);
   }
 
   /**
@@ -723,23 +349,7 @@ export class DealService {
     status: RecipientStatus,
     errorMessage?: string
   ) {
-    const data: Prisma.DealRecipientUpdateInput = {
-      status,
-      sentAt: new Date(),
-    };
-
-    if (status === RecipientStatus.SENT) {
-      data.emailSentAt = new Date();
-    }
-
-    if (errorMessage) {
-      data.errorMessage = errorMessage;
-    }
-
-    return await this.db.dealRecipient.update({
-      where: { id: recipientId },
-      data,
-    });
+    return await this.repository.updateRecipientStatus(recipientId, status, errorMessage);
   }
 
   /**
@@ -822,52 +432,7 @@ export class DealService {
    * Get new vehicles and owners for a deal (PHASE 2 - Backend duplicate filtering)
    */
   async getNewVehiclesAndOwners(dealId: string, vehicleIds: string[]) {
-    const deal = await this.db.deal.findUnique({
-      where: { id: dealId },
-      include: {
-        vehicles: {
-          select: { vehicleId: true },
-        },
-        recipients: {
-          select: { userId: true },
-        },
-      },
-    });
-
-    if (!deal) {
-      throw new DealNotFoundError(dealId);
-    }
-
-    // Get existing IDs
-    const existingVehicleIds = new Set(deal.vehicles.map((v) => v.vehicleId));
-    const existingRecipientIds = new Set(deal.recipients.map((r) => r.userId));
-
-    // Filter to get only new vehicles
-    const newVehicleIds = vehicleIds.filter((id) => !existingVehicleIds.has(id));
-
-    // Get owners of new vehicles
-    const vehicles = await this.db.vehicle.findMany({
-      where: {
-        id: { in: newVehicleIds },
-      },
-      select: {
-        id: true,
-        ownerId: true,
-      },
-    });
-
-    // Get unique owner IDs that are not already recipients
-    const ownerIds = [...new Set(vehicles.map((v) => v.ownerId))];
-    const newOwnerIds = ownerIds.filter((id) => !existingRecipientIds.has(id));
-
-    return {
-      newVehicleIds,
-      newVehicleCount: newVehicleIds.length,
-      newOwnerIds,
-      newOwnerCount: newOwnerIds.length,
-      existingVehicleCount: vehicleIds.length - newVehicleIds.length,
-      existingOwnerCount: ownerIds.length - newOwnerIds.length,
-    };
+    return await this.repository.getNewVehiclesAndOwners(dealId, vehicleIds);
   }
 }
 

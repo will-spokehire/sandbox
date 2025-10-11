@@ -9,6 +9,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { parseCollections, generateCollectionSlug, mapSteeringToType } from './data-mappers.js';
 import { validateVehicleBatch } from './validation.js';
+import type { InputJsonValue } from '@prisma/client/runtime/library';
 
 const prisma = new PrismaClient();
 
@@ -373,8 +374,8 @@ async function analyzeData(records: ProcessedVehicleRecord[]): Promise<void> {
     uniqueVehicles.add(record.id);
     
     // Count images
-    if (record.images && record.images.length > 0) {
-      totalImages += record.images.length;
+    if (record.images && record.images.urls.length > 0) {
+      totalImages += record.images.urls.length;
       recordsWithImages++;
     }
   }
@@ -446,7 +447,7 @@ async function setupMakesAndModels(records: ProcessedVehicleRecord[]): Promise<{
       if (name) {
         const nameWords = name.trim().split(/\s+/);
         if (nameWords.length >= 2) {
-          make = nameWords[0];
+          make = nameWords[0] ?? '';
           model = nameWords.slice(1).join(' ');
           console.log(`🔧 Fixed invalid make "${record.vehicle.make}" → using name "${name}" → Make: "${make}", Model: "${model}"`);
         } else {
@@ -665,14 +666,14 @@ async function migrateUsers(records: ProcessedVehicleRecord[], stats: MigrationS
           },
         });
         
-        userMap.set(owner.email, updatedUser.id);
+        userMap.set(owner.email ?? '', updatedUser.id ?? '');
         stats.usersUpdated++;
         console.log(`✅ Updated user: ${owner.email}`);
       } else {
         // Create new user
         const newUser = await prisma.user.create({
           data: {
-            email: owner.email,
+            email: owner.email ?? '',
             firstName: owner.firstName,
             lastName: owner.lastName,
             phone: owner.phone,
@@ -687,15 +688,15 @@ async function migrateUsers(records: ProcessedVehicleRecord[], stats: MigrationS
           },
         });
         
-        userMap.set(owner.email, newUser.id);
+        userMap.set(owner.email ?? '', newUser.id ?? '');
         stats.usersCreated++;
-        console.log(`✅ Created user: ${owner.email}`);
+        console.log(`✅ Created user: ${owner.email ?? ''}`);
       }
       
-      processedEmails.add(owner.email);
+      processedEmails.add(owner.email ?? '');
       
     } catch (error) {
-      const errorMsg = `Error processing user ${owner.email}: ${String(error)}`;
+      const errorMsg = `Error processing user ${owner.email ?? ''}: ${String(error)}`;
       console.error(`❌ ${errorMsg}`);
       stats.errors.push(errorMsg);
     }
@@ -745,7 +746,7 @@ async function migrateVehicles(
       // Find user ID
       let userId: string | undefined;
       if (record.owner?.email) {
-        userId = userMap.get(record.owner.email);
+        userId = userMap.get(record.owner.email ?? '' );
       } else {
         // Use system user for vehicles without owners
         userId = userMap.get('SYSTEM_USER');
@@ -782,7 +783,7 @@ async function migrateVehicles(
         if (vehicle.name) {
           const nameWords = vehicle.name.trim().split(/\s+/);
           if (nameWords.length >= 2) {
-            actualMake = nameWords[0];
+            actualMake = nameWords[0] ?? '';
             actualModel = nameWords.slice(1).join(' ');
           } else {
             console.warn(`⚠️ Skipping vehicle with invalid make "${vehicle.make}" and insufficient name "${vehicle.name}"`);
@@ -836,7 +837,7 @@ async function migrateVehicles(
       }
       
       // Normalize registration number
-      const normalizedRegistration = normalizeRegistration(vehicle.registration);
+      const normalizedRegistration = normalizeRegistration(vehicle.registration ?? '');
 
       // Check for duplicate registrations
       const existingVehicles = await prisma.vehicle.findMany({
@@ -857,7 +858,7 @@ async function migrateVehicles(
       let duplicateVehicle = null;
 
       for (const existingVehicle of existingVehicles) {
-        if (areRegistrationsSimilar(vehicle.registration, existingVehicle.registration)) {
+        if (areRegistrationsSimilar(vehicle.registration ?? '', existingVehicle.registration ?? '')) {
           // Found a potential duplicate - check additional criteria
           const currentHasImages = (record.images?.urls?.length ?? 0) > 0;
           const existingHasImages = (existingVehicle.media?.length ?? 0) > 0;
@@ -878,7 +879,7 @@ async function migrateVehicles(
 
       if (isDuplicate) {
         stats.registrationDuplicates++;
-        console.log(`⚠️ Skipped duplicate vehicle: ${vehicle.name} (${vehicle.registration}) - matches existing vehicle ${duplicateVehicle.id}`);
+        console.log(`⚠️ Skipped duplicate vehicle: ${vehicle.name} (${vehicle.registration}) - matches existing vehicle ${duplicateVehicle?.id}`);
         continue;
       }
 
@@ -979,7 +980,7 @@ async function migrateMedia(
       
       try {
         // Extract filename from URL
-        const filename = imageUrl.split('/').pop() ?? `image_${i + 1}`;
+        const filename = imageUrl?.split('/').pop() ?? `image_${i + 1}`;
 
         // Validate filename has a proper image extension
         const hasValidExtension = filename && /\.(jpg|jpeg|png|gif|webp|bmp|tiff|svg)$/i.test(filename);
@@ -991,13 +992,13 @@ async function migrateMedia(
         }
 
         // Determine media status based on image availability
-        const mediaStatus = getMediaStatus(imageUrl);
-        const imageExists = checkImageExists(imageUrl);
+        const mediaStatus = getMediaStatus(imageUrl ?? '');
+        const imageExists = checkImageExists(imageUrl ?? '');
 
         // Check if media already exists for this URL and vehicle
         const existingMedia = await prisma.media.findFirst({
           where: {
-            originalUrl: imageUrl,
+            originalUrl: imageUrl ?? '',
             vehicleId: vehicleId,
           },
         });
@@ -1012,7 +1013,7 @@ async function migrateMedia(
         await prisma.media.upsert({
           where: {
             originalUrl_vehicleId: {
-              originalUrl: imageUrl,
+              originalUrl: imageUrl ?? '',
               vehicleId: vehicleId,
             },
           },
@@ -1024,7 +1025,7 @@ async function migrateMedia(
           },
           create: {
             type: 'IMAGE',
-            originalUrl: imageUrl,
+            originalUrl: imageUrl ?? '',
             filename: filename,
             title: imageTitle,
             mimeType: 'image/jpeg', // Assume JPEG for now
@@ -1086,8 +1087,8 @@ async function createSourceTracking(
           rawData: {
             primarySource: record.primarySource,
             sources: record.sources,
-            originalRecord: record,
-          },
+            originalRecord: record as unknown as InputJsonValue,
+          } as unknown as InputJsonValue,
         },
       });
       

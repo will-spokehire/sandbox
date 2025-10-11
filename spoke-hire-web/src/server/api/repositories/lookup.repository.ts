@@ -6,13 +6,13 @@
  */
 
 import { DatabaseError } from "../errors/app-errors";
-import { type db } from "~/server/db";
+import { BaseRepository } from "./base.repository";
 
-// Use the actual DB client type (with extensions)
-type DbClient = typeof db;
+export class LookupRepository extends BaseRepository {
+  // Lookup repository doesn't have a single model, so we return null
+  protected readonly model = null;
 
-export class LookupRepository {
-  constructor(private db: DbClient) {}
+  protected readonly entityName = "Lookup" as const;
 
   /**
    * Get all active makes

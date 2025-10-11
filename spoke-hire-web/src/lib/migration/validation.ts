@@ -76,8 +76,8 @@ export function cleanFieldWithUrls(value: string, fieldType: 'name' | 'model' = 
   
   // Try to extract the part before URLs
   const parts = value.split(/\s+https?:/);
-  if (parts.length > 0 && parts[0].trim()) {
-    return parts[0].trim();
+  if (parts.length > 0 && parts[0]?.trim()) {
+    return parts?.[0]?.trim() ?? '';
   }
   
   // If we can't extract anything meaningful, return 'Unknown' for models

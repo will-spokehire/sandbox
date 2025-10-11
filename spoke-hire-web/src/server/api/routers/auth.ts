@@ -8,7 +8,7 @@
  * - Get current session
  * - Resend OTP
  * 
- * REFACTORED: Now uses service layer pattern for better separation of concerns.
+ * REFACTORED: Now uses ServiceFactory for consistent service creation.
  */
 
 import { z } from "zod";
@@ -17,7 +17,7 @@ import {
   publicProcedure,
   protectedProcedure,
 } from "~/server/api/trpc";
-import { AuthService } from "../services/auth.service";
+import { ServiceFactory } from "../services/service-factory";
 
 // ============================================================================
 // Input Validation Schemas
@@ -49,7 +49,7 @@ export const authRouter = createTRPCRouter({
   signInWithOtp: publicProcedure
     .input(signInWithOtpInputSchema)
     .mutation(async ({ ctx, input }) => {
-      const service = new AuthService(ctx.db, ctx.supabase);
+      const service = ServiceFactory.createAuthService(ctx.db, ctx.supabase);
       return await service.signInWithOtp(input);
     }),
 
@@ -61,7 +61,7 @@ export const authRouter = createTRPCRouter({
   verifyOtp: publicProcedure
     .input(verifyOtpInputSchema)
     .mutation(async ({ ctx, input }) => {
-      const service = new AuthService(ctx.db, ctx.supabase);
+      const service = ServiceFactory.createAuthService(ctx.db, ctx.supabase);
       return await service.verifyOtp(input);
     }),
 
@@ -70,7 +70,7 @@ export const authRouter = createTRPCRouter({
    * Ends the current session
    */
   signOut: protectedProcedure.mutation(async ({ ctx }) => {
-    const service = new AuthService(ctx.db, ctx.supabase);
+    const service = ServiceFactory.createAuthService(ctx.db, ctx.supabase);
     return await service.signOut();
   }),
 
@@ -109,7 +109,7 @@ export const authRouter = createTRPCRouter({
   resendOtp: publicProcedure
     .input(resendOtpInputSchema)
     .mutation(async ({ ctx, input }) => {
-      const service = new AuthService(ctx.db, ctx.supabase);
+      const service = ServiceFactory.createAuthService(ctx.db, ctx.supabase);
       return await service.resendOtp(input.email);
     }),
 });

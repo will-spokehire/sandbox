@@ -3,22 +3,19 @@
  * 
  * Business logic layer for lookup/reference data operations.
  * Handles makes, models, collections, and other reference tables.
+ * 
+ * REFACTORED: Now uses dependency injection for repository and cache.
  */
 
-import { type VehicleStatus } from "@prisma/client";
-import { LookupRepository } from "../repositories/lookup.repository";
-import { cacheService, CacheKeys, CacheTTL } from "./cache.service";
-import { type db } from "~/server/db";
-
-// Use the actual DB client type (with extensions)
-type DbClient = typeof db;
+import type { VehicleStatus } from "@prisma/client";
+import type { LookupRepository } from "../repositories/lookup.repository";
+import { type CacheService, CacheKeys, CacheTTL } from "./cache.service";
 
 export class LookupService {
-  private repository: LookupRepository;
-
-  constructor(private db: DbClient) {
-    this.repository = new LookupRepository(db);
-  }
+  constructor(
+    private repository: LookupRepository,
+    private cache: CacheService
+  ) {}
 
   /**
    * Get all filter options for vehicle filtering
@@ -27,7 +24,7 @@ export class LookupService {
   async getFilterOptions(): Promise<Record<string, unknown>> {
     // Check cache first
     const cacheKey = CacheKeys.vehicleFilterOptions();
-    const cached = cacheService.get<Record<string, unknown>>(cacheKey);
+    const cached = this.cache.get<Record<string, unknown>>(cacheKey);
     if (cached) {
       return cached;
     }
@@ -81,7 +78,7 @@ export class LookupService {
     };
 
     // Cache for 5 minutes
-    cacheService.set(cacheKey, result, CacheTTL.MEDIUM);
+    this.cache.set(cacheKey, result, CacheTTL.MEDIUM);
 
     return result;
   }
@@ -93,7 +90,7 @@ export class LookupService {
   async getModelsByMake(makeId: string): Promise<Array<Record<string, unknown>>> {
     // Check cache first
     const cacheKey = CacheKeys.modelsByMake(makeId);
-    const cached = cacheService.get<Array<Record<string, unknown>>>(cacheKey);
+    const cached = this.cache.get<Array<Record<string, unknown>>>(cacheKey);
     if (cached) {
       return cached;
     }
@@ -102,7 +99,7 @@ export class LookupService {
     const models = await this.repository.getModelsByMake(makeId);
 
     // Cache for 5 minutes
-    cacheService.set(cacheKey, models, CacheTTL.MEDIUM);
+    this.cache.set(cacheKey, models, CacheTTL.MEDIUM);
 
     return models;
   }
@@ -112,10 +109,10 @@ export class LookupService {
    * Call this when makes, models, or collections are updated
    */
   invalidateCaches() {
-    cacheService.delete(CacheKeys.vehicleFilterOptions());
-    cacheService.invalidateByPattern("models:by-make:");
-    cacheService.delete(CacheKeys.makes());
-    cacheService.delete(CacheKeys.collections());
-    cacheService.delete(CacheKeys.steeringTypes());
+    this.cache.delete(CacheKeys.vehicleFilterOptions());
+    this.cache.invalidateByPattern("models:by-make:");
+    this.cache.delete(CacheKeys.makes());
+    this.cache.delete(CacheKeys.collections());
+    this.cache.delete(CacheKeys.steeringTypes());
   }
 }

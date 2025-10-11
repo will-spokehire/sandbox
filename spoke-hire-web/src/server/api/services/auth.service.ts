@@ -3,10 +3,12 @@
  * 
  * Business logic layer for authentication operations.
  * Handles OTP, user validation, and session management.
+ * 
+ * REFACTORED: Now uses dependency injection and shared types.
  */
 
-import { type SupabaseClient } from "@supabase/supabase-js";
-import { UserRepository } from "../repositories/user.repository";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { UserRepository } from "../repositories/user.repository";
 import {
   UserNotFoundError,
   AdminRequiredError,
@@ -15,30 +17,13 @@ import {
   RateLimitError,
   UnauthorizedError,
 } from "../errors/app-errors";
-import { type db } from "~/server/db";
-
-// Use the actual DB client type (with extensions)
-type DbClient = typeof db;
-
-export interface SignInWithOtpParams {
-  email: string;
-  redirectTo?: string;
-}
-
-export interface VerifyOtpParams {
-  email: string;
-  token: string;
-}
+import type { SignInWithOtpParams, VerifyOtpParams } from "~/server/types";
 
 export class AuthService {
-  private userRepository: UserRepository;
-
   constructor(
-    private db: DbClient,
+    private userRepository: UserRepository,
     private supabase: SupabaseClient
-  ) {
-    this.userRepository = new UserRepository(db);
-  }
+  ) {}
 
   /**
    * Sign in with OTP

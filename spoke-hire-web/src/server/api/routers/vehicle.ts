@@ -4,14 +4,13 @@
  * Handles all vehicle-related operations for the admin interface.
  * All procedures require admin authentication.
  * 
- * REFACTORED: Now uses service layer pattern for better separation of concerns.
+ * REFACTORED: Now uses ServiceFactory for consistent service creation.
  */
 
 import { z } from "zod";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
 import { VehicleStatus } from "@prisma/client";
-import { VehicleService } from "../services/vehicle.service";
-import { LookupService } from "../services/lookup.service";
+import { ServiceFactory } from "../services/service-factory";
 import { cacheService, CacheKeys } from "../services/cache.service";
 
 // ============================================================================
@@ -88,7 +87,7 @@ export const vehicleRouter = createTRPCRouter({
   list: adminProcedure
     .input(listVehiclesInputSchema)
     .query(async ({ ctx, input }) => {
-      const service = new VehicleService(ctx.db);
+      const service = ServiceFactory.createVehicleService(ctx.db);
       return await service.listVehicles(input);
     }),
 
@@ -98,7 +97,7 @@ export const vehicleRouter = createTRPCRouter({
   getById: adminProcedure
     .input(getByIdInputSchema)
     .query(async ({ ctx, input }) => {
-      const service = new VehicleService(ctx.db);
+      const service = ServiceFactory.createVehicleService(ctx.db);
       return await service.getVehicleById(input.id);
     }),
 
@@ -108,7 +107,7 @@ export const vehicleRouter = createTRPCRouter({
   updateStatus: adminProcedure
     .input(updateStatusInputSchema)
     .mutation(async ({ ctx, input }) => {
-      const service = new VehicleService(ctx.db);
+      const service = ServiceFactory.createVehicleService(ctx.db);
       return await service.updateVehicleStatus(input.id, input.status);
     }),
 
@@ -118,7 +117,7 @@ export const vehicleRouter = createTRPCRouter({
   delete: adminProcedure
     .input(deleteVehicleInputSchema)
     .mutation(async ({ ctx, input }) => {
-      const service = new VehicleService(ctx.db);
+      const service = ServiceFactory.createVehicleService(ctx.db);
       return await service.deleteVehicle(input.id);
     }),
 
@@ -126,8 +125,8 @@ export const vehicleRouter = createTRPCRouter({
    * Get filter options (makes, models, years, etc.)
    */
   getFilterOptions: adminProcedure.query(async ({ ctx }) => {
-    const service = new LookupService(ctx.db);
-    return await service.getFilterOptions() as Record<string, unknown>;
+    const service = ServiceFactory.createLookupService(ctx.db);
+    return await service.getFilterOptions();
   }),
 
   /**
@@ -136,8 +135,8 @@ export const vehicleRouter = createTRPCRouter({
   getModelsByMake: adminProcedure
     .input(z.object({ makeId: z.string() }))
     .query(async ({ ctx, input }) => {
-      const service = new LookupService(ctx.db);
-      return await service.getModelsByMake(input.makeId) as Array<Record<string, unknown>>;
+      const service = ServiceFactory.createLookupService(ctx.db);
+      return await service.getModelsByMake(input.makeId);
     }),
 });
 

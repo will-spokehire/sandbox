@@ -27,7 +27,17 @@
     "fs-extra": "^11.1.1",
     "path": "^0.12.7"
   },
-  "keywords": ["data", "processing", "vehicle", "catalog", "pipeline", "automation"],
+  "keywords": [
+    "data",
+    "processing",
+    "vehicle",
+    "catalog",
+    "pipeline",
+    "automation"
+  ],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "csv-writer": "^1.6.0"
+  }
 }

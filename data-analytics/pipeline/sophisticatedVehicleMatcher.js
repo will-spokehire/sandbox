@@ -1,5 +1,6 @@
 const fs = require('fs-extra');
 const path = require('path');
+const DataValidator = require('../lib/utils/DataValidator');
 
 class SophisticatedVehicleMatcher {
   constructor() {
@@ -33,10 +34,29 @@ class SophisticatedVehicleMatcher {
   async init() {
     console.log('🚀 Starting Improved Vehicle Matcher with Data Normalization...');
     await this.loadData();
+    await this.validateData();
     await this.buildMatchingIndexes();
     await this.performSophisticatedMatching();
     await this.saveResults();
     this.printStats();
+  }
+
+  async validateData() {
+    console.log('\n🔍 Validating data quality...');
+    const validator = new DataValidator();
+    
+    // Validate cleansed data
+    if (this.cleansedData.length > 0) {
+      console.log('\nValidating cleansed records...');
+      const cleansedResults = validator.validateRecords(this.cleansedData, 'cleansed');
+      
+      if (!cleansedResults.valid) {
+        console.log('\n⚠️  WARNING: Data quality issues detected in cleansed data');
+        console.log('   Errors have been logged but processing will continue.');
+      }
+    }
+    
+    console.log('✅ Data validation completed\n');
   }
 
   async loadData() {

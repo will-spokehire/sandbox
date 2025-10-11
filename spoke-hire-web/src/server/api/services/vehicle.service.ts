@@ -3,66 +3,29 @@
  * 
  * Business logic layer for vehicle operations.
  * Orchestrates repositories, builders, and external services.
+ * 
+ * REFACTORED: Now uses dependency injection and shared types.
  */
 
-import { type VehicleStatus } from "@prisma/client";
-import { VehicleRepository, type VehicleWithRelations } from "../repositories/vehicle.repository";
-import { VehicleQueryBuilder, type VehicleFilters } from "../builders/vehicle-query.builder";
+import type { VehicleStatus } from "@prisma/client";
+import type { VehicleRepository } from "../repositories/vehicle.repository";
+import type { VehicleQueryBuilder } from "../builders/vehicle-query.builder";
+import type { VehicleFilters } from "../builders/vehicle-query.builder";
 import { geocodePostcode } from "~/lib/services/geocoding";
-import { cacheService, CacheKeys, CacheTTL } from "./cache.service";
+import { type CacheService, CacheKeys, CacheTTL } from "./cache.service";
 import { VehicleNotFoundError } from "../errors/app-errors";
-import { type db } from "~/server/db";
-
-// Use the actual DB client type (with extensions)
-type DbClient = typeof db;
-
-export interface ListVehiclesParams {
-  limit: number;
-  cursor?: string;
-  skip?: number;
-  search?: string;
-  status?: VehicleStatus;
-  makeId?: string;
-  makeIds?: string[];
-  modelId?: string;
-  collectionIds?: string[];
-  exteriorColors?: string[];
-  interiorColors?: string[];
-  yearFrom?: string;
-  yearTo?: string;
-  priceFrom?: number;
-  priceTo?: number;
-  ownerId?: string;
-  vehicleIds?: string[]; // Filter by specific vehicle IDs
-  numberOfSeats?: number[];
-  gearboxTypes?: string[];
-  steeringIds?: string[];
-  countryIds?: string[];
-  counties?: string[];
-  userPostcode?: string;
-  userLatitude?: number;
-  userLongitude?: number;
-  maxDistanceMiles?: number;
-  sortByDistance?: boolean;
-  sortBy?: string;
-  sortOrder?: "asc" | "desc";
-  includeTotalCount?: boolean;
-}
-
-export interface ListVehiclesResult {
-  vehicles: VehicleWithRelations[];
-  nextCursor?: string;
-  totalCount?: number;
-}
+import type {
+  ListVehiclesParams,
+  ListVehiclesResult,
+  VehicleWithRelations,
+} from "~/server/types";
 
 export class VehicleService {
-  private repository: VehicleRepository;
-  private queryBuilder: VehicleQueryBuilder;
-
-  constructor(private db: DbClient) {
-    this.repository = new VehicleRepository(db);
-    this.queryBuilder = new VehicleQueryBuilder();
-  }
+  constructor(
+    private repository: VehicleRepository,
+    private queryBuilder: VehicleQueryBuilder,
+    private cache: CacheService
+  ) {}
 
   /**
    * List vehicles with pagination, filters, and optional distance-based sorting
@@ -125,6 +88,7 @@ export class VehicleService {
 
     // Check if we should use distance filtering
     const useDistanceFilter = userLat && userLon && maxDistanceMiles;
+    const effectiveLimitValue = limit ?? 50; // Default limit
 
     let vehicles: VehicleWithRelations[];
     let totalCount: number | undefined;
@@ -136,7 +100,7 @@ export class VehicleService {
         userLon!,
         maxDistanceMiles,
         filters,
-        limit,
+        effectiveLimitValue,
         skip,
         sortBy,
         sortOrder,
@@ -149,7 +113,7 @@ export class VehicleService {
       // Use standard Prisma query
       const result = await this.listStandard(
         filters,
-        limit,
+        effectiveLimitValue,
         skip,
         cursor,
         sortBy,
@@ -162,13 +126,14 @@ export class VehicleService {
 
     // Determine next cursor
     let nextCursor: string | undefined;
-    if (vehicles.length > limit) {
+    if (vehicles.length > effectiveLimitValue) {
       const nextItem = vehicles.pop();
       nextCursor = nextItem?.id;
     }
 
     return {
       vehicles,
+      items: vehicles,
       nextCursor,
       totalCount,
     };
@@ -287,7 +252,7 @@ export class VehicleService {
   async getVehicleById(id: string) {
     // Try cache first
     const cacheKey = CacheKeys.vehicleDetail(id);
-    const cached = cacheService.get<VehicleWithRelations>(cacheKey);
+    const cached = this.cache.get<VehicleWithRelations>(cacheKey);
     if (cached) {
       return cached;
     }
@@ -310,7 +275,7 @@ export class VehicleService {
     };
 
     // Cache for 1 minute
-    cacheService.set(cacheKey, result, CacheTTL.SHORT);
+    this.cache.set(cacheKey, result, CacheTTL.SHORT);
 
     return result;
   }
@@ -329,9 +294,9 @@ export class VehicleService {
     const updatedVehicle = await this.repository.updateStatus(id, status);
 
     // Invalidate caches
-    cacheService.delete(CacheKeys.vehicleDetail(id));
-    cacheService.invalidateByPattern("vehicle:list:");
-    cacheService.delete(CacheKeys.vehicleFilterOptions());
+    this.cache.delete(CacheKeys.vehicleDetail(id));
+    this.cache.invalidateByPattern("vehicle:list:");
+    this.cache.delete(CacheKeys.vehicleFilterOptions());
 
     return updatedVehicle;
   }
@@ -350,9 +315,9 @@ export class VehicleService {
     const deletedVehicle = await this.repository.softDelete(id);
 
     // Invalidate caches
-    cacheService.delete(CacheKeys.vehicleDetail(id));
-    cacheService.invalidateByPattern("vehicle:list:");
-    cacheService.delete(CacheKeys.vehicleFilterOptions());
+    this.cache.delete(CacheKeys.vehicleDetail(id));
+    this.cache.invalidateByPattern("vehicle:list:");
+    this.cache.delete(CacheKeys.vehicleFilterOptions());
 
     return deletedVehicle;
   }
