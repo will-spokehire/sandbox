@@ -5,11 +5,9 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ArrowLeft, Car, Archive, ArchiveRestore, MessageCircle, MoreHorizontal, Eye, User, Mail, Phone, Pencil } from "lucide-react";
 import { format } from "date-fns";
-import { toast } from "sonner";
 import { useRequireAdmin } from "~/providers/auth-provider";
 import { UserMenu } from "~/components/auth/UserMenu";
 import { Button } from "~/components/ui/button";
-import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 import {
@@ -29,6 +27,9 @@ import {
 import { formatOwnerName } from "~/lib/vehicles";
 import { useClipboard } from "~/hooks/useClipboard";
 import { CreateEditDealDialog } from "~/components/deals";
+import { useDealMutations } from "~/hooks/useDealMutations";
+import { getDealStatusConfig } from "~/lib/deals";
+import { Badge } from "~/components/ui/badge";
 
 /**
  * Deal Detail Page
@@ -43,7 +44,6 @@ export default function DealDetailPage({
   const { user, isLoading: isAuthLoading } = useRequireAdmin();
   const router = useRouter();
   const resolvedParams = use(params);
-  const utils = api.useUtils();
   const { copyToClipboard } = useClipboard();
   const [showEditDialog, setShowEditDialog] = useState(false);
 
@@ -60,29 +60,8 @@ export default function DealDetailPage({
     }
   );
 
-  // Archive mutation
-  const archiveMutation = api.deal.archive.useMutation({
-    onSuccess: () => {
-      toast.success("Deal archived successfully");
-      void utils.deal.getById.invalidate({ id: resolvedParams.id });
-      void utils.deal.list.invalidate();
-    },
-    onError: (error) => {
-      toast.error(error.message ?? "Failed to archive deal");
-    },
-  });
-
-  // Unarchive mutation
-  const unarchiveMutation = api.deal.unarchive.useMutation({
-    onSuccess: () => {
-      toast.success("Deal unarchived successfully");
-      void utils.deal.getById.invalidate({ id: resolvedParams.id });
-      void utils.deal.list.invalidate();
-    },
-    onError: (error) => {
-      toast.error(error.message ?? "Failed to unarchive deal");
-    },
-  });
+  // Use custom mutation hooks for centralized error handling
+  const { archive, unarchive } = useDealMutations();
 
   if (isAuthLoading || !user) {
     return (
@@ -96,12 +75,7 @@ export default function DealDetailPage({
   }
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; label: string }> = {
-      ACTIVE: { variant: "default", label: "Active" },
-      ARCHIVED: { variant: "secondary", label: "Archived" },
-    };
-
-    const config = variants[status] ?? { variant: "secondary", label: status };
+    const config = getDealStatusConfig(status as "ACTIVE" | "ARCHIVED");
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
@@ -204,16 +178,14 @@ export default function DealDetailPage({
                         <DropdownMenuSeparator />
                         {deal.status === "ACTIVE" ? (
                           <DropdownMenuItem
-                            onClick={() => archiveMutation.mutate({ id: deal.id })}
-                            disabled={archiveMutation.isPending}
+                            onClick={() => void archive(deal.id)}
                           >
                             <Archive className="mr-2 h-4 w-4" />
                             Archive
                           </DropdownMenuItem>
                         ) : (
                           <DropdownMenuItem
-                            onClick={() => unarchiveMutation.mutate({ id: deal.id })}
-                            disabled={unarchiveMutation.isPending}
+                            onClick={() => void unarchive(deal.id)}
                           >
                             <ArchiveRestore className="mr-2 h-4 w-4" />
                             Unarchive

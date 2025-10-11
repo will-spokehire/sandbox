@@ -4,10 +4,8 @@ import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, Mail, Archive, ArchiveRestore, Car, User, Plus, Pencil, MoreHorizontal } from "lucide-react";
 import { format } from "date-fns";
-import { toast } from "sonner";
 import { useRequireAdmin } from "~/providers/auth-provider";
 import { Button } from "~/components/ui/button";
-import { Badge } from "~/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -30,6 +28,9 @@ import { PageHeader } from "~/app/_components/ui";
 import { api } from "~/trpc/react";
 import { CreateEditDealDialog } from "~/components/deals";
 import { PageLoading } from "~/components/loading";
+import { useDealMutations } from "~/hooks/useDealMutations";
+import { getDealStatusConfig } from "~/lib/deals";
+import { Badge } from "~/components/ui/badge";
 
 /**
  * Deals List Content Component
@@ -39,7 +40,6 @@ function DealsListContent() {
   const { user, isLoading: isAuthLoading } = useRequireAdmin();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const utils = api.useUtils();
 
   // Dialog state
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -68,27 +68,8 @@ function DealsListContent() {
 
   const deals = data?.pages.flatMap((page) => page.deals) ?? [];
 
-  // Archive mutation
-  const archiveMutation = api.deal.archive.useMutation({
-    onSuccess: () => {
-      toast.success("Deal archived successfully");
-      void utils.deal.list.invalidate();
-    },
-    onError: (error) => {
-      toast.error(error.message ?? "Failed to archive deal");
-    },
-  });
-
-  // Unarchive mutation
-  const unarchiveMutation = api.deal.unarchive.useMutation({
-    onSuccess: () => {
-      toast.success("Deal unarchived successfully");
-      void utils.deal.list.invalidate();
-    },
-    onError: (error) => {
-      toast.error(error.message ?? "Failed to unarchive deal");
-    },
-  });
+  // Use custom mutation hooks for centralized error handling
+  const { archive, unarchive } = useDealMutations();
 
   const handleView = (dealId: string) => {
     router.push(`/admin/deals/${dealId}`);
@@ -100,11 +81,16 @@ function DealsListContent() {
   };
 
   const handleArchive = (dealId: string) => {
-    archiveMutation.mutate({ id: dealId });
+    void archive(dealId);
   };
 
   const handleUnarchive = (dealId: string) => {
-    unarchiveMutation.mutate({ id: dealId });
+    void unarchive(dealId);
+  };
+
+  const getStatusBadge = (status: string) => {
+    const config = getDealStatusConfig(status as "ACTIVE" | "ARCHIVED");
+    return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
   const toggleArchived = () => {
@@ -120,18 +106,6 @@ function DealsListContent() {
   if (isAuthLoading || !user) {
     return null; // Layout handles loading state
   }
-
-  const getStatusBadge = (status: string) => {
-    const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; label: string }> = {
-      ACTIVE: { variant: "default", label: "Active" },
-      ARCHIVED: { variant: "secondary", label: "Archived" },
-    };
-
-    const config = variants[status] ?? { variant: "secondary", label: status };
-    return (
-      <Badge variant={config.variant}>{config.label}</Badge>
-    );
-  };
 
   return (
     <div className="space-y-6">

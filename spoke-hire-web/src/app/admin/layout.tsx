@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from 
 import { UserMenu } from "~/components/auth/UserMenu";
 import { useRequireAdmin } from "~/providers/auth-provider";
 import { cn } from "~/lib/utils";
+import { PageLoading } from "~/components/loading";
 
 interface NavItem {
   name: string;
@@ -75,14 +76,7 @@ export default function AdminLayout({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   if (isLoading || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="h-12 w-12 border-4 border-slate-200 border-t-slate-600 rounded-full animate-spin mx-auto" />
-          <p className="text-sm text-slate-600">Loading...</p>
-        </div>
-      </div>
-    );
+    return <PageLoading />;
   }
 
   return (
