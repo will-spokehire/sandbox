@@ -115,6 +115,8 @@ src/
    ```
 3. **UI state:** Use React hooks (`useState`, `useReducer`)
 4. **Global client state:** Context API for simple cases, avoid unless necessary
+5. **Filter state:** Use `useURLFilters` for list page filters with URL persistence
+6. **Mutation state:** Use custom hooks (`useVehicleMutations`, `useDealMutations`) for centralized error handling
 
 ### Data Fetching Patterns
 1. **Fetch on server when possible** - Use React Server Components
@@ -123,6 +125,7 @@ src/
    - Mutations: `api.[router].[procedure].useMutation()`
 3. **Loading states:** Use `Skeleton` component from shadcn/ui
 4. **Error handling:** Use `Alert` component or `Sonner` toasts
+5. **Error boundaries:** Wrap components with `ErrorBoundary` for React error catching
 
 ### Forms
 Use shadcn/ui Form component with React Hook Form + Zod validation.

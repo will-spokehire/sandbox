@@ -8,70 +8,9 @@
 import { type Prisma, type DealStatus, RecipientStatus } from "@prisma/client";
 import { BaseRepository } from "./base.repository";
 import { DatabaseError, DealNotFoundError } from "../errors/app-errors";
+import type { DealWithDetails } from "~/server/types";
 
-export interface DealWithDetails {
-  id: string;
-  name: string;
-  date: string | null;
-  time: string | null;
-  location: string | null;
-  brief: string | null;
-  fee: string | null;
-  status: DealStatus;
-  createdAt: Date;
-  updatedAt: Date;
-  createdBy: {
-    id: string;
-    email: string;
-    firstName: string | null;
-    lastName: string | null;
-  };
-  vehicles: Array<{
-    id: string;
-    order: number;
-    vehicle: {
-      id: string;
-      name: string;
-      year: string;
-      price: Prisma.Decimal | null;
-      registration: string | null;
-      ownerId: string;
-      make: { name: string };
-      model: { name: string };
-      owner: {
-        id: string;
-        email: string;
-        firstName: string | null;
-        lastName: string | null;
-        phone: string | null;
-      };
-      media: Array<{
-        id: string;
-        publishedUrl: string | null;
-        isPrimary: boolean;
-      }>;
-    };
-  }>;
-  recipients: Array<{
-    id: string;
-    status: RecipientStatus;
-    emailSentAt: Date | null;
-    emailOpenedAt: Date | null;
-    emailClickedAt: Date | null;
-    errorMessage: string | null;
-    user: {
-      id: string;
-      email: string;
-      firstName: string | null;
-      lastName: string | null;
-      phone: string | null;
-    };
-  }>;
-  _count: {
-    vehicles: number;
-    recipients: number;
-  };
-}
+// Use shared types instead of duplicating interface
 
 export interface CreateDealData {
   name: string;
@@ -98,7 +37,7 @@ export class DealRepository extends BaseRepository {
    */
   async findByIdWithDetails(dealId: string): Promise<DealWithDetails> {
     try {
-      const deal = await this.db.deal.findUnique({
+      const dealResult = await this.db.deal.findUnique({
         where: { id: dealId },
         include: {
           createdBy: {
@@ -168,11 +107,24 @@ export class DealRepository extends BaseRepository {
         },
       });
 
-      if (!deal) {
+      if (!dealResult) {
         throw new DealNotFoundError(dealId);
       }
 
-      return deal as unknown as DealWithDetails;
+      // Convert Decimal prices to strings for client compatibility
+      // Type assertion needed because Prisma's inferred type doesn't match our shared types
+      const dealWithRelations = dealResult as any;
+      
+      return {
+        ...dealWithRelations,
+        vehicles: dealWithRelations.vehicles.map((dealVehicle: any) => ({
+          ...dealVehicle,
+          vehicle: {
+            ...dealVehicle.vehicle,
+            price: dealVehicle.vehicle.price?.toString() ?? null,
+          },
+        })),
+      } as DealWithDetails;
     } catch (error) {
       if (error instanceof DealNotFoundError) {
         throw error;
