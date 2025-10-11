@@ -20,7 +20,7 @@ export function createSupabaseClient() {
   }
 
   // Use service role key for admin operations, fallback to anon key
-  const key = serviceRoleKey || supabaseKey;
+  const key = serviceRoleKey ?? supabaseKey;
   
   if (!key) {
     throw new Error('Missing NEXT_PUBLIC_SUPABASE_ANON_KEY or SUPABASE_SERVICE_ROLE_KEY environment variable');

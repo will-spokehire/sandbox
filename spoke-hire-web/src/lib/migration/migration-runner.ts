@@ -7,7 +7,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import type {
   SourceRecord,
-} from './data-mappers.js';
+} from './data-mappers';
 import {
   extractEmail,
   extractUserData,
@@ -18,7 +18,7 @@ import {
   mapSteeringToType,
   parseCollections,
   generateCollectionSlug,
-} from './data-mappers.js';
+} from './data-mappers';
 
 const prisma = new PrismaClient();
 
@@ -211,21 +211,21 @@ async function loadDataSources(): Promise<DataSources> {
     // Load catalog data
     const catalogPath = path.join(dataDir, 'catalog_products.json');
     if (fs.existsSync(catalogPath)) {
-      sources.catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
+      sources.catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8')) as SourceRecord[];
       console.log(`✅ Loaded ${sources.catalog.length} catalog records`);
     }
     
     // Load cleansed data
     const cleansedPath = path.join(dataDir, 'cleansed_database.json');
     if (fs.existsSync(cleansedPath)) {
-      sources.cleansed = JSON.parse(fs.readFileSync(cleansedPath, 'utf8'));
+      sources.cleansed = JSON.parse(fs.readFileSync(cleansedPath, 'utf8')) as SourceRecord[];
       console.log(`✅ Loaded ${sources.cleansed.length} cleansed records`);
     }
     
     // Load submission data
     const submissionPath = path.join(dataDir, 'submission.from.1march.2025.json');
     if (fs.existsSync(submissionPath)) {
-      sources.submission = JSON.parse(fs.readFileSync(submissionPath, 'utf8'));
+      sources.submission = JSON.parse(fs.readFileSync(submissionPath, 'utf8')) as SourceRecord[];
       console.log(`✅ Loaded ${sources.submission.length} submission records`);
     }
     
@@ -249,7 +249,7 @@ async function analyzeData(sources: DataSources): Promise<void> {
   let recordsWithImages = 0;
   
   // Analyze each source
-  for (const [sourceName, records] of Object.entries(sources)) {
+  for (const [sourceName, records] of Object.entries(sources) as Array<[keyof DataSources, SourceRecord[]]>) {
     console.log(`\n📋 ${sourceName.toUpperCase()} Source:`);
     console.log(`  Records: ${records.length}`);
     
@@ -279,7 +279,7 @@ async function analyzeData(sources: DataSources): Promise<void> {
   }
   
   console.log('\n📈 Overall Statistics:');
-  console.log(`  Total Records: ${Object.values(sources).reduce((sum, records) => sum + records.length, 0)}`);
+  console.log(`  Total Records: ${(Object.values(sources) as SourceRecord[][]).reduce((sum, records) => sum + records.length, 0)}`);
   console.log(`  Unique Emails: ${uniqueEmails.size}`);
   console.log(`  Unique Vehicles: ${uniqueVehicles.size}`);
   console.log(`  Total Images: ${totalImages}`);
@@ -325,7 +325,7 @@ async function setupMakesAndModels(sources: DataSources): Promise<{
   const modelData = new Map<string, Set<string>>(); // make -> models
   
   // Extract makes and models from all sources
-  for (const [sourceName, records] of Object.entries(sources)) {
+  for (const [sourceName, records] of Object.entries(sources) as Array<[keyof DataSources, SourceRecord[]]>) {
     for (const record of records) {
       const vehicleData = extractVehicleData(record, sourceName);
       if (vehicleData?.make && vehicleData?.model) {
@@ -465,7 +465,7 @@ async function migrateUsers(sources: DataSources, stats: MigrationStats): Promis
   userMap.set('SYSTEM_USER', systemUserId);
   
   // Process all sources to find unique users
-  for (const [sourceName, records] of Object.entries(sources)) {
+  for (const [sourceName, records] of Object.entries(sources) as Array<[keyof DataSources, SourceRecord[]]>) {
     for (const record of records) {
       const userData = extractUserData(record, sourceName);
       if (!userData || processedEmails.has(userData.email)) {
@@ -482,13 +482,13 @@ async function migrateUsers(sources: DataSources, stats: MigrationStats): Promis
           const updatedUser = await prisma.user.update({
             where: { id: existingUser.id },
             data: {
-              firstName: userData.firstName || existingUser.firstName,
-              lastName: userData.lastName || existingUser.lastName,
-              phone: userData.phone || existingUser.phone,
-              street: userData.street || existingUser.street,
-              city: userData.city || existingUser.city,
-              county: userData.county || existingUser.county,
-              postcode: userData.postcode || existingUser.postcode,
+              firstName: userData.firstName ?? existingUser.firstName,
+              lastName: userData.lastName ?? existingUser.lastName,
+              phone: userData.phone ?? existingUser.phone,
+              street: userData.street ?? existingUser.street,
+              city: userData.city ?? existingUser.city,
+              county: userData.county ?? existingUser.county,
+              postcode: userData.postcode ?? existingUser.postcode,
             },
           });
           
@@ -521,7 +521,7 @@ async function migrateUsers(sources: DataSources, stats: MigrationStats): Promis
         processedEmails.add(userData.email);
         
       } catch (error) {
-        const errorMsg = `Error processing user ${userData.email}: ${error}`;
+        const errorMsg = `Error processing user ${userData.email}: ${String(error)}`;
         console.error(`❌ ${errorMsg}`);
         stats.errors.push(errorMsg);
       }
@@ -548,7 +548,7 @@ async function migrateVehicles(
   
   const vehicleMap = new Map<string, string>();
   
-  for (const [sourceName, records] of Object.entries(sources)) {
+  for (const [sourceName, records] of Object.entries(sources) as Array<[keyof DataSources, SourceRecord[]]>) {
     console.log(`\n📋 Processing ${sourceName} vehicles...`);
     
     for (const record of records) {
@@ -622,8 +622,8 @@ async function migrateVehicles(
         stats.vehiclesCreated++;
         
         // Assign collections if available
-        if (record.collection && sourceName === 'catalog') {
-          const collections = parseCollections(record.collection);
+        if ((record as SourceRecord & { collection?: string }).collection && sourceName === 'catalog') {
+          const collections = parseCollections((record as SourceRecord & { collection?: string }).collection);
           for (const collectionName of collections) {
             const collectionId = collectionMap[collectionName];
             if (collectionId) {
@@ -636,7 +636,7 @@ async function migrateVehicles(
                 });
                 console.log(`✅ Assigned collection "${collectionName}" to vehicle ${vehicle.name}`);
               } catch (error) {
-                console.warn(`⚠️ Failed to assign collection "${collectionName}": ${error}`);
+                console.warn(`⚠️ Failed to assign collection "${collectionName}": ${String(error)}`);
               }
             }
           }
@@ -645,7 +645,7 @@ async function migrateVehicles(
         console.log(`✅ Created vehicle: ${vehicle.name} (${vehicle.id})`);
         
       } catch (error) {
-        const errorMsg = `Error creating vehicle ${originalId}: ${error}`;
+        const errorMsg = `Error creating vehicle ${originalId}: ${String(error)}`;
         console.error(`❌ ${errorMsg}`);
         stats.errors.push(errorMsg);
       }
@@ -666,7 +666,7 @@ async function migrateMedia(
 ): Promise<void> {
   console.log('\n📸 Migrating media...');
   
-  for (const [sourceName, records] of Object.entries(sources)) {
+  for (const [sourceName, records] of Object.entries(sources) as Array<[keyof DataSources, SourceRecord[]]>) {
     console.log(`\n📋 Processing ${sourceName} media...`);
     
     for (const record of records) {
@@ -706,7 +706,7 @@ async function migrateMedia(
           console.log(`✅ Created media: ${media.filename} for vehicle ${vehicleId}`);
           
         } catch (error) {
-          const errorMsg = `Error creating media ${media.filename}: ${error}`;
+          const errorMsg = `Error creating media ${media.filename}: ${String(error)}`;
           console.error(`❌ ${errorMsg}`);
           stats.errors.push(errorMsg);
         }
@@ -727,7 +727,7 @@ async function migrateSources(
 ): Promise<void> {
   console.log('\n📋 Migrating source tracking...');
   
-  for (const [sourceName, records] of Object.entries(sources)) {
+  for (const [sourceName, records] of Object.entries(sources) as Array<[keyof DataSources, SourceRecord[]]>) {
     console.log(`\n📋 Processing ${sourceName} sources...`);
     
     for (const record of records) {
@@ -749,13 +749,13 @@ async function migrateSources(
           },
           update: {
             vehicleId: vehicleId,
-            rawData: record,
+            rawData: record as Record<string, unknown>,
           },
           create: {
             vehicleId: vehicleId,
             sourceType: sourceName,
             sourceId: originalId,
-            rawData: record,
+            rawData: record as Record<string, unknown>,
           },
         });
         
@@ -763,7 +763,7 @@ async function migrateSources(
         console.log(`✅ Created source tracking: ${sourceName}:${originalId} for vehicle ${vehicleId}`);
         
       } catch (error) {
-        const errorMsg = `Error creating source tracking ${sourceName}:${originalId}: ${error}`;
+        const errorMsg = `Error creating source tracking ${sourceName}:${originalId}: ${String(error)}`;
         console.error(`❌ ${errorMsg}`);
         stats.errors.push(errorMsg);
       }
@@ -820,13 +820,13 @@ export async function runMigration(filters: MigrationFilters = DEFAULT_FILTERS):
     const catalog = await loadProcessedVehicleCatalog();
     
     // Apply filters
-    const filteredRecords = applyFiltersToProcessedRecords(catalog, filters);
+    applyFiltersToProcessedRecords(catalog, filters);
     
     // Analyze filtered data
     // await analyzeProcessedData(filteredRecords);
     
     // Setup reference data
-    const steeringMap = await setupSteeringTypes();
+    await setupSteeringTypes();
     // const { makeMap, modelMap } = await setupMakesAndModelsFromProcessed(filteredRecords);
     // const collectionMap = await setupCollectionsFromProcessed(filteredRecords);
     

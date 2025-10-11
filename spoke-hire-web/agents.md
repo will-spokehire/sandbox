@@ -10,6 +10,40 @@
 - **Forms:** React Hook Form + Zod
 - **State:** TanStack Query (via tRPC)
 
+## 🚀 Quick Dev Rules
+
+### **TypeScript & ESLint**
+- ❌ Never use `any` → Use `unknown`, `Record<string, unknown>`, specific types
+- ❌ Never use `||` → Use `??` (nullish coalescing)
+- ✅ Use `import type` for type-only imports
+- ✅ Wrap errors: `String(error)` in template literals
+- ✅ Remove unused variables or prefix with `_`
+
+### **React Hooks**
+- ✅ Wrap arrays in `useMemo` for `useCallback` dependencies
+- ✅ Example: `useMemo(() => data?.items ?? [], [data?.items])`
+
+### **Quick Fixes**
+```typescript
+// ❌ Bad
+const data = JSON.parse(json) as any;
+const value = input || defaultValue;
+catch (_error) { }
+
+// ✅ Good  
+const data = JSON.parse(json) as SourceRecord[];
+const value = input ?? defaultValue;
+catch { }
+```
+
+### **Commands**
+```bash
+npm run lint        # Check for errors
+npm run typecheck   # TypeScript validation
+```
+
+**Rule**: Fix ALL lint warnings immediately! 🎯
+
 ## UI Component Guidelines
 
 ### Using shadcn/ui Components

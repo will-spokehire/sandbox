@@ -5,15 +5,15 @@
  * Orchestrates repositories, builders, and external services.
  */
 
-import { type VehicleStatus } from "@prisma/client";
-import { VehicleRepository } from "../repositories/vehicle.repository";
+import { type VehicleStatus, type PrismaClient } from "@prisma/client";
+import { VehicleRepository, type VehicleWithRelations } from "../repositories/vehicle.repository";
 import { VehicleQueryBuilder, type VehicleFilters } from "../builders/vehicle-query.builder";
 import { geocodePostcode } from "~/lib/services/geocoding";
 import { cacheService, CacheKeys, CacheTTL } from "./cache.service";
 import { VehicleNotFoundError } from "../errors/app-errors";
 
-// Use the DB type from context
-type DbClient = any;
+// Use the proper Prisma client type
+type DbClient = PrismaClient;
 
 export interface ListVehiclesParams {
   limit: number;
@@ -49,7 +49,7 @@ export interface ListVehiclesParams {
 }
 
 export interface ListVehiclesResult {
-  vehicles: any[];
+  vehicles: VehicleWithRelations[];
   nextCursor?: string;
   totalCount?: number;
 }
@@ -125,15 +125,15 @@ export class VehicleService {
     // Check if we should use distance filtering
     const useDistanceFilter = userLat && userLon && maxDistanceMiles;
 
-    let vehicles: any[];
+    let vehicles: VehicleWithRelations[];
     let totalCount: number | undefined;
 
     if (useDistanceFilter) {
       // Use distance-based query
       const result = await this.listWithDistance(
-        userLat!,
-        userLon!,
-        maxDistanceMiles!,
+        userLat,
+        userLon,
+        maxDistanceMiles,
         filters,
         limit,
         skip,
@@ -160,7 +160,7 @@ export class VehicleService {
     }
 
     // Determine next cursor
-    let nextCursor: string | undefined = undefined;
+    let nextCursor: string | undefined;
     if (vehicles.length > limit) {
       const nextItem = vehicles.pop();
       nextCursor = nextItem?.id;
@@ -182,12 +182,12 @@ export class VehicleService {
     maxDistanceMiles: number,
     filters: VehicleFilters,
     limit: number,
-    skip: number = 0,
-    sortBy: string = "createdAt",
+    skip = 0,
+    sortBy = "createdAt",
     sortOrder: "asc" | "desc" = "desc",
-    sortByDistance: boolean = false,
-    includeTotalCount: boolean = false
-  ) {
+    sortByDistance = false,
+    includeTotalCount = false
+  ): Promise<{ vehicles: VehicleWithRelations[]; totalCount?: number }> {
     // Build and execute distance query
     const query = this.queryBuilder.buildDistanceQuery({
       userLatitude: userLat,
@@ -201,11 +201,11 @@ export class VehicleService {
       sortByDistance,
     });
 
-    const rawVehicles = await this.repository.queryRaw<any>(query);
+    const rawVehicles = await this.repository.queryRaw<{ id: string; distance: number }>(query);
 
     // Fetch related data for each vehicle
-    const vehicleIds = rawVehicles.map((v: any) => v.id);
-    let vehicles: any[] = [];
+    const vehicleIds = rawVehicles.map((v) => v.id);
+    let vehicles: VehicleWithRelations[] = [];
 
     if (vehicleIds.length > 0) {
       const vehiclesWithRelations = await this.repository.findManyByIds(vehicleIds);
@@ -213,11 +213,11 @@ export class VehicleService {
       // Merge distance data with relations, maintaining order
       const vehicleMap = new Map(vehiclesWithRelations.map((v) => [v.id, v]));
       vehicles = rawVehicles
-        .map((rv: any) => {
+        .map((rv) => {
           const vehicle = vehicleMap.get(rv.id);
           return vehicle ? { ...vehicle, distance: rv.distance } : null;
         })
-        .filter(Boolean);
+        .filter((v): v is VehicleWithRelations & { distance: number } => v !== null);
     }
 
     // Get total count if requested
@@ -242,12 +242,12 @@ export class VehicleService {
   private async listStandard(
     filters: VehicleFilters,
     limit: number,
-    skip: number = 0,
+    skip = 0,
     cursor?: string,
-    sortBy: string = "createdAt",
+    sortBy = "createdAt",
     sortOrder: "asc" | "desc" = "desc",
-    includeTotalCount: boolean = false
-  ) {
+    includeTotalCount = false
+  ): Promise<{ vehicles: VehicleWithRelations[]; totalCount?: number }> {
     // Build Prisma where clause
     const where = this.queryBuilder.buildPrismaWhere(filters);
 
@@ -257,7 +257,7 @@ export class VehicleService {
     }
 
     // Build orderBy
-    const orderBy: any =
+    const orderBy =
       sortBy === "name"
         ? { name: sortOrder }
         : sortBy === "price"
@@ -286,7 +286,7 @@ export class VehicleService {
   async getVehicleById(id: string) {
     // Try cache first
     const cacheKey = CacheKeys.vehicleDetail(id);
-    const cached = cacheService.get<any>(cacheKey);
+    const cached = cacheService.get<VehicleWithRelations>(cacheKey);
     if (cached) {
       return cached;
     }

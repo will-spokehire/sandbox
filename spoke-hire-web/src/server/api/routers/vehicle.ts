@@ -12,6 +12,7 @@ import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
 import { VehicleStatus } from "@prisma/client";
 import { VehicleService } from "../services/vehicle.service";
 import { LookupService } from "../services/lookup.service";
+import { cacheService, CacheKeys } from "../services/cache.service";
 
 // ============================================================================
 // Input Validation Schemas
@@ -126,7 +127,7 @@ export const vehicleRouter = createTRPCRouter({
    */
   getFilterOptions: adminProcedure.query(async ({ ctx }) => {
     const service = new LookupService(ctx.db);
-    return await service.getFilterOptions();
+    return await service.getFilterOptions() as Record<string, unknown>;
   }),
 
   /**
@@ -136,7 +137,7 @@ export const vehicleRouter = createTRPCRouter({
     .input(z.object({ makeId: z.string() }))
     .query(async ({ ctx, input }) => {
       const service = new LookupService(ctx.db);
-      return await service.getModelsByMake(input.makeId);
+      return await service.getModelsByMake(input.makeId) as Array<Record<string, unknown>>;
     }),
 });
 
@@ -145,6 +146,11 @@ export const vehicleRouter = createTRPCRouter({
  * For backward compatibility with existing code
  */
 export function invalidateFilterOptionsCache() {
-  const service = new LookupService({} as any);
-  service.invalidateCaches();
+  // This function is for backward compatibility
+  // Directly invalidate the caches without needing a database client
+  cacheService.delete(CacheKeys.vehicleFilterOptions());
+  cacheService.invalidateByPattern("models:by-make:");
+  cacheService.delete(CacheKeys.makes());
+  cacheService.delete(CacheKeys.collections());
+  cacheService.delete(CacheKeys.steeringTypes());
 }

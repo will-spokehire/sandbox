@@ -7,7 +7,7 @@
  * TODO: Consider upgrading to Redis/Upstash for production scalability
  */
 
-interface CacheEntry<T = any> {
+interface CacheEntry<T = unknown> {
   data: T;
   timestamp: number;
   ttl: number; // Time to live in milliseconds

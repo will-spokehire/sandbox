@@ -5,7 +5,6 @@
  * https://loops.so
  */
 
-import { TRPCError } from "@trpc/server";
 
 /**
  * Vehicle data for email
@@ -48,12 +47,12 @@ export class EmailService {
   private testEmailOverride: string | undefined;
 
   constructor() {
-    this.apiKey = process.env.LOOPS_API_KEY || "";
-    this.transactionalId = process.env.LOOPS_TRANSACTIONAL_ID || "deal-notification";
+    this.apiKey = process.env.LOOPS_API_KEY ?? "";
+    this.transactionalId = process.env.LOOPS_TRANSACTIONAL_ID ?? "deal-notification";
     // Only enable debug mode if explicitly set to "true", not in all development
     this.isDebugMode = process.env.EMAIL_DEBUG === "true";
     // Test email override - if set, all emails will be sent to this address
-    this.testEmailOverride = process.env.TEST_EMAIL_OVERRIDE?.trim() || undefined;
+    this.testEmailOverride = process.env.TEST_EMAIL_OVERRIDE?.trim() ?? undefined;
     
     if (!this.apiKey) {
       console.warn("⚠️ LOOPS_API_KEY not configured. Email sending will be simulated.");
@@ -80,7 +79,7 @@ export class EmailService {
     
     // Determine actual recipient email (use override if set)
     const originalRecipient = to;
-    const actualRecipient = this.testEmailOverride || to;
+    const actualRecipient = this.testEmailOverride ?? to;
     const isOverrideActive = this.testEmailOverride && this.testEmailOverride !== to;
 
     // If debug mode or no API key, log instead of sending
@@ -95,13 +94,13 @@ export class EmailService {
         console.log("(Using test email override)");
       }
       console.log("Deal Name:", dealName);
-      console.log("Date:", date || "(none)");
-      console.log("Time:", time || "(none)");
-      console.log("Location:", location || "(none)");
-      console.log("Brief:", brief || "(none)");
-      console.log("Fee:", fee || "(none)");
+      console.log("Date:", date ?? "(none)");
+      console.log("Time:", time ?? "(none)");
+      console.log("Location:", location ?? "(none)");
+      console.log("Brief:", brief ?? "(none)");
+      console.log("Fee:", fee ?? "(none)");
       console.log("Vehicle Names:", vehicleNames);
-      console.log("Deal URL:", dealUrl || "(none)");
+      console.log("Deal URL:", dealUrl ?? "(none)");
       console.log("=".repeat(80) + "\n");
       
       // Simulate delay
@@ -132,18 +131,18 @@ export class EmailService {
           dataVariables: {
             userName,
             dealName,
-            date: date || "",
-            time: time || "",
-            location: location || "",
-            brief: brief || "",
-            fee: fee || "",
+            date: date ?? "",
+            time: time ?? "",
+            location: location ?? "",
+            brief: brief ?? "",
+            fee: fee ?? "",
             vehicleNames,
-            dealUrl: dealUrl || "",
+            dealUrl: dealUrl ?? "",
           },
         }),
       });
 
-      const data = await response.json();
+      const data = await response.json() as { id?: string };
 
       if (!response.ok) {
         const errorMessage = `Loops API error: ${response.status} - ${JSON.stringify(data)}`;
@@ -239,7 +238,7 @@ export class EmailService {
 /**
  * Helper to format price
  */
-export function formatPrice(price: any): string {
+export function formatPrice(price: string | number | null | undefined): string {
   if (!price) return "POA";
   
   const numPrice = typeof price === "string" ? parseFloat(price) : Number(price);

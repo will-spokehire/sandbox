@@ -5,12 +5,12 @@
  * Handles makes, models, collections, and other reference tables.
  */
 
-import { type VehicleStatus } from "@prisma/client";
+import { type VehicleStatus, type PrismaClient } from "@prisma/client";
 import { LookupRepository } from "../repositories/lookup.repository";
 import { cacheService, CacheKeys, CacheTTL } from "./cache.service";
 
-// Use the DB type from context
-type DbClient = any;
+// Use the proper Prisma client type
+type DbClient = PrismaClient;
 
 export class LookupService {
   private repository: LookupRepository;
@@ -23,10 +23,10 @@ export class LookupService {
    * Get all filter options for vehicle filtering
    * Cached for 5 minutes
    */
-  async getFilterOptions() {
+  async getFilterOptions(): Promise<Record<string, unknown>> {
     // Check cache first
     const cacheKey = CacheKeys.vehicleFilterOptions();
-    const cached = cacheService.get<any>(cacheKey);
+    const cached = cacheService.get<Record<string, unknown>>(cacheKey);
     if (cached) {
       return cached;
     }
@@ -68,9 +68,9 @@ export class LookupService {
       exteriorColors,
       interiorColors,
       years,
-      statusCounts: statusCounts.map((sc: any) => ({
-        status: sc.status as VehicleStatus,
-        count: sc._count as number,
+      statusCounts: statusCounts.map((sc: { status: VehicleStatus; _count: number }) => ({
+        status: sc.status,
+        count: sc._count,
       })),
       seats,
       gearboxTypes,
@@ -89,10 +89,10 @@ export class LookupService {
    * Get models by make ID
    * Cached for 5 minutes
    */
-  async getModelsByMake(makeId: string) {
+  async getModelsByMake(makeId: string): Promise<Array<Record<string, unknown>>> {
     // Check cache first
     const cacheKey = CacheKeys.modelsByMake(makeId);
-    const cached = cacheService.get<any>(cacheKey);
+    const cached = cacheService.get<Array<Record<string, unknown>>>(cacheKey);
     if (cached) {
       return cached;
     }

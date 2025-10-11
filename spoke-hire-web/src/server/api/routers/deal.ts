@@ -95,7 +95,7 @@ export const dealRouter = createTRPCRouter({
   list: adminProcedure
     .input(listDealsInputSchema)
     .query(async ({ ctx, input }) => {
-      const service = new DealService(ctx.db as any);
+      const service = new DealService(ctx.db);
       return await service.listDeals({
         limit: input.limit,
         cursor: input.cursor,
@@ -109,7 +109,7 @@ export const dealRouter = createTRPCRouter({
   getById: adminProcedure
     .input(getDealByIdInputSchema)
     .query(async ({ ctx, input }) => {
-      const service = new DealService(ctx.db as any);
+      const service = new DealService(ctx.db);
       return await service.getDealById(input.id);
     }),
 
@@ -119,7 +119,7 @@ export const dealRouter = createTRPCRouter({
   create: adminProcedure
     .input(createDealInputSchema)
     .mutation(async ({ ctx, input }) => {
-      const service = new DealService(ctx.db as any);
+      const service = new DealService(ctx.db);
       
       // Get current user ID from context
       const userId = ctx.user.id;
@@ -146,7 +146,7 @@ export const dealRouter = createTRPCRouter({
   send: adminProcedure
     .input(sendDealInputSchema)
     .mutation(async ({ ctx, input }) => {
-      const dealService = new DealService(ctx.db as any);
+      const dealService = new DealService(ctx.db);
       const emailService = new EmailService();
 
       // Get deal details
@@ -162,17 +162,17 @@ export const dealRouter = createTRPCRouter({
       );
 
       // Prepare emails for bulk sending - personalized per recipient
-      const emails = recipients.map((recipient: any) => {
+      const emails = recipients.map((recipient) => {
         // Filter vehicles to only include those owned by this recipient
         const recipientVehicles = vehicles.filter(
-          (vehicle: any) => vehicle.ownerId === recipient.userId
+          (vehicle) => vehicle.ownerId === recipient.userId
         );
         
         // Format vehicle names as comma-separated string
-        const vehicleNames = recipientVehicles.map((v: any) => v.name).join(", ");
+        const vehicleNames = recipientVehicles.map((v) => v.name).join(", ");
         
         // Get user name (firstName or fallback to email username)
-        const userName = recipient.user.firstName || recipient.user.email.split("@")[0];
+        const userName = recipient.user.firstName ?? recipient.user.email.split("@")[0];
         
         return {
           to: recipient.user.email,
@@ -240,7 +240,7 @@ export const dealRouter = createTRPCRouter({
   addVehiclesToDeal: adminProcedure
     .input(addVehiclesToDealInputSchema)
     .mutation(async ({ ctx, input }) => {
-      const service = new DealService(ctx.db as any);
+      const service = new DealService(ctx.db);
       return await service.addVehiclesToDeal({
         dealId: input.dealId,
         vehicleIds: input.vehicleIds,
@@ -254,7 +254,7 @@ export const dealRouter = createTRPCRouter({
   update: adminProcedure
     .input(updateDealInputSchema)
     .mutation(async ({ ctx, input }) => {
-      const service = new DealService(ctx.db as any);
+      const service = new DealService(ctx.db);
       const { id, ...updateParams } = input;
       return await service.updateDeal(id, updateParams);
     }),
@@ -265,7 +265,7 @@ export const dealRouter = createTRPCRouter({
   updateStatus: adminProcedure
     .input(updateDealStatusInputSchema)
     .mutation(async ({ ctx, input }) => {
-      const service = new DealService(ctx.db as any);
+      const service = new DealService(ctx.db);
       if (input.status === "ARCHIVED") {
         return await service.archiveDeal(input.id);
       } else {
@@ -279,7 +279,7 @@ export const dealRouter = createTRPCRouter({
   archive: adminProcedure
     .input(archiveDealInputSchema)
     .mutation(async ({ ctx, input }) => {
-      const service = new DealService(ctx.db as any);
+      const service = new DealService(ctx.db);
       return await service.archiveDeal(input.id);
     }),
 
@@ -289,7 +289,7 @@ export const dealRouter = createTRPCRouter({
   unarchive: adminProcedure
     .input(unarchiveDealInputSchema)
     .mutation(async ({ ctx, input }) => {
-      const service = new DealService(ctx.db as any);
+      const service = new DealService(ctx.db);
       return await service.unarchiveDeal(input.id);
     }),
 
@@ -299,7 +299,7 @@ export const dealRouter = createTRPCRouter({
   delete: adminProcedure
     .input(deleteDealInputSchema)
     .mutation(async ({ ctx, input }) => {
-      const service = new DealService(ctx.db as any);
+      const service = new DealService(ctx.db);
       return await service.deleteDeal(input.id);
     }),
 
@@ -315,7 +315,11 @@ export const dealRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      const where: any = {
+      const where: {
+        status: string;
+        OR?: Array<Record<string, unknown>>;
+        userType?: string;
+      } = {
         status: "ACTIVE",
       };
 
@@ -371,7 +375,7 @@ export const dealRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      const service = new DealService(ctx.db as any);
+      const service = new DealService(ctx.db);
       return await service.getNewVehiclesAndOwners(input.dealId, input.vehicleIds);
     }),
 });

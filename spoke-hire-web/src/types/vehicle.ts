@@ -116,7 +116,7 @@ export interface PostcodeResponse {
     postcode: string;
     admin_district: string;
     region: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 

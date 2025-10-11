@@ -8,7 +8,7 @@
  */
 
 import { TRPCError } from "@trpc/server";
-import { type PrismaClient, DealStatus, RecipientStatus, Prisma } from "@prisma/client";
+import { type PrismaClient, DealStatus, RecipientStatus, type Prisma } from "@prisma/client";
 import { DealNotFoundError } from "../errors/app-errors";
 import {
   MAX_VEHICLES_PER_DEAL,
@@ -88,7 +88,7 @@ export interface DealWithDetails {
       id: string;
       name: string;
       year: string;
-      price: any;
+      price: string | number | null;
       registration: string | null;
       make: { name: string };
       model: { name: string };
@@ -683,7 +683,7 @@ export class DealService {
       },
     });
 
-    return dealVehicles.map((dv: any) => dv.vehicle);
+    return dealVehicles.map((dv) => dv.vehicle);
   }
 
   /**
@@ -748,17 +748,17 @@ export class DealService {
     const recipients = await this.getDealRecipients(dealId, recipientIds);
     
     // Prepare emails for bulk sending - personalized per recipient
-    const emails = recipients.map((recipient: any) => {
+    const emails = recipients.map((recipient) => {
       // Filter vehicles to only include those owned by this recipient
       const recipientVehicles = vehicles.filter(
-        (vehicle: any) => vehicle.ownerId === recipient.userId
+        (vehicle) => vehicle.ownerId === recipient.userId
       );
       
       // Format vehicle names as comma-separated string
-      const vehicleNames = recipientVehicles.map((v: any) => v.name).join(", ");
+      const vehicleNames = recipientVehicles.map((v) => v.name).join(", ");
       
       // Get user name (firstName or fallback to email username)
-      const userName = recipient.user.firstName || recipient.user.email.split("@")[0];
+      const userName = recipient.user.firstName ?? recipient.user.email.split("@")[0];
       
       return {
         to: recipient.user.email,

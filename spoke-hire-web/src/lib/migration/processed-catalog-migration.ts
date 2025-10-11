@@ -8,6 +8,7 @@ import { PrismaClient } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
 import { parseCollections, generateCollectionSlug, mapSteeringToType } from './data-mappers.js';
+import { validateVehicleBatch } from './validation.js';
 
 const prisma = new PrismaClient();
 
@@ -83,7 +84,7 @@ function getCountryCode(countryName: string): string | null {
     // and we want unique names instead
   };
 
-  return countryCodeMap[countryName] || null;
+  return countryCodeMap[countryName] ?? null;
 }
 
 /**
@@ -257,7 +258,7 @@ interface ProcessedVehicleCatalog {
   metadata: {
     generatedAt: string;
     totalRecords: number;
-    [key: string]: any;
+    [key: string]: unknown;
   };
   records: ProcessedVehicleRecord[];
 }
@@ -653,13 +654,13 @@ async function migrateUsers(records: ProcessedVehicleRecord[], stats: MigrationS
         const updatedUser = await prisma.user.update({
           where: { id: existingUser.id },
           data: {
-            firstName: owner.firstName || existingUser.firstName,
-            lastName: owner.lastName || existingUser.lastName,
-            phone: owner.phone || existingUser.phone,
-            street: owner.address?.street || existingUser.street,
-            city: owner.address?.city || existingUser.city,
-            county: owner.address?.county || existingUser.county,
-            postcode: owner.address?.postcode || existingUser.postcode,
+            firstName: owner.firstName ?? existingUser.firstName,
+            lastName: owner.lastName ?? existingUser.lastName,
+            phone: owner.phone ?? existingUser.phone,
+            street: owner.address?.street ?? existingUser.street,
+            city: owner.address?.city ?? existingUser.city,
+            county: owner.address?.county ?? existingUser.county,
+            postcode: owner.address?.postcode ?? existingUser.postcode,
             countryId: owner.address?.country ? countryMap.get(owner.address.country) : existingUser.countryId,
           },
         });
@@ -694,7 +695,7 @@ async function migrateUsers(records: ProcessedVehicleRecord[], stats: MigrationS
       processedEmails.add(owner.email);
       
     } catch (error) {
-      const errorMsg = `Error processing user ${owner.email}: ${error}`;
+      const errorMsg = `Error processing user ${owner.email}: ${String(error)}`;
       console.error(`❌ ${errorMsg}`);
       stats.errors.push(errorMsg);
     }
@@ -717,6 +718,23 @@ async function migrateVehicles(
   stats: MigrationStats
 ): Promise<Map<string, string>> {
   console.log('\n🚗 Migrating vehicles...');
+  
+  // Validate vehicle data before migration
+  console.log('🔍 Validating vehicle data...');
+  const validation = validateVehicleBatch(records, { autoFix: true });
+  
+  if (validation.errors > 0) {
+    console.log(`\n⚠️  Found ${validation.errors} vehicles with data quality issues:`);
+    validation.issues.slice(0, 5).forEach(issue => {
+      console.log(`   Record ${issue.recordId}: ${issue.field} - ${issue.message}`);
+    });
+    if (validation.issues.length > 5) {
+      console.log(`   ... and ${validation.issues.length - 5} more issues`);
+    }
+    console.log(`✅ Auto-fixed ${validation.fixed} issues\n`);
+  } else {
+    console.log('✅ All vehicle data validated successfully\n');
+  }
   
   const vehicleMap = new Map<string, string>();
   
@@ -792,7 +810,8 @@ async function migrateVehicles(
         const capacityStr = vehicle.engineCapacity.trim();
 
         // Extract the numeric part first (capture full decimal number)
-        const match = capacityStr.match(/(\d+(?:\.\d+)?)/);
+        const regex = /(\d+(?:\.\d+)?)/;
+        const match = regex.exec(capacityStr);
         if (!match) {
           engineCapacity = undefined;
         } else {
@@ -840,8 +859,8 @@ async function migrateVehicles(
       for (const existingVehicle of existingVehicles) {
         if (areRegistrationsSimilar(vehicle.registration, existingVehicle.registration)) {
           // Found a potential duplicate - check additional criteria
-          const currentHasImages = (record.images?.urls?.length || 0) > 0;
-          const existingHasImages = (existingVehicle.media?.length || 0) > 0;
+          const currentHasImages = (record.images?.urls?.length ?? 0) > 0;
+          const existingHasImages = (existingVehicle.media?.length ?? 0) > 0;
           const currentHasOwner = record.owner?.email;
           const existingHasOwner = existingVehicle.owner?.email;
 
@@ -880,7 +899,7 @@ async function migrateVehicles(
           condition: vehicle.condition,
           isRoadLegal: vehicle.isRoadLegal === 'Yes',
           price: vehicle.price,
-          status: hasCompleteCarInfo(record) && (record.images?.urls?.length || 0) > 0 && record.owner?.address?.postcode ? 'PUBLISHED' : 'DRAFT',
+          status: hasCompleteCarInfo(record) && (record.images?.urls?.length ?? 0) > 0 && record.owner?.address?.postcode ? 'PUBLISHED' : 'DRAFT',
           description: vehicle.condition,
           ownerId: userId,
         },
@@ -897,7 +916,7 @@ async function migrateVehicles(
       }
 
       // Track vehicles without images or postcode
-      if (!record.images || !record.images.urls || record.images.urls.length === 0) {
+      if (!record.images?.urls?.length) {
         console.log(`📷 Vehicle ${createdVehicle.id} has no images - marked as DRAFT`);
       } else if (!record.owner?.address?.postcode) {
         console.log(`📮 Vehicle ${createdVehicle.id} has no postcode - marked as DRAFT`);
@@ -918,7 +937,7 @@ async function migrateVehicles(
               });
               console.log(`✅ Assigned collection "${collectionName}" to vehicle ${vehicle.name}`);
             } catch (error) {
-              console.warn(`⚠️ Failed to assign collection "${collectionName}": ${error}`);
+              console.warn(`⚠️ Failed to assign collection "${collectionName}": ${String(error)}`);
             }
           }
         }
@@ -927,7 +946,7 @@ async function migrateVehicles(
       console.log(`✅ Created vehicle: ${vehicle.name} (${createdVehicle.id})`);
       
     } catch (error) {
-      const errorMsg = `Error creating vehicle ${record.id}: ${error}`;
+      const errorMsg = `Error creating vehicle ${record.id}: ${String(error)}`;
       console.error(`❌ ${errorMsg}`);
       stats.errors.push(errorMsg);
     }
@@ -950,17 +969,17 @@ async function migrateMedia(
   for (const record of records) {
     const vehicleId = vehicleMap.get(record.id);
     
-    if (!vehicleId || !record.images || !record.images.urls || record.images.urls.length === 0) {
+    if (!vehicleId || !record.images?.urls?.length) {
       continue; // Skip if no vehicle was created or no images
     }
     
     for (let i = 0; i < record.images.urls.length; i++) {
       const imageUrl = record.images.urls[i];
-      const imageTitle = record.images.titles?.[i] || null;
+      const imageTitle = record.images.titles?.[i] ?? null;
       
       try {
         // Extract filename from URL
-        const filename = imageUrl.split('/').pop() || `image_${i + 1}`;
+        const filename = imageUrl.split('/').pop() ?? `image_${i + 1}`;
 
         // Validate filename has a proper image extension
         const hasValidExtension = filename && /\.(jpg|jpeg|png|gif|webp|bmp|tiff|svg)$/i.test(filename);
@@ -990,7 +1009,7 @@ async function migrateMedia(
         }
 
         // Create new media record using upsert to handle race conditions
-        const createdMedia = await prisma.media.upsert({
+        await prisma.media.upsert({
           where: {
             originalUrl_vehicleId: {
               originalUrl: imageUrl,
@@ -1031,7 +1050,7 @@ async function migrateMedia(
         console.log(`✅ Created media: ${filename} [${statusIcon} ${mediaStatus}] for vehicle ${vehicleId}`);
         
       } catch (error) {
-        const errorMsg = `Error creating media ${imageUrl}: ${error}`;
+        const errorMsg = `Error creating media ${imageUrl}: ${String(error)}`;
         console.error(`❌ ${errorMsg}`);
         stats.errors.push(errorMsg);
       }
@@ -1076,7 +1095,7 @@ async function createSourceTracking(
       console.log(`✅ Created source tracking: processed_catalog:${record.id} for vehicle ${vehicleId}`);
       
     } catch (error) {
-      const errorMsg = `Error creating source tracking ${record.id}: ${error}`;
+      const errorMsg = `Error creating source tracking ${record.id}: ${String(error)}`;
       console.error(`❌ ${errorMsg}`);
       stats.errors.push(errorMsg);
     }

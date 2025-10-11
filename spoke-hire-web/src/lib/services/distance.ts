@@ -62,7 +62,7 @@ export function getPostGISDistanceSQL(
   userLat: number,
   userLon: number,
   unit: DistanceUnit = "miles",
-  tableAlias: string = "User"
+  tableAlias = "User"
 ): string {
   // ST_Distance with geography type returns meters
   // Convert to miles (0.000621371) or km (0.001)
@@ -143,7 +143,7 @@ export function getPostGISDWithinFilter(
   userLon: number,
   maxDistance: number,
   unit: DistanceUnit = "miles",
-  tableAlias: string = "User"
+  tableAlias = "User"
 ): string {
   // Convert distance to meters for ST_DWithin
   const distanceMeters = unit === "miles" ? maxDistance * 1609.34 : maxDistance * 1000;
@@ -168,7 +168,7 @@ export function getPostGISDWithinFilter(
 export function formatDistance(
   distance: number,
   unit: DistanceUnit = "miles",
-  decimals: number = 1
+  decimals = 1
 ): string {
   const formatted = distance.toFixed(decimals);
   const unitLabel = unit === "miles" ? "mi" : "km";

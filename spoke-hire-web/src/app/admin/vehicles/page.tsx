@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense, useCallback } from "react";
+import { useEffect, useState, Suspense, useCallback, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { VehicleStatus } from "@prisma/client";
 import { LayoutGrid, Table as TableIcon, Send } from "lucide-react";
@@ -108,7 +108,7 @@ function VehiclesPageContent() {
     }
   );
 
-  const vehicles = data?.vehicles ?? [];
+  const vehicles = useMemo(() => data?.vehicles ?? [], [data?.vehicles]);
   const totalCount = data?.totalCount ?? 0;
   const totalPages = Math.ceil(totalCount / itemsPerPage);
 
@@ -333,7 +333,7 @@ function VehiclesPageContent() {
     try {
       await navigator.clipboard.writeText(text);
       toast.success(`${label} copied to clipboard`);
-    } catch (_err) {
+    } catch {
       toast.error(`Failed to copy ${label}`);
     }
   };
@@ -389,7 +389,7 @@ function VehiclesPageContent() {
   }, []);
 
   // Check if any filters are active (PUBLISHED is the default, so not counted as a filter)
-  const hasFilters = !!(searchInput || (status && status !== "PUBLISHED") || makeIds.length > 0 || modelId || collectionIds.length > 0 || exteriorColors.length > 0 || interiorColors.length > 0 || yearFrom || yearTo || numberOfSeats.length > 0 || gearboxTypes.length > 0 || steeringIds.length > 0 || countryIds.length > 0 || counties.length > 0 || postcode || maxDistance);
+  const hasFilters = !!(searchInput ?? (status && status !== "PUBLISHED") ?? makeIds.length > 0 ?? modelId ?? collectionIds.length > 0 ?? exteriorColors.length > 0 ?? interiorColors.length > 0 ?? yearFrom ?? yearTo ?? numberOfSeats.length > 0 ?? gearboxTypes.length > 0 ?? steeringIds.length > 0 ?? countryIds.length > 0 ?? counties.length > 0 ?? postcode ?? maxDistance);
 
   if (isAuthLoading || !user) {
     return null; // Layout handles loading state

@@ -155,7 +155,7 @@ export class VehicleQueryBuilder {
     }
 
     // Search filter (across multiple fields)
-    if (filters.search && filters.search.trim()) {
+    if (filters.search?.trim()) {
       const searchTerm = `%${filters.search}%`;
       conditions.push(
         Prisma.sql`(
@@ -179,7 +179,7 @@ export class VehicleQueryBuilder {
    * Build ORDER BY clause
    */
   buildOrderByClause(
-    sortBy: string = "createdAt",
+    sortBy = "createdAt",
     sortOrder: "asc" | "desc" = "desc",
     sortByDistance = false
   ): Prisma.Sql {
@@ -318,8 +318,8 @@ export class VehicleQueryBuilder {
   /**
    * Build Prisma where clause (for non-distance queries)
    */
-  buildPrismaWhere(filters: VehicleFilters): any {
-    const where: any = {};
+  buildPrismaWhere(filters: VehicleFilters): Prisma.VehicleWhereInput {
+    const where: Prisma.VehicleWhereInput = {};
 
     if (filters.status) {
       where.status = filters.status;
@@ -400,7 +400,7 @@ export class VehicleQueryBuilder {
       };
     }
 
-    if (filters.search && filters.search.trim()) {
+    if (filters.search?.trim()) {
       where.OR = [
         { name: { contains: filters.search, mode: "insensitive" } },
         { registration: { contains: filters.search, mode: "insensitive" } },

@@ -26,23 +26,11 @@ export type Json =
 
 export interface Database {
   public: {
-    Tables: {
-      // Add your Supabase tables here if you're using RLS
-      // For now, we're primarily using Prisma with PostgreSQL
-      // and Supabase only for authentication
-    };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
-      [_ in never]: never;
-    };
-    Enums: {
-      [_ in never]: never;
-    };
-    CompositeTypes: {
-      [_ in never]: never;
-    };
+    Tables: Record<string, never>;
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 }
 

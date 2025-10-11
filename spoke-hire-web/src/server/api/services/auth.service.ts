@@ -6,6 +6,7 @@
  */
 
 import { type SupabaseClient } from "@supabase/supabase-js";
+import { type PrismaClient } from "@prisma/client";
 import { UserRepository } from "../repositories/user.repository";
 import {
   UserNotFoundError,
@@ -16,8 +17,8 @@ import {
   UnauthorizedError,
 } from "../errors/app-errors";
 
-// Use the DB type from context
-type DbClient = any;
+// Use the proper Prisma client type
+type DbClient = PrismaClient;
 
 export interface SignInWithOtpParams {
   email: string;

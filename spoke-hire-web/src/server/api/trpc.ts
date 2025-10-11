@@ -9,11 +9,9 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
-import { type User as SupabaseUser } from "@supabase/supabase-js";
-
 import { db } from "~/server/db";
 import { createClient } from "~/lib/supabase/server";
-import { type User, type UserType } from "@prisma/client";
+import { type User } from "@prisma/client";
 
 /**
  * 1. CONTEXT

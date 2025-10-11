@@ -88,8 +88,8 @@ export function formatYear(year: string | null | undefined): string {
 export function getInitials(firstName?: string | null, lastName?: string | null): string {
   if (!firstName && !lastName) return "?";
   
-  const first = firstName?.charAt(0)?.toUpperCase() || "";
-  const last = lastName?.charAt(0)?.toUpperCase() || "";
+  const first = firstName?.charAt(0)?.toUpperCase() ?? "";
+  const last = lastName?.charAt(0)?.toUpperCase() ?? "";
   
   return `${first}${last}` || "?";
 }
@@ -111,7 +111,7 @@ export function formatOwnerName(
   if (lastName) {
     return lastName;
   }
-  return email || "Unknown";
+  return email ?? "Unknown";
 }
 
 /**
@@ -166,7 +166,7 @@ export function getVehicleImageUrl(
 ): string {
   // Try to get publishedUrl or originalUrl from media
   if (media && media.length > 0) {
-    const url = media[0]?.publishedUrl || media[0]?.originalUrl;
+    const url = media[0]?.publishedUrl ?? media[0]?.originalUrl;
     if (url) return url;
   }
   
