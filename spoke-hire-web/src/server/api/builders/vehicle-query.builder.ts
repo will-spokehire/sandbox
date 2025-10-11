@@ -386,18 +386,14 @@ export class VehicleQueryBuilder {
 
     // Country filter (via owner)
     if (filters.countryIds && filters.countryIds.length > 0) {
-      where.owner = {
-        ...where.owner,
-        countryId: { in: filters.countryIds },
-      };
+      where.owner = where.owner ?? {};
+      where.owner.countryId = { in: filters.countryIds };
     }
 
     // County filter (via owner)
     if (filters.counties && filters.counties.length > 0) {
-      where.owner = {
-        ...where.owner,
-        county: { in: filters.counties },
-      };
+      where.owner = where.owner ?? {};
+      where.owner.county = { in: filters.counties };
     }
 
     if (filters.search?.trim()) {

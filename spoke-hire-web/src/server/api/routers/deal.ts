@@ -10,7 +10,7 @@
  */
 
 import { z } from "zod";
-import { RecipientStatus } from "@prisma/client";
+import { RecipientStatus,  type Prisma } from "@prisma/client";
 import { createTRPCRouter, adminProcedure } from "~/server/api/trpc";
 import { DealService } from "~/server/api/services/deal.service";
 import { EmailService } from "~/server/api/services/email.service";
@@ -172,7 +172,7 @@ export const dealRouter = createTRPCRouter({
         const vehicleNames = recipientVehicles.map((v) => v.name).join(", ");
         
         // Get user name (firstName or fallback to email username)
-        const userName = recipient.user.firstName ?? recipient.user.email.split("@")[0];
+        const userName = recipient.user.firstName ?? "Owner";
         
         return {
           to: recipient.user.email,
@@ -315,11 +315,7 @@ export const dealRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      const where: {
-        status: string;
-        OR?: Array<Record<string, unknown>>;
-        userType?: string;
-      } = {
+      const where: Prisma.UserWhereInput = {
         status: "ACTIVE",
       };
 

@@ -5,12 +5,13 @@
  * Handles makes, models, collections, and other reference tables.
  */
 
-import { type VehicleStatus, type PrismaClient } from "@prisma/client";
+import { type VehicleStatus } from "@prisma/client";
 import { LookupRepository } from "../repositories/lookup.repository";
 import { cacheService, CacheKeys, CacheTTL } from "./cache.service";
+import { type db } from "~/server/db";
 
-// Use the proper Prisma client type
-type DbClient = PrismaClient;
+// Use the actual DB client type (with extensions)
+type DbClient = typeof db;
 
 export class LookupService {
   private repository: LookupRepository;
@@ -68,7 +69,7 @@ export class LookupService {
       exteriorColors,
       interiorColors,
       years,
-      statusCounts: statusCounts.map((sc: { status: VehicleStatus; _count: number }) => ({
+      statusCounts: (statusCounts as unknown as Array<{ status: VehicleStatus; _count: number }>).map((sc) => ({
         status: sc.status,
         count: sc._count,
       })),

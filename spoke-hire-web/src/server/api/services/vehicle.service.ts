@@ -5,15 +5,16 @@
  * Orchestrates repositories, builders, and external services.
  */
 
-import { type VehicleStatus, type PrismaClient } from "@prisma/client";
+import { type VehicleStatus } from "@prisma/client";
 import { VehicleRepository, type VehicleWithRelations } from "../repositories/vehicle.repository";
 import { VehicleQueryBuilder, type VehicleFilters } from "../builders/vehicle-query.builder";
 import { geocodePostcode } from "~/lib/services/geocoding";
 import { cacheService, CacheKeys, CacheTTL } from "./cache.service";
 import { VehicleNotFoundError } from "../errors/app-errors";
+import { type db } from "~/server/db";
 
-// Use the proper Prisma client type
-type DbClient = PrismaClient;
+// Use the actual DB client type (with extensions)
+type DbClient = typeof db;
 
 export interface ListVehiclesParams {
   limit: number;
@@ -131,8 +132,8 @@ export class VehicleService {
     if (useDistanceFilter) {
       // Use distance-based query
       const result = await this.listWithDistance(
-        userLat,
-        userLon,
+        userLat!,
+        userLon!,
         maxDistanceMiles,
         filters,
         limit,
@@ -205,8 +206,8 @@ export class VehicleService {
 
     // Fetch related data for each vehicle
     const vehicleIds = rawVehicles.map((v) => v.id);
-    let vehicles: VehicleWithRelations[] = [];
-
+    let vehicles: (VehicleWithRelations & { distance: number })[] = [];
+    
     if (vehicleIds.length > 0) {
       const vehiclesWithRelations = await this.repository.findManyByIds(vehicleIds);
 
@@ -217,7 +218,7 @@ export class VehicleService {
           const vehicle = vehicleMap.get(rv.id);
           return vehicle ? { ...vehicle, distance: rv.distance } : null;
         })
-        .filter((v): v is VehicleWithRelations & { distance: number } => v !== null);
+        .filter((v) => v !== null);
     }
 
     // Get total count if requested

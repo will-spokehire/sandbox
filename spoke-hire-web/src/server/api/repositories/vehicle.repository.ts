@@ -5,11 +5,12 @@
  * Handles all Prisma queries related to vehicles.
  */
 
-import { type Prisma, type VehicleStatus, type PrismaClient } from "@prisma/client";
+import { type Prisma, type VehicleStatus } from "@prisma/client";
 import { DatabaseError, VehicleNotFoundError } from "../errors/app-errors";
+import { type db } from "~/server/db";
 
-// Use the proper Prisma client type
-type DbClient = PrismaClient;
+// Use the actual DB client type (with extensions)
+type DbClient = typeof db;
 
 export interface FindManyOptions {
   take?: number;
@@ -328,6 +329,7 @@ export class VehicleRepository {
               email: true,
               firstName: true,
               lastName: true,
+              phone: true,
               postcode: true,
               city: true,
               latitude: true,

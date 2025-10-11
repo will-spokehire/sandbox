@@ -5,11 +5,11 @@
  * Handles all Prisma queries related to reference data.
  */
 
-import { type PrismaClient } from "@prisma/client";
 import { DatabaseError } from "../errors/app-errors";
+import { type db } from "~/server/db";
 
-// Use the proper Prisma client type
-type DbClient = PrismaClient;
+// Use the actual DB client type (with extensions)
+type DbClient = typeof db;
 
 export class LookupRepository {
   constructor(private db: DbClient) {}

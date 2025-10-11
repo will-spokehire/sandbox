@@ -8,7 +8,7 @@
  */
 
 import { TRPCError } from "@trpc/server";
-import { type PrismaClient, DealStatus, RecipientStatus, type Prisma } from "@prisma/client";
+import { DealStatus, RecipientStatus, type Prisma } from "@prisma/client";
 import { DealNotFoundError } from "../errors/app-errors";
 import {
   MAX_VEHICLES_PER_DEAL,
@@ -18,9 +18,10 @@ import {
   DEAL_NAME_MAX_LENGTH,
 } from "../constants/deals";
 import { EmailService } from "./email.service";
+import { type db } from "~/server/db";
 
-// Use PrismaClient directly as the type
-type DbClient = PrismaClient;
+// Use the actual DB client type (with extensions)
+type DbClient = typeof db;
 
 /**
  * Deal Service Parameters
@@ -265,7 +266,7 @@ export class DealService {
       throw new DealNotFoundError(dealId);
     }
 
-    return deal as DealWithDetails;
+    return deal as unknown as DealWithDetails;
   }
 
   /**
@@ -651,7 +652,7 @@ export class DealService {
    * Get vehicles for deal (for sending emails)
    */
   async getDealVehicles(dealId: string) {
-    const dealVehicles = await this.db.dealVehicle.findMany({
+    const dealVehicles = (await this.db.dealVehicle.findMany({
       where: { dealId },
       orderBy: { order: "asc" },
       include: {
@@ -681,7 +682,17 @@ export class DealService {
           },
         },
       },
-    });
+    })) as unknown as Array<{
+      vehicle: {
+        id: string;
+        name: string;
+        ownerId: string;
+        make: { name: string };
+        model: { name: string };
+        owner: { id: string; email: string; firstName: string | null; lastName: string | null };
+        media: Array<{ id: string; publishedUrl: string | null; originalUrl: string }>;
+      };
+    }>;
 
     return dealVehicles.map((dv) => dv.vehicle);
   }
@@ -758,8 +769,7 @@ export class DealService {
       const vehicleNames = recipientVehicles.map((v) => v.name).join(", ");
       
       // Get user name (firstName or fallback to email username)
-      const userName = recipient.user.firstName ?? recipient.user.email.split("@")[0];
-      
+      const userName = recipient.user.firstName ?? "User";      
       return {
         to: recipient.user.email,
         userName,
