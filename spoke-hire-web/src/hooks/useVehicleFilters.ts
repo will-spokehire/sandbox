@@ -1,8 +1,37 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type { VehicleStatus } from "@prisma/client";
+import { z } from "zod";
+
+// Storage key for localStorage
+const STORAGE_KEY = 'spokehire_vehicle_filters';
+
+// Zod schema for validating stored filters
+const VehicleFiltersSchema = z.object({
+  search: z.string().optional(),
+  status: z.enum(["DRAFT", "PUBLISHED", "DECLINED", "ARCHIVED", "ALL"]).optional(),
+  makeIds: z.array(z.string()).optional(),
+  modelId: z.string().optional(),
+  collectionIds: z.array(z.string()).optional(),
+  exteriorColors: z.array(z.string()).optional(),
+  interiorColors: z.array(z.string()).optional(),
+  yearFrom: z.string().optional(),
+  yearTo: z.string().optional(),
+  numberOfSeats: z.array(z.number()).optional(),
+  gearboxTypes: z.array(z.string()).optional(),
+  steeringIds: z.array(z.string()).optional(),
+  countryIds: z.array(z.string()).optional(),
+  counties: z.array(z.string()).optional(),
+  postcode: z.string().optional(),
+  maxDistance: z.number().optional(),
+  sortBy: z.string().optional(),
+  sortOrder: z.enum(["asc", "desc"]).optional(),
+  sortByDistance: z.boolean().optional(),
+  viewMode: z.enum(["table", "cards"]).optional(),
+  page: z.number().optional(),
+});
 
 export interface VehicleFilters {
   search?: string;
@@ -53,11 +82,86 @@ export interface VehicleFiltersUpdate {
 }
 
 /**
+ * Load filters from localStorage with validation
+ */
+function loadFiltersFromStorage(): Partial<VehicleFilters> | null {
+  if (typeof window === 'undefined') return null;
+  
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return null;
+    
+    const parsed = JSON.parse(stored);
+    const validated = VehicleFiltersSchema.parse(parsed);
+    return validated;
+  } catch (error) {
+    console.warn('Failed to load filters from localStorage:', error);
+    // Clear corrupted data
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // Ignore errors when clearing
+    }
+    return null;
+  }
+}
+
+/**
+ * Save filters to localStorage
+ */
+function saveFiltersToStorage(filters: VehicleFilters): void {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    // Don't save page number to localStorage (it's session-specific)
+    const { page, ...filtersToSave } = filters;
+    
+    // Only save non-default values to keep storage clean
+    const nonDefaultFilters: Partial<VehicleFilters> = {};
+    
+    if (filtersToSave.search) nonDefaultFilters.search = filtersToSave.search;
+    if (filtersToSave.status && filtersToSave.status !== "PUBLISHED") {
+      nonDefaultFilters.status = filtersToSave.status;
+    }
+    if (filtersToSave.makeIds?.length) nonDefaultFilters.makeIds = filtersToSave.makeIds;
+    if (filtersToSave.modelId) nonDefaultFilters.modelId = filtersToSave.modelId;
+    if (filtersToSave.collectionIds?.length) nonDefaultFilters.collectionIds = filtersToSave.collectionIds;
+    if (filtersToSave.exteriorColors?.length) nonDefaultFilters.exteriorColors = filtersToSave.exteriorColors;
+    if (filtersToSave.interiorColors?.length) nonDefaultFilters.interiorColors = filtersToSave.interiorColors;
+    if (filtersToSave.yearFrom) nonDefaultFilters.yearFrom = filtersToSave.yearFrom;
+    if (filtersToSave.yearTo) nonDefaultFilters.yearTo = filtersToSave.yearTo;
+    if (filtersToSave.numberOfSeats?.length) nonDefaultFilters.numberOfSeats = filtersToSave.numberOfSeats;
+    if (filtersToSave.gearboxTypes?.length) nonDefaultFilters.gearboxTypes = filtersToSave.gearboxTypes;
+    if (filtersToSave.steeringIds?.length) nonDefaultFilters.steeringIds = filtersToSave.steeringIds;
+    if (filtersToSave.countryIds?.length) nonDefaultFilters.countryIds = filtersToSave.countryIds;
+    if (filtersToSave.counties?.length) nonDefaultFilters.counties = filtersToSave.counties;
+    if (filtersToSave.postcode) nonDefaultFilters.postcode = filtersToSave.postcode;
+    if (filtersToSave.maxDistance) nonDefaultFilters.maxDistance = filtersToSave.maxDistance;
+    if (filtersToSave.sortBy && filtersToSave.sortBy !== "createdAt") {
+      nonDefaultFilters.sortBy = filtersToSave.sortBy;
+    }
+    if (filtersToSave.sortOrder && filtersToSave.sortOrder !== "desc") {
+      nonDefaultFilters.sortOrder = filtersToSave.sortOrder;
+    }
+    if (filtersToSave.sortByDistance) nonDefaultFilters.sortByDistance = filtersToSave.sortByDistance;
+    if (filtersToSave.viewMode && filtersToSave.viewMode !== "table") {
+      nonDefaultFilters.viewMode = filtersToSave.viewMode;
+    }
+    
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(nonDefaultFilters));
+  } catch (error) {
+    console.warn('Failed to save filters to localStorage:', error);
+  }
+}
+
+/**
  * Hook for managing vehicle filters with URL state synchronization
+ * and localStorage persistence
  * 
  * This hook provides a clean interface for reading and updating vehicle filters
  * while keeping the URL as the single source of truth. All filter changes
  * are automatically reflected in the URL and can be shared/bookmarked.
+ * localStorage is used as a fallback to remember user preferences across sessions.
  * 
  * @example
  * ```tsx
@@ -80,6 +184,7 @@ export interface VehicleFiltersUpdate {
 export function useVehicleFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const hasLoadedFromStorage = useRef(false);
 
   // Read all current filters from URL
   const filters: VehicleFilters = {
@@ -105,6 +210,39 @@ export function useVehicleFilters() {
     viewMode: (searchParams.get("viewMode") as "table" | "cards") ?? "table",
     page: parseInt(searchParams.get("page") ?? "1", 10),
   };
+
+  // Load filters from localStorage on initial mount if URL is empty
+  useEffect(() => {
+    if (hasLoadedFromStorage.current) return;
+    hasLoadedFromStorage.current = true;
+
+    const urlParams = searchParams.toString();
+    // Only load from storage if URL has no filter params (or only has default status)
+    const hasOnlyDefaultParams = !urlParams || urlParams === 'status=PUBLISHED' || urlParams === '';
+    
+    if (hasOnlyDefaultParams) {
+      const storedFilters = loadFiltersFromStorage();
+      if (storedFilters && Object.keys(storedFilters).length > 0) {
+        // Apply stored filters to URL (this will trigger a re-render with the filters)
+        const params = new URLSearchParams();
+        
+        Object.entries(storedFilters).forEach(([key, value]) => {
+          if (value === undefined || value === null) return;
+          
+          if (Array.isArray(value)) {
+            if (value.length > 0) {
+              params.set(key, value.join(','));
+            }
+          } else {
+            params.set(key, String(value));
+          }
+        });
+        
+        const newUrl = params.toString() ? `?${params.toString()}` : "/admin/vehicles";
+        router.replace(newUrl, { scroll: false });
+      }
+    }
+  }, []); // Run only once on mount
 
   /**
    * Update URL with new filter values
@@ -297,12 +435,26 @@ export function useVehicleFilters() {
 
     const newUrl = params.toString() ? `?${params.toString()}` : "/admin/vehicles";
     router.push(newUrl, { scroll: false });
-  }, [searchParams, router]);
+
+    // Save updated filters to localStorage (after URL update for consistency)
+    // Create the updated filter state to save
+    const updatedFilters = { ...filters };
+    Object.assign(updatedFilters, updates);
+    saveFiltersToStorage(updatedFilters);
+  }, [searchParams, router, filters]);
 
   /**
    * Clear all filters and reset to default state
    */
   const clearFilters = useCallback(() => {
+    // Clear localStorage
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (error) {
+        console.warn('Failed to clear filters from localStorage:', error);
+      }
+    }
     router.push("/admin/vehicles?status=PUBLISHED", { scroll: false });
   }, [router]);
 
