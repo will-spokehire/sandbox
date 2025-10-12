@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { MoreHorizontal, Mail, Phone, MessageCircle } from "lucide-react";
+import { MoreHorizontal, Mail, Phone, MessageCircle, Send } from "lucide-react";
 import { Card } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import {
@@ -22,6 +22,7 @@ import { getWhatsAppChatUrl } from "~/lib/whatsapp";
 
 interface VehicleMediaSectionProps {
   vehicle: VehicleDetail;
+  onSendDeal?: () => void;
 }
 
 /**
@@ -29,7 +30,7 @@ interface VehicleMediaSectionProps {
  * 
  * Displays the main hero image with action buttons and a thumbnail gallery below
  */
-export function VehicleMediaSection({ vehicle }: VehicleMediaSectionProps) {
+export function VehicleMediaSection({ vehicle, onSendDeal }: VehicleMediaSectionProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxImages, setLightboxImages] = useState<string[]>([]);
@@ -119,6 +120,23 @@ export function VehicleMediaSection({ vehicle }: VehicleMediaSectionProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                
+                {/* Send Deal */}
+                {onSendDeal && (
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSendDeal();
+                    }}
+                  >
+                    <Send className="mr-2 h-4 w-4" />
+                    Send Deal
+                  </DropdownMenuItem>
+                )}
+                
+                <DropdownMenuSeparator />
                 <DropdownMenuLabel>Contact Owner</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 

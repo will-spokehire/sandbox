@@ -1,6 +1,6 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
 import { useRequireAdmin } from "~/providers/auth-provider";
@@ -14,6 +14,7 @@ import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { AlertCircle } from "lucide-react";
 import type { VehicleDetail } from "~/types/vehicle";
+import { SendDealToVehiclesDialog } from "~/components/deals";
 
 /**
  * Vehicle Detail Page
@@ -37,6 +38,9 @@ export default function VehicleDetailPage({
   const resolvedParams = use(params);
   const { id } = resolvedParams;
   
+  // Send Deal Dialog state
+  const [isSendDealDialogOpen, setIsSendDealDialogOpen] = useState(false);
+  
   // Fetch vehicle data on the client
   // OPTIMIZATION: Uses TanStack Query cache with staleTime for SPA-like behavior
   // - If data was recently fetched, shows cached data instantly (no loading spinner)
@@ -56,6 +60,15 @@ export default function VehicleDetailPage({
   const vehicle: VehicleDetail | undefined = vehicleData;
 
   const isLoading = isAuthLoading || isVehicleLoading;
+  
+  // Handle Send Deal
+  const handleSendDeal = () => {
+    setIsSendDealDialogOpen(true);
+  };
+  
+  const handleDealSuccess = () => {
+    setIsSendDealDialogOpen(false);
+  };
 
   // Handle loading state
   if (isLoading || !user) {
@@ -100,7 +113,7 @@ export default function VehicleDetailPage({
       <main className="container mx-auto px-4 py-6 md:py-8">
         <div className="space-y-6">
           {/* Media Section - Hero Image + Gallery */}
-          <VehicleMediaSection vehicle={vehicle} />
+          <VehicleMediaSection vehicle={vehicle} onSendDeal={handleSendDeal} />
 
           {/* Two-Column Layout for Details */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -120,6 +133,16 @@ export default function VehicleDetailPage({
           <VehicleMetadata vehicle={vehicle} />
         </div>
       </main>
+      
+      {/* Send Deal Dialog */}
+      {isSendDealDialogOpen && (
+        <SendDealToVehiclesDialog
+          open={isSendDealDialogOpen}
+          onOpenChange={setIsSendDealDialogOpen}
+          selectedVehicleIds={[vehicle.id]}
+          onSuccess={handleDealSuccess}
+        />
+      )}
     </div>
   );
 }
