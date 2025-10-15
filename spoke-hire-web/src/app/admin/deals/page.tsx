@@ -255,24 +255,27 @@ function DealsListContent() {
                             onClick={() => handleView(deal.id)}
                             className="w-full text-left p-4 hover:bg-muted/50 transition-colors"
                           >
-                            {/* Header */}
-                            <div className="flex items-start justify-between gap-3 mb-3">
-                              <div className="flex-1 min-w-0 pr-8">
-                                <h3 className="font-semibold text-base mb-1 truncate">
-                                  {deal.name}
-                                </h3>
-                                {(deal.date ?? deal.location) && (
-                                  <p className="text-sm text-muted-foreground line-clamp-1">
-                                    {deal.date && deal.location ? `${deal.date} • ${deal.location}` : deal.date ?? deal.location}
-                                  </p>
-                                )}
-                              </div>
-                              <div className="flex-shrink-0">
+                            {/* Header - Title with more space for actions menu */}
+                            <div className="mb-3 pr-12">
+                              <h3 className="font-semibold text-base mb-2">
+                                {deal.name}
+                              </h3>
+                              
+                              {/* Status badge and metadata row */}
+                              <div className="flex flex-wrap items-center gap-2">
                                 {getStatusBadge(deal.status)}
+                                {(deal.date ?? deal.location) && (
+                                  <>
+                                    <span className="text-muted-foreground">•</span>
+                                    <span className="text-sm text-muted-foreground line-clamp-1">
+                                      {deal.date && deal.location ? `${deal.date} • ${deal.location}` : deal.date ?? deal.location}
+                                    </span>
+                                  </>
+                                )}
                               </div>
                             </div>
 
-                            {/* Stats */}
+                            {/* Stats - More compact */}
                             <div className="flex items-center gap-4 mb-3 text-sm">
                               <div className="flex items-center gap-1.5">
                                 <Car className="h-4 w-4 text-muted-foreground" />
@@ -300,7 +303,7 @@ function DealsListContent() {
                                 <Button
                                   variant="secondary"
                                   size="icon"
-                                  className="h-8 w-8 shadow-lg backdrop-blur-sm bg-background/90 hover:bg-background"
+                                  className="h-9 w-9 shadow-lg backdrop-blur-sm bg-background/80 hover:bg-background/90"
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   <MoreHorizontal className="h-4 w-4" />
