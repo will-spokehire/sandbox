@@ -113,15 +113,15 @@ export default function VehicleDetailPage({
       <main className="container mx-auto px-4 py-6 md:py-8">
         {/* Two-Column Layout: Photos on Left (larger), Details on Right (smaller) */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-          {/* Left Column - Media Gallery (2/3 width on desktop) */}
-          <div className="lg:col-span-2 space-y-4">
+          {/* Left Column - Media Gallery + Owner Info (2/3 width on desktop) */}
+          <div className="lg:col-span-2 space-y-6">
             <VehicleMediaSection vehicle={vehicle} onSendDeal={handleSendDeal} />
+            <VehicleOwnerInfo owner={vehicle.owner} vehicleId={vehicle.id} />
           </div>
 
           {/* Right Column - Vehicle Details (1/3 width on desktop) */}
           <div className="lg:col-span-1 space-y-6">
             <VehicleBasicInfo vehicle={vehicle} />
-            <VehicleOwnerInfo owner={vehicle.owner} vehicleId={vehicle.id} />
             <VehicleCollections collections={vehicle.collections} />
           </div>
         </div>
