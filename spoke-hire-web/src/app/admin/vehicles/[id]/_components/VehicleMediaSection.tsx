@@ -300,6 +300,18 @@ export function VehicleMediaSection({ vehicle, onSendDeal }: VehicleMediaSection
             </div>
           </div>
         )}
+        
+        {/* Description Section */}
+        {vehicle.description && (
+          <div className="space-y-3">
+            <h3 className="text-lg font-semibold text-foreground">
+              Description
+            </h3>
+            <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+              {vehicle.description}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Lightbox - Using simplified custom modal */}

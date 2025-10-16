@@ -3,6 +3,7 @@ import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
 import { formatPrice, formatRegistration } from "~/lib/vehicles";
 import { type VehicleDetail } from "~/types/vehicle";
+import { VehicleStatusBadge } from "~/app/admin/vehicles/_components/VehicleStatusBadge";
 
 interface VehicleBasicInfoProps {
   vehicle: VehicleDetail;
@@ -33,6 +34,11 @@ export function VehicleBasicInfo({ vehicle }: VehicleBasicInfoProps) {
       label: "Price",
       value: formatPrice(vehicle.price),
       highlight: true,
+    },
+    {
+      label: "Current Status",
+      value: vehicle.status,
+      statusBadge: true,
     },
     {
       label: "Engine Capacity",
@@ -88,7 +94,9 @@ export function VehicleBasicInfo({ vehicle }: VehicleBasicInfoProps) {
                       : "text-foreground"
                   } ${detail.mono ? "font-mono" : ""}`}
                 >
-                  {detail.badge ? (
+                  {detail.statusBadge ? (
+                    <VehicleStatusBadge status={vehicle.status} />
+                  ) : detail.badge ? (
                     <Badge variant={detail.badgeVariant as "default" | "secondary" | "destructive" | "outline"}>
                       {detail.value}
                     </Badge>
@@ -101,18 +109,6 @@ export function VehicleBasicInfo({ vehicle }: VehicleBasicInfoProps) {
             </div>
           ))}
         </dl>
-
-        {/* Description Section */}
-        {vehicle.description && (
-          <div className="mt-6 pt-6 border-t">
-            <h4 className="text-sm font-semibold text-foreground mb-2">
-              Description
-            </h4>
-            <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-              {vehicle.description}
-            </p>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

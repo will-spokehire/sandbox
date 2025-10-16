@@ -10,7 +10,6 @@ import { VehicleCollections } from "~/app/admin/vehicles/[id]/_components/Vehicl
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { AlertCircle, ArrowLeft } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { VehicleStatusBadge } from "~/app/admin/vehicles/_components/VehicleStatusBadge";
 import type { VehicleDetail } from "~/types/vehicle";
 
@@ -129,34 +128,6 @@ export default function UserVehicleDetailPage({
             
             {/* Collections & Tags */}
             <VehicleCollections collections={vehicle.collections} />
-            
-            {/* Listing Status */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Listing Status</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Current Status</span>
-                  <VehicleStatusBadge status={vehicle.status} />
-                </div>
-                {vehicle.status === 'DRAFT' && (
-                  <p className="text-sm text-muted-foreground">
-                    Your vehicle is in draft status. Contact us to publish it.
-                  </p>
-                )}
-                {vehicle.status === 'PUBLISHED' && (
-                  <p className="text-sm text-muted-foreground">
-                    Your vehicle is live and visible to production companies.
-                  </p>
-                )}
-                {vehicle.status === 'DECLINED' && (
-                  <p className="text-sm text-muted-foreground">
-                    This listing needs review. Please contact us for more information.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
           </div>
         </div>
       </main>
