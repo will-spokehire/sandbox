@@ -1,24 +1,45 @@
 'use client';
 
-import { useState } from 'react';
 import { useRequireAuth } from '~/providers/auth-provider';
 import { api } from '~/trpc/react';
+import { useURLFilters } from '~/hooks/useURLFilters';
 import { DashboardHeader } from './_components/DashboardHeader';
 import { VehicleStatusTabs } from './_components/VehicleStatusTabs';
 import { UserVehicleGrid } from './_components/UserVehicleGrid';
+import { Skeleton } from '~/components/ui/skeleton';
+import { Card, CardContent } from '~/components/ui/card';
+import { z } from 'zod';
 import type { VehicleStatus } from '@prisma/client';
+
+// Filter schema for URL-based filter management
+const userVehicleFiltersSchema = z.object({
+  status: z.enum(['ALL', 'DRAFT', 'PUBLISHED', 'DECLINED', 'ARCHIVED']).default('ALL'),
+});
+
+type UserVehicleFilters = z.infer<typeof userVehicleFiltersSchema>;
+
+const defaultFilters: UserVehicleFilters = {
+  status: 'ALL',
+};
 
 /**
  * User Vehicles List Page
  * 
  * Main page for users to view their vehicles.
  * Requires authentication but not admin role.
+ * Uses URL-based filter management for better UX and shareable URLs.
  */
 export default function UserVehiclesPage() {
   const { user, isLoading: isAuthLoading } = useRequireAuth();
-  const [statusFilter, setStatusFilter] = useState<VehicleStatus | 'ALL'>('ALL');
+  
+  // URL-based filter management - persists across page reloads
+  const { filters, updateFilters } = useURLFilters(
+    userVehicleFiltersSchema,
+    defaultFilters,
+    '/user/vehicles'
+  );
 
-  // Fetch user's vehicles
+  // Fetch user's vehicles with URL-based filter
   const {
     data: vehiclesData,
     isLoading: isVehiclesLoading,
@@ -26,7 +47,7 @@ export default function UserVehiclesPage() {
   } = api.userVehicle.myVehicles.useQuery(
     {
       limit: 50,
-      status: statusFilter === 'ALL' ? undefined : statusFilter,
+      status: filters.status === 'ALL' ? undefined : (filters.status as VehicleStatus),
     },
     {
       enabled: !isAuthLoading && !!user,
@@ -41,14 +62,35 @@ export default function UserVehiclesPage() {
     }
   );
 
-  // Show loading state
+  // Show loading state with skeleton
   if (isAuthLoading || isVehiclesLoading) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
         <DashboardHeader />
         <main className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center py-16">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900 dark:border-slate-50"></div>
+          {/* Page Title Skeleton */}
+          <div className="mb-8">
+            <Skeleton className="h-9 w-48 mb-2" />
+            <Skeleton className="h-5 w-64" />
+          </div>
+
+          {/* Tabs Skeleton */}
+          <div className="mb-6">
+            <Skeleton className="h-10 w-full max-w-md" />
+          </div>
+
+          {/* Vehicle Grid Skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Card key={i} className="overflow-hidden">
+                <Skeleton className="aspect-[3/2] w-full" />
+                <CardContent className="pt-3 p-4">
+                  <Skeleton className="h-6 w-3/4 mb-2" />
+                  <Skeleton className="h-4 w-1/2 mb-3" />
+                  <Skeleton className="h-5 w-20" />
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </main>
       </div>
@@ -110,8 +152,8 @@ export default function UserVehiclesPage() {
         {/* Status Filter Tabs */}
         <div className="mb-6">
           <VehicleStatusTabs
-            activeStatus={statusFilter}
-            onStatusChange={setStatusFilter}
+            activeStatus={(filters.status ?? 'ALL') as VehicleStatus | 'ALL'}
+            onStatusChange={(status) => updateFilters({ status })}
             counts={counts}
           />
         </div>

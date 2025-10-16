@@ -161,6 +161,102 @@ export const userVehicleRouter = createTRPCRouter({
   }),
 
   /**
+   * Get a single vehicle by ID (owner only)
+   * Security: Only the vehicle owner can access their vehicle
+   * For dev/testing: admins can pass testOwnerId to view any vehicle
+   */
+  myVehicleById: protectedProcedure
+    .input(z.object({
+      id: z.string(),
+      // Dev only: Test with different owner ID (requires admin)
+      testOwnerId: z.string().optional(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const { id, testOwnerId } = input;
+
+      // Determine which user's vehicles to fetch
+      // Allow admins to test with different owner IDs in dev mode
+      const ownerId = (testOwnerId && ctx.user.userType === 'ADMIN') 
+        ? testOwnerId 
+        : ctx.user.id;
+
+      // Fetch vehicle with ownership check at DB level
+      const vehicle = await ctx.db.vehicle.findFirst({
+        where: {
+          id,
+          ownerId, // ✅ Authorization enforced at DB level
+        },
+        include: {
+          make: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          model: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          steering: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          owner: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+              phone: true,
+            },
+          },
+          media: {
+            where: {
+              isVisible: true,
+              status: "READY",
+            },
+            orderBy: [
+              { isPrimary: "desc" },
+              { order: "asc" },
+            ],
+            select: {
+              id: true,
+              type: true,
+              originalUrl: true,
+              publishedUrl: true,
+              isPrimary: true,
+              order: true,
+              status: true,
+              isVisible: true,
+            },
+          },
+          collections: {
+            include: {
+              collection: {
+                select: {
+                  id: true,
+                  name: true,
+                  slug: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // If not found, throw error
+      if (!vehicle) {
+        throw new Error('Vehicle not found or you do not have permission to view it');
+      }
+
+      return vehicle;
+    }),
+
+  /**
    * Get list of users who own vehicles (for testing/dev purposes)
    * Only accessible by admins
    */

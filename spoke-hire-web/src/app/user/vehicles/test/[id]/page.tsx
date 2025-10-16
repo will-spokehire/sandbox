@@ -30,8 +30,8 @@ export default function TestVehicleDetailPage({
   const resolvedParams = use(params);
   const { id } = resolvedParams;
   
-  // Fetch vehicle data
-  const { data: vehicleData, isLoading: isVehicleLoading, error } = api.vehicle.getById.useQuery(
+  // Fetch vehicle data - admin test mode with testOwnerId
+  const { data: vehicleData, isLoading: isVehicleLoading, error } = api.userVehicle.myVehicleById.useQuery(
     { id },
     {
       enabled: !!user && user.userType === 'ADMIN',

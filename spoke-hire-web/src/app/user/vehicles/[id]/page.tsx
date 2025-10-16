@@ -9,6 +9,8 @@ import { UserVehicleDetails } from "./_components/UserVehicleDetails";
 import { VehicleCollections } from "~/app/admin/vehicles/[id]/_components/VehicleCollections";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
+import { Skeleton } from "~/components/ui/skeleton";
+import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import { AlertCircle, ArrowLeft } from "lucide-react";
 import type { VehicleDetail } from "~/types/vehicle";
 
@@ -31,8 +33,8 @@ export default function UserVehicleDetailPage({
   const resolvedParams = use(params);
   const { id } = resolvedParams;
   
-  // Fetch vehicle data
-  const { data: vehicleData, isLoading: isVehicleLoading, error } = api.vehicle.getById.useQuery(
+  // Fetch vehicle data - uses secure endpoint with ownership check
+  const { data: vehicleData, isLoading: isVehicleLoading, error } = api.userVehicle.myVehicleById.useQuery(
     { id },
     {
       enabled: !!user,
@@ -45,23 +47,76 @@ export default function UserVehicleDetailPage({
 
   const isLoading = isAuthLoading || isVehicleLoading;
 
-  // Check if user owns this vehicle
-  const isOwner = vehicle && user && vehicle.ownerId === user.id;
-
-  // Handle loading state
+  // Handle loading state with skeleton
   if (isLoading || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <div className="text-center space-y-4">
-          <div className="h-12 w-12 border-4 border-slate-200 border-t-slate-600 rounded-full animate-spin mx-auto" />
-          <p className="text-sm text-slate-600 dark:text-slate-400">Loading vehicle details...</p>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+        {/* Header Skeleton */}
+        <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center gap-4">
+              <Skeleton className="h-9 w-20" />
+              <div>
+                <Skeleton className="h-7 w-48 mb-2" />
+                <Skeleton className="h-4 w-64" />
+              </div>
+            </div>
+          </div>
         </div>
+
+        {/* Main Content Skeleton */}
+        <main className="container mx-auto px-4 py-6 md:py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+            {/* Left Column - Media Skeleton */}
+            <div className="lg:col-span-2 space-y-4">
+              <Card className="overflow-hidden">
+                <Skeleton className="aspect-[3/2] w-full" />
+              </Card>
+              <div className="grid grid-cols-6 gap-2">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="aspect-[3/2]" />
+                ))}
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-6 w-32" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+              </div>
+            </div>
+
+            {/* Right Column - Details Skeleton */}
+            <div className="lg:col-span-1 space-y-6">
+              <Card>
+                <CardHeader>
+                  <Skeleton className="h-6 w-32" />
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="flex justify-between items-center py-2">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-4 w-32" />
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <Skeleton className="h-6 w-40" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-6 w-full" />
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </main>
       </div>
     );
   }
 
   // Handle error or unauthorized access
-  if (error || !vehicle || !isOwner) {
+  if (error || !vehicle) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
         <div className="container mx-auto px-4 py-8">
