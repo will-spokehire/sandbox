@@ -7,7 +7,6 @@ import { useRequireAdmin } from "~/providers/auth-provider";
 import { VehicleMediaSection } from "~/app/admin/vehicles/[id]/_components/VehicleMediaSection";
 import { VehicleBasicInfo } from "~/app/admin/vehicles/[id]/_components/VehicleBasicInfo";
 import { VehicleCollections } from "~/app/admin/vehicles/[id]/_components/VehicleCollections";
-import { VehicleMetadata } from "~/app/admin/vehicles/[id]/_components/VehicleMetadata";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { AlertCircle, ArrowLeft } from "lucide-react";
@@ -173,32 +172,8 @@ export default function TestVehicleDetailPage({
                   )}
                 </CardContent>
               </Card>
-
-              {/* Test Info Card */}
-              <Card className="border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20">
-                <CardHeader>
-                  <CardTitle className="text-yellow-900 dark:text-yellow-200">Test Information</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-yellow-700 dark:text-yellow-300">Vehicle ID:</span>
-                    <span className="font-mono text-yellow-900 dark:text-yellow-100">{vehicle.id}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-yellow-700 dark:text-yellow-300">Owner:</span>
-                    <span className="font-medium text-yellow-900 dark:text-yellow-100">{vehicle.owner.email}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-yellow-700 dark:text-yellow-300">Owner ID:</span>
-                    <span className="font-mono text-yellow-900 dark:text-yellow-100">{vehicle.ownerId}</span>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
           </div>
-
-          {/* Metadata Section */}
-          <VehicleMetadata vehicle={vehicle} />
         </div>
       </main>
     </div>

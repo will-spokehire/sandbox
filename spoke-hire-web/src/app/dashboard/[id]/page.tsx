@@ -7,7 +7,6 @@ import { useRequireAuth } from "~/providers/auth-provider";
 import { VehicleMediaSection } from "~/app/admin/vehicles/[id]/_components/VehicleMediaSection";
 import { VehicleBasicInfo } from "~/app/admin/vehicles/[id]/_components/VehicleBasicInfo";
 import { VehicleCollections } from "~/app/admin/vehicles/[id]/_components/VehicleCollections";
-import { VehicleMetadata } from "~/app/admin/vehicles/[id]/_components/VehicleMetadata";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { AlertCircle, ArrowLeft } from "lucide-react";
@@ -160,9 +159,6 @@ export default function UserVehicleDetailPage({
               </Card>
             </div>
           </div>
-
-          {/* Metadata Section */}
-          <VehicleMetadata vehicle={vehicle} />
         </div>
       </main>
     </div>
