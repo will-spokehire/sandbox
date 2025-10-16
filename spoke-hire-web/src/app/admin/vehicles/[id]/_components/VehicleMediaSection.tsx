@@ -83,10 +83,10 @@ export function VehicleMediaSection({ vehicle, onSendDeal }: VehicleMediaSection
 
   return (
     <div className="space-y-4">
-      {/* Desktop: Side-by-side layout, Mobile: Stacked */}
-      <div className="flex flex-col lg:flex-row gap-4">
+      {/* Always stacked vertically: Hero image on top, thumbnails below */}
+      <div className="flex flex-col gap-4">
         {/* Main/Hero Image - 3:2 aspect ratio */}
-        <Card className="relative overflow-hidden p-0 group flex-1 lg:max-w-[900px]">
+        <Card className="relative overflow-hidden p-0 group">
           <div className="relative aspect-[3/2] bg-muted">
           <Image
             src={
@@ -245,18 +245,18 @@ export function VehicleMediaSection({ vehicle, onSendDeal }: VehicleMediaSection
         </div>
       </Card>
 
-        {/* Thumbnail Gallery - Right side on desktop, below on mobile */}
+        {/* Thumbnail Gallery - Always below hero image */}
         {hasImages && sortedMedia.length > 1 && (
-          <div className="relative lg:w-[280px] xl:w-[300px] 2xl:w-[420px]">
+          <div className="relative">
             {/* Media Count Badge */}
-            <div className="mb-3 flex items-center justify-between lg:justify-center">
+            <div className="mb-3 flex items-center justify-between">
               <div className="bg-muted border rounded-full px-3 py-1 text-sm font-medium">
                 {sortedMedia.length} {sortedMedia.length === 1 ? "photo" : "photos"}
               </div>
             </div>
             
-            {/* Thumbnails - 2 column grid (lg/xl), 3 column grid (2xl+), horizontal scroll on mobile - 3:2 aspect ratio */}
-            <div className="flex lg:grid lg:grid-cols-2 2xl:grid-cols-3 gap-2 overflow-x-auto lg:overflow-y-auto lg:max-h-[600px] pb-2 lg:pb-0 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600 scrollbar-track-transparent">
+            {/* Thumbnails - Horizontal scrollable grid */}
+            <div className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
               {sortedMedia.slice(0, 12).map((media, index) => {
                 const isLastThumb = index === 11 && sortedMedia.length > 12;
                 const remainingCount = sortedMedia.length - 12;
@@ -266,7 +266,7 @@ export function VehicleMediaSection({ vehicle, onSendDeal }: VehicleMediaSection
                     key={media.id}
                     onClick={() => isLastThumb ? openLightbox(index) : setSelectedImageIndex(index)}
                     className={cn(
-                      "relative flex-shrink-0 aspect-[3/2] w-28 sm:w-32 lg:w-full rounded-md overflow-hidden border-2 transition-all hover:scale-105 hover:shadow-md",
+                      "relative aspect-[3/2] rounded-md overflow-hidden border-2 transition-all hover:scale-105 hover:shadow-md",
                       selectedImageIndex === index
                         ? "border-primary ring-2 ring-primary/20"
                         : "border-border hover:border-primary/50"
