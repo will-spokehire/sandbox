@@ -229,7 +229,83 @@ SUPABASE_SERVICE_ROLE_KEY="eyJhbGc..."  # Keep secret!
 
 ---
 
-## Step 7: Run Database Migrations
+## Step 7: Storage RLS Setup (Required for Image Uploads)
+
+### Understanding Storage Security
+
+The vehicle image upload feature requires proper Row Level Security on Supabase Storage to ensure:
+- ✅ Users can only upload images to vehicles they own
+- ✅ Admins can manage all vehicle images
+- ✅ Everyone can view images (public bucket)
+- ❌ Users cannot delete/modify other users' images
+
+### Path Structure
+
+All vehicle images are stored with this path format:
+```
+vehicles/{vehicleId}/{filename}
+```
+Example: `vehicles/cm123abc/mercedes-photo.jpg`
+
+### Apply Storage RLS Policies
+
+**Using Supabase Dashboard (Recommended)**
+
+1. Go to your Supabase project dashboard
+2. Click **"SQL Editor"** in sidebar
+3. Click **"New query"**
+4. Copy and paste contents of `/sql/setup/storage-rls-policies.sql`
+5. Click **"Run"** (or press Ctrl/Cmd + Enter)
+
+This will:
+- Create a helper function that uses `storage.foldername()` to extract vehicleId from path
+- Validate vehicle ownership or admin status
+- Add RLS policies for INSERT, UPDATE, DELETE operations based on ownership
+- Enable public READ access for displaying images
+- Verify the `vehicle-images` bucket configuration
+
+### Verify Storage Setup
+
+After running the script, test it works:
+
+1. **Check function exists:**
+```sql
+SELECT routine_name 
+FROM information_schema.routines 
+WHERE routine_schema = 'public' 
+AND routine_name = 'user_can_manage_vehicle_image';
+```
+
+2. **Check policies exist:**
+```sql
+SELECT schemaname, tablename, policyname 
+FROM pg_policies 
+WHERE tablename = 'objects' 
+AND schemaname = 'storage';
+```
+
+You should see 4 policies:
+- `Public read access to vehicle-images`
+- `Owners and admins can upload to vehicle-images`
+- `Owners and admins can update vehicle-images`
+- `Owners and admins can delete vehicle-images`
+
+### Create Storage Bucket (if not exists)
+
+If you don't have the `vehicle-images` bucket:
+
+1. Go to **Storage** in Supabase dashboard
+2. Click **"New bucket"**
+3. Settings:
+   - **Name**: `vehicle-images`
+   - **Public**: ✅ Yes (enables public read access)
+   - **File size limit**: `15000000` (15MB)
+   - **Allowed MIME types**: `image/jpeg,image/jpg,image/png,image/webp`
+4. Click **"Create bucket"**
+
+---
+
+## Step 8: Run Database Migrations
 
 ```bash
 # Push Prisma schema to database
@@ -241,7 +317,7 @@ npm run db:migrate
 
 ---
 
-## Step 8: Test the Setup
+## Step 9: Test the Setup
 
 ### Test 1: Verify Supabase Connection
 
@@ -279,7 +355,7 @@ Your tRPC endpoints should work normally:
 
 ---
 
-## Step 9: Create Admin User
+## Step 10: Create Admin User
 
 ### Option A: Using Supabase Dashboard
 
@@ -359,10 +435,13 @@ Before deploying to production:
 - [ ] SERVICE_ROLE key is kept secret (not in client code)
 - [ ] Site URL and redirect URLs updated for production domain
 - [ ] Email confirmation enabled for production
-- [ ] RLS policies applied and tested
+- [ ] RLS policies applied and tested (database + storage)
+- [ ] Storage RLS policies applied (`/sql/setup/storage-rls-policies.sql`)
+- [ ] `vehicle-images` bucket created and configured
 - [ ] Admin user created
 - [ ] Database migrations applied
 - [ ] Email templates customized with branding
+- [ ] Test image upload/delete functionality
 
 ---
 

@@ -2,10 +2,14 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { Pencil } from "lucide-react";
 import { Card } from "~/components/ui/card";
+import { Button } from "~/components/ui/button";
 import { VehicleStatusBadge } from "~/app/admin/vehicles/_components/VehicleStatusBadge";
+import { ImageEditDialog } from "~/components/vehicles/ImageEditDialog";
 import { cn } from "~/lib/utils";
 import type { VehicleDetail } from "~/types/vehicle";
+import { useRequireAuth } from "~/providers/auth-provider";
 
 interface UserVehicleMediaProps {
   vehicle: VehicleDetail;
@@ -18,8 +22,16 @@ interface UserVehicleMediaProps {
  * Displays hero image, thumbnails, and description
  */
 export function UserVehicleMedia({ vehicle }: UserVehicleMediaProps) {
+  const { user } = useRequireAuth();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
+  // Check if current user owns this vehicle or is an admin
+  const canEdit = user && (
+    user.id === vehicle.ownerId || 
+    user.userType === "ADMIN"
+  );
 
   // Filter and sort media - only show visible, ready images
   const sortedMedia = vehicle.media
@@ -82,6 +94,21 @@ export function UserVehicleMedia({ vehicle }: UserVehicleMediaProps) {
                 <VehicleStatusBadge status={vehicle.status} />
               </div>
             </div>
+
+            {/* Edit Images Button (Top-Right) - Only show to owner or admin */}
+            {canEdit && (
+              <div className="absolute top-3 right-3 md:top-4 md:right-4 z-10">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => setIsEditDialogOpen(true)}
+                  className="backdrop-blur-sm bg-background/80 hover:bg-background/90"
+                >
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Edit Images
+                </Button>
+              </div>
+            )}
 
             {/* Navigation Arrows */}
             {sortedMedia.length > 1 && (
@@ -267,6 +294,19 @@ export function UserVehicleMedia({ vehicle }: UserVehicleMediaProps) {
           )}
         </div>
       )}
+
+      {/* Image Edit Dialog */}
+      <ImageEditDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        vehicleId={vehicle.id}
+        images={sortedMedia.map((m) => ({
+          id: m.id,
+          url: m.publishedUrl ?? m.originalUrl,
+          order: m.order,
+          isPrimary: m.isPrimary ?? false,
+        }))}
+      />
     </div>
   );
 }

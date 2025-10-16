@@ -84,3 +84,13 @@ export type {
   EmailConfig,
 } from "./email";
 
+// Media types
+export type {
+  ReorderImagesInput,
+  DeleteImageInput,
+  CreateMediaInput,
+  MediaItem,
+  UploadProgress,
+  UploadResult,
+} from "./media";
+

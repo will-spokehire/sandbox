@@ -3,6 +3,7 @@ import { authRouter } from "~/server/api/routers/auth";
 import { vehicleRouter } from "~/server/api/routers/vehicle";
 import { userVehicleRouter } from "~/server/api/routers/user-vehicle";
 import { dealRouter } from "~/server/api/routers/deal";
+import { mediaRouter } from "~/server/api/routers/media";
 
 /**
  * This is the primary router for your server.
@@ -14,6 +15,7 @@ export const appRouter = createTRPCRouter({
   vehicle: vehicleRouter,
   userVehicle: userVehicleRouter,
   deal: dealRouter,
+  media: mediaRouter,
 });
 
 // export type definition of API

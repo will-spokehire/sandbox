@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { MoreHorizontal, Mail, Phone, MessageCircle, Send } from "lucide-react";
+import { MoreHorizontal, Mail, Phone, MessageCircle, Send, Pencil } from "lucide-react";
 import { Card } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import {
@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { VehicleStatusBadge } from "../../_components/VehicleStatusBadge";
+import { ImageEditDialog } from "~/components/vehicles/ImageEditDialog";
 import { getVehicleImageUrl } from "~/lib/vehicles";
 import { cn } from "~/lib/utils";
 import { type VehicleDetail } from "~/types/vehicle";
@@ -34,6 +35,7 @@ export function VehicleMediaSection({ vehicle, onSendDeal }: VehicleMediaSection
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxImages, setLightboxImages] = useState<string[]>([]);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   // Filter and sort media - only show visible, ready images
   const sortedMedia = vehicle.media
@@ -124,6 +126,17 @@ export function VehicleMediaSection({ vehicle, onSendDeal }: VehicleMediaSection
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                
+                {/* Edit Images */}
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsEditDialogOpen(true);
+                  }}
+                >
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit Images
+                </DropdownMenuItem>
                 
                 {/* Send Deal */}
                 {onSendDeal && (
@@ -379,6 +392,23 @@ export function VehicleMediaSection({ vehicle, onSendDeal }: VehicleMediaSection
           )}
         </div>
       )}
+
+      {/* Image Edit Dialog */}
+      <ImageEditDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        vehicleId={vehicle.id}
+        images={sortedMedia.map((m) => ({
+          id: m.id,
+          url: m.publishedUrl ?? m.originalUrl,
+          order: m.order,
+          isPrimary: m.isPrimary ?? false,
+        }))}
+        onSuccess={() => {
+          // Refetch will happen automatically via query invalidation
+          // This callback is just to ensure the parent component knows
+        }}
+      />
     </div>
   );
 }

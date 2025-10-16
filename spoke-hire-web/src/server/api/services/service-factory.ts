@@ -16,13 +16,16 @@ import { VehicleService } from "./vehicle.service";
 import { DealService } from "./deal.service";
 import { LookupService } from "./lookup.service";
 import { AuthService } from "./auth.service";
+import { MediaService } from "./media.service";
 import { VehicleRepository } from "../repositories/vehicle.repository";
 import { UserRepository } from "../repositories/user.repository";
 import { LookupRepository } from "../repositories/lookup.repository";
 import { DealRepository } from "../repositories/deal.repository";
+import { MediaRepository } from "../repositories/media.repository";
 import { VehicleQueryBuilder } from "../builders/vehicle-query.builder";
 import { cacheService } from "./cache.service";
 import { type SupabaseClient } from "@supabase/supabase-js";
+import { createAdminClient } from "~/lib/supabase/server";
 
 /**
  * Service Factory Class
@@ -63,6 +66,15 @@ export class ServiceFactory {
   static createAuthService(db: DbClient, supabase: SupabaseClient): AuthService {
     const repository = new UserRepository(db);
     return new AuthService(repository, supabase);
+  }
+
+  /**
+   * Create MediaService with dependencies
+   */
+  static createMediaService(db: DbClient): MediaService {
+    const repository = new MediaRepository(db);
+    const supabaseClient = createAdminClient();
+    return new MediaService(repository, supabaseClient, db);
   }
 
   /**

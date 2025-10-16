@@ -119,16 +119,12 @@ export default function VehicleDetailPage({
             <VehicleOwnerInfo owner={vehicle.owner} vehicleId={vehicle.id} />
           </div>
 
-          {/* Right Column - Vehicle Details (1/3 width on desktop) */}
+          {/* Right Column - Vehicle Details, Collections, Metadata (1/3 width on desktop) */}
           <div className="lg:col-span-1 space-y-6">
             <VehicleBasicInfo vehicle={vehicle} />
             <VehicleCollections collections={vehicle.collections} />
+            <VehicleMetadata vehicle={vehicle} />
           </div>
-        </div>
-
-        {/* Metadata Section - Full Width Below */}
-        <div className="mt-6">
-          <VehicleMetadata vehicle={vehicle} />
         </div>
       </main>
       
