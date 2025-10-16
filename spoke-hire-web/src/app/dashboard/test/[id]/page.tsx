@@ -130,15 +130,15 @@ export default function TestVehicleDetailPage({
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 md:py-8">
-        {/* Two-Column Layout: Photos on Left, Details on Right (Desktop) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-          {/* Left Column - Media Gallery (stacked on mobile, fixed on desktop) */}
-          <div className="space-y-4">
+        {/* Two-Column Layout: Photos on Left (larger), Details on Right (smaller) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+          {/* Left Column - Media Gallery (2/3 width on desktop) */}
+          <div className="lg:col-span-2 space-y-4">
             <VehicleMediaSection vehicle={vehicle} />
           </div>
 
-          {/* Right Column - Vehicle Details */}
-          <div className="space-y-6">
+          {/* Right Column - Vehicle Details (1/3 width on desktop) */}
+          <div className="lg:col-span-1 space-y-6">
             {/* Vehicle Details */}
             <VehicleBasicInfo vehicle={vehicle} />
             
