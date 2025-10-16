@@ -10,7 +10,6 @@ import { VehicleCollections } from "~/app/admin/vehicles/[id]/_components/Vehicl
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { AlertCircle, ArrowLeft } from "lucide-react";
-import { VehicleStatusBadge } from "~/app/admin/vehicles/_components/VehicleStatusBadge";
 import type { VehicleDetail } from "~/types/vehicle";
 
 /**
@@ -103,26 +102,23 @@ export default function TestVehicleDetailPage({
       {/* Header */}
       <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push("/dashboard/test")}
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Test
-              </Button>
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-50">
-                  {vehicle.name}
-                </h1>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  {vehicle.make.name} {vehicle.model.name} • {vehicle.year}
-                </p>
-              </div>
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => router.push("/dashboard/test")}
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Test
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-50">
+                {vehicle.name}
+              </h1>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                {vehicle.make.name} {vehicle.model.name} • {vehicle.year}
+              </p>
             </div>
-            <VehicleStatusBadge status={vehicle.status} />
           </div>
         </div>
       </div>
