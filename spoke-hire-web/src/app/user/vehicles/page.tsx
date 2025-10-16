@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useRequireAuth } from '~/providers/auth-provider';
 import { api } from '~/trpc/react';
 import { useURLFilters } from '~/hooks/useURLFilters';
@@ -23,13 +24,11 @@ const defaultFilters: UserVehicleFilters = {
 };
 
 /**
- * User Vehicles List Page
+ * User Vehicles List Page Content
  * 
- * Main page for users to view their vehicles.
- * Requires authentication but not admin role.
- * Uses URL-based filter management for better UX and shareable URLs.
+ * Wrapped component that uses useSearchParams
  */
-export default function UserVehiclesPage() {
+function UserVehiclesPageContent() {
   const { user, isLoading: isAuthLoading } = useRequireAuth();
   
   // URL-based filter management - persists across page reloads
@@ -162,6 +161,30 @@ export default function UserVehiclesPage() {
         <UserVehicleGrid vehicles={vehicles} />
       </main>
     </div>
+  );
+}
+
+/**
+ * User Vehicles List Page
+ * 
+ * Main page for users to view their vehicles.
+ * Requires authentication but not admin role.
+ * Uses URL-based filter management for better UX and shareable URLs.
+ */
+export default function UserVehiclesPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+        <DashboardHeader />
+        <main className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center py-16">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900 dark:border-slate-50"></div>
+          </div>
+        </main>
+      </div>
+    }>
+      <UserVehiclesPageContent />
+    </Suspense>
   );
 }
 
