@@ -250,13 +250,6 @@ export function VehicleMediaSection({ vehicle, onSendDeal }: VehicleMediaSection
         {/* Thumbnail Gallery - Always below hero image */}
         {hasImages && sortedMedia.length > 1 && (
           <div className="relative">
-            {/* Media Count Badge */}
-            <div className="mb-3 flex items-center justify-between">
-              <div className="bg-muted border rounded-full px-3 py-1 text-sm font-medium">
-                {sortedMedia.length} {sortedMedia.length === 1 ? "photo" : "photos"}
-              </div>
-            </div>
-            
             {/* Thumbnails - Horizontal scrollable grid */}
             <div className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
               {sortedMedia.slice(0, 12).map((media, index) => {
