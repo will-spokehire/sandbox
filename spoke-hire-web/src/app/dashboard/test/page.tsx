@@ -7,7 +7,7 @@ import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
-import { UserVehicleGrid } from '../_components/UserVehicleGrid';
+import { UserVehicleCard } from '../_components/UserVehicleCard';
 import { VehicleStatusTabs } from '../_components/VehicleStatusTabs';
 import type { VehicleStatus } from '@prisma/client';
 
@@ -187,8 +187,41 @@ export default function DashboardTestPage() {
               <div className="flex items-center justify-center py-16">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900 dark:border-slate-50"></div>
               </div>
+            ) : vehicles.length === 0 ? (
+              <div className="text-center py-16">
+                <div className="mb-4">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-24 w-24 mx-auto text-slate-300 dark:text-slate-700"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-50 mb-2">
+                  No vehicles for this user
+                </h3>
+                <p className="text-slate-600 dark:text-slate-400 max-w-md mx-auto">
+                  This user doesn't have any vehicles with the selected status.
+                </p>
+              </div>
             ) : (
-              <UserVehicleGrid vehicles={vehicles} />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {vehicles.map((vehicle) => (
+                  <UserVehicleCard 
+                    key={vehicle.id} 
+                    vehicle={vehicle}
+                    href={`/dashboard/test/${vehicle.id}`}
+                  />
+                ))}
+              </div>
             )}
           </>
         )}

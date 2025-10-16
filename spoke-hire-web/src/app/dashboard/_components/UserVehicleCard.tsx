@@ -33,6 +33,7 @@ interface UserVehicleCardProps {
       media: number;
     };
   };
+  href?: string; // Optional custom href for testing/other use cases
 }
 
 const statusColors: Record<VehicleStatus, string> = {
@@ -55,12 +56,13 @@ const statusLabels: Record<VehicleStatus, string> = {
  * Displays a vehicle card for regular users (non-admin).
  * Shows primary image, name, make/model, year, and status.
  */
-export function UserVehicleCard({ vehicle }: UserVehicleCardProps) {
+export function UserVehicleCard({ vehicle, href }: UserVehicleCardProps) {
   const primaryImage = vehicle.media[0];
   const imageUrl = primaryImage?.publishedUrl || primaryImage?.originalUrl;
+  const linkHref = href ?? `/dashboard/${vehicle.id}`;
 
   return (
-    <Link href={`/dashboard/${vehicle.id}`}>
+    <Link href={linkHref}>
       <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer p-0 gap-0">
         <div className="relative aspect-[3/2] bg-slate-100 dark:bg-slate-800">
           {imageUrl ? (
