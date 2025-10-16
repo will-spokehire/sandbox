@@ -103,7 +103,9 @@ export function VehicleMediaSection({ vehicle, onSendDeal }: VehicleMediaSection
 
           {/* Status Badge Overlay (Top-Left) */}
           <div className="absolute top-3 left-3 md:top-4 md:left-4 z-10">
-            <VehicleStatusBadge status={vehicle.status} />
+            <div className="backdrop-blur-sm bg-background/80 rounded-md p-1">
+              <VehicleStatusBadge status={vehicle.status} />
+            </div>
           </div>
 
           {/* Action Menu (Top-Right) - All Screens */}
