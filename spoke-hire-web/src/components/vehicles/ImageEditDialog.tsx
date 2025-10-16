@@ -488,15 +488,18 @@ export function ImageEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Edit Vehicle Images</DialogTitle>
-          <DialogDescription>
-            Drag to reorder images (saved automatically). The first image will be set as primary.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="max-w-6xl h-[90vh] flex flex-col gap-0 p-0">
+        <div className="px-4 pt-4 md:px-6 md:pt-6">
+          <DialogHeader>
+            <DialogTitle>Edit Vehicle Images</DialogTitle>
+            <DialogDescription>
+              Drag to reorder images (saved automatically). The first image will be set as primary.
+            </DialogDescription>
+          </DialogHeader>
+        </div>
 
-        <div className="space-y-6">
+        <div className="flex-1 overflow-y-auto px-4 py-4 md:px-6">
+          <div className="space-y-6">
           {/* Image Grid */}
           {images.length > 0 && (
             <div>
@@ -530,7 +533,7 @@ export function ImageEditDialog({
             <div
               onDragOver={handleDragOver}
               onDrop={handleDrop}
-              className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer"
+              className="border-2 border-dashed rounded-lg p-6 md:p-8 text-center hover:border-primary transition-colors cursor-pointer"
               onClick={() => fileInputRef.current?.click()}
             >
               <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
@@ -552,23 +555,26 @@ export function ImageEditDialog({
 
             {/* Upload Progress */}
             {hasUploads && (
-              <div className="mt-4 space-y-2">
+              <div className="mt-4 space-y-2 max-h-64 overflow-y-auto">
                 {uploads.map((upload, index) => (
                   <UploadProgressItem key={index} upload={upload} />
                 ))}
               </div>
             )}
           </div>
+          </div>
         </div>
 
-        <DialogFooter>
-          <Button
-            onClick={() => handleOpenChange(false)}
-            disabled={isBusy}
-          >
-            Close
-          </Button>
-        </DialogFooter>
+        <div className="px-4 py-4 md:px-6 md:py-6 border-t bg-background">
+          <DialogFooter className="mt-0">
+            <Button
+              onClick={() => handleOpenChange(false)}
+              disabled={isBusy}
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
