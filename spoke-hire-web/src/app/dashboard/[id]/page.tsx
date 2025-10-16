@@ -115,49 +115,48 @@ export default function UserVehicleDetailPage({
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 md:py-8">
-        <div className="space-y-6">
-          {/* Media Section - Hero Image + Gallery */}
-          <VehicleMediaSection vehicle={vehicle} />
+        {/* Two-Column Layout: Photos on Left, Details on Right (Desktop) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+          {/* Left Column - Media Gallery (stacked on mobile, fixed on desktop) */}
+          <div className="space-y-4">
+            <VehicleMediaSection vehicle={vehicle} />
+          </div>
 
-          {/* Two-Column Layout for Details */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Left Column */}
-            <div className="space-y-6">
-              <VehicleBasicInfo vehicle={vehicle} />
-            </div>
-
-            {/* Right Column */}
-            <div className="space-y-6">
-              <VehicleCollections collections={vehicle.collections} />
-              
-              {/* Status Info Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Listing Status</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Current Status</span>
-                    <VehicleStatusBadge status={vehicle.status} />
-                  </div>
-                  {vehicle.status === 'DRAFT' && (
-                    <p className="text-sm text-muted-foreground">
-                      Your vehicle is in draft status. Contact us to publish it.
-                    </p>
-                  )}
-                  {vehicle.status === 'PUBLISHED' && (
-                    <p className="text-sm text-muted-foreground">
-                      Your vehicle is live and visible to production companies.
-                    </p>
-                  )}
-                  {vehicle.status === 'DECLINED' && (
-                    <p className="text-sm text-muted-foreground">
-                      This listing needs review. Please contact us for more information.
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+          {/* Right Column - Vehicle Details */}
+          <div className="space-y-6">
+            {/* Vehicle Details */}
+            <VehicleBasicInfo vehicle={vehicle} />
+            
+            {/* Collections & Tags */}
+            <VehicleCollections collections={vehicle.collections} />
+            
+            {/* Listing Status */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Listing Status</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Current Status</span>
+                  <VehicleStatusBadge status={vehicle.status} />
+                </div>
+                {vehicle.status === 'DRAFT' && (
+                  <p className="text-sm text-muted-foreground">
+                    Your vehicle is in draft status. Contact us to publish it.
+                  </p>
+                )}
+                {vehicle.status === 'PUBLISHED' && (
+                  <p className="text-sm text-muted-foreground">
+                    Your vehicle is live and visible to production companies.
+                  </p>
+                )}
+                {vehicle.status === 'DECLINED' && (
+                  <p className="text-sm text-muted-foreground">
+                    This listing needs review. Please contact us for more information.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </div>
       </main>
