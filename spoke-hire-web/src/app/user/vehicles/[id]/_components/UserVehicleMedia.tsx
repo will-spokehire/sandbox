@@ -1,0 +1,273 @@
+"use client";
+
+import { useState } from "react";
+import Image from "next/image";
+import { Card } from "~/components/ui/card";
+import { VehicleStatusBadge } from "~/app/admin/vehicles/_components/VehicleStatusBadge";
+import { cn } from "~/lib/utils";
+import type { VehicleDetail } from "~/types/vehicle";
+
+interface UserVehicleMediaProps {
+  vehicle: VehicleDetail;
+}
+
+/**
+ * User Vehicle Media Section
+ * 
+ * Simplified media gallery for vehicle owners - no admin actions
+ * Displays hero image, thumbnails, and description
+ */
+export function UserVehicleMedia({ vehicle }: UserVehicleMediaProps) {
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+
+  // Filter and sort media - only show visible, ready images
+  const sortedMedia = vehicle.media
+    .filter((m) => m.type === "IMAGE" && m.status === "READY" && m.isVisible)
+    .sort((a, b) => {
+      // Primary images first
+      if (a.isPrimary && !b.isPrimary) return -1;
+      if (!a.isPrimary && b.isPrimary) return 1;
+      // Then by order
+      return a.order - b.order;
+    });
+
+  const mainImage = sortedMedia[selectedImageIndex];
+  const hasImages = sortedMedia.length > 0;
+
+  const openLightbox = (index: number) => {
+    setSelectedImageIndex(index);
+    setIsLightboxOpen(true);
+  };
+
+  const goToNext = () => {
+    setSelectedImageIndex((prev) => (prev + 1) % sortedMedia.length);
+  };
+
+  const goToPrevious = () => {
+    setSelectedImageIndex((prev) =>
+      prev === 0 ? sortedMedia.length - 1 : prev - 1
+    );
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Always stacked vertically: Hero image on top, thumbnails below */}
+      <div className="flex flex-col gap-4">
+        {/* Main/Hero Image - 3:2 aspect ratio */}
+        <Card className="relative overflow-hidden p-0 group">
+          <div className="relative aspect-[3/2] bg-muted">
+            {hasImages && mainImage ? (
+              <Image
+                src={mainImage.publishedUrl ?? mainImage.originalUrl}
+                alt={`${vehicle.name} - Main image`}
+                fill
+                className="object-cover cursor-pointer"
+                priority
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 900px"
+                onClick={() => openLightbox(selectedImageIndex)}
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
+                <div className="text-center">
+                  <p className="text-lg font-medium">No images available</p>
+                  <p className="text-sm">Images will appear here once uploaded</p>
+                </div>
+              </div>
+            )}
+
+            {/* Status Badge Overlay (Top-Left) */}
+            <div className="absolute top-3 left-3 md:top-4 md:left-4 z-10">
+              <div className="backdrop-blur-sm bg-background/80 rounded-md p-1">
+                <VehicleStatusBadge status={vehicle.status} />
+              </div>
+            </div>
+
+            {/* Navigation Arrows */}
+            {sortedMedia.length > 1 && (
+              <>
+                <button
+                  onClick={goToPrevious}
+                  className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 md:p-3 transition-all opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                  aria-label="Previous image"
+                >
+                  <svg
+                    className="h-5 w-5 md:h-6 md:w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={3}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </button>
+                <button
+                  onClick={goToNext}
+                  className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 md:p-3 transition-all opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                  aria-label="Next image"
+                >
+                  <svg
+                    className="h-5 w-5 md:h-6 md:w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={3}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+              </>
+            )}
+
+            {/* Image Counter */}
+            {sortedMedia.length > 1 && (
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 bg-black/60 text-white text-xs md:text-sm px-3 py-1 rounded-full font-medium">
+                {selectedImageIndex + 1} / {sortedMedia.length}
+              </div>
+            )}
+
+            {/* Click to expand */}
+            {hasImages && (
+              <div className="absolute bottom-3 right-3 z-20 bg-black/60 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                Click to expand
+              </div>
+            )}
+          </div>
+        </Card>
+
+        {/* Thumbnail Gallery - Always below hero image */}
+        {hasImages && sortedMedia.length > 1 && (
+          <div className="relative">
+            {/* Thumbnails - Horizontal scrollable grid */}
+            <div className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
+              {sortedMedia.slice(0, 12).map((media, index) => {
+                const isLastThumb = index === 11 && sortedMedia.length > 12;
+                const remainingCount = sortedMedia.length - 12;
+                
+                return (
+                  <button
+                    key={media.id}
+                    onClick={() => isLastThumb ? openLightbox(index) : setSelectedImageIndex(index)}
+                    className={cn(
+                      "relative aspect-[3/2] rounded-md overflow-hidden border-2 transition-all hover:scale-105 hover:shadow-md",
+                      selectedImageIndex === index
+                        ? "border-primary ring-2 ring-primary/20"
+                        : "border-border hover:border-primary/50"
+                    )}
+                  >
+                    <Image
+                      src={media.publishedUrl ?? media.originalUrl}
+                      alt={`${vehicle.name} - Thumbnail ${index + 1}`}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 25vw, 150px"
+                    />
+                    {isLastThumb && remainingCount > 0 && (
+                      <div className="absolute inset-0 bg-black/70 flex items-center justify-center text-white font-semibold text-sm">
+                        +{remainingCount}
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+        
+        {/* Description Section */}
+        {vehicle.description && (
+          <div className="space-y-3">
+            <h3 className="text-lg font-semibold text-foreground">
+              Description
+            </h3>
+            <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+              {vehicle.description}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Lightbox - Using simplified custom modal */}
+      {hasImages && isLightboxOpen && (
+        <div
+          className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4"
+          onClick={() => setIsLightboxOpen(false)}
+        >
+          {/* Close Button */}
+          <button
+            onClick={() => setIsLightboxOpen(false)}
+            className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors z-10"
+          >
+            <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          {/* Main Image */}
+          <div className="max-w-4xl max-h-full flex flex-col items-center">
+            <div className="relative max-w-full max-h-[80vh] flex items-center justify-center">
+              <Image
+                src={sortedMedia[selectedImageIndex]?.publishedUrl ?? sortedMedia[selectedImageIndex]?.originalUrl ?? ""}
+                alt={`${vehicle.name} - Image ${selectedImageIndex + 1}`}
+                width={1200}
+                height={800}
+                className="max-w-full max-h-full object-contain rounded-lg"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+
+            {/* Image Counter */}
+            {sortedMedia.length > 1 && (
+              <div className="mt-4 text-white text-center">
+                <p className="text-sm">
+                  {selectedImageIndex + 1} of {sortedMedia.length}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Navigation Arrows */}
+          {sortedMedia.length > 1 && (
+            <>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedImageIndex((prev) =>
+                    prev > 0 ? prev - 1 : sortedMedia.length - 1
+                  );
+                }}
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 transition-colors z-10"
+              >
+                <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedImageIndex((prev) =>
+                    prev < sortedMedia.length - 1 ? prev + 1 : 0
+                  );
+                }}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 transition-colors z-10"
+              >
+                <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+

@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
           
           // Redirect based on user type
           if (user) {
-            next = user.userType === 'ADMIN' ? '/admin' : '/dashboard';
+            next = user.userType === 'ADMIN' ? '/admin' : '/user/vehicles';
           }
         }
       } catch (dbError) {

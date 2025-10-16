@@ -61,7 +61,7 @@ export function OTPVerification() {
       await refreshSession();
       
       // Redirect based on user type
-      const redirectPath = data.user.userType === 'ADMIN' ? '/admin' : '/dashboard';
+      const redirectPath = data.user.userType === 'ADMIN' ? '/admin' : '/user/vehicles';
       
       // Small delay to ensure auth state is updated
       setTimeout(() => {

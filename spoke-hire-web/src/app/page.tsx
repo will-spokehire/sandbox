@@ -16,7 +16,7 @@ export default function Home() {
       if (user.userType === 'ADMIN') {
         router.push('/admin');
       } else {
-        router.push('/dashboard');
+        router.push('/user/vehicles');
       }
     }
   }, [isLoading, isAuthenticated, user, router]);
