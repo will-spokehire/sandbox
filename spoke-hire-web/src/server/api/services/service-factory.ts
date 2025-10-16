@@ -74,7 +74,7 @@ export class ServiceFactory {
   static createMediaService(db: DbClient): MediaService {
     const repository = new MediaRepository(db);
     const supabaseClient = createAdminClient();
-    return new MediaService(repository, supabaseClient, db);
+    return new MediaService(repository, supabaseClient, cacheService, db);
   }
 
   /**

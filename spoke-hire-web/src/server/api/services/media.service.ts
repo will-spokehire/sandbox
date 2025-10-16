@@ -12,6 +12,7 @@
 import { TRPCError } from "@trpc/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { MediaRepository } from "../repositories/media.repository";
+import { type CacheService, CacheKeys } from "./cache.service";
 import type {
   ReorderImagesInput,
   DeleteImageInput,
@@ -28,6 +29,7 @@ export class MediaService {
   constructor(
     private repository: MediaRepository,
     private supabaseClient: SupabaseClient,
+    private cache: CacheService,
     private db: any // DbClient type
   ) {}
 
@@ -103,6 +105,10 @@ export class MediaService {
 
     // Execute batch update
     await this.repository.batchUpdateOrders(batchUpdates);
+
+    // Invalidate vehicle cache to ensure fresh data on next fetch
+    this.cache.delete(CacheKeys.vehicleDetail(vehicleId));
+    this.cache.invalidateByPattern("vehicle:list:");
 
     return {
       success: true,
@@ -185,6 +191,10 @@ export class MediaService {
       }
     }
 
+    // Invalidate vehicle cache to ensure fresh data on next fetch
+    this.cache.delete(CacheKeys.vehicleDetail(vehicleId));
+    this.cache.invalidateByPattern("vehicle:list:");
+
     return {
       success: true,
       deletedImageId: imageId,
@@ -227,6 +237,10 @@ export class MediaService {
       status: "READY",
       isVisible: true,
     });
+
+    // Invalidate vehicle cache to ensure fresh data on next fetch
+    this.cache.delete(CacheKeys.vehicleDetail(vehicleId));
+    this.cache.invalidateByPattern("vehicle:list:");
 
     return media;
   }
