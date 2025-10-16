@@ -16,6 +16,35 @@ export class UserRepository extends BaseRepository {
   protected readonly entityName = "User" as const;
 
   /**
+   * Create a new user
+   */
+  async create(data: {
+    email: string;
+    supabaseId?: string;
+    userType: "ADMIN" | "REGISTERED" | "OWNER_ONLY";
+    status: "ACTIVE" | "INACTIVE" | "SUSPENDED";
+    firstName?: string;
+    lastName?: string;
+  }) {
+    try {
+      return await this.db.user.create({
+        data,
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          userType: true,
+          status: true,
+          supabaseId: true,
+        },
+      });
+    } catch (error) {
+      throw new DatabaseError("Failed to create user", error);
+    }
+  }
+
+  /**
    * Find user by email
    */
   async findByEmail(email: string) {

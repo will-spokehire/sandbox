@@ -1,12 +1,12 @@
 import { Suspense } from 'react';
-import { OTPVerification } from '~/components/auth/OTPVerification';
+import { SignupForm } from '~/components/auth/SignupForm';
 
 /**
- * OTP Verification Page
+ * Signup Page
  * 
- * Page for users to verify their email with a one-time password.
+ * Public page for new users to create an account with email OTP.
  */
-export default function VerifyOtpPage() {
+export default function SignupPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4">
       <div className="w-full max-w-md">
@@ -15,25 +15,24 @@ export default function VerifyOtpPage() {
             SpokeHire
           </h1>
           <p className="text-slate-600 dark:text-slate-400">
-            Verify your email
+            Join us today
           </p>
         </div>
 
-        <Suspense fallback={<OTPVerificationSkeleton />}>
-          <OTPVerification />
+        <Suspense fallback={<SignupFormSkeleton />}>
+          <SignupForm />
         </Suspense>
       </div>
     </div>
   );
 }
 
-function OTPVerificationSkeleton() {
+function SignupFormSkeleton() {
   return (
     <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6">
       <div className="space-y-4 animate-pulse">
         <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded w-3/4" />
         <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-full" />
-        <div className="h-10 bg-slate-200 dark:bg-slate-700 rounded" />
         <div className="h-10 bg-slate-200 dark:bg-slate-700 rounded" />
         <div className="h-10 bg-slate-200 dark:bg-slate-700 rounded" />
       </div>
@@ -42,7 +41,7 @@ function OTPVerificationSkeleton() {
 }
 
 export const metadata = {
-  title: 'Verify Email - SpokeHire',
-  description: 'Verify your email to access SpokeHire',
+  title: 'Sign Up - SpokeHire',
+  description: 'Create your SpokeHire account',
 };
 

@@ -15,7 +15,7 @@ export default function LoginPage() {
             SpokeHire
           </h1>
           <p className="text-slate-600 dark:text-slate-400">
-            Admin Portal
+            Sign in to continue
           </p>
         </div>
 
@@ -41,7 +41,7 @@ function LoginFormSkeleton() {
 }
 
 export const metadata = {
-  title: 'Sign In - SpokeHire Admin',
-  description: 'Sign in to the SpokeHire admin portal',
+  title: 'Sign In - SpokeHire',
+  description: 'Sign in to SpokeHire',
 };
 

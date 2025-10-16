@@ -60,9 +60,12 @@ export function OTPVerification() {
       await utils.auth.getSession.invalidate();
       await refreshSession();
       
+      // Redirect based on user type
+      const redirectPath = data.user.userType === 'ADMIN' ? '/admin' : '/dashboard';
+      
       // Small delay to ensure auth state is updated
       setTimeout(() => {
-        router.push('/admin');
+        router.push(redirectPath);
         router.refresh();
       }, 100);
     },

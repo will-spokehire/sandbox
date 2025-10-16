@@ -27,7 +27,8 @@ export class AuthService {
 
   /**
    * Sign in with OTP
-   * Validates user exists, is admin, and is active before sending OTP
+   * Supports open registration - creates user on first login for non-admins
+   * For existing users, validates they are active before sending OTP
    */
   async signInWithOtp(params: SignInWithOtpParams) {
     const { email, redirectTo } = params;
@@ -35,25 +36,27 @@ export class AuthService {
     // Check if user exists in our database
     const user = await this.userRepository.findByEmail(email);
 
-    if (!user) {
-      throw new UserNotFoundError(email);
+    // If user exists, validate their status
+    if (user) {
+      // Verify user is admin or regular user
+      if (user.userType !== "ADMIN" && user.userType !== "REGISTERED") {
+        // OWNER_ONLY users can also log in
+        if (user.userType !== "OWNER_ONLY") {
+          throw new AdminRequiredError();
+        }
+      }
+
+      // Verify user is active
+      if (user.status !== "ACTIVE") {
+        throw new AccountInactiveError();
+      }
     }
 
-    // Verify user is admin
-    if (user.userType !== "ADMIN") {
-      throw new AdminRequiredError();
-    }
-
-    // Verify user is active
-    if (user.status !== "ACTIVE") {
-      throw new AccountInactiveError();
-    }
-
-    // Send OTP via Supabase
+    // Send OTP via Supabase (create user if they don't exist)
     const { error } = await this.supabase.auth.signInWithOtp({
       email,
       options: {
-        shouldCreateUser: false,
+        shouldCreateUser: true, // Allow new user creation
         emailRedirectTo: redirectTo,
       },
     });
@@ -79,6 +82,7 @@ export class AuthService {
   /**
    * Verify OTP code
    * Validates session exists and user has proper permissions
+   * Auto-creates user record for new registrations
    */
   async verifyOtp(params: VerifyOtpParams) {
     const { email } = params;
@@ -93,16 +97,20 @@ export class AuthService {
     }
 
     // Get user from our database
-    const user = await this.userRepository.getSessionUser(email);
+    let user = await this.userRepository.getSessionUser(email);
 
     if (!user) {
-      // User doesn't exist in our DB, sign them out
-      await this.supabase.auth.signOut();
-      throw new UserNotFoundError(email);
+      // New user - create account with REGISTERED type
+      user = await this.userRepository.create({
+        email,
+        supabaseId: supabaseUser.id,
+        userType: "REGISTERED",
+        status: "ACTIVE",
+      });
     }
 
-    // Verify user is admin
-    if (user.userType !== "ADMIN") {
+    // Verify user is admin or registered user
+    if (user.userType !== "ADMIN" && user.userType !== "REGISTERED" && user.userType !== "OWNER_ONLY") {
       await this.supabase.auth.signOut();
       throw new AdminRequiredError();
     }
@@ -155,18 +163,19 @@ export class AuthService {
    * Resend OTP
    */
   async resendOtp(email: string) {
-    // Check if user exists and is admin
+    // Check if user exists (allow all user types for resend)
     const user = await this.userRepository.findByEmail(email);
 
-    if (!user || user.userType !== "ADMIN") {
-      throw new AdminRequiredError();
+    // If user exists, verify they are active
+    if (user && user.status !== "ACTIVE") {
+      throw new AccountInactiveError();
     }
 
-    // Resend OTP
+    // Resend OTP (allow creating user if they don't exist)
     const { error } = await this.supabase.auth.signInWithOtp({
       email,
       options: {
-        shouldCreateUser: false,
+        shouldCreateUser: true,
       },
     });
 
