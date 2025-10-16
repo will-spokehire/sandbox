@@ -1,0 +1,7 @@
+{
+  "setup-worktree": [
+    "cd spoke-hire-web",
+    "cp $ROOT_WORKTREE_PATH/.env .env",
+    "npm install"
+  ]
+}
