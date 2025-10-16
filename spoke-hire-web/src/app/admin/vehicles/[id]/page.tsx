@@ -111,25 +111,23 @@ export default function VehicleDetailPage({
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 md:py-8">
-        <div className="space-y-6">
-          {/* Media Section - Hero Image + Gallery */}
-          <VehicleMediaSection vehicle={vehicle} onSendDeal={handleSendDeal} />
-
-          {/* Two-Column Layout for Details */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Left Column */}
-            <div className="space-y-6">
-              <VehicleBasicInfo vehicle={vehicle} />
-            </div>
-
-            {/* Right Column */}
-            <div className="space-y-6">
-              <VehicleOwnerInfo owner={vehicle.owner} vehicleId={vehicle.id} />
-              <VehicleCollections collections={vehicle.collections} />
-            </div>
+        {/* Two-Column Layout: Photos on Left (larger), Details on Right (smaller) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+          {/* Left Column - Media Gallery (2/3 width on desktop) */}
+          <div className="lg:col-span-2 space-y-4">
+            <VehicleMediaSection vehicle={vehicle} onSendDeal={handleSendDeal} />
           </div>
 
-          {/* Metadata Section */}
+          {/* Right Column - Vehicle Details (1/3 width on desktop) */}
+          <div className="lg:col-span-1 space-y-6">
+            <VehicleBasicInfo vehicle={vehicle} />
+            <VehicleOwnerInfo owner={vehicle.owner} vehicleId={vehicle.id} />
+            <VehicleCollections collections={vehicle.collections} />
+          </div>
+        </div>
+
+        {/* Metadata Section - Full Width Below */}
+        <div className="mt-6">
           <VehicleMetadata vehicle={vehicle} />
         </div>
       </main>
