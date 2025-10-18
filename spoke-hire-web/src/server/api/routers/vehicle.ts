@@ -72,6 +72,26 @@ const updateStatusInputSchema = z.object({
   status: z.nativeEnum(VehicleStatus),
 });
 
+const updateVehicleInputSchema = z.object({
+  id: z.string(),
+  name: z.string().min(3).optional(),
+  status: z.nativeEnum(VehicleStatus).optional(),
+  price: z.number().min(0).nullable().optional(),
+  year: z.string().optional(),
+  registration: z.string().nullable().optional(),
+  makeId: z.string().optional(),
+  modelId: z.string().optional(),
+  engineCapacity: z.number().min(0).nullable().optional(),
+  numberOfSeats: z.number().min(1).max(20).nullable().optional(),
+  steeringId: z.string().nullable().optional(),
+  gearbox: z.string().nullable().optional(),
+  exteriorColour: z.string().nullable().optional(),
+  interiorColour: z.string().nullable().optional(),
+  condition: z.string().nullable().optional(),
+  isRoadLegal: z.boolean().optional(),
+  description: z.string().nullable().optional(),
+});
+
 const deleteVehicleInputSchema = z.object({
   id: z.string(),
 });
@@ -109,6 +129,17 @@ export const vehicleRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const service = ServiceFactory.createVehicleService(ctx.db);
       return await service.updateVehicleStatus(input.id, input.status);
+    }),
+
+  /**
+   * Update vehicle
+   */
+  update: adminProcedure
+    .input(updateVehicleInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const service = ServiceFactory.createVehicleService(ctx.db);
+      const { id, ...data } = input;
+      return await service.updateVehicle(id, data);
     }),
 
   /**

@@ -116,6 +116,17 @@ export interface UpdateVehicleData {
   price?: number | null;
   year?: string;
   registration?: string | null;
+  makeId?: string;
+  modelId?: string;
+  engineCapacity?: number | null;
+  numberOfSeats?: number | null;
+  steeringId?: string | null;
+  gearbox?: string | null;
+  exteriorColour?: string | null;
+  interiorColour?: string | null;
+  condition?: string | null;
+  isRoadLegal?: boolean;
+  description?: string | null;
 }
 
 /**

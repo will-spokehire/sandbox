@@ -41,7 +41,7 @@ export class ServiceFactory {
     const repository = new VehicleRepository(db);
     const queryBuilder = new VehicleQueryBuilder();
     
-    return new VehicleService(repository, queryBuilder, cacheService);
+    return new VehicleService(repository, queryBuilder, cacheService, db);
   }
 
   /**

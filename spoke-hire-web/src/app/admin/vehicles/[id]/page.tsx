@@ -15,6 +15,7 @@ import { Button } from "~/components/ui/button";
 import { AlertCircle } from "lucide-react";
 import type { VehicleDetail } from "~/types/vehicle";
 import { SendDealToVehiclesDialog } from "~/components/deals";
+import { EditVehicleDialog } from "./_components/EditVehicleDialog";
 
 /**
  * Vehicle Detail Page
@@ -40,6 +41,7 @@ export default function VehicleDetailPage({
   
   // Send Deal Dialog state
   const [isSendDealDialogOpen, setIsSendDealDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   
   // Fetch vehicle data on the client
   // OPTIMIZATION: Uses TanStack Query cache with staleTime for SPA-like behavior
@@ -107,7 +109,7 @@ export default function VehicleDetailPage({
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Header */}
-      <VehicleDetailHeader vehicle={vehicle} />
+      <VehicleDetailHeader vehicle={vehicle} onEdit={() => setIsEditDialogOpen(true)} />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 md:py-8">
@@ -135,6 +137,18 @@ export default function VehicleDetailPage({
           onOpenChange={setIsSendDealDialogOpen}
           selectedVehicleIds={[vehicle.id]}
           onSuccess={handleDealSuccess}
+        />
+      )}
+
+      {/* Edit Vehicle Dialog */}
+      {isEditDialogOpen && (
+        <EditVehicleDialog
+          open={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          vehicle={vehicle}
+          onSuccess={() => {
+            // Dialog handles cache invalidation
+          }}
         />
       )}
     </div>

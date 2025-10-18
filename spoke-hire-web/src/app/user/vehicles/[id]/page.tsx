@@ -1,6 +1,6 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
 import { useRequireAuth } from "~/providers/auth-provider";
@@ -11,8 +11,9 @@ import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
-import { AlertCircle, ArrowLeft } from "lucide-react";
+import { AlertCircle, ArrowLeft, Pencil } from "lucide-react";
 import type { VehicleDetail } from "~/types/vehicle";
+import { EditVehicleDialog } from "./_components/EditVehicleDialog";
 
 /**
  * User Vehicle Detail Page
@@ -28,6 +29,7 @@ export default function UserVehicleDetailPage({
 }) {
   const { user, isLoading: isAuthLoading } = useRequireAuth();
   const router = useRouter();
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   
   // Unwrap params Promise as required by Next.js 15
   const resolvedParams = use(params);
@@ -143,23 +145,34 @@ export default function UserVehicleDetailPage({
       {/* Header */}
       <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push("/user/vehicles")}
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-50">
-                {vehicle.name}
-              </h1>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                {vehicle.make.name} {vehicle.model.name} • {vehicle.year}
-              </p>
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4 min-w-0 flex-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push("/user/vehicles")}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back
+              </Button>
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-50">
+                  {vehicle.name}
+                </h1>
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  {vehicle.make.name} {vehicle.model.name} • {vehicle.year}
+                </p>
+              </div>
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsEditDialogOpen(true)}
+              className="gap-2"
+            >
+              <Pencil className="h-4 w-4" />
+              <span className="hidden sm:inline">Edit</span>
+            </Button>
           </div>
         </div>
       </div>
@@ -183,6 +196,18 @@ export default function UserVehicleDetailPage({
           </div>
         </div>
       </main>
+
+      {/* Edit Vehicle Dialog */}
+      {isEditDialogOpen && (
+        <EditVehicleDialog
+          open={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          vehicle={vehicle}
+          onSuccess={() => {
+            // Dialog handles cache invalidation
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -1,22 +1,23 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Pencil } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { UserMenu } from "~/components/auth/UserMenu";
 import { type VehicleDetail } from "~/types/vehicle";
 
 interface VehicleDetailHeaderProps {
   vehicle: VehicleDetail;
+  onEdit?: () => void;
 }
 
 /**
  * Vehicle Detail Header
  * 
- * Header for the vehicle detail page with back navigation.
+ * Header for the vehicle detail page with back navigation and edit button.
  * Uses browser back() which automatically preserves the list state via URL.
  */
-export function VehicleDetailHeader({ vehicle }: VehicleDetailHeaderProps) {
+export function VehicleDetailHeader({ vehicle, onEdit }: VehicleDetailHeaderProps) {
   const router = useRouter();
 
   return (
@@ -43,7 +44,18 @@ export function VehicleDetailHeader({ vehicle }: VehicleDetailHeaderProps) {
               </p>
             </div>
           </div>
-          <div className="flex-shrink-0">
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {onEdit && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onEdit}
+                className="gap-2"
+              >
+                <Pencil className="h-4 w-4" />
+                <span className="hidden sm:inline">Edit</span>
+              </Button>
+            )}
             <UserMenu />
           </div>
         </div>

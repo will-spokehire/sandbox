@@ -18,13 +18,15 @@ import type {
   ListVehiclesParams,
   ListVehiclesResult,
   VehicleWithRelations,
+  DbClient,
 } from "~/server/types";
 
 export class VehicleService {
   constructor(
     private repository: VehicleRepository,
     private queryBuilder: VehicleQueryBuilder,
-    private cache: CacheService
+    private cache: CacheService,
+    private db: DbClient
   ) {}
 
   /**
@@ -278,6 +280,150 @@ export class VehicleService {
     this.cache.set(cacheKey, result, CacheTTL.SHORT);
 
     return result;
+  }
+
+  /**
+   * Update vehicle
+   * Supports creating new Make/Model records if string names are provided instead of IDs
+   */
+  async updateVehicle(id: string, data: import("~/server/types").UpdateVehicleData) {
+    // Check if vehicle exists
+    const exists = await this.repository.findById(id);
+    if (!exists) {
+      throw new VehicleNotFoundError(id);
+    }
+
+    // Helper function to check if a string is a UUID
+    const isUUID = (str: string): boolean => {
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      return uuidRegex.test(str);
+    };
+
+    // Helper function to generate slug from name
+    const generateSlug = (name: string): string => {
+      return name
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, '') // Remove non-word chars
+        .replace(/[\s_-]+/g, '-')  // Replace spaces/underscores with -
+        .replace(/^-+|-+$/g, '');   // Remove leading/trailing -
+    };
+
+    // Process makeId - create new make if string name provided
+    let finalMakeId = data.makeId ?? exists.makeId;
+    if (data.makeId && !isUUID(data.makeId)) {
+      // User provided a make name, not an ID - create or find make
+      const makeName = data.makeId.trim();
+      
+      // Check if make already exists (case-insensitive)
+      let make = await this.db.make.findFirst({
+        where: { 
+          name: { 
+            equals: makeName,
+            mode: 'insensitive'
+          } 
+        },
+      });
+
+      // Create new make if it doesn't exist
+      if (!make) {
+        make = await this.db.make.create({
+          data: {
+            name: makeName,
+            slug: generateSlug(makeName),
+            isActive: true,
+          },
+        });
+        
+        // Invalidate makes cache
+        this.cache.delete(CacheKeys.makes());
+        this.cache.delete(CacheKeys.vehicleFilterOptions());
+      }
+      
+      finalMakeId = make.id;
+    }
+
+    // Process modelId - create new model if string name provided
+    let finalModelId = data.modelId ?? exists.modelId;
+    if (data.modelId && !isUUID(data.modelId)) {
+      // User provided a model name, not an ID - create or find model
+      const modelName = data.modelId.trim();
+      
+      // Check if model already exists for this make (case-insensitive)
+      let model = await this.db.model.findFirst({
+        where: { 
+          name: { 
+            equals: modelName,
+            mode: 'insensitive'
+          },
+          makeId: finalMakeId,
+        },
+      });
+
+      // Create new model if it doesn't exist
+      if (!model) {
+        model = await this.db.model.create({
+          data: {
+            name: modelName,
+            slug: generateSlug(modelName),
+            makeId: finalMakeId,
+            isActive: true,
+          },
+        });
+        
+        // Invalidate models cache for this make
+        this.cache.delete(CacheKeys.modelsByMake(finalMakeId));
+        this.cache.delete(CacheKeys.vehicleFilterOptions());
+      }
+      
+      finalModelId = model.id;
+    }
+
+    // Validate make/model relationship
+    if (finalMakeId && finalModelId) {
+      const model = await this.db.model.findUnique({
+        where: { id: finalModelId },
+        select: { makeId: true },
+      });
+
+      if (!model || model.makeId !== finalMakeId) {
+        throw new Error("Invalid make/model combination");
+      }
+    }
+
+    // Update vehicle with final IDs
+    const updatedVehicle = await this.db.vehicle.update({
+      where: { id },
+      data: {
+        ...(data.name !== undefined && { name: data.name }),
+        ...(data.status !== undefined && { status: data.status }),
+        ...(data.price !== undefined && { price: data.price }),
+        ...(data.year !== undefined && { year: data.year }),
+        ...(data.registration !== undefined && { registration: data.registration }),
+        makeId: finalMakeId,
+        modelId: finalModelId,
+        ...(data.engineCapacity !== undefined && { engineCapacity: data.engineCapacity }),
+        ...(data.numberOfSeats !== undefined && { numberOfSeats: data.numberOfSeats }),
+        ...(data.steeringId !== undefined && { steeringId: data.steeringId }),
+        ...(data.gearbox !== undefined && { gearbox: data.gearbox }),
+        ...(data.exteriorColour !== undefined && { exteriorColour: data.exteriorColour }),
+        ...(data.interiorColour !== undefined && { interiorColour: data.interiorColour }),
+        ...(data.condition !== undefined && { condition: data.condition }),
+        ...(data.isRoadLegal !== undefined && { isRoadLegal: data.isRoadLegal }),
+        ...(data.description !== undefined && { description: data.description }),
+      },
+      include: {
+        make: { select: { id: true, name: true } },
+        model: { select: { id: true, name: true } },
+        owner: { select: { id: true, email: true, firstName: true, lastName: true } },
+      },
+    });
+
+    // Invalidate caches
+    this.cache.delete(CacheKeys.vehicleDetail(id));
+    this.cache.invalidateByPattern("vehicle:list:");
+
+    return updatedVehicle;
   }
 
   /**
