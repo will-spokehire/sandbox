@@ -391,6 +391,38 @@ export class VehicleService {
       }
     }
 
+    // Check registration uniqueness if registration is being updated
+    if (data.registration !== undefined && data.registration !== null && data.registration !== exists.registration) {
+      const existingVehicleWithReg = await this.db.vehicle.findFirst({
+        where: {
+          registration: {
+            equals: data.registration,
+            mode: "insensitive" as const,
+          },
+          id: {
+            not: id, // Exclude current vehicle
+          },
+        },
+        select: {
+          id: true,
+          name: true,
+          ownerId: true,
+        },
+      });
+
+      if (existingVehicleWithReg) {
+        const isOwnVehicle = existingVehicleWithReg.ownerId === exists.ownerId;
+        throw new Error(
+          JSON.stringify({
+            code: "REGISTRATION_EXISTS",
+            vehicleId: existingVehicleWithReg.id,
+            vehicleName: existingVehicleWithReg.name,
+            isOwnVehicle,
+          })
+        );
+      }
+    }
+
     // Update vehicle with final IDs
     const updatedVehicle = await this.db.vehicle.update({
       where: { id },
@@ -418,6 +450,25 @@ export class VehicleService {
         owner: { select: { id: true, email: true, firstName: true, lastName: true } },
       },
     });
+
+    // Update collections if provided
+    if (data.collectionIds !== undefined) {
+      // Delete existing collections
+      await this.db.vehicleCollection.deleteMany({
+        where: { vehicleId: id },
+      });
+
+      // Create new collections
+      if (data.collectionIds.length > 0) {
+        await this.db.vehicleCollection.createMany({
+          data: data.collectionIds.map(collectionId => ({
+            vehicleId: id,
+            collectionId: collectionId,
+          })),
+          skipDuplicates: true,
+        });
+      }
+    }
 
     // Invalidate caches
     this.cache.delete(CacheKeys.vehicleDetail(id));

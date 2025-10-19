@@ -5,8 +5,9 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, Pencil } from "lucide-react";
+import { Loader2, Pencil, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +28,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Checkbox } from "~/components/ui/checkbox";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { api } from "~/trpc/react";
 import type { VehicleDetail, FilterOptions, ModelsByMake } from "~/types/vehicle";
 import { VehicleStatus } from "@prisma/client";
@@ -68,7 +70,13 @@ export function EditVehicleDialog({
   vehicle,
   onSuccess,
 }: EditVehicleDialogProps) {
+  const router = useRouter();
   const [selectedMakeId, setSelectedMakeId] = useState<string>(vehicle.makeId);
+  const [registrationError, setRegistrationError] = useState<{
+    vehicleId: string;
+    vehicleName: string;
+    isOwnVehicle: boolean;
+  } | null>(null);
   const utils = api.useUtils();
 
   const form = useForm<EditVehicleFormData>({
@@ -115,6 +123,7 @@ export function EditVehicleDialog({
         description: vehicle.description ?? "",
       });
       setSelectedMakeId(vehicle.makeId);
+      setRegistrationError(null); // Clear any previous errors
     }
   }, [open, vehicle, form]);
 
@@ -155,10 +164,26 @@ export function EditVehicleDialog({
       toast.success("Vehicle updated successfully");
       void utils.vehicle.getById.invalidate({ id: vehicle.id });
       void utils.vehicle.list.invalidate();
+      setRegistrationError(null);
       onSuccess();
       onOpenChange(false);
     },
     onError: (error) => {
+      // Try to parse registration error
+      try {
+        const errorData = JSON.parse(error.message);
+        if (errorData.code === "REGISTRATION_EXISTS") {
+          setRegistrationError({
+            vehicleId: errorData.vehicleId,
+            vehicleName: errorData.vehicleName,
+            isOwnVehicle: errorData.isOwnVehicle,
+          });
+          return;
+        }
+      } catch {
+        // Not a JSON error, fall through to default handling
+      }
+
       toast.error("Failed to update vehicle", {
         description: error.message,
       });
@@ -278,6 +303,35 @@ export function EditVehicleDialog({
                   />
                 </div>
               </div>
+
+              {/* Registration Error Alert */}
+              {registrationError && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Registration Number Already Exists</AlertTitle>
+                  <AlertDescription>
+                    {registrationError.isOwnVehicle ? (
+                      <div className="space-y-3">
+                        <p>
+                          You already have a vehicle with this registration: <strong>{registrationError.vehicleName}</strong>
+                        </p>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => router.push(`/admin/vehicles/${registrationError.vehicleId}`)}
+                        >
+                          View This Vehicle
+                        </Button>
+                      </div>
+                    ) : (
+                      <p>
+                        This registration is already in use by another owner. If this is incorrect, please investigate.
+                      </p>
+                    )}
+                  </AlertDescription>
+                </Alert>
+              )}
             </div>
           </div>
 

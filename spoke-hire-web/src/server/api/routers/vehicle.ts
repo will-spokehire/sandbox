@@ -90,6 +90,7 @@ const updateVehicleInputSchema = z.object({
   condition: z.string().nullable().optional(),
   isRoadLegal: z.boolean().optional(),
   description: z.string().nullable().optional(),
+  collectionIds: z.array(z.string()).optional(),
 });
 
 const deleteVehicleInputSchema = z.object({

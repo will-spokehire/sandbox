@@ -18,6 +18,10 @@ const JPEG_QUALITY = 0.85;
 const CHUNK_SIZE = 6 * 1024 * 1024; // 6MB chunks (required by Supabase)
 const RETRY_DELAYS = [0, 3000, 5000, 10000, 20000];
 
+// Minimum image dimensions
+const MIN_IMAGE_WIDTH = 800;
+const MIN_IMAGE_HEIGHT = 600;
+
 /**
  * Upload progress callback
  */
@@ -69,6 +73,23 @@ function validateFile(file: File): { valid: boolean; error?: string } {
     return {
       valid: false,
       error: "Only JPEG, PNG, and WebP images are allowed",
+    };
+  }
+
+  return { valid: true };
+}
+
+/**
+ * Validate image dimensions
+ */
+function validateDimensions(
+  width: number,
+  height: number
+): { valid: boolean; error?: string } {
+  if (width < MIN_IMAGE_WIDTH || height < MIN_IMAGE_HEIGHT) {
+    return {
+      valid: false,
+      error: `Image must be at least ${MIN_IMAGE_WIDTH}×${MIN_IMAGE_HEIGHT}px (current: ${width}×${height}px)`,
     };
   }
 
@@ -259,6 +280,27 @@ export async function uploadImageWithProgress(
   }
 
   try {
+    // Get original dimensions before processing
+    const originalDimensions = await getImageDimensions(file);
+    
+    // Validate dimensions
+    const dimensionValidation = validateDimensions(
+      originalDimensions.width,
+      originalDimensions.height
+    );
+    if (!dimensionValidation.valid) {
+      return {
+        success: false,
+        publicUrl: null,
+        storagePath: null,
+        filename: file.name,
+        fileSize: file.size,
+        width: originalDimensions.width,
+        height: originalDimensions.height,
+        error: dimensionValidation.error ?? "Image dimensions too small",
+      };
+    }
+
     // Resize image if needed
     const resizeResult = await resizeImageIfNeeded(file);
 
@@ -293,20 +335,41 @@ export async function uploadImageWithProgress(
       };
     }
 
-    // Get project ID from environment
-    const projectId = process.env.NEXT_PUBLIC_SUPABASE_URL?.split("//")[1]?.split(
-      "."
-    )[0];
-
-    if (!projectId) {
+    // Get Supabase URL and determine if we're in local development
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    
+    if (!supabaseUrl) {
       return {
         success: false,
         publicUrl: null,
         storagePath: null,
         filename: file.name,
         fileSize: resizeResult.newSize,
-        error: "Invalid Supabase configuration",
+        error: "Invalid Supabase configuration - URL missing",
       };
+    }
+
+    // Determine the upload endpoint based on environment
+    const isLocalDev = supabaseUrl.includes('127.0.0.1') || supabaseUrl.includes('localhost');
+    let uploadEndpoint: string;
+
+    if (isLocalDev) {
+      // For local development, use the local Supabase storage endpoint
+      uploadEndpoint = `${supabaseUrl}/storage/v1/upload/resumable`;
+    } else {
+      // For production, use the project-specific storage hostname
+      const projectId = supabaseUrl.split("//")[1]?.split(".")[0];
+      if (!projectId) {
+        return {
+          success: false,
+          publicUrl: null,
+          storagePath: null,
+          filename: file.name,
+          fileSize: resizeResult.newSize,
+          error: "Invalid Supabase configuration - cannot extract project ID",
+        };
+      }
+      uploadEndpoint = `https://${projectId}.storage.supabase.co/storage/v1/upload/resumable`;
     }
 
     // Upload using TUS protocol
@@ -316,8 +379,8 @@ export async function uploadImageWithProgress(
       error?: string;
     }>((resolve, reject) => {
       const upload = new tus.Upload(resizeResult.blob, {
-        // Use direct storage hostname for better performance
-        endpoint: `https://${projectId}.storage.supabase.co/storage/v1/upload/resumable`,
+        // Use the determined endpoint (local or production)
+        endpoint: uploadEndpoint,
         retryDelays: RETRY_DELAYS,
         headers: {
           authorization: `Bearer ${session.access_token}`,

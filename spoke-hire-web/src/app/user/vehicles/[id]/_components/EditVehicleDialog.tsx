@@ -5,8 +5,9 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, Pencil } from "lucide-react";
+import { Loader2, Pencil, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +28,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Checkbox } from "~/components/ui/checkbox";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { api } from "~/trpc/react";
 import type { VehicleDetail, FilterOptions, ModelsByMake } from "~/types/vehicle";
 import { VEHICLE_COLORS, GEARBOX_TYPES } from "~/lib/constants/vehicle";
@@ -71,7 +73,13 @@ export function EditVehicleDialog({
   vehicle,
   onSuccess,
 }: EditVehicleDialogProps) {
+  const router = useRouter();
   const [selectedMakeId, setSelectedMakeId] = useState<string>(vehicle.makeId);
+  const [registrationError, setRegistrationError] = useState<{
+    vehicleId: string;
+    vehicleName: string;
+    isOwnVehicle: boolean;
+  } | null>(null);
   const utils = api.useUtils();
 
   // Get initial status (default to DRAFT if currently DECLINED)
@@ -126,13 +134,14 @@ export function EditVehicleDialog({
         description: vehicle.description ?? "",
       });
       setSelectedMakeId(vehicle.makeId);
+      setRegistrationError(null); // Clear any previous errors
     }
   }, [open, vehicle, form]);
 
   // Fetch filter options for dropdowns
   const { data: filterOptions } = api.userVehicle.getFilterOptions.useQuery(undefined, {
     enabled: open,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 60 * 1000, // 1 minute - shorter because users can create new makes/models
   }) as { data: FilterOptions | undefined };
 
   // Fetch models when make is selected
@@ -140,25 +149,47 @@ export function EditVehicleDialog({
     { makeId: selectedMakeId },
     { 
       enabled: open && !!selectedMakeId,
-      staleTime: 5 * 60 * 1000,
+      staleTime: 60 * 1000, // 1 minute - shorter because users can create new models
     }
   ) as { data: ModelsByMake[] | undefined, isLoading: boolean };
 
   // Convert models to combobox options
   const modelOptions: ComboboxOption[] = React.useMemo(() => {
-    return models?.map((model) => ({
+    const options = models?.map((model) => ({
       value: model.id,
       label: model.name,
     })) ?? [];
-  }, [models]);
+    
+    // Always include the current vehicle's model if not already in the list
+    // This ensures it displays correctly while models are loading
+    if (vehicle.model && !options.some(opt => opt.value === vehicle.modelId)) {
+      options.unshift({
+        value: vehicle.modelId,
+        label: vehicle.model.name,
+      });
+    }
+    
+    return options;
+  }, [models, vehicle.model, vehicle.modelId]);
 
   // Convert makes to combobox options
   const makeOptions: ComboboxOption[] = React.useMemo(() => {
-    return filterOptions?.makes.map((make) => ({
+    const options = filterOptions?.makes.map((make) => ({
       value: make.id,
       label: make.name,
     })) ?? [];
-  }, [filterOptions?.makes]);
+    
+    // Always include the current vehicle's make if not already in the list
+    // This ensures it displays correctly while filter options are loading
+    if (vehicle.make && !options.some(opt => opt.value === vehicle.makeId)) {
+      options.unshift({
+        value: vehicle.makeId,
+        label: vehicle.make.name,
+      });
+    }
+    
+    return options;
+  }, [filterOptions?.makes, vehicle.make, vehicle.makeId]);
 
   // Update mutation
   const updateMutation = api.userVehicle.updateMyVehicle.useMutation({
@@ -167,10 +198,31 @@ export function EditVehicleDialog({
       void utils.userVehicle.myVehicleById.invalidate({ id: vehicle.id });
       void utils.userVehicle.myVehicles.invalidate();
       void utils.userVehicle.myVehicleCounts.invalidate();
+      
+      // Invalidate filter options and models cache in case new make/model was created
+      void utils.userVehicle.getFilterOptions.invalidate();
+      void utils.userVehicle.getModelsByMake.invalidate();
+      
+      setRegistrationError(null);
       onSuccess();
       onOpenChange(false);
     },
     onError: (error) => {
+      // Try to parse registration error
+      try {
+        const errorData = JSON.parse(error.message);
+        if (errorData.code === "REGISTRATION_EXISTS") {
+          setRegistrationError({
+            vehicleId: errorData.vehicleId,
+            vehicleName: errorData.vehicleName,
+            isOwnVehicle: errorData.isOwnVehicle,
+          });
+          return;
+        }
+      } catch {
+        // Not a JSON error, fall through to default handling
+      }
+
       toast.error("Failed to update vehicle", {
         description: error.message,
       });
@@ -290,6 +342,35 @@ export function EditVehicleDialog({
                   />
                 </div>
               </div>
+
+              {/* Registration Error Alert */}
+              {registrationError && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Registration Number Already Exists</AlertTitle>
+                  <AlertDescription>
+                    {registrationError.isOwnVehicle ? (
+                      <div className="space-y-3">
+                        <p>
+                          You already have a vehicle with this registration: <strong>{registrationError.vehicleName}</strong>
+                        </p>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => router.push(`/user/vehicles/${registrationError.vehicleId}`)}
+                        >
+                          View This Vehicle
+                        </Button>
+                      </div>
+                    ) : (
+                      <p>
+                        This registration is already in use. If this is your vehicle, please contact support.
+                      </p>
+                    )}
+                  </AlertDescription>
+                </Alert>
+              )}
             </div>
           </div>
 

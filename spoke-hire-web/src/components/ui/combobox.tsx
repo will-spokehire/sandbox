@@ -77,7 +77,7 @@ export function Combobox({
           disabled={disabled}
           className="w-full justify-between"
         >
-          {selectedOption?.label ?? value ?? placeholder}
+          {selectedOption?.label ?? (value ? value : placeholder)}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>

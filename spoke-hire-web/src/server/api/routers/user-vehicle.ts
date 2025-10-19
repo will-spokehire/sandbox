@@ -11,6 +11,7 @@ import { z } from "zod";
 import { protectedProcedure, createTRPCRouter } from "~/server/api/trpc";
 import { VehicleStatus } from "@prisma/client";
 import { ServiceFactory } from "../services/service-factory";
+import { geocodePostcode } from "~/lib/services/geocoding";
 
 // ============================================================================
 // Input Validation Schemas
@@ -31,7 +32,7 @@ const listMyVehiclesInputSchema = z.object({
 const myVehicleCountsInputSchema = z.object({
   // Dev only: Test with different owner ID (requires admin)
   testOwnerId: z.string().optional(),
-});
+}).optional().default({});
 
 const updateMyVehicleInputSchema = z.object({
   id: z.string(),
@@ -51,6 +52,48 @@ const updateMyVehicleInputSchema = z.object({
   condition: z.string().nullable().optional(),
   isRoadLegal: z.boolean().optional(),
   description: z.string().nullable().optional(),
+  collectionIds: z.array(z.string()).optional(),
+});
+
+const createMyVehicleInputSchema = z.object({
+  makeId: z.string().min(1, "Make is required"),
+  modelId: z.string().min(1, "Model is required"),
+  name: z.string().min(3, "Vehicle name must be at least 3 characters"),
+  year: z.string().min(1, "Year is required"),
+  registration: z.string().min(1, "Registration is required"),
+  price: z.number().min(0, "Price cannot be negative").optional(),
+  exteriorColour: z.string().min(1, "Exterior colour is required"),
+  interiorColour: z.string().min(1, "Interior colour is required"),
+  gearbox: z.string().min(1, "Gearbox is required"),
+  engineCapacity: z.number().min(1, "Engine capacity is required"),
+  numberOfSeats: z.number().min(1).max(20, "Number of seats must be between 1 and 20"),
+  steeringId: z.string().min(1, "Steering type is required"),
+  condition: z.string().min(1, "Condition is required"),
+  isRoadLegal: z.boolean().default(true),
+  description: z.string().optional(),
+  collectionIds: z.array(z.string()).optional(),
+});
+
+const updateMyProfileInputSchema = z.object({
+  firstName: z.string().min(1, "First name is required").optional(),
+  lastName: z.string().min(1, "Last name is required").optional(),
+  phone: z.string().min(1, "Phone is required").optional(),
+  street: z.string().optional(),
+  city: z.string().min(1, "City is required").optional(),
+  county: z.string().optional(),
+  postcode: z.string().min(1, "Postcode is required").optional(),
+  countryId: z.string().optional(),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
+});
+
+const lookupPostcodeInputSchema = z.object({
+  postcode: z.string().min(1, "Postcode is required"),
+});
+
+const checkRegistrationInputSchema = z.object({
+  registration: z.string().min(1, "Registration is required"),
+  excludeVehicleId: z.string().optional(),
 });
 
 // ============================================================================
@@ -281,7 +324,7 @@ export const userVehicleRouter = createTRPCRouter({
    * Update vehicle (owner only)
    * Security: Only the vehicle owner can update their vehicle
    * Status restrictions: Users cannot set status to DECLINED
-   * Supports creating new Make/Model records if string names are provided instead of IDs
+   * Validates IDs or creates new Make/Model from names
    */
   updateMyVehicle: protectedProcedure
     .input(updateMyVehicleInputSchema)
@@ -300,93 +343,137 @@ export const userVehicleRouter = createTRPCRouter({
         throw new Error('Vehicle not found or you do not have permission to edit it');
       }
 
-      // Helper function to check if a string is a UUID
-      const isUUID = (str: string): boolean => {
-        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-        return uuidRegex.test(str);
+      // Helper to check if string is a cUID (25 chars) or UUID (with dashes)
+      const isId = (str: string): boolean => {
+        return str.length === 25 || str.includes('-');
       };
 
-      // Helper function to generate slug from name
+      // Helper to generate slug from name
       const generateSlug = (name: string): string => {
         return name
           .toLowerCase()
           .trim()
-          .replace(/[^\w\s-]/g, '') // Remove non-word chars
-          .replace(/[\s_-]+/g, '-')  // Replace spaces/underscores with -
-          .replace(/^-+|-+$/g, '');   // Remove leading/trailing -
+          .replace(/[^\w\s-]/g, '')
+          .replace(/[\s_-]+/g, '-')
+          .replace(/^-+|-+$/g, '');
       };
 
-      // Process makeId - create new make if string name provided
-      let finalMakeId = data.makeId ?? vehicle.makeId;
-      if (data.makeId && !isUUID(data.makeId)) {
-        // User provided a make name, not an ID - create or find make
-        const makeName = data.makeId.trim();
-        
-        // Check if make already exists (case-insensitive)
-        let make = await ctx.db.make.findFirst({
-          where: { 
-            name: { 
-              equals: makeName,
-              mode: 'insensitive'
-            } 
-          },
-        });
-
-        // Create new make if it doesn't exist
-        if (!make) {
-          make = await ctx.db.make.create({
-            data: {
-              name: makeName,
-              slug: generateSlug(makeName),
-              isActive: true,
+      // Process makeId if provided - validate if ID, create if name
+      let finalMakeId = vehicle.makeId; // Default to existing
+      if (data.makeId) {
+        if (isId(data.makeId)) {
+          // It's an ID - validate it exists
+          const make = await ctx.db.make.findUnique({
+            where: { id: data.makeId },
+          });
+          
+          if (!make) {
+            throw new Error(`Make not found. Please select a valid make from the list.`);
+          }
+          finalMakeId = make.id;
+        } else {
+          // It's a name - create or find it
+          const makeName = data.makeId.trim();
+          
+          let make = await ctx.db.make.findFirst({
+            where: { 
+              name: { 
+                equals: makeName,
+                mode: 'insensitive'
+              } 
             },
           });
+
+          if (!make) {
+            make = await ctx.db.make.create({
+              data: {
+                name: makeName,
+                slug: generateSlug(makeName),
+                isActive: true,
+              },
+            });
+          }
+          
+          finalMakeId = make.id;
         }
-        
-        finalMakeId = make.id;
       }
 
-      // Process modelId - create new model if string name provided
-      let finalModelId = data.modelId ?? vehicle.modelId;
-      if (data.modelId && !isUUID(data.modelId)) {
-        // User provided a model name, not an ID - create or find model
-        const modelName = data.modelId.trim();
-        
-        // Check if model already exists for this make (case-insensitive)
-        let model = await ctx.db.model.findFirst({
-          where: { 
-            name: { 
-              equals: modelName,
-              mode: 'insensitive'
-            },
-            makeId: finalMakeId,
-          },
-        });
-
-        // Create new model if it doesn't exist
-        if (!model) {
-          model = await ctx.db.model.create({
-            data: {
-              name: modelName,
-              slug: generateSlug(modelName),
+      // Process modelId if provided - validate if ID, create if name
+      let finalModelId = vehicle.modelId; // Default to existing
+      if (data.modelId) {
+        if (isId(data.modelId)) {
+          // It's an ID - validate it exists
+          const model = await ctx.db.model.findUnique({
+            where: { id: data.modelId },
+          });
+          
+          if (!model) {
+            throw new Error(`Model not found. Please select a valid model from the list.`);
+          }
+          
+          if (model.makeId !== finalMakeId) {
+            throw new Error(`The selected model does not belong to the selected make.`);
+          }
+          
+          finalModelId = model.id;
+        } else {
+          // It's a name - create or find it
+          const modelName = data.modelId.trim();
+          
+          let model = await ctx.db.model.findFirst({
+            where: { 
+              name: { 
+                equals: modelName,
+                mode: 'insensitive'
+              },
               makeId: finalMakeId,
-              isActive: true,
             },
           });
+
+          if (!model) {
+            model = await ctx.db.model.create({
+              data: {
+                name: modelName,
+                slug: generateSlug(modelName),
+                makeId: finalMakeId,
+                isActive: true,
+              },
+            });
+          }
+          
+          finalModelId = model.id;
         }
-        
-        finalModelId = model.id;
       }
 
-      // Validate make/model relationship
-      if (finalMakeId && finalModelId) {
-        const model = await ctx.db.model.findUnique({
-          where: { id: finalModelId },
-          select: { makeId: true },
+      // Check registration uniqueness if registration is being updated
+      if (data.registration !== undefined && data.registration !== null && data.registration !== vehicle.registration) {
+        const existingVehicleWithReg = await ctx.db.vehicle.findFirst({
+          where: {
+            registration: {
+              equals: data.registration,
+              mode: "insensitive",
+            },
+            id: {
+              not: id, // Exclude current vehicle
+            },
+          },
+          select: {
+            id: true,
+            name: true,
+            ownerId: true,
+          },
         });
 
-        if (!model || model.makeId !== finalMakeId) {
-          throw new Error("Invalid make/model combination");
+        if (existingVehicleWithReg) {
+          const isOwnVehicle = existingVehicleWithReg.ownerId === ctx.user.id;
+          throw new Error(
+            JSON.stringify({
+              code: "REGISTRATION_EXISTS",
+              vehicleId: existingVehicleWithReg.id,
+              vehicleName: existingVehicleWithReg.name,
+              isOwnVehicle,
+            })
+          );
         }
       }
 
@@ -429,6 +516,25 @@ export const userVehicleRouter = createTRPCRouter({
           },
         },
       });
+
+      // Update collections if provided
+      if (data.collectionIds !== undefined) {
+        // Delete existing collections
+        await ctx.db.vehicleCollection.deleteMany({
+          where: { vehicleId: id },
+        });
+
+        // Create new collections
+        if (data.collectionIds.length > 0) {
+          await ctx.db.vehicleCollection.createMany({
+            data: data.collectionIds.map(collectionId => ({
+              vehicleId: id,
+              collectionId: collectionId,
+            })),
+            skipDuplicates: true,
+          });
+        }
+      }
 
       return updatedVehicle;
     }),
@@ -488,6 +594,369 @@ export const userVehicleRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const service = ServiceFactory.createLookupService(ctx.db);
       return await service.getModelsByMake(input.makeId);
+    }),
+
+  /**
+   * Create a new vehicle owned by the current user
+   * Vehicle starts in DRAFT status
+   * Validates IDs or creates new Make/Model from names
+   */
+  createMyVehicle: protectedProcedure
+    .input(createMyVehicleInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      // Helper to check if string is a cUID (25 chars) or UUID (with dashes)
+      const isId = (str: string): boolean => {
+        return str.length === 25 || str.includes('-');
+      };
+
+      // Helper to generate slug from name
+      const generateSlug = (name: string): string => {
+        return name
+          .toLowerCase()
+          .trim()
+          .replace(/[^\w\s-]/g, '')
+          .replace(/[\s_-]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+      };
+
+      // Process makeId - validate if ID, create if name
+      let finalMakeId: string;
+      if (isId(input.makeId)) {
+        // It's an ID - validate it exists
+        const make = await ctx.db.make.findUnique({
+          where: { id: input.makeId },
+        });
+        
+        if (!make) {
+          throw new Error(`Make not found. Please select a valid make from the list.`);
+        }
+        finalMakeId = make.id;
+      } else {
+        // It's a name - create or find it
+        const makeName = input.makeId.trim();
+        
+        let make = await ctx.db.make.findFirst({
+          where: { 
+            name: { 
+              equals: makeName,
+              mode: 'insensitive'
+            } 
+          },
+        });
+
+        if (!make) {
+          make = await ctx.db.make.create({
+            data: {
+              name: makeName,
+              slug: generateSlug(makeName),
+              isActive: true,
+            },
+          });
+        }
+        
+        finalMakeId = make.id;
+      }
+
+      // Process modelId - validate if ID, create if name
+      let finalModelId: string;
+      if (isId(input.modelId)) {
+        // It's an ID - validate it exists
+        const model = await ctx.db.model.findUnique({
+          where: { id: input.modelId },
+        });
+        
+        if (!model) {
+          throw new Error(`Model not found. Please select a valid model from the list.`);
+        }
+        
+        if (model.makeId !== finalMakeId) {
+          throw new Error(`The selected model does not belong to the selected make.`);
+        }
+        
+        finalModelId = model.id;
+      } else {
+        // It's a name - create or find it
+        const modelName = input.modelId.trim();
+        
+        let model = await ctx.db.model.findFirst({
+          where: { 
+            name: { 
+              equals: modelName,
+              mode: 'insensitive'
+            },
+            makeId: finalMakeId,
+          },
+        });
+
+        if (!model) {
+          model = await ctx.db.model.create({
+            data: {
+              name: modelName,
+              slug: generateSlug(modelName),
+              makeId: finalMakeId,
+              isActive: true,
+            },
+          });
+        }
+        
+        finalModelId = model.id;
+      }
+
+      // Check registration uniqueness
+      const existingVehicleWithReg = await ctx.db.vehicle.findFirst({
+        where: {
+          registration: {
+            equals: input.registration,
+            mode: "insensitive",
+          },
+        },
+        select: {
+          id: true,
+          name: true,
+          ownerId: true,
+        },
+      });
+
+      if (existingVehicleWithReg) {
+        const isOwnVehicle = existingVehicleWithReg.ownerId === ctx.user.id;
+        throw new Error(
+          JSON.stringify({
+            code: "REGISTRATION_EXISTS",
+            vehicleId: existingVehicleWithReg.id,
+            vehicleName: existingVehicleWithReg.name,
+            isOwnVehicle,
+          })
+        );
+      }
+
+      // Create the vehicle
+      const vehicle = await ctx.db.vehicle.create({
+        data: {
+          name: input.name,
+          makeId: finalMakeId,
+          modelId: finalModelId,
+          year: input.year,
+          registration: input.registration,
+          price: input.price,
+          exteriorColour: input.exteriorColour,
+          interiorColour: input.interiorColour,
+          gearbox: input.gearbox,
+          engineCapacity: input.engineCapacity,
+          numberOfSeats: input.numberOfSeats,
+          steeringId: input.steeringId,
+          condition: input.condition,
+          isRoadLegal: input.isRoadLegal,
+          description: input.description ?? null,
+          status: "DRAFT",
+          ownerId: ctx.user.id,
+        },
+        include: {
+          make: { select: { id: true, name: true } },
+          model: { select: { id: true, name: true } },
+          steering: { select: { id: true, name: true } },
+          owner: { 
+            select: { 
+              id: true, 
+              email: true, 
+              firstName: true, 
+              lastName: true 
+            } 
+          },
+        },
+      });
+
+      // Assign collections if provided
+      if (input.collectionIds && input.collectionIds.length > 0) {
+        await ctx.db.vehicleCollection.createMany({
+          data: input.collectionIds.map(collectionId => ({
+            vehicleId: vehicle.id,
+            collectionId: collectionId,
+          })),
+          skipDuplicates: true,
+        });
+      }
+
+      return vehicle;
+    }),
+
+  /**
+   * Update current user's profile
+   * Sets profileCompleted to true when required fields are present
+   */
+  updateMyProfile: protectedProcedure
+    .input(updateMyProfileInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      // Check if profile will be complete after this update
+      const currentUser = await ctx.db.user.findUnique({
+        where: { id: ctx.user.id },
+        select: {
+          firstName: true,
+          lastName: true,
+          phone: true,
+          city: true,
+          postcode: true,
+        },
+      });
+
+      if (!currentUser) {
+        throw new Error("User not found");
+      }
+
+      // Determine final values after update
+      const finalFirstName = input.firstName ?? currentUser.firstName;
+      const finalLastName = input.lastName ?? currentUser.lastName;
+      const finalPhone = input.phone ?? currentUser.phone;
+      const finalCity = input.city ?? currentUser.city;
+      const finalPostcode = input.postcode ?? currentUser.postcode;
+
+      // Check if all required fields will be present
+      const profileCompleted = Boolean(
+        finalFirstName && 
+        finalLastName && 
+        finalPhone && 
+        finalCity && 
+        finalPostcode
+      );
+
+      // Update user profile
+      const updatedUser = await ctx.db.user.update({
+        where: { id: ctx.user.id },
+        data: {
+          ...(input.firstName !== undefined && { firstName: input.firstName }),
+          ...(input.lastName !== undefined && { lastName: input.lastName }),
+          ...(input.phone !== undefined && { phone: input.phone }),
+          ...(input.street !== undefined && { street: input.street }),
+          ...(input.city !== undefined && { city: input.city }),
+          ...(input.county !== undefined && { county: input.county }),
+          ...(input.postcode !== undefined && { postcode: input.postcode }),
+          ...(input.countryId !== undefined && { countryId: input.countryId || null }),
+          ...(input.latitude !== undefined && { 
+            latitude: input.latitude,
+            geoUpdatedAt: new Date(),
+            geoSource: "postcodes.io",
+          }),
+          ...(input.longitude !== undefined && { longitude: input.longitude }),
+          profileCompleted,
+        },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          phone: true,
+          street: true,
+          city: true,
+          county: true,
+          postcode: true,
+          countryId: true,
+          profileCompleted: true,
+        },
+      });
+
+      return updatedUser;
+    }),
+
+  /**
+   * Lookup postcode to get address and geo data
+   * Uses postcodes.io API via geocoding service
+   */
+  lookupPostcode: protectedProcedure
+    .input(lookupPostcodeInputSchema)
+    .query(async ({ ctx, input }) => {
+      try {
+        const result = await geocodePostcode(input.postcode);
+        
+        // For London postcodes, use region as city (e.g., "London")
+        // For other postcodes, use admin_district as city (e.g., "Sevenoaks")
+        const city = result.region === "London" 
+          ? "London" 
+          : (result.adminDistrict ?? "");
+        
+        // Look up country ID from the database
+        const country = await ctx.db.country.findFirst({
+          where: { 
+            name: { 
+              equals: result.country,
+              mode: "insensitive"
+            }
+          },
+          select: { id: true }
+        });
+        
+        return {
+          success: true,
+          data: {
+            postcode: result.postcode,
+            city,
+            county: result.adminCounty ?? "",
+            latitude: result.latitude,
+            longitude: result.longitude,
+            country: result.country,
+            countryId: country?.id ?? null,
+          },
+        };
+      } catch (error) {
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : "Failed to lookup postcode",
+        };
+      }
+    }),
+
+  /**
+   * Check if a registration number is available
+   * Used for validation before creating/updating vehicles
+   */
+  checkRegistration: protectedProcedure
+    .input(checkRegistrationInputSchema)
+    .query(async ({ ctx, input }) => {
+      // Build where clause
+      const where: {
+        registration: {
+          equals: string;
+          mode: "insensitive";
+        };
+        id?: {
+          not: string;
+        };
+      } = {
+        registration: {
+          equals: input.registration,
+          mode: "insensitive",
+        },
+      };
+
+      // Exclude specific vehicle if provided (for edit scenarios)
+      if (input.excludeVehicleId) {
+        where.id = { not: input.excludeVehicleId };
+      }
+
+      // Find existing vehicle with this registration
+      const existingVehicle = await ctx.db.vehicle.findFirst({
+        where,
+        select: {
+          id: true,
+          name: true,
+          ownerId: true,
+          registration: true,
+        },
+      });
+
+      if (existingVehicle) {
+        return {
+          available: false,
+          existingVehicle: {
+            id: existingVehicle.id,
+            name: existingVehicle.name,
+            ownerId: existingVehicle.ownerId,
+            isOwnVehicle: existingVehicle.ownerId === ctx.user.id,
+          },
+        };
+      }
+
+      return {
+        available: true,
+      };
     }),
 });
 

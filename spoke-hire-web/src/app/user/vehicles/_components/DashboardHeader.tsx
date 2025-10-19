@@ -1,12 +1,14 @@
 'use client';
 
 import { Button } from '~/components/ui/button';
+import { User, Car } from 'lucide-react';
+import Link from 'next/link';
 import { useAuth } from '~/providers/auth-provider';
 
 /**
  * Dashboard Header Component
  * 
- * Header for the user dashboard with user info and sign out button.
+ * Header for the user dashboard with navigation links and sign out button.
  */
 export function DashboardHeader() {
   const { user, signOut } = useAuth();
@@ -24,12 +26,35 @@ export function DashboardHeader() {
             </p>
           </div>
 
-          <Button
-            variant="outline"
-            onClick={() => void signOut()}
-          >
-            Sign Out
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+            >
+              <Link href="/user/vehicles">
+                <Car className="mr-2 h-4 w-4" />
+                Vehicles
+              </Link>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+            >
+              <Link href="/user/profile">
+                <User className="mr-2 h-4 w-4" />
+                Profile
+              </Link>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => void signOut()}
+            >
+              Sign Out
+            </Button>
+          </div>
         </div>
       </div>
     </header>

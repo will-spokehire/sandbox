@@ -127,6 +127,7 @@ export interface UpdateVehicleData {
   condition?: string | null;
   isRoadLegal?: boolean;
   description?: string | null;
+  collectionIds?: string[];
 }
 
 /**

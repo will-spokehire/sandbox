@@ -14,6 +14,7 @@ export interface GeocodingResult {
   country: string;
   region?: string;
   adminDistrict?: string;
+  adminCounty?: string;
 }
 
 export interface PostcodesIoResponse {
@@ -25,6 +26,7 @@ export interface PostcodesIoResponse {
     country: string;
     region?: string;
     admin_district?: string;
+    admin_county?: string;
     codes?: {
       admin_district?: string;
       admin_county?: string;
@@ -139,6 +141,7 @@ export async function geocodePostcode(
     country: data.result.country,
     region: data.result.region,
     adminDistrict: data.result.admin_district,
+    adminCounty: data.result.admin_county,
   };
 }
 
@@ -193,6 +196,7 @@ export async function geocodePostcodesBatch(
         country: item.result.country,
         region: item.result.region,
         adminDistrict: item.result.admin_district,
+        adminCounty: item.result.admin_county,
       });
     }
   }

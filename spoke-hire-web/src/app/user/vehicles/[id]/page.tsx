@@ -52,7 +52,7 @@ export default function UserVehicleDetailPage({
   // Handle loading state with skeleton
   if (isLoading || !user) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      <>
         {/* Header Skeleton */}
         <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
           <div className="container mx-auto px-4 py-4">
@@ -113,35 +113,33 @@ export default function UserVehicleDetailPage({
             </div>
           </div>
         </main>
-      </div>
+      </>
     );
   }
 
   // Handle error or unauthorized access
   if (error || !vehicle) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-        <div className="container mx-auto px-4 py-8">
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Vehicle Not Found</AlertTitle>
-            <AlertDescription>
-              The vehicle you&apos;re looking for doesn&apos;t exist or you don&apos;t have permission to view it.
-            </AlertDescription>
-          </Alert>
-          <div className="mt-4">
-            <Button onClick={() => router.push("/user/vehicles")}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to My Vehicles
-            </Button>
-          </div>
+      <div className="container mx-auto px-4 py-8">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Vehicle Not Found</AlertTitle>
+          <AlertDescription>
+            The vehicle you&apos;re looking for doesn&apos;t exist or you don&apos;t have permission to view it.
+          </AlertDescription>
+        </Alert>
+        <div className="mt-4">
+          <Button onClick={() => router.push("/user/vehicles")}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to My Vehicles
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+    <>
       {/* Header */}
       <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
         <div className="container mx-auto px-4 py-4">
@@ -192,7 +190,12 @@ export default function UserVehicleDetailPage({
             <UserVehicleDetails vehicle={vehicle} />
             
             {/* Collections & Tags - Shared component is fine (just displays tags) */}
-            <VehicleCollections collections={vehicle.collections} />
+            <VehicleCollections 
+              collections={vehicle.collections}
+              vehicle={vehicle}
+              canEdit={true}
+              isAdmin={false}
+            />
           </div>
         </div>
       </main>
@@ -208,7 +211,7 @@ export default function UserVehicleDetailPage({
           }}
         />
       )}
-    </div>
+    </>
   );
 }
 

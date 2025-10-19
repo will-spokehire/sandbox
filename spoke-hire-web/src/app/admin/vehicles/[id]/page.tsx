@@ -124,7 +124,12 @@ export default function VehicleDetailPage({
           {/* Right Column - Vehicle Details, Collections, Metadata (1/3 width on desktop) */}
           <div className="lg:col-span-1 space-y-6">
             <VehicleBasicInfo vehicle={vehicle} />
-            <VehicleCollections collections={vehicle.collections} />
+            <VehicleCollections 
+              collections={vehicle.collections} 
+              vehicle={vehicle}
+              canEdit={true}
+              isAdmin={true}
+            />
             <VehicleMetadata vehicle={vehicle} />
           </div>
         </div>

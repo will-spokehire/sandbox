@@ -6,15 +6,29 @@ import { type VehicleStatus } from "@prisma/client";
 
 /**
  * Format price for display
- * Accepts number, Decimal (from Prisma), or null/undefined
+ * Accepts number, string, Decimal (from Prisma), or null/undefined
  */
-export function formatPrice(price: number | { toNumber: () => number } | null | undefined): string {
+export function formatPrice(price: number | string | { toNumber: () => number } | null | undefined): string {
   if (price === null || price === undefined) {
     return "N/A";
   }
 
-  // Handle Prisma Decimal type
-  const numericPrice = typeof price === "number" ? price : price.toNumber();
+  let numericPrice: number;
+
+  // Handle different input types
+  if (typeof price === "number") {
+    numericPrice = price;
+  } else if (typeof price === "string") {
+    numericPrice = parseFloat(price);
+    if (isNaN(numericPrice)) {
+      return "N/A";
+    }
+  } else if (typeof price === "object" && "toNumber" in price && typeof price.toNumber === "function") {
+    // Handle Prisma Decimal type
+    numericPrice = price.toNumber();
+  } else {
+    return "N/A";
+  }
 
   return new Intl.NumberFormat("en-GB", {
     style: "currency",

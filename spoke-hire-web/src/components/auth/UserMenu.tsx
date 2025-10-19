@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '~/providers/auth-provider';
+import { useRouter } from 'next/navigation';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +27,7 @@ import { LogOut, User, Shield } from 'lucide-react';
  */
 export function UserMenu() {
   const { user, isAuthenticated, signOut, isLoading } = useAuth();
+  const router = useRouter();
 
   if (isLoading) {
     return (
@@ -61,7 +63,10 @@ export function UserMenu() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem disabled className="cursor-default">
+        <DropdownMenuItem 
+          className="cursor-pointer"
+          onClick={() => router.push('/user/profile')}
+        >
           <User className="mr-2 h-4 w-4" />
           <span>Profile</span>
         </DropdownMenuItem>
