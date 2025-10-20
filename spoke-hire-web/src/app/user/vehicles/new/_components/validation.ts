@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isValidPhoneNumber } from "~/lib/whatsapp";
 
 /**
  * Validation schemas for the vehicle creation wizard
@@ -9,7 +10,13 @@ import { z } from "zod";
 export const profileSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
-  phone: z.string().min(1, "Phone is required"),
+  phone: z
+    .string()
+    .min(1, "Phone number is required")
+    .refine(
+      (val) => isValidPhoneNumber(val),
+      "Please enter a valid phone number"
+    ),
   street: z.string().optional(),
   city: z.string().min(1, "City is required"),
   county: z.string().optional(),

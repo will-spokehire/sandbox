@@ -15,6 +15,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { PhoneInput } from "~/components/ui/phone-input";
 import { Button } from "~/components/ui/button";
 import {
   Select,
@@ -266,10 +267,10 @@ export function ProfileForm({
             <FormItem>
               <FormLabel>Phone Number *</FormLabel>
               <FormControl>
-                <Input
-                  type="tel"
-                  placeholder="07123 456789"
-                  {...field}
+                <PhoneInput
+                  placeholder="Enter phone number"
+                  value={field.value}
+                  onChange={field.onChange}
                 />
               </FormControl>
               <FormDescription>

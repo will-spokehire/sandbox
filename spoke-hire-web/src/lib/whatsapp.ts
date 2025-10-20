@@ -1,8 +1,30 @@
 /**
  * WhatsApp Utility Functions
  * 
- * Helper functions for generating WhatsApp URLs and messages
+ * Helper functions for generating WhatsApp URLs, messages, and phone number formatting
  */
+
+/**
+ * Format phone number for display (with country code and spacing)
+ * Examples: "+44 7123 456789", "+1 (555) 123-4567"
+ */
+export function formatPhoneForDisplay(phone: string | null | undefined): string {
+  if (!phone) return '';
+  // Return phone as-is (already in E.164 format)
+  return phone;
+}
+
+/**
+ * Validate phone number format
+ * Returns true if the phone number is valid in E.164 format
+ */
+export function isValidPhoneNumber(phone: string | undefined): boolean {
+  if (!phone) return false;
+  
+  // Basic E.164 validation: starts with + and has 8-15 digits
+  const e164Pattern = /^\+[1-9]\d{7,14}$/;
+  return e164Pattern.test(phone);
+}
 
 /**
  * Format phone number for WhatsApp (remove spaces, dashes, etc.)

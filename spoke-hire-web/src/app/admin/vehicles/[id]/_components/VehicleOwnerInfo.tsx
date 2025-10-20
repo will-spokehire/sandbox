@@ -8,6 +8,7 @@ import { Button } from "~/components/ui/button";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Separator } from "~/components/ui/separator";
 import { formatOwnerName, getInitials } from "~/lib/vehicles";
+import { formatPhoneForDisplay } from "~/lib/whatsapp";
 import { type VehicleDetail } from "~/types/vehicle";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
@@ -119,7 +120,7 @@ export function VehicleOwnerInfo({ owner, vehicleId }: VehicleOwnerInfoProps) {
                     href={`tel:${owner.phone}`}
                     className="text-primary hover:underline"
                   >
-                    {owner.phone}
+                    {formatPhoneForDisplay(owner.phone)}
                   </a>
                 </dd>
               </div>
