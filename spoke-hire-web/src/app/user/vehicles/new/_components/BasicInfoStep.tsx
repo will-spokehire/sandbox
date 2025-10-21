@@ -87,7 +87,6 @@ export function BasicInfoStep({ onComplete, defaultValues, onValidationChange }:
     defaultValues: {
       makeId: defaultValues?.makeId ?? "",
       modelId: defaultValues?.modelId ?? "",
-      name: defaultValues?.name ?? "",
       year: defaultValues?.year ?? "",
       registration: defaultValues?.registration ?? "",
       price: defaultValues?.price !== undefined ? String(defaultValues.price) : "",
@@ -155,7 +154,6 @@ export function BasicInfoStep({ onComplete, defaultValues, onValidationChange }:
 
   const watchMake = form.watch("makeId");
   const watchModel = form.watch("modelId");
-  const watchYear = form.watch("year");
 
   // Update selected make when it changes
   useEffect(() => {
@@ -165,20 +163,6 @@ export function BasicInfoStep({ onComplete, defaultValues, onValidationChange }:
       form.setValue("modelId", "");
     }
   }, [watchMake, selectedMakeId, form]);
-
-  // Auto-generate vehicle name
-  useEffect(() => {
-    const makeName = (filterOptions?.makes as MakeItem[] | undefined)?.find((m: MakeItem) => m.id === watchMake)?.name;
-    const modelName = (models as ModelItem[] | undefined)?.find((m: ModelItem) => m.id === watchModel)?.name;
-    
-    if (makeName && modelName && watchYear) {
-      const generatedName = `${makeName} ${modelName} ${watchYear}`;
-      // Only update if user hasn't manually edited the name
-      if (!form.formState.dirtyFields.name) {
-        form.setValue("name", generatedName);
-      }
-    }
-  }, [watchMake, watchModel, watchYear, filterOptions, models, form]);
 
   // Generate year options (current year down to 1900)
   const currentYear = new Date().getFullYear();
@@ -281,27 +265,6 @@ export function BasicInfoStep({ onComplete, defaultValues, onValidationChange }:
                 </Select>
                 <FormDescription className="min-h-[20px]">
                   {/* Reserved space for consistency */}
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Vehicle Name */}
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Vehicle Name *</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="E.g., BMW M3 2020"
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription className="min-h-[20px]">
-                  This will be auto-filled based on make, model and year
                 </FormDescription>
                 <FormMessage />
               </FormItem>

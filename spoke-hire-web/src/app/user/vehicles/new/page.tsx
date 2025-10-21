@@ -19,6 +19,7 @@ import {
   ProfileStep,
   BasicInfoStep,
   TechnicalDetailsStep,
+  VehicleDetailsStep,
   MediaStep,
   isProfileComplete,
   type ProfileFormData,
@@ -26,6 +27,8 @@ import {
   type BasicInfoSubmitData,
   type TechnicalDetailsFormData,
   type TechnicalDetailsSubmitData,
+  type VehicleDetailsFormData,
+  type VehicleDetailsSubmitData,
 } from "./_components";
 
 // Storage keys for auto-save
@@ -33,6 +36,7 @@ const STORAGE_KEY_PREFIX = "vehicle_wizard_";
 const PROFILE_KEY = `${STORAGE_KEY_PREFIX}profile`;
 const BASIC_INFO_KEY = `${STORAGE_KEY_PREFIX}basic_info`;
 const TECHNICAL_DETAILS_KEY = `${STORAGE_KEY_PREFIX}technical_details`;
+const VEHICLE_DETAILS_KEY = `${STORAGE_KEY_PREFIX}vehicle_details`;
 const CURRENT_STEP_KEY = `${STORAGE_KEY_PREFIX}current_step`;
 
 /**
@@ -40,9 +44,10 @@ const CURRENT_STEP_KEY = `${STORAGE_KEY_PREFIX}current_step`;
  * 
  * Multi-step form for adding a new vehicle:
  * 1. Profile completion (if needed)
- * 2. Basic vehicle information
- * 3. Technical details (creates vehicle)
- * 4. Photos (with success dialog and redirect)
+ * 2. Basic vehicle information (Make, Model, Year, Registration, Price)
+ * 3. Technical details (Engine, Seats, Steering, Gearbox, Colors, Condition)
+ * 4. Vehicle details (Name, Description, Collections) - creates vehicle here
+ * 5. Photos (with success dialog and redirect)
  */
 export default function AddVehiclePage() {
   const router = useRouter();
@@ -53,6 +58,7 @@ export default function AddVehiclePage() {
   const [profileData, setProfileData] = useState<Partial<ProfileFormData>>({});
   const [basicInfoData, setBasicInfoData] = useState<Partial<BasicInfoSubmitData>>({});
   const [technicalDetailsData, setTechnicalDetailsData] = useState<Partial<TechnicalDetailsSubmitData>>({});
+  const [vehicleDetailsData, setVehicleDetailsData] = useState<Partial<VehicleDetailsSubmitData>>({});
   const [createdVehicleId, setCreatedVehicleId] = useState<string | null>(null);
   const [profileNeedsCompletion, setProfileNeedsCompletion] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -65,6 +71,12 @@ export default function AddVehiclePage() {
 
   // Fetch filter options for labels
   const { data: filterOptions } = api.userVehicle.getFilterOptions.useQuery();
+  
+  // Fetch models for the selected make (for auto-generating vehicle name)
+  const { data: modelsForName } = api.userVehicle.getModelsByMake.useQuery(
+    { makeId: basicInfoData.makeId ?? "" },
+    { enabled: !!basicInfoData.makeId }
+  );
 
   // Create vehicle mutation
   const createVehicleMutation = api.userVehicle.createMyVehicle.useMutation({
@@ -85,6 +97,7 @@ export default function AddVehiclePage() {
       setProfileData({});
       setBasicInfoData({});
       setTechnicalDetailsData({});
+      setVehicleDetailsData({});
       
       // Move to media step (use functional update to get latest value)
       setCurrentStep((prev) => prev + 1);
@@ -159,6 +172,7 @@ export default function AddVehiclePage() {
       const savedProfile = sessionStorage.getItem(PROFILE_KEY);
       const savedBasicInfo = sessionStorage.getItem(BASIC_INFO_KEY);
       const savedTechnicalDetails = sessionStorage.getItem(TECHNICAL_DETAILS_KEY);
+      const savedVehicleDetails = sessionStorage.getItem(VEHICLE_DETAILS_KEY);
       const savedStep = sessionStorage.getItem(CURRENT_STEP_KEY);
 
       if (savedProfile) {
@@ -193,6 +207,9 @@ export default function AddVehiclePage() {
           engineCapacity: Number(parsed.engineCapacity),
         });
       }
+      if (savedVehicleDetails) {
+        setVehicleDetailsData(JSON.parse(savedVehicleDetails));
+      }
       if (savedStep) {
         const step = parseInt(savedStep);
         // Start at profile step if needed, otherwise skip it
@@ -218,7 +235,7 @@ export default function AddVehiclePage() {
     if (!isInitialized) return;
     
     // Don't auto-save if we're on the media step (vehicle already created)
-    const mediaStep = profileNeedsCompletion ? 3 : 2;
+    const mediaStep = profileNeedsCompletion ? 4 : 3;
     if (currentStep === mediaStep) return;
 
     try {
@@ -231,6 +248,9 @@ export default function AddVehiclePage() {
       if (Object.keys(technicalDetailsData).length > 0) {
         sessionStorage.setItem(TECHNICAL_DETAILS_KEY, JSON.stringify(technicalDetailsData));
       }
+      if (Object.keys(vehicleDetailsData).length > 0) {
+        sessionStorage.setItem(VEHICLE_DETAILS_KEY, JSON.stringify(vehicleDetailsData));
+      }
       sessionStorage.setItem(CURRENT_STEP_KEY, currentStep.toString());
       
       // Update draft data flag
@@ -240,12 +260,13 @@ export default function AddVehiclePage() {
     } catch (error) {
       console.error("Failed to save wizard data:", error);
     }
-  }, [profileData, basicInfoData, technicalDetailsData, currentStep, isInitialized, profileNeedsCompletion]);
+  }, [profileData, basicInfoData, technicalDetailsData, vehicleDetailsData, currentStep, isInitialized, profileNeedsCompletion]);
 
   const clearStoredData = () => {
     sessionStorage.removeItem(PROFILE_KEY);
     sessionStorage.removeItem(BASIC_INFO_KEY);
     sessionStorage.removeItem(TECHNICAL_DETAILS_KEY);
+    sessionStorage.removeItem(VEHICLE_DETAILS_KEY);
     sessionStorage.removeItem(CURRENT_STEP_KEY);
     setHasDraftData(false);
   };
@@ -257,6 +278,7 @@ export default function AddVehiclePage() {
       setProfileData({});
       setBasicInfoData({});
       setTechnicalDetailsData({});
+      setVehicleDetailsData({});
       setCurrentStep(profileNeedsCompletion ? 0 : 0);
       toast.success("Draft deleted");
       // Refresh the page to reset state
@@ -270,12 +292,14 @@ export default function AddVehiclePage() {
         { number: 0, title: "Profile", description: "Your details" },
         { number: 1, title: "Basic Info", description: "Vehicle basics" },
         { number: 2, title: "Technical", description: "Specifications" },
-        { number: 3, title: "Photos", description: "Add images" },
+        { number: 3, title: "Details", description: "Name & tags" },
+        { number: 4, title: "Photos", description: "Add images" },
       ]
     : [
         { number: 0, title: "Basic Info", description: "Vehicle basics" },
         { number: 1, title: "Technical", description: "Specifications" },
-        { number: 2, title: "Photos", description: "Add images" },
+        { number: 2, title: "Details", description: "Name & tags" },
+        { number: 3, title: "Photos", description: "Add images" },
       ];
 
   const totalSteps = steps.length;
@@ -309,17 +333,31 @@ export default function AddVehiclePage() {
 
   const handleTechnicalDetailsComplete = (data: TechnicalDetailsSubmitData) => {
     setTechnicalDetailsData(data);
+    setCurrentStep(currentStep + 1);
+  };
+
+  const handleVehicleDetailsComplete = (data: VehicleDetailsSubmitData) => {
+    setVehicleDetailsData(data);
     
-    // Create the vehicle immediately after technical details are complete
-    // Combine basic info and technical details for vehicle creation
+    // Create the vehicle after vehicle details are complete
+    // Combine all previous step data with vehicle details for vehicle creation
     const fullData = {
-      name: basicInfoData.name!,
       makeId: basicInfoData.makeId!,
       modelId: basicInfoData.modelId!,
       year: basicInfoData.year!,
       registration: basicInfoData.registration!,
       price: basicInfoData.price,
-      ...data,
+      engineCapacity: technicalDetailsData.engineCapacity!,
+      numberOfSeats: technicalDetailsData.numberOfSeats!,
+      steeringId: technicalDetailsData.steeringId!,
+      gearbox: technicalDetailsData.gearbox!,
+      exteriorColour: technicalDetailsData.exteriorColour!,
+      interiorColour: technicalDetailsData.interiorColour!,
+      condition: technicalDetailsData.condition!,
+      isRoadLegal: technicalDetailsData.isRoadLegal!,
+      name: data.name,
+      description: data.description,
+      collectionIds: data.collectionIds,
     };
 
     createVehicleMutation.mutate(fullData);
@@ -388,6 +426,26 @@ export default function AddVehiclePage() {
       );
     }
 
+    // Vehicle details step (Name, Description, Collections)
+    const vehicleDetailsStep = profileNeedsCompletion ? 3 : 2;
+    if (currentStep === vehicleDetailsStep) {
+      // Generate auto name from basic info
+      const makeName = (filterOptions?.makes as any[] | undefined)?.find((m: any) => m.id === basicInfoData.makeId)?.name;
+      const modelName = (modelsForName as any[] | undefined)?.find((m: any) => m.id === basicInfoData.modelId)?.name;
+      const autoGeneratedName = 
+        makeName && modelName && basicInfoData.year
+          ? `${makeName} ${modelName} ${basicInfoData.year}`
+          : undefined;
+
+      return (
+        <VehicleDetailsStep
+          onComplete={handleVehicleDetailsComplete}
+          defaultValues={vehicleDetailsData}
+          autoGeneratedName={autoGeneratedName}
+        />
+      );
+    }
+
     // Media step (after vehicle is created)
     if (isMediaStep && createdVehicleId) {
       return (
@@ -402,7 +460,7 @@ export default function AddVehiclePage() {
   };
 
   // Determine navigation button state
-  const mediaStep = profileNeedsCompletion ? 3 : 2;
+  const mediaStep = profileNeedsCompletion ? 4 : 3;
   const isMediaStep = currentStep === mediaStep;
   
   const canGoBack = currentStep > 0 && !isMediaStep;

@@ -32,7 +32,6 @@ export type ProfileFormData = z.infer<typeof profileSchema>;
 export const basicInfoSchema = z.object({
   makeId: z.string().min(1, "Make is required"),
   modelId: z.string().min(1, "Model is required"),
-  name: z.string().min(3, "Vehicle name must be at least 3 characters"),
   year: z.string().min(1, "Year is required"),
   registration: z.string().min(1, "Registration is required"),
   price: z
@@ -67,8 +66,6 @@ export const technicalDetailsSchema = z.object({
   interiorColour: z.string().min(1, "Interior colour is required"),
   condition: z.string().min(1, "Condition is required"),
   isRoadLegal: z.boolean(),
-  description: z.string().optional(),
-  collectionIds: z.array(z.string()).optional(),
 });
 
 export type TechnicalDetailsFormData = z.infer<typeof technicalDetailsSchema>;
@@ -78,8 +75,22 @@ export type TechnicalDetailsSubmitData = Omit<TechnicalDetailsFormData, 'engineC
   engineCapacity: number;
 };
 
+// Vehicle details step validation (Name, Description, Collections)
+export const vehicleDetailsSchema = z.object({
+  name: z.string().min(3, "Vehicle name must be at least 3 characters"),
+  description: z.string().optional(),
+  collectionIds: z.array(z.string()).optional(),
+});
+
+export type VehicleDetailsFormData = z.infer<typeof vehicleDetailsSchema>;
+
+// Type for the submit data (same as form data for this step)
+export type VehicleDetailsSubmitData = VehicleDetailsFormData;
+
 // Combined schema for full vehicle creation
-export const fullVehicleSchema = basicInfoSchema.merge(technicalDetailsSchema);
+export const fullVehicleSchema = basicInfoSchema
+  .merge(technicalDetailsSchema)
+  .merge(vehicleDetailsSchema);
 
 export type FullVehicleFormData = z.infer<typeof fullVehicleSchema>;
 

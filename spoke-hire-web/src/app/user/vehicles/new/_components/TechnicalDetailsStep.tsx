@@ -11,10 +11,8 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Textarea } from "~/components/ui/textarea";
 import { Checkbox } from "~/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
-import { Check } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -25,7 +23,7 @@ import {
 import { api } from "~/trpc/react";
 import { technicalDetailsSchema, type TechnicalDetailsFormData, type TechnicalDetailsSubmitData } from "./validation";
 import { VEHICLE_COLORS, GEARBOX_TYPES } from "~/lib/constants/vehicle";
-import type { FilterOptions, SteeringItem, CollectionItem } from "./types";
+import type { FilterOptions, SteeringItem } from "./types";
 
 interface TechnicalDetailsStepProps {
   onComplete: (data: TechnicalDetailsSubmitData) => void;
@@ -61,8 +59,6 @@ export function TechnicalDetailsStep({
       interiorColour: defaultValues?.interiorColour ?? "",
       condition: defaultValues?.condition ?? "",
       isRoadLegal: defaultValues?.isRoadLegal ?? true,
-      description: defaultValues?.description ?? "",
-      collectionIds: defaultValues?.collectionIds ?? [],
     },
   });
 
@@ -92,9 +88,6 @@ export function TechnicalDetailsStep({
     };
   }, [form, onComplete]);
 
-  const watchDescription = form.watch("description");
-  const descriptionLength = watchDescription?.length ?? 0;
-
   // Seats options (1-20)
   const seatOptions = Array.from({ length: 20 }, (_, i) => i + 1);
 
@@ -106,12 +99,6 @@ export function TechnicalDetailsStep({
     "Fair",
     "Restoration",
   ];
-
-  // Convert collections to options
-  const collectionOptions: CollectionItem[] = useMemo(() => {
-    const collections = filterOptions?.collections as CollectionItem[] | undefined;
-    return collections ?? [];
-  }, [filterOptions?.collections]);
 
   // Convert steering types to options
   const steeringOptions: SteeringItem[] = useMemo(() => {
@@ -399,100 +386,6 @@ export function TechnicalDetailsStep({
                     Vehicle is legal to drive on public roads
                   </FormDescription>
                 </div>
-              </FormItem>
-            )}
-          />
-
-          {/* Description */}
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-sm md:text-base">Description</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Tell us about your vehicle's history, features, modifications, etc."
-                    className="min-h-[120px] md:min-h-[150px] resize-none text-base md:text-sm"
-                    {...field}
-                    value={field.value ?? ""}
-                  />
-                </FormControl>
-                <div className="flex justify-between items-center min-h-[20px]">
-                  <FormDescription className="text-xs md:text-sm">
-                    Optional but recommended for better visibility
-                  </FormDescription>
-                  <span className="text-xs text-muted-foreground">{descriptionLength} / 2000</span>
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Collections & Tags */}
-          <FormField
-            control={form.control}
-            name="collectionIds"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-sm md:text-base">Collections & Tags</FormLabel>
-                <FormControl>
-                  <div className="flex flex-wrap gap-2">
-                    {collectionOptions.map((collection) => {
-                      const isSelected = (field.value ?? []).includes(collection.id);
-                      return (
-                        <button
-                          key={collection.id}
-                          type="button"
-                          onClick={() => {
-                            const currentIds = field.value ?? [];
-                            if (isSelected) {
-                              // Remove if already selected
-                              field.onChange(currentIds.filter((id: string) => id !== collection.id));
-                            } else {
-                              // Add if not selected
-                              field.onChange([...currentIds, collection.id]);
-                            }
-                          }}
-                          disabled={isLoadingFilters}
-                          className={`
-                            px-3 md:px-4 py-2 rounded-md border-2 transition-all text-sm md:text-base
-                            ${isSelected 
-                              ? 'border-primary bg-primary text-primary-foreground shadow-sm' 
-                              : 'border-input bg-background hover:bg-accent hover:text-accent-foreground'
-                            }
-                          `}
-                          style={
-                            isSelected && collection.color
-                              ? {
-                                  backgroundColor: collection.color,
-                                  borderColor: collection.color,
-                                  color: '#ffffff',
-                                }
-                              : {}
-                          }
-                        >
-                          <div className="flex items-center gap-2">
-                            {collection.color && !isSelected && (
-                              <div
-                                className="w-3 h-3 rounded-full"
-                                style={{ backgroundColor: collection.color }}
-                              />
-                            )}
-                            <span>{collection.name}</span>
-                            {isSelected && (
-                              <Check className="h-4 w-4" />
-                            )}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </FormControl>
-                <FormDescription className="min-h-[20px] text-xs md:text-sm">
-                  Optional: Select one or more collections to categorize your vehicle
-                </FormDescription>
-                <FormMessage />
               </FormItem>
             )}
           />
