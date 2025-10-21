@@ -25,6 +25,38 @@ export interface LoopsDealEmailParams {
 }
 
 /**
+ * Vehicle published email parameters
+ */
+export interface VehiclePublishedEmailParams {
+  to: string;
+  ownerName: string;
+  vehicleName: string;
+  vehicleUrl: string;
+  dashboardUrl: string;
+}
+
+/**
+ * Vehicle declined email parameters
+ */
+export interface VehicleDeclinedEmailParams {
+  to: string;
+  ownerName: string;
+  vehicleName: string;
+  declinedReason: string;
+  dashboardUrl: string;
+}
+
+/**
+ * Vehicle in review email parameters (to admin)
+ */
+export interface VehicleInReviewEmailParams {
+  to: string;
+  vehicleName: string;
+  ownerName: string;
+  vehicleUrl: string;
+}
+
+/**
  * Email Service Class
  */
 export class EmailService {
@@ -195,6 +227,232 @@ export class EmailService {
         };
       }
     });
+  }
+
+  /**
+   * Send vehicle published notification email
+   */
+  async sendVehiclePublishedEmail(params: VehiclePublishedEmailParams): Promise<{ success: boolean; messageId?: string; error?: string }> {
+    const { to, ownerName, vehicleName, vehicleUrl, dashboardUrl } = params;
+    
+    const transactionalId = process.env.LOOPS_VEHICLE_PUBLISHED_ID ?? "vehicle-published";
+    
+    // Determine actual recipient email (use override if set)
+    const originalRecipient = to;
+    const actualRecipient = this.testEmailOverride ?? to;
+    const isOverrideActive = this.testEmailOverride && this.testEmailOverride !== to;
+
+    // If debug mode or no API key, log instead of sending
+    if (this.isDebugMode || !this.apiKey) {
+      console.log("\n" + "=".repeat(80));
+      console.log("📧 [EMAIL DEBUG] Vehicle Published Email:");
+      console.log("=".repeat(80));
+      console.log("To:", actualRecipient);
+      if (isOverrideActive) {
+        console.log("Original Recipient:", originalRecipient);
+        console.log("(Using test email override)");
+      }
+      console.log("Owner Name:", ownerName);
+      console.log("Vehicle Name:", vehicleName);
+      console.log("Vehicle URL:", vehicleUrl);
+      console.log("Dashboard URL:", dashboardUrl);
+      console.log("=".repeat(80) + "\n");
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      return {
+        success: true,
+        messageId: `debug_published_${Date.now()}`,
+      };
+    }
+
+    try {
+      if (isOverrideActive) {
+        console.log(`🧪 [TEST EMAIL OVERRIDE] Redirecting email from ${originalRecipient} to ${actualRecipient}`);
+      }
+
+      const response = await fetch(`${this.apiUrl}/transactional`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${this.apiKey}`,
+        },
+        body: JSON.stringify({
+          transactionalId,
+          email: actualRecipient,
+          dataVariables: {
+            ownerName,
+            vehicleName,
+            vehicleUrl,
+            dashboardUrl,
+          },
+        }),
+      });
+
+      const data = await response.json() as { id?: string };
+
+      if (!response.ok) {
+        const errorMessage = `Loops API error: ${response.status} - ${JSON.stringify(data)}`;
+        console.error(errorMessage);
+        return { success: false, error: errorMessage };
+      }
+
+      return { success: true, messageId: data.id };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to send email";
+      console.error("Failed to send vehicle published email:", error);
+      return { success: false, error: errorMessage };
+    }
+  }
+
+  /**
+   * Send vehicle declined notification email
+   */
+  async sendVehicleDeclinedEmail(params: VehicleDeclinedEmailParams): Promise<{ success: boolean; messageId?: string; error?: string }> {
+    const { to, ownerName, vehicleName, declinedReason, dashboardUrl } = params;
+    
+    const transactionalId = process.env.LOOPS_VEHICLE_DECLINED_ID ?? "vehicle-declined";
+    
+    // Determine actual recipient email (use override if set)
+    const originalRecipient = to;
+    const actualRecipient = this.testEmailOverride ?? to;
+    const isOverrideActive = this.testEmailOverride && this.testEmailOverride !== to;
+
+    // If debug mode or no API key, log instead of sending
+    if (this.isDebugMode || !this.apiKey) {
+      console.log("\n" + "=".repeat(80));
+      console.log("📧 [EMAIL DEBUG] Vehicle Declined Email:");
+      console.log("=".repeat(80));
+      console.log("To:", actualRecipient);
+      if (isOverrideActive) {
+        console.log("Original Recipient:", originalRecipient);
+        console.log("(Using test email override)");
+      }
+      console.log("Owner Name:", ownerName);
+      console.log("Vehicle Name:", vehicleName);
+      console.log("Declined Reason:", declinedReason);
+      console.log("Dashboard URL:", dashboardUrl);
+      console.log("=".repeat(80) + "\n");
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      return {
+        success: true,
+        messageId: `debug_declined_${Date.now()}`,
+      };
+    }
+
+    try {
+      if (isOverrideActive) {
+        console.log(`🧪 [TEST EMAIL OVERRIDE] Redirecting email from ${originalRecipient} to ${actualRecipient}`);
+      }
+
+      const response = await fetch(`${this.apiUrl}/transactional`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${this.apiKey}`,
+        },
+        body: JSON.stringify({
+          transactionalId,
+          email: actualRecipient,
+          dataVariables: {
+            ownerName,
+            vehicleName,
+            declinedReason,
+            dashboardUrl,
+          },
+        }),
+      });
+
+      const data = await response.json() as { id?: string };
+
+      if (!response.ok) {
+        const errorMessage = `Loops API error: ${response.status} - ${JSON.stringify(data)}`;
+        console.error(errorMessage);
+        return { success: false, error: errorMessage };
+      }
+
+      return { success: true, messageId: data.id };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to send email";
+      console.error("Failed to send vehicle declined email:", error);
+      return { success: false, error: errorMessage };
+    }
+  }
+
+  /**
+   * Send vehicle in review notification email (to admin)
+   */
+  async sendVehicleInReviewEmail(params: VehicleInReviewEmailParams): Promise<{ success: boolean; messageId?: string; error?: string }> {
+    const { to, vehicleName, ownerName, vehicleUrl } = params;
+    
+    const transactionalId = process.env.LOOPS_VEHICLE_IN_REVIEW_ID ?? "vehicle-in-review";
+    
+    // Determine actual recipient email (use override if set)
+    const originalRecipient = to;
+    const actualRecipient = this.testEmailOverride ?? to;
+    const isOverrideActive = this.testEmailOverride && this.testEmailOverride !== to;
+
+    // If debug mode or no API key, log instead of sending
+    if (this.isDebugMode || !this.apiKey) {
+      console.log("\n" + "=".repeat(80));
+      console.log("📧 [EMAIL DEBUG] Vehicle In Review Email (Admin):");
+      console.log("=".repeat(80));
+      console.log("To:", actualRecipient);
+      if (isOverrideActive) {
+        console.log("Original Recipient:", originalRecipient);
+        console.log("(Using test email override)");
+      }
+      console.log("Vehicle Name:", vehicleName);
+      console.log("Owner Name:", ownerName);
+      console.log("Vehicle URL (Admin):", vehicleUrl);
+      console.log("=".repeat(80) + "\n");
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      return {
+        success: true,
+        messageId: `debug_in_review_${Date.now()}`,
+      };
+    }
+
+    try {
+      if (isOverrideActive) {
+        console.log(`🧪 [TEST EMAIL OVERRIDE] Redirecting email from ${originalRecipient} to ${actualRecipient}`);
+      }
+
+      const response = await fetch(`${this.apiUrl}/transactional`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${this.apiKey}`,
+        },
+        body: JSON.stringify({
+          transactionalId,
+          email: actualRecipient,
+          dataVariables: {
+            vehicleName,
+            ownerName,
+            vehicleUrl,
+          },
+        }),
+      });
+
+      const data = await response.json() as { id?: string };
+
+      if (!response.ok) {
+        const errorMessage = `Loops API error: ${response.status} - ${JSON.stringify(data)}`;
+        console.error(errorMessage);
+        return { success: false, error: errorMessage };
+      }
+
+      return { success: true, messageId: data.id };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to send email";
+      console.error("Failed to send vehicle in review email:", error);
+      return { success: false, error: errorMessage };
+    }
   }
 
   /**

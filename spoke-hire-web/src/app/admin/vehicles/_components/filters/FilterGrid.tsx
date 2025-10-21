@@ -146,6 +146,7 @@ export function FilterGrid() {
         value={filters.status}
         options={[
           { value: "DRAFT", label: "Draft" },
+          { value: "IN_REVIEW", label: "In Review" },
           { value: "PUBLISHED", label: "Published" },
           { value: "DECLINED", label: "Declined" },
           { value: "ARCHIVED", label: "Archived" },

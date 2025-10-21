@@ -46,6 +46,7 @@ export function getStatusVariant(
 ): "default" | "secondary" | "destructive" | "outline" {
   const variants = {
     DRAFT: "outline",
+    IN_REVIEW: "default",
     PUBLISHED: "default",
     DECLINED: "destructive",
     ARCHIVED: "secondary",
@@ -60,6 +61,7 @@ export function getStatusVariant(
 export function getStatusLabel(status: VehicleStatus): string {
   const labels = {
     DRAFT: "Draft",
+    IN_REVIEW: "In Review",
     PUBLISHED: "Published",
     DECLINED: "Declined",
     ARCHIVED: "Archived",

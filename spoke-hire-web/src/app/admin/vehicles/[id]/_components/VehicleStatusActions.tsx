@@ -1,54 +1,80 @@
 "use client";
 
 import { useState } from "react";
-import { VehicleStatus } from "@prisma/client";
-import { CheckCircle, XCircle, Archive, FileText } from "lucide-react";
+import { type VehicleStatus } from "@prisma/client";
+import { CheckCircle, XCircle, Send, Archive } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Button } from "~/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "~/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
+import { VehicleStatusBadge } from "~/components/vehicles/VehicleStatusBadge";
+import { DeclineVehicleDialog } from "./DeclineVehicleDialog";
 import { api } from "~/trpc/react";
 
 interface VehicleStatusActionsProps {
   vehicleId: string;
   currentStatus: VehicleStatus;
+  vehicleName: string;
+  ownerEmail: string;
 }
 
 /**
- * Vehicle Status Actions Component
+ * Admin Vehicle Status Actions Component
  * 
- * Provides quick actions to change vehicle status with confirmation
+ * Provides admin-specific status change actions:
+ * - If IN_REVIEW: Show prominent Approve and Decline buttons
+ * - Admin can change to any status from any status
  */
 export function VehicleStatusActions({
   vehicleId,
   currentStatus,
+  vehicleName,
+  ownerEmail,
 }: VehicleStatusActionsProps) {
   const router = useRouter();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState<VehicleStatus | null>(null);
+  const utils = api.useUtils();
+  const [isDeclineDialogOpen, setIsDeclineDialogOpen] = useState(false);
 
+  // Approve vehicle mutation
+  const approveMutation = api.vehicle.approveVehicle.useMutation({
+    onSuccess: () => {
+      toast.success("Vehicle approved", {
+        description: "Vehicle has been published and owner notified",
+      });
+      void utils.vehicle.getById.invalidate({ id: vehicleId });
+      router.refresh();
+    },
+    onError: (error) => {
+      toast.error("Failed to approve vehicle", {
+        description: error.message,
+      });
+    },
+  });
+
+  // Decline vehicle mutation
+  const declineMutation = api.vehicle.declineVehicle.useMutation({
+    onSuccess: () => {
+      toast.success("Vehicle declined", {
+        description: "Owner has been notified with your feedback",
+      });
+      setIsDeclineDialogOpen(false);
+      void utils.vehicle.getById.invalidate({ id: vehicleId });
+      router.refresh();
+    },
+    onError: (error) => {
+      toast.error("Failed to decline vehicle", {
+        description: error.message,
+      });
+    },
+  });
+
+  // General status update mutation
   const updateStatusMutation = api.vehicle.updateStatus.useMutation({
     onSuccess: (data) => {
-      toast.success("Status updated successfully", {
+      toast.success("Status updated", {
         description: `Vehicle status changed to ${data.status}`,
       });
-      setIsDialogOpen(false);
-      router.refresh(); // Refresh the page to show updated data
+      void utils.vehicle.getById.invalidate({ id: vehicleId });
+      router.refresh();
     },
     onError: (error) => {
       toast.error("Failed to update status", {
@@ -57,130 +83,107 @@ export function VehicleStatusActions({
     },
   });
 
+  const handleApprove = () => {
+    approveMutation.mutate({ vehicleId });
+  };
+
+  const handleDecline = (reason: string) => {
+    declineMutation.mutate({
+      vehicleId,
+      declinedReason: reason,
+    });
+  };
+
   const handleStatusChange = (status: VehicleStatus) => {
-    setSelectedStatus(status);
-    setIsDialogOpen(true);
+    updateStatusMutation.mutate({
+      id: vehicleId,
+      status,
+    });
   };
 
-  const confirmStatusChange = () => {
-    if (selectedStatus) {
-      updateStatusMutation.mutate({
-        id: vehicleId,
-        status: selectedStatus,
-      });
-    }
-  };
-
-  // Define available status transitions
-  const statusOptions = [
-    {
-      value: VehicleStatus.PUBLISHED,
-      label: "Publish",
-      icon: CheckCircle,
-      variant: "default" as const,
-      description: "Make this vehicle visible to the public",
-      show: currentStatus !== VehicleStatus.PUBLISHED,
-    },
-    {
-      value: VehicleStatus.DRAFT,
-      label: "Move to Draft",
-      icon: FileText,
-      variant: "outline" as const,
-      description: "Hide this vehicle and mark as draft",
-      show: currentStatus !== VehicleStatus.DRAFT,
-    },
-    {
-      value: VehicleStatus.DECLINED,
-      label: "Decline",
-      icon: XCircle,
-      variant: "destructive" as const,
-      description: "Decline this vehicle listing",
-      show: currentStatus !== VehicleStatus.DECLINED,
-    },
-    {
-      value: VehicleStatus.ARCHIVED,
-      label: "Archive",
-      icon: Archive,
-      variant: "secondary" as const,
-      description: "Archive this vehicle (soft delete)",
-      show: currentStatus !== VehicleStatus.ARCHIVED,
-    },
-  ].filter((option) => option.show);
-
-  const selectedOption = statusOptions.find((opt) => opt.value === selectedStatus);
-
-  return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="secondary"
-            size="sm"
-            className="gap-2 shadow-lg backdrop-blur-sm bg-background/90 hover:bg-background"
-          >
-            Change Status
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuLabel>Change Vehicle Status</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          {statusOptions.map((option) => {
-            const Icon = option.icon;
-            return (
-              <DropdownMenuItem
-                key={option.value}
-                onClick={() => handleStatusChange(option.value)}
-              >
-                <Icon className="mr-2 h-4 w-4" />
-                {option.label}
-              </DropdownMenuItem>
-            );
-          })}
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {/* Confirmation Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Change Vehicle Status</DialogTitle>
-            <DialogDescription>
-              {selectedOption?.description}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <p className="text-sm text-muted-foreground">
-              Are you sure you want to change the status from{" "}
-              <span className="font-semibold">{currentStatus}</span> to{" "}
-              <span className="font-semibold">{selectedStatus}</span>?
-            </p>
+  // If vehicle is IN_REVIEW, show prominent Approve/Decline buttons
+  if (currentStatus === "IN_REVIEW") {
+    return (
+      <>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <VehicleStatusBadge status={currentStatus} />
+          <div className="flex gap-2">
+            <Button
+              onClick={handleApprove}
+              disabled={approveMutation.isPending}
+              className="gap-2"
+              size="sm"
+            >
+              <CheckCircle className="h-4 w-4" />
+              {approveMutation.isPending ? "Approving..." : "Approve"}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => setIsDeclineDialogOpen(true)}
+              disabled={declineMutation.isPending}
+              className="gap-2"
+              size="sm"
+            >
+              <XCircle className="h-4 w-4" />
+              Decline
+            </Button>
           </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsDialogOpen(false)}
-              disabled={updateStatusMutation.isPending}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant={selectedOption?.variant ?? "default"}
-              onClick={confirmStatusChange}
-              disabled={updateStatusMutation.isPending}
-            >
-              {updateStatusMutation.isPending ? (
-                <>
-                  <div className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
-                  Updating...
-                </>
-              ) : (
-                <>Confirm</>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+        </div>
+
+        <DeclineVehicleDialog
+          open={isDeclineDialogOpen}
+          onOpenChange={setIsDeclineDialogOpen}
+          onConfirm={handleDecline}
+          isPending={declineMutation.isPending}
+          vehicleName={vehicleName}
+          ownerEmail={ownerEmail}
+        />
+      </>
+    );
+  }
+
+  // For other statuses, show badge and quick action buttons
+  return (
+    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+      <VehicleStatusBadge status={currentStatus} />
+      <div className="flex gap-2 flex-wrap">
+        {currentStatus !== "PUBLISHED" && (
+          <Button
+            onClick={() => handleStatusChange("PUBLISHED")}
+            disabled={updateStatusMutation.isPending}
+            size="sm"
+            variant="outline"
+            className="gap-2"
+          >
+            <CheckCircle className="h-4 w-4" />
+            Publish
+          </Button>
+        )}
+        {currentStatus !== "IN_REVIEW" && (
+          <Button
+            onClick={() => handleStatusChange("IN_REVIEW")}
+            disabled={updateStatusMutation.isPending}
+            size="sm"
+            variant="outline"
+            className="gap-2"
+          >
+            <Send className="h-4 w-4" />
+            In Review
+          </Button>
+        )}
+        {currentStatus !== "ARCHIVED" && (
+          <Button
+            onClick={() => handleStatusChange("ARCHIVED")}
+            disabled={updateStatusMutation.isPending}
+            size="sm"
+            variant="outline"
+            className="gap-2"
+          >
+            <Archive className="h-4 w-4" />
+            Archive
+          </Button>
+        )}
+      </div>
+    </div>
   );
 }
-

@@ -1024,5 +1024,99 @@ export const userVehicleRouter = createTRPCRouter({
 
       return generated;
     }),
+
+  /**
+   * Submit vehicle for review (DRAFT/DECLINED → IN_REVIEW)
+   * Validates vehicle has all required fields and photos
+   */
+  submitForReview: protectedProcedure
+    .input(z.object({ vehicleId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const statusService = ServiceFactory.createVehicleStatusService(ctx.db);
+
+      // Verify ownership
+      const vehicle = await ctx.db.vehicle.findUnique({
+        where: { id: input.vehicleId },
+        select: { ownerId: true, status: true },
+      });
+
+      if (!vehicle) {
+        throw new Error("Vehicle not found");
+      }
+
+      if (vehicle.ownerId !== ctx.user.id) {
+        throw new Error("You don't have permission to modify this vehicle");
+      }
+
+      // Change status to IN_REVIEW (service validates and sends emails)
+      await statusService.changeVehicleStatus(
+        input.vehicleId,
+        "IN_REVIEW",
+        ctx.user.id,
+        false // isAdmin
+      );
+
+      return { success: true };
+    }),
+
+  /**
+   * Archive vehicle (any status → ARCHIVED)
+   */
+  archiveMyVehicle: protectedProcedure
+    .input(z.object({ vehicleId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const statusService = ServiceFactory.createVehicleStatusService(ctx.db);
+
+      // Verify ownership
+      const vehicle = await ctx.db.vehicle.findUnique({
+        where: { id: input.vehicleId },
+        select: { ownerId: true },
+      });
+
+      if (!vehicle) {
+        throw new Error("Vehicle not found");
+      }
+
+      if (vehicle.ownerId !== ctx.user.id) {
+        throw new Error("You don't have permission to modify this vehicle");
+      }
+
+      // Change status to ARCHIVED
+      await statusService.changeVehicleStatus(
+        input.vehicleId,
+        "ARCHIVED",
+        ctx.user.id,
+        false // isAdmin
+      );
+
+      return { success: true };
+    }),
+
+  /**
+   * Get validation errors for a vehicle
+   * Used to show user what's missing before they can submit for review
+   */
+  getValidationErrors: protectedProcedure
+    .input(z.object({ vehicleId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const statusService = ServiceFactory.createVehicleStatusService(ctx.db);
+
+      // Verify ownership
+      const vehicle = await ctx.db.vehicle.findUnique({
+        where: { id: input.vehicleId },
+        select: { ownerId: true },
+      });
+
+      if (!vehicle) {
+        throw new Error("Vehicle not found");
+      }
+
+      if (vehicle.ownerId !== ctx.user.id) {
+        throw new Error("You don't have permission to view this vehicle");
+      }
+
+      const errors = await statusService.getValidationErrors(input.vehicleId);
+      return { errors };
+    }),
 });
 

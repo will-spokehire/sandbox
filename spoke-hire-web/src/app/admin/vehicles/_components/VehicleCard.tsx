@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { Card, CardContent } from "~/components/ui/card";
-import { VehicleStatusBadge } from "./VehicleStatusBadge";
+import { VehicleStatusBadge } from "~/components/vehicles/VehicleStatusBadge";
 import {
   formatPrice,
   formatRegistration,

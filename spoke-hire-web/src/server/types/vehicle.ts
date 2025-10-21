@@ -59,6 +59,7 @@ export interface VehicleWithRelations {
   price: Prisma.Decimal | string | number | null;
   registration: string | null;
   status: VehicleStatus;
+  declinedReason: string | null;
   ownerId: string;
   make: {
     id: string;
@@ -127,6 +128,7 @@ export interface UpdateVehicleData {
   condition?: string | null;
   isRoadLegal?: boolean;
   description?: string | null;
+  declinedReason?: string | null;
   collectionIds?: string[];
 }
 

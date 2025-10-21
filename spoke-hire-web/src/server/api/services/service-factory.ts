@@ -13,10 +13,12 @@
 
 import { type DbClient } from "../repositories/base.repository";
 import { VehicleService } from "./vehicle.service";
+import { VehicleStatusService } from "./vehicle-status.service";
 import { DealService } from "./deal.service";
 import { LookupService } from "./lookup.service";
 import { AuthService } from "./auth.service";
 import { MediaService } from "./media.service";
+import { EmailService } from "./email.service";
 import { AIVehicleGeneratorService } from "./ai-vehicle-generator.service";
 import { VehicleRepository } from "../repositories/vehicle.repository";
 import { UserRepository } from "../repositories/user.repository";
@@ -43,6 +45,14 @@ export class ServiceFactory {
     const queryBuilder = new VehicleQueryBuilder();
     
     return new VehicleService(repository, queryBuilder, cacheService, db);
+  }
+
+  /**
+   * Create VehicleStatusService with dependencies
+   */
+  static createVehicleStatusService(db: DbClient): VehicleStatusService {
+    const emailService = new EmailService();
+    return new VehicleStatusService(db, emailService);
   }
 
   /**

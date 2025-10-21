@@ -5,6 +5,7 @@ import Image from "next/image";
 import { MoreHorizontal, Mail, Phone, MessageCircle, Send, Pencil } from "lucide-react";
 import { Card } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
+import { VehicleStatusBadge } from "~/components/vehicles/VehicleStatusBadge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +14,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { VehicleStatusBadge } from "../../_components/VehicleStatusBadge";
 import { ImageEditDialog } from "~/components/vehicles/ImageEditDialog";
 import { getVehicleImageUrl } from "~/lib/vehicles";
 import { cn } from "~/lib/utils";
@@ -105,9 +105,7 @@ export function VehicleMediaSection({ vehicle, onSendDeal }: VehicleMediaSection
 
           {/* Status Badge Overlay (Top-Left) */}
           <div className="absolute top-3 left-3 md:top-4 md:left-4 z-10">
-            <div className="backdrop-blur-sm bg-background/80 rounded-md p-1">
-              <VehicleStatusBadge status={vehicle.status} />
-            </div>
+            <VehicleStatusBadge status={vehicle.status} />
           </div>
 
           {/* Action Menu (Top-Right) - All Screens */}

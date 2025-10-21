@@ -135,7 +135,10 @@ export default function TestVehicleDetailPage({
           {/* Right Column - Vehicle Details (1/3 width on desktop) */}
           <div className="lg:col-span-1 space-y-6">
             {/* Vehicle Details */}
-            <UserVehicleDetails vehicle={vehicle} />
+            <UserVehicleDetails 
+              vehicle={vehicle}
+              onEditClick={() => {/* Test page - no edit dialog */}}
+            />
             
             {/* Collections & Tags */}
             <VehicleCollections collections={vehicle.collections} />

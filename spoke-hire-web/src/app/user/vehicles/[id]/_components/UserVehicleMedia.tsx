@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Pencil } from "lucide-react";
 import { Card } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
-import { VehicleStatusBadge } from "~/app/admin/vehicles/_components/VehicleStatusBadge";
+import { VehicleStatusBadge } from "~/components/vehicles/VehicleStatusBadge";
 import { ImageEditDialog } from "~/components/vehicles/ImageEditDialog";
 import { cn } from "~/lib/utils";
 import type { VehicleDetail } from "~/types/vehicle";
@@ -90,9 +90,7 @@ export function UserVehicleMedia({ vehicle }: UserVehicleMediaProps) {
 
             {/* Status Badge Overlay (Top-Left) */}
             <div className="absolute top-3 left-3 md:top-4 md:left-4 z-10">
-              <div className="backdrop-blur-sm bg-background/80 rounded-md p-1">
-                <VehicleStatusBadge status={vehicle.status} />
-              </div>
+              <VehicleStatusBadge status={vehicle.status} />
             </div>
 
             {/* Edit Images Button (Top-Right) - Only show to owner or admin */}

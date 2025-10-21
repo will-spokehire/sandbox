@@ -1,12 +1,16 @@
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
+import { Pencil } from "lucide-react";
 import { formatPrice, formatRegistration } from "~/lib/vehicles";
 import { type VehicleDetail } from "~/types/vehicle";
-import { VehicleStatusBadge } from "~/app/admin/vehicles/_components/VehicleStatusBadge";
 
 interface VehicleBasicInfoProps {
   vehicle: VehicleDetail;
+  onEditClick: () => void;
 }
 
 /**
@@ -14,7 +18,7 @@ interface VehicleBasicInfoProps {
  * 
  * Displays core vehicle details in a clean, organized format
  */
-export function VehicleBasicInfo({ vehicle }: VehicleBasicInfoProps) {
+export function VehicleBasicInfo({ vehicle, onEditClick }: VehicleBasicInfoProps) {
   const details = [
     {
       label: "Make & Model",
@@ -34,11 +38,6 @@ export function VehicleBasicInfo({ vehicle }: VehicleBasicInfoProps) {
       label: "Price",
       value: formatPrice(vehicle.price),
       highlight: true,
-    },
-    {
-      label: "Current Status",
-      value: vehicle.status,
-      statusBadge: true,
     },
     {
       label: "Engine Capacity",
@@ -75,9 +74,20 @@ export function VehicleBasicInfo({ vehicle }: VehicleBasicInfoProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <span>Vehicle Details</span>
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <span>Vehicle Details</span>
+          </CardTitle>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onEditClick}
+            className="gap-2"
+          >
+            <Pencil className="h-4 w-4" />
+            <span className="hidden sm:inline">Edit</span>
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <dl className="space-y-3">
@@ -94,9 +104,7 @@ export function VehicleBasicInfo({ vehicle }: VehicleBasicInfoProps) {
                       : "text-foreground"
                   } ${detail.mono ? "font-mono" : ""}`}
                 >
-                  {detail.statusBadge ? (
-                    <VehicleStatusBadge status={vehicle.status} />
-                  ) : detail.badge ? (
+                  {detail.badge ? (
                     <Badge variant={detail.badgeVariant as "default" | "secondary" | "destructive" | "outline"}>
                       {detail.value}
                     </Badge>

@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 'use client';
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Badge } from '~/components/ui/badge';
-import { Card, CardContent } from '~/components/ui/card';
+import { Card } from '~/components/ui/card';
+import { VehicleStatusBadge } from '~/components/vehicles/VehicleStatusBadge';
 import type { VehicleStatus } from '@prisma/client';
 
 interface VehicleMedia {
@@ -35,20 +36,6 @@ interface UserVehicleCardProps {
   };
   href?: string; // Optional custom href for testing/other use cases
 }
-
-const statusColors: Record<VehicleStatus, string> = {
-  PUBLISHED: 'bg-green-500',
-  DRAFT: 'bg-yellow-500',
-  DECLINED: 'bg-red-500',
-  ARCHIVED: 'bg-gray-500',
-};
-
-const statusLabels: Record<VehicleStatus, string> = {
-  PUBLISHED: 'Published',
-  DRAFT: 'Draft',
-  DECLINED: 'Declined',
-  ARCHIVED: 'Archived',
-};
 
 /**
  * User Vehicle Card Component
@@ -92,16 +79,12 @@ export function UserVehicleCard({ vehicle, href }: UserVehicleCardProps) {
             </div>
           )}
           
-          {/* Status Badge */}
-          <div className="absolute top-2 right-2">
-            <Badge 
-              className={`${statusColors[vehicle.status]} text-white border-none`}
-            >
-              {statusLabels[vehicle.status]}
-            </Badge>
+          {/* Status Badge - Top Left */}
+          <div className="absolute top-3 left-3 z-10">
+            <VehicleStatusBadge status={vehicle.status} />
           </div>
 
-          {/* Image Count */}
+          {/* Image Count - Bottom Right */}
           {vehicle._count.media > 0 && (
             <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
               {vehicle._count.media} {vehicle._count.media === 1 ? 'photo' : 'photos'}
@@ -124,4 +107,3 @@ export function UserVehicleCard({ vehicle, href }: UserVehicleCardProps) {
     </Link>
   );
 }
-

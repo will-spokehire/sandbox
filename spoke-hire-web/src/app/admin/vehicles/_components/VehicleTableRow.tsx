@@ -16,7 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { VehicleStatusBadge } from "./VehicleStatusBadge";
+import { VehicleStatusBadge } from "~/components/vehicles/VehicleStatusBadge";
 import {
   formatPrice,
   formatRegistration,

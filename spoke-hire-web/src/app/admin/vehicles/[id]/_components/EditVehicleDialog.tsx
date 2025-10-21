@@ -508,6 +508,7 @@ export function EditVehicleDialog({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="DRAFT">Draft</SelectItem>
+                  <SelectItem value="IN_REVIEW">In Review</SelectItem>
                   <SelectItem value="PUBLISHED">Published</SelectItem>
                   <SelectItem value="DECLINED">Declined</SelectItem>
                   <SelectItem value="ARCHIVED">Archived</SelectItem>

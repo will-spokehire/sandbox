@@ -41,6 +41,7 @@ enum MediaStatus {
 // Vehicle Status Enum
 enum VehicleStatus {
     DRAFT
+    IN_REVIEW
     PUBLISHED
     DECLINED
     ARCHIVED
@@ -235,6 +236,7 @@ model Vehicle {
     price             Decimal? @db.Decimal(10,2)
     status            VehicleStatus @default(DRAFT)
     description       String?
+    declinedReason    String?  // Admin's support text when vehicle is declined
     
     // Relationships - Owner is REQUIRED but may not have Supabase account
     ownerId           String   // Required - but owner might not be registered user

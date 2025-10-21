@@ -70,6 +70,7 @@ const getByIdInputSchema = z.object({
 const updateStatusInputSchema = z.object({
   id: z.string(),
   status: z.nativeEnum(VehicleStatus),
+  declinedReason: z.string().optional(), // Optional reason when declining
 });
 
 const updateVehicleInputSchema = z.object({
@@ -124,12 +125,79 @@ export const vehicleRouter = createTRPCRouter({
 
   /**
    * Update vehicle status
+   * Admin can change to any status with optional decline reason
    */
   updateStatus: adminProcedure
     .input(updateStatusInputSchema)
     .mutation(async ({ ctx, input }) => {
+      const statusService = ServiceFactory.createVehicleStatusService(ctx.db);
+      
+      // Use status service for proper validation and email notifications
+      await statusService.changeVehicleStatus(
+        input.id,
+        input.status,
+        ctx.user.id,
+        true, // isAdmin
+        input.declinedReason
+      );
+
+      // Invalidate cache
+      cacheService.delete(CacheKeys.vehicleDetail(input.id));
+      cacheService.invalidateByPattern("vehicle:list:");
+
+      // Return updated vehicle
       const service = ServiceFactory.createVehicleService(ctx.db);
-      return await service.updateVehicleStatus(input.id, input.status);
+      return await service.getVehicleById(input.id);
+    }),
+
+  /**
+   * Approve vehicle (IN_REVIEW → PUBLISHED)
+   * Convenience endpoint with email notification
+   */
+  approveVehicle: adminProcedure
+    .input(z.object({ vehicleId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const statusService = ServiceFactory.createVehicleStatusService(ctx.db);
+      
+      await statusService.changeVehicleStatus(
+        input.vehicleId,
+        "PUBLISHED",
+        ctx.user.id,
+        true // isAdmin
+      );
+
+      // Invalidate cache
+      cacheService.delete(CacheKeys.vehicleDetail(input.vehicleId));
+      cacheService.invalidateByPattern("vehicle:list:");
+
+      return { success: true };
+    }),
+
+  /**
+   * Decline vehicle (IN_REVIEW → DECLINED)
+   * Requires decline reason for email notification
+   */
+  declineVehicle: adminProcedure
+    .input(z.object({
+      vehicleId: z.string(),
+      declinedReason: z.string().min(10, "Decline reason must be at least 10 characters"),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const statusService = ServiceFactory.createVehicleStatusService(ctx.db);
+      
+      await statusService.changeVehicleStatus(
+        input.vehicleId,
+        "DECLINED",
+        ctx.user.id,
+        true, // isAdmin
+        input.declinedReason
+      );
+
+      // Invalidate cache
+      cacheService.delete(CacheKeys.vehicleDetail(input.vehicleId));
+      cacheService.invalidateByPattern("vehicle:list:");
+
+      return { success: true };
     }),
 
   /**

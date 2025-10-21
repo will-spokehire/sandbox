@@ -16,7 +16,7 @@ import type { VehicleStatus } from '@prisma/client';
 
 // Filter schema for URL-based filter management
 const userVehicleFiltersSchema = z.object({
-  status: z.enum(['ALL', 'DRAFT', 'PUBLISHED', 'DECLINED', 'ARCHIVED']).default('ALL'),
+  status: z.enum(['ALL', 'DRAFT', 'IN_REVIEW', 'PUBLISHED', 'DECLINED', 'ARCHIVED']).default('ALL'),
 });
 
 type UserVehicleFilters = z.infer<typeof userVehicleFiltersSchema>;

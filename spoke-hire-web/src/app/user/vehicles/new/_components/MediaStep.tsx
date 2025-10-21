@@ -12,9 +12,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { ImageIcon, CheckCircle2 } from "lucide-react";
+import { ImageIcon, CheckCircle2, Send } from "lucide-react";
 import { VehicleImageManager } from "~/components/vehicles/VehicleImageManager";
 import { api } from "~/trpc/react";
+import { toast } from "sonner";
 
 interface MediaStepProps {
   vehicleId: string;
@@ -26,7 +27,7 @@ interface MediaStepProps {
  * 
  * Requires users to upload at least one vehicle photo before continuing.
  * This step occurs after the vehicle has been created in DRAFT status.
- * Shows success dialog after completion and redirects to vehicle detail page.
+ * Shows success dialog after completion with option to submit for review.
  */
 export function MediaStep({ vehicleId, onComplete }: MediaStepProps) {
   const router = useRouter();
@@ -42,6 +43,23 @@ export function MediaStep({ vehicleId, onComplete }: MediaStepProps) {
     }
   );
 
+  // Submit for review mutation
+  const submitForReviewMutation = api.userVehicle.submitForReview.useMutation({
+    onSuccess: () => {
+      toast.success("Vehicle submitted for review", {
+        description: "An admin will review your vehicle shortly",
+      });
+      router.push(`/user/vehicles/${vehicleId}`);
+    },
+    onError: (error) => {
+      toast.error("Failed to submit for review", {
+        description: error.message,
+      });
+      // Still redirect to vehicle page
+      router.push(`/user/vehicles/${vehicleId}`);
+    },
+  });
+
   // Update hasImages when data changes
   useEffect(() => {
     setHasImages((images?.length ?? 0) > 0);
@@ -54,6 +72,11 @@ export function MediaStep({ vehicleId, onComplete }: MediaStepProps) {
   const handleViewVehicle = () => {
     setShowSuccessDialog(false);
     onComplete();
+  };
+
+  const handleSubmitForReview = () => {
+    setShowSuccessDialog(false);
+    submitForReviewMutation.mutate({ vehicleId });
   };
 
   return (
@@ -102,22 +125,25 @@ export function MediaStep({ vehicleId, onComplete }: MediaStepProps) {
               <DialogTitle className="text-xl md:text-2xl">Vehicle Created Successfully!</DialogTitle>
             </div>
             <DialogDescription className="text-sm md:text-base">
-              Your vehicle has been added to your collection. You can now view and manage it.
+              Your vehicle has been added to your collection. You can now view it, or submit it for admin review to get it published.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button 
               variant="outline" 
-              onClick={() => router.push("/user/vehicles")}
-              className="w-full sm:w-auto"
-            >
-              Back to Vehicles
-            </Button>
-            <Button 
               onClick={handleViewVehicle}
+              disabled={submitForReviewMutation.isPending}
               className="w-full sm:w-auto"
             >
               View Vehicle
+            </Button>
+            <Button 
+              onClick={handleSubmitForReview}
+              disabled={submitForReviewMutation.isPending}
+              className="w-full sm:w-auto gap-2"
+            >
+              <Send className="h-4 w-4" />
+              {submitForReviewMutation.isPending ? "Submitting..." : "Submit for Review"}
             </Button>
           </DialogFooter>
         </DialogContent>

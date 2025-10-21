@@ -6,12 +6,13 @@ import { api } from "~/trpc/react";
 import { useRequireAuth } from "~/providers/auth-provider";
 import { UserVehicleMedia } from "./_components/UserVehicleMedia";
 import { UserVehicleDetails } from "./_components/UserVehicleDetails";
+import { UserVehicleActions } from "./_components/UserVehicleActions";
 import { VehicleCollections } from "~/app/admin/vehicles/[id]/_components/VehicleCollections";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
-import { AlertCircle, ArrowLeft, Pencil } from "lucide-react";
+import { AlertCircle, ArrowLeft } from "lucide-react";
 import type { VehicleDetail } from "~/types/vehicle";
 import { EditVehicleDialog } from "./_components/EditVehicleDialog";
 
@@ -143,7 +144,8 @@ export default function UserVehicleDetailPage({
       {/* Header */}
       <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            {/* Left: Back button + Vehicle name */}
             <div className="flex items-center gap-4 min-w-0 flex-1">
               <Button
                 variant="ghost"
@@ -153,30 +155,40 @@ export default function UserVehicleDetailPage({
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back
               </Button>
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-50">
+              <div className="min-w-0 flex-1">
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-50 truncate">
                   {vehicle.name}
                 </h1>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
+                <p className="text-sm text-slate-600 dark:text-slate-400 truncate">
                   {vehicle.make.name} {vehicle.model.name} • {vehicle.year}
                 </p>
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsEditDialogOpen(true)}
-              className="gap-2"
-            >
-              <Pencil className="h-4 w-4" />
-              <span className="hidden sm:inline">Edit</span>
-            </Button>
+
+            {/* Right: Action buttons (wraps on mobile only) */}
+            <div className="flex items-center gap-2 md:ml-4">
+              <UserVehicleActions
+                vehicleId={vehicle.id}
+                currentStatus={vehicle.status}
+              />
+            </div>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 md:py-8">
+        {/* Show declined reason if vehicle is declined */}
+        {vehicle.status === "DECLINED" && vehicle.declinedReason && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Vehicle Declined</AlertTitle>
+            <AlertDescription>
+              <p><span className="font-medium">Reason: </span>{vehicle.declinedReason}</p>
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Two-Column Layout: Photos on Left (larger), Details on Right (smaller) */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Left Column - Media Gallery (2/3 width on desktop) */}
@@ -187,7 +199,10 @@ export default function UserVehicleDetailPage({
           {/* Right Column - Vehicle Details (1/3 width on desktop) */}
           <div className="lg:col-span-1 space-y-6">
             {/* Vehicle Details */}
-            <UserVehicleDetails vehicle={vehicle} />
+            <UserVehicleDetails 
+              vehicle={vehicle}
+              onEditClick={() => setIsEditDialogOpen(true)}
+            />
             
             {/* Collections & Tags - Shared component is fine (just displays tags) */}
             <VehicleCollections 

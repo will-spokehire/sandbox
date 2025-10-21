@@ -109,7 +109,7 @@ export default function VehicleDetailPage({
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Header */}
-      <VehicleDetailHeader vehicle={vehicle} onEdit={() => setIsEditDialogOpen(true)} />
+      <VehicleDetailHeader vehicle={vehicle} />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 md:py-8">
@@ -123,7 +123,10 @@ export default function VehicleDetailPage({
 
           {/* Right Column - Vehicle Details, Collections, Metadata (1/3 width on desktop) */}
           <div className="lg:col-span-1 space-y-6">
-            <VehicleBasicInfo vehicle={vehicle} />
+            <VehicleBasicInfo 
+              vehicle={vehicle}
+              onEditClick={() => setIsEditDialogOpen(true)}
+            />
             <VehicleCollections 
               collections={vehicle.collections} 
               vehicle={vehicle}
