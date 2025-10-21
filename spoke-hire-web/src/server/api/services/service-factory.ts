@@ -17,6 +17,7 @@ import { DealService } from "./deal.service";
 import { LookupService } from "./lookup.service";
 import { AuthService } from "./auth.service";
 import { MediaService } from "./media.service";
+import { AIVehicleGeneratorService } from "./ai-vehicle-generator.service";
 import { VehicleRepository } from "../repositories/vehicle.repository";
 import { UserRepository } from "../repositories/user.repository";
 import { LookupRepository } from "../repositories/lookup.repository";
@@ -75,6 +76,13 @@ export class ServiceFactory {
     const repository = new MediaRepository(db);
     const supabaseClient = createAdminClient();
     return new MediaService(repository, supabaseClient, cacheService, db);
+  }
+
+  /**
+   * Create AIVehicleGeneratorService
+   */
+  static createAIVehicleGeneratorService(): AIVehicleGeneratorService {
+    return new AIVehicleGeneratorService();
   }
 
   /**

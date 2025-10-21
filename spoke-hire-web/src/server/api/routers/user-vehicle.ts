@@ -96,6 +96,19 @@ const checkRegistrationInputSchema = z.object({
   excludeVehicleId: z.string().optional(),
 });
 
+const generateVehicleContentInputSchema = z.object({
+  makeId: z.string().min(1, "Make is required"),
+  modelId: z.string().min(1, "Model is required"),
+  year: z.string().min(1, "Year is required"),
+  engineCapacity: z.number().min(1, "Engine capacity is required"),
+  numberOfSeats: z.number().min(1).max(20, "Number of seats must be between 1 and 20"),
+  steeringId: z.string().min(1, "Steering type is required"),
+  gearbox: z.string().min(1, "Gearbox is required"),
+  exteriorColour: z.string().min(1, "Exterior colour is required"),
+  interiorColour: z.string().min(1, "Interior colour is required"),
+  isRoadLegal: z.boolean(),
+});
+
 // ============================================================================
 // Router Definition
 // ============================================================================
@@ -957,6 +970,59 @@ export const userVehicleRouter = createTRPCRouter({
       return {
         available: true,
       };
+    }),
+
+  /**
+   * Generate AI-powered vehicle name and description
+   * Uses Google Gemini to create marketing content
+   */
+  generateVehicleContent: protectedProcedure
+    .input(generateVehicleContentInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const aiService = ServiceFactory.createAIVehicleGeneratorService();
+
+      // Get make and model names
+      const [make, model, steering] = await Promise.all([
+        ctx.db.make.findUnique({
+          where: { id: input.makeId },
+          select: { name: true },
+        }),
+        ctx.db.model.findUnique({
+          where: { id: input.modelId },
+          select: { name: true },
+        }),
+        ctx.db.steeringType.findUnique({
+          where: { id: input.steeringId },
+          select: { name: true },
+        }),
+      ]);
+
+      if (!make || !model || !steering) {
+        throw new Error("Invalid make, model, or steering ID");
+      }
+
+      // Get user's city for location
+      const userCity = ctx.user.city ?? "UK";
+
+      // Prepare data for AI generation
+      const vehicleData = {
+        make: make.name,
+        model: model.name,
+        year: input.year,
+        engineCapacity: input.engineCapacity,
+        numberOfSeats: input.numberOfSeats,
+        steering: steering.name,
+        gearbox: input.gearbox,
+        exteriorColour: input.exteriorColour,
+        interiorColour: input.interiorColour,
+        isRoadLegal: input.isRoadLegal,
+        location: userCity,
+      };
+
+      // Generate content
+      const generated = await aiService.generateVehicleContent(vehicleData);
+
+      return generated;
     }),
 });
 
