@@ -1,11 +1,11 @@
 'use client';
 
-import { Tabs, TabsList, TabsTrigger } from '~/components/ui/tabs';
+import { Button } from '~/components/ui/button';
 import type { VehicleStatus } from '@prisma/client';
 
 interface VehicleStatusTabsProps {
-  activeStatus: VehicleStatus | 'ALL';
-  onStatusChange: (status: VehicleStatus | 'ALL') => void;
+  activeStatus: VehicleStatus | 'ALL_ACTIVE';
+  onStatusChange: (status: VehicleStatus | 'ALL_ACTIVE') => void;
   counts?: {
     total: number;
     published: number;
@@ -26,25 +26,25 @@ export function VehicleStatusTabs({
   counts,
 }: VehicleStatusTabsProps) {
   return (
-    <Tabs value={activeStatus} onValueChange={(value) => onStatusChange(value as VehicleStatus | 'ALL')}>
-      <TabsList className="w-full sm:w-auto">
-        <TabsTrigger value="ALL" className="flex-1 sm:flex-none">
-          All {counts && `(${counts.total})`}
-        </TabsTrigger>
-        <TabsTrigger value="PUBLISHED" className="flex-1 sm:flex-none">
-          Published {counts && `(${counts.published})`}
-        </TabsTrigger>
-        <TabsTrigger value="DRAFT" className="flex-1 sm:flex-none">
-          Draft {counts && `(${counts.draft})`}
-        </TabsTrigger>
-        <TabsTrigger value="DECLINED" className="flex-1 sm:flex-none">
-          Declined {counts && `(${counts.declined})`}
-        </TabsTrigger>
-        <TabsTrigger value="ARCHIVED" className="flex-1 sm:flex-none">
+    <div className="flex gap-2">
+      <Button
+        variant={activeStatus === 'ALL_ACTIVE' ? 'default' : 'outline'}
+        onClick={() => onStatusChange('ALL_ACTIVE')}
+        size="sm"
+      >
+        Active {counts && `(${counts.total})`}
+      </Button>
+      {counts && counts.archived > 0 && (
+        <Button
+          variant={activeStatus === 'ARCHIVED' ? 'default' : 'outline'}
+          onClick={() => onStatusChange('ARCHIVED')}
+          size="sm"
+        >
           Archived {counts && `(${counts.archived})`}
-        </TabsTrigger>
-      </TabsList>
-    </Tabs>
+        </Button>
+      )}
+    </div>
   );
 }
+
 

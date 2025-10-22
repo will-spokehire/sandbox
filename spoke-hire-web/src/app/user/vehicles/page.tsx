@@ -16,13 +16,13 @@ import type { VehicleStatus } from '@prisma/client';
 
 // Filter schema for URL-based filter management
 const userVehicleFiltersSchema = z.object({
-  status: z.enum(['ALL', 'DRAFT', 'IN_REVIEW', 'PUBLISHED', 'DECLINED', 'ARCHIVED']).default('ALL'),
+  status: z.enum(['ALL_ACTIVE', 'DRAFT', 'IN_REVIEW', 'PUBLISHED', 'DECLINED', 'ARCHIVED']).default('ALL_ACTIVE'),
 });
 
 type UserVehicleFilters = z.infer<typeof userVehicleFiltersSchema>;
 
 const defaultFilters: UserVehicleFilters = {
-  status: 'ALL',
+  status: 'ALL_ACTIVE',
 };
 
 /**
@@ -48,7 +48,7 @@ function UserVehiclesPageContent() {
   } = api.userVehicle.myVehicles.useQuery(
     {
       limit: 50,
-      status: filters.status === 'ALL' ? undefined : (filters.status as VehicleStatus),
+      status: filters.status === 'ALL_ACTIVE' ? undefined : (filters.status as VehicleStatus),
     },
     {
       enabled: !isAuthLoading && !!user,
@@ -152,7 +152,7 @@ function UserVehiclesPageContent() {
       {/* Status Filter Tabs */}
       <div className="mb-6">
         <VehicleStatusTabs
-          activeStatus={(filters.status ?? 'ALL') as VehicleStatus | 'ALL'}
+          activeStatus={(filters.status ?? 'ALL_ACTIVE') as VehicleStatus | 'ALL_ACTIVE'}
           onStatusChange={(status) => updateFilters({ status })}
           counts={counts}
         />

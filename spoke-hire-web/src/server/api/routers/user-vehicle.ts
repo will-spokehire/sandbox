@@ -130,9 +130,13 @@ export const userVehicleRouter = createTRPCRouter({
         : ctx.user.id;
 
       // Build where clause
+      // When no status is provided, exclude archived vehicles (show all active)
       const where = {
         ownerId,
-        ...(status && { status }),
+        ...(status 
+          ? { status } 
+          : { status: { not: VehicleStatus.ARCHIVED } }
+        ),
       };
 
       // Fetch vehicles
@@ -146,7 +150,7 @@ export const userVehicleRouter = createTRPCRouter({
           skip: 1, // Skip the cursor
         }),
         orderBy: {
-          createdAt: "desc",
+          updatedAt: "desc",
         },
         include: {
           make: {
@@ -210,9 +214,14 @@ export const userVehicleRouter = createTRPCRouter({
         ? input.testOwnerId 
         : ctx.user.id;
     
+      // Count vehicles by status
+      // Total excludes archived to match the "Active" filter
       const [total, published, draft, declined, archived] = await Promise.all([
         ctx.db.vehicle.count({
-          where: { ownerId },
+          where: { 
+            ownerId,
+            status: { not: VehicleStatus.ARCHIVED }
+          },
         }),
         ctx.db.vehicle.count({
           where: { ownerId, status: "PUBLISHED" },
