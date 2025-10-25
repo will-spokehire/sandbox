@@ -110,6 +110,30 @@ const generateVehicleContentInputSchema = z.object({
 });
 
 // ============================================================================
+// Helper Functions
+// ============================================================================
+
+/**
+ * Check if a string is a database ID (cUID or UUID format)
+ * Used to determine if makeId/modelId is an actual ID or a user-entered name
+ */
+function isId(str: string): boolean {
+  return str.length === 25 || str.includes('-');
+}
+
+/**
+ * Generate slug from name
+ */
+function generateSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+// ============================================================================
 // Router Definition
 // ============================================================================
 
@@ -626,20 +650,6 @@ export const userVehicleRouter = createTRPCRouter({
   createMyVehicle: protectedProcedure
     .input(createMyVehicleInputSchema)
     .mutation(async ({ ctx, input }) => {
-      // Helper to check if string is a cUID (25 chars) or UUID (with dashes)
-      const isId = (str: string): boolean => {
-        return str.length === 25 || str.includes('-');
-      };
-
-      // Helper to generate slug from name
-      const generateSlug = (name: string): string => {
-        return name
-          .toLowerCase()
-          .trim()
-          .replace(/[^\w\s-]/g, '')
-          .replace(/[\s_-]+/g, '-')
-          .replace(/^-+|-+$/g, '');
-      };
 
       // Process makeId - validate if ID, create if name
       let finalMakeId: string;
@@ -1051,30 +1061,55 @@ export const userVehicleRouter = createTRPCRouter({
   /**
    * Generate AI-powered vehicle name and description
    * Uses Google Gemini to create marketing content
+   * Handles both existing IDs and new make/model names
    */
   generateVehicleContent: protectedProcedure
     .input(generateVehicleContentInputSchema)
     .mutation(async ({ ctx, input }) => {
       const aiService = ServiceFactory.createAIVehicleGeneratorService();
 
-      // Get make and model names
-      const [make, model, steering] = await Promise.all([
-        ctx.db.make.findUnique({
+      // Resolve make name - handle both ID and name string
+      let makeName: string;
+      if (isId(input.makeId)) {
+        // It's an ID - look it up in database
+        const make = await ctx.db.make.findUnique({
           where: { id: input.makeId },
           select: { name: true },
-        }),
-        ctx.db.model.findUnique({
+        });
+        if (!make) {
+          throw new Error("Invalid make ID");
+        }
+        makeName = make.name;
+      } else {
+        // It's a name string - use directly
+        makeName = input.makeId.trim();
+      }
+
+      // Resolve model name - handle both ID and name string
+      let modelName: string;
+      if (isId(input.modelId)) {
+        // It's an ID - look it up in database
+        const model = await ctx.db.model.findUnique({
           where: { id: input.modelId },
           select: { name: true },
-        }),
-        ctx.db.steeringType.findUnique({
-          where: { id: input.steeringId },
-          select: { name: true },
-        }),
-      ]);
+        });
+        if (!model) {
+          throw new Error("Invalid model ID");
+        }
+        modelName = model.name;
+      } else {
+        // It's a name string - use directly
+        modelName = input.modelId.trim();
+      }
 
-      if (!make || !model || !steering) {
-        throw new Error("Invalid make, model, or steering ID");
+      // Resolve steering name - always an ID
+      const steering = await ctx.db.steeringType.findUnique({
+        where: { id: input.steeringId },
+        select: { name: true },
+      });
+
+      if (!steering) {
+        throw new Error("Invalid steering type ID");
       }
 
       // Get user's city for location
@@ -1082,8 +1117,8 @@ export const userVehicleRouter = createTRPCRouter({
 
       // Prepare data for AI generation
       const vehicleData = {
-        make: make.name,
-        model: model.name,
+        make: makeName,
+        model: modelName,
         year: input.year,
         engineCapacity: input.engineCapacity,
         numberOfSeats: input.numberOfSeats,
