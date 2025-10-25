@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
@@ -44,7 +44,12 @@ export function MultiSelectFilter({
   className,
 }: MultiSelectFilterProps) {
   const [open, setOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const isMobile = useIsMobile();
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleToggle = (id: string) => {
     const newIds = selectedIds.includes(id)
@@ -90,6 +95,20 @@ export function MultiSelectFilter({
       })}
     </>
   );
+
+  // Only render after mount to avoid hydration issues
+  if (!isMounted) {
+    return (
+      <Button
+        variant="outline"
+        className={cn("justify-between", className)}
+        disabled
+      >
+        <span className="truncate">{placeholder}</span>
+        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+      </Button>
+    );
+  }
 
   // Mobile: Sheet
   if (isMobile) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Car, User, Plus, Menu } from "lucide-react";
@@ -74,6 +74,11 @@ function NavLinks({ pathname, onClick }: { pathname: string; onClick?: () => voi
 export function UserNavigation() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
@@ -105,39 +110,41 @@ export function UserNavigation() {
             </div>
 
             {/* Mobile Menu Button */}
-            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-              <SheetTrigger asChild className="lg:hidden">
-                <Button variant="outline" size="icon">
-                  <Menu className="h-5 w-5" />
-                  <span className="sr-only">Open menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-64 p-0">
-                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                <SheetDescription className="sr-only">
-                  Main navigation menu for user pages
-                </SheetDescription>
-                <div className="flex flex-col h-full">
-                  {/* Mobile Menu Header */}
-                  <div className="flex items-center justify-between px-4 py-5 border-b border-slate-200 dark:border-slate-800">
-                    <span className="text-lg font-semibold text-slate-900 dark:text-slate-50">Menu</span>
-                  </div>
-                  
-                  {/* Mobile Navigation */}
-                  <div className="flex-1 px-3 py-4 overflow-y-auto">
-                    <NavLinks 
-                      pathname={pathname} 
-                      onClick={() => setMobileMenuOpen(false)} 
-                    />
-                  </div>
+            {isMounted && (
+              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                <SheetTrigger asChild className="lg:hidden">
+                  <Button variant="outline" size="icon">
+                    <Menu className="h-5 w-5" />
+                    <span className="sr-only">Open menu</span>
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-64 p-0">
+                  <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                  <SheetDescription className="sr-only">
+                    Main navigation menu for user pages
+                  </SheetDescription>
+                  <div className="flex flex-col h-full">
+                    {/* Mobile Menu Header */}
+                    <div className="flex items-center justify-between px-4 py-5 border-b border-slate-200 dark:border-slate-800">
+                      <span className="text-lg font-semibold text-slate-900 dark:text-slate-50">Menu</span>
+                    </div>
+                    
+                    {/* Mobile Navigation */}
+                    <div className="flex-1 px-3 py-4 overflow-y-auto">
+                      <NavLinks 
+                        pathname={pathname} 
+                        onClick={() => setMobileMenuOpen(false)} 
+                      />
+                    </div>
 
-                  {/* Mobile User Menu */}
-                  <div className="border-t border-slate-200 dark:border-slate-800 p-4">
-                    <UserMenu />
+                    {/* Mobile User Menu */}
+                    <div className="border-t border-slate-200 dark:border-slate-800 p-4">
+                      <UserMenu />
+                    </div>
                   </div>
-                </div>
-              </SheetContent>
-            </Sheet>
+                </SheetContent>
+              </Sheet>
+            )}
           </div>
         </div>
       </div>

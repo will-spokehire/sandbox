@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Car, Mail, LayoutDashboard, Menu } from "lucide-react";
@@ -74,6 +74,11 @@ export default function AdminLayout({
   const { user, isLoading } = useRequireAdmin();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   if (isLoading || !user) {
     return <PageLoading />;
@@ -137,47 +142,49 @@ export default function AdminLayout({
             </Link>
             <div className="flex items-center gap-2">
               <UserMenu />
-              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="outline" size="icon">
-                    <Menu className="h-5 w-5" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="right" className="w-64 p-0">
-                  <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                  <SheetDescription className="sr-only">
-                    Main navigation menu for the admin panel
-                  </SheetDescription>
-                  <div className="flex flex-col h-full">
-                    {/* Mobile Menu Header */}
-                    <div className="flex items-center justify-between px-4 py-5 border-b">
-                      <span className="text-lg font-semibold">Menu</span>
-                    </div>
-                    
-                    {/* Mobile Navigation */}
-                    <div className="flex-1 px-3 py-4 overflow-y-auto">
-                      <NavLinks 
-                        pathname={pathname} 
-                        onClick={() => setMobileMenuOpen(false)} 
-                      />
-                    </div>
+              {isMounted && (
+                <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                  <SheetTrigger asChild>
+                    <Button variant="outline" size="icon">
+                      <Menu className="h-5 w-5" />
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="right" className="w-64 p-0">
+                    <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                    <SheetDescription className="sr-only">
+                      Main navigation menu for the admin panel
+                    </SheetDescription>
+                    <div className="flex flex-col h-full">
+                      {/* Mobile Menu Header */}
+                      <div className="flex items-center justify-between px-4 py-5 border-b">
+                        <span className="text-lg font-semibold">Menu</span>
+                      </div>
+                      
+                      {/* Mobile Navigation */}
+                      <div className="flex-1 px-3 py-4 overflow-y-auto">
+                        <NavLinks 
+                          pathname={pathname} 
+                          onClick={() => setMobileMenuOpen(false)} 
+                        />
+                      </div>
 
-                    {/* Mobile User Info */}
-                    <div className="border-t p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">
-                            {user.firstName ?? user.email}
-                          </p>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {user.email}
-                          </p>
+                      {/* Mobile User Info */}
+                      <div className="border-t p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">
+                              {user.firstName ?? user.email}
+                            </p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {user.email}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </SheetContent>
-              </Sheet>
+                  </SheetContent>
+                </Sheet>
+              )}
             </div>
           </div>
         </div>
