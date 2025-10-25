@@ -9,6 +9,7 @@
 import { generateText } from "ai";
 import { google } from "@ai-sdk/google";
 import { env } from "~/env";
+import { generateVehicleName as generateStandardVehicleName } from "~/lib/vehicle-name-generator";
 
 /**
  * Vehicle data for AI generation
@@ -45,7 +46,7 @@ export class AIVehicleGeneratorService {
    * Generate vehicle name using simple pattern: Year Make Model
    */
   async generateVehicleName(data: VehicleGenerationData): Promise<string> {
-    return `${data.year} ${data.make} ${data.model}`;
+    return generateStandardVehicleName(data.year, data.make, data.model);
   }
 
   /**

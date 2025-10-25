@@ -12,6 +12,7 @@ import { protectedProcedure, createTRPCRouter } from "~/server/api/trpc";
 import { VehicleStatus } from "@prisma/client";
 import { ServiceFactory } from "../services/service-factory";
 import { geocodePostcode } from "~/lib/services/geocoding";
+import { generateVehicleName } from "~/lib/vehicle-name-generator";
 
 // ============================================================================
 // Input Validation Schemas
@@ -37,7 +38,7 @@ const myVehicleCountsInputSchema = z.object({
 const updateMyVehicleInputSchema = z.object({
   id: z.string(),
   name: z.string().min(3).optional(),
-  status: z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED']).optional(), // Users can't set DECLINED
+  status: z.enum(['DRAFT', 'IN_REVIEW', 'PUBLISHED', 'ARCHIVED']).optional(), // Users can edit IN_REVIEW vehicles but can't set DECLINED
   price: z.number().min(0).nullable().optional(),
   year: z.string().optional(),
   registration: z.string().nullable().optional(),
@@ -436,7 +437,6 @@ export const userVehicleRouter = createTRPCRouter({
                 name: makeName,
                 slug: generateSlug(makeName),
                 isActive: true,
-                isPublished: false, // User-created makes are unpublished
               },
             });
           }
@@ -484,12 +484,37 @@ export const userVehicleRouter = createTRPCRouter({
                 slug: generateSlug(modelName),
                 makeId: finalMakeId,
                 isActive: true,
-                isPublished: false, // User-created models are unpublished
               },
             });
           }
           
           finalModelId = model.id;
+        }
+      }
+
+      // Auto-regenerate vehicle name if make, model, or year changed
+      let finalName = data.name;
+      const didMakeModelYearChange = 
+        (data.makeId && finalMakeId !== vehicle.makeId) ||
+        (data.modelId && finalModelId !== vehicle.modelId) ||
+        (data.year && data.year !== vehicle.year);
+
+      if (didMakeModelYearChange) {
+        // Fetch the names to generate new vehicle name
+        const make = await ctx.db.make.findUnique({
+          where: { id: finalMakeId },
+          select: { name: true },
+        });
+        
+        const model = await ctx.db.model.findUnique({
+          where: { id: finalModelId },
+          select: { name: true },
+        });
+        
+        const year = data.year ?? vehicle.year;
+        
+        if (make && model) {
+          finalName = generateVehicleName(year, make.name, model.name);
         }
       }
 
@@ -529,7 +554,7 @@ export const userVehicleRouter = createTRPCRouter({
       const updatedVehicle = await ctx.db.vehicle.update({
         where: { id },
         data: {
-          ...(data.name !== undefined && { name: data.name }),
+          ...(finalName !== undefined && { name: finalName }),
           ...(data.status !== undefined && { status: data.status }),
           ...(data.price !== undefined && { price: data.price }),
           ...(data.year !== undefined && { year: data.year }),
@@ -684,7 +709,6 @@ export const userVehicleRouter = createTRPCRouter({
               name: makeName,
               slug: generateSlug(makeName),
               isActive: true,
-              isPublished: false, // User-created makes are unpublished
             },
           });
         }
@@ -730,7 +754,6 @@ export const userVehicleRouter = createTRPCRouter({
               slug: generateSlug(modelName),
               makeId: finalMakeId,
               isActive: true,
-              isPublished: false, // User-created models are unpublished
             },
           });
         }

@@ -33,12 +33,13 @@ import { api } from "~/trpc/react";
 import type { VehicleDetail, FilterOptions, ModelsByMake } from "~/types/vehicle";
 import { VEHICLE_COLORS, GEARBOX_TYPES } from "~/lib/constants/vehicle";
 import { Combobox, type ComboboxOption } from "~/components/ui/combobox";
+import { generateVehicleName as generateStandardVehicleName } from "~/lib/vehicle-name-generator";
 
-// User status options (excluding DECLINED)
-const USER_VEHICLE_STATUSES = ['DRAFT', 'PUBLISHED', 'ARCHIVED'] as const;
+// User status options (users can view IN_REVIEW but shouldn't manually set DECLINED)
+const USER_VEHICLE_STATUSES = ['DRAFT', 'IN_REVIEW', 'PUBLISHED', 'ARCHIVED'] as const;
 type UserVehicleStatus = typeof USER_VEHICLE_STATUSES[number];
 
-// Validation schema matching backend - users can't set DECLINED status
+// Validation schema matching backend - users can view/edit IN_REVIEW vehicles
 const editVehicleSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
   status: z.enum(USER_VEHICLE_STATUSES),
@@ -92,6 +93,7 @@ export function EditVehicleDialog({
 
   const form = useForm<EditVehicleFormData>({
     resolver: zodResolver(editVehicleSchema),
+    mode: "onChange", // Validate on change to show errors immediately
     defaultValues: {
       name: vehicle.name,
       status: getInitialStatus(),
@@ -244,6 +246,42 @@ export function EditVehicleDialog({
     });
   };
 
+  // Helper function to generate vehicle name from make, model, and year
+  const generateVehicleName = (makeId: string, modelId: string, year: string): string => {
+    // Get make name
+    const make = filterOptions?.makes.find(m => m.id === makeId);
+    const makeName = make?.name || '';
+    
+    // Get model name
+    const model = models?.find(m => m.id === modelId);
+    const modelName = model?.name || '';
+    
+    if (!makeName || !modelName || !year) {
+      return form.getValues('name'); // Return current if can't generate
+    }
+    
+    return generateStandardVehicleName(year, makeName, modelName);
+  };
+
+  // Watch for changes to make, model, or year and update name
+  useEffect(() => {
+    const subscription = form.watch((value, { name: fieldName }) => {
+      // Only regenerate if make, model, or year changed
+      if (fieldName === 'makeId' || fieldName === 'modelId' || fieldName === 'year') {
+        const makeId = value.makeId;
+        const modelId = value.modelId;
+        const year = value.year;
+        
+        if (makeId && modelId && year) {
+          const newName = generateVehicleName(makeId, modelId, year);
+          // Use setValue with shouldValidate and shouldDirty to ensure it's tracked
+          form.setValue('name', newName, { shouldValidate: true, shouldDirty: true, shouldTouch: true });
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, filterOptions, models]);
+
   // Handle make change
   const handleMakeChange = (makeId: string) => {
     setSelectedMakeId(makeId);
@@ -271,16 +309,13 @@ export function EditVehicleDialog({
             
             <div className="grid grid-cols-1 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Name *</Label>
-                <Input
-                  id="name"
-                  {...form.register("name")}
-                  placeholder="e.g., 2015 BMW 3 Series"
-                  disabled={true}
-                />
-                {form.formState.errors.name && (
-                  <p className="text-sm text-red-500">{form.formState.errors.name.message}</p>
-                )}
+                <Label>Vehicle Name</Label>
+                <div className="rounded-md border border-input bg-muted/50 px-3 py-2 text-sm min-h-[40px] flex items-center">
+                  {form.watch("name") || "Auto-generated from make, model, and year"}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Name is automatically generated based on year, make, and model
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
