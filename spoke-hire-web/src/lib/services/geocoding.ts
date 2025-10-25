@@ -92,6 +92,8 @@ export async function geocodePostcode(
       latitude: true,
       longitude: true,
       postcode: true,
+      city: true,
+      county: true,
       country: {
         select: {
           name: true,
@@ -101,11 +103,18 @@ export async function geocodePostcode(
   });
 
   if (cachedUser?.latitude && cachedUser?.longitude) {
+    // For London, use "London" as the region/county
+    const region = cachedUser.city === "London" ? "London" : undefined;
+    const adminCounty = cachedUser.county ?? undefined;
+    
     return {
       latitude: cachedUser.latitude,
       longitude: cachedUser.longitude,
       postcode: cachedUser.postcode ?? normalized,
       country: cachedUser.country?.name ?? "United Kingdom",
+      region,
+      adminCounty,
+      adminDistrict: cachedUser.city ?? undefined,
     };
   }
 

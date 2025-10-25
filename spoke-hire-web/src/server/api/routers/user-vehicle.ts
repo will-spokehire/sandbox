@@ -943,6 +943,11 @@ export const userVehicleRouter = createTRPCRouter({
           ? "London" 
           : (result.adminDistrict ?? "");
         
+        // For London, use region as county; otherwise use admin_county
+        const county = result.region === "London" 
+          ? "London" 
+          : (result.adminCounty ?? "");
+        
         // Look up country ID from the database
         const country = await ctx.db.country.findFirst({
           where: { 
@@ -959,7 +964,7 @@ export const userVehicleRouter = createTRPCRouter({
           data: {
             postcode: result.postcode,
             city,
-            county: result.adminCounty ?? "",
+            county,
             latitude: result.latitude,
             longitude: result.longitude,
             country: result.country,
