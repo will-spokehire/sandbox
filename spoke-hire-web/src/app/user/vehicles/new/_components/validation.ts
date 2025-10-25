@@ -36,10 +36,10 @@ export const basicInfoSchema = z.object({
   registration: z.string().min(1, "Registration is required"),
   price: z
     .string()
-    .optional()
+    .min(1, "Agreed value is required")
     .refine(
-      (val) => !val || val === "" || (!isNaN(Number(val)) && Number(val) >= 0),
-      "Price must be a valid number greater than or equal to 0"
+      (val) => !isNaN(Number(val)) && Number(val) > 0,
+      "Agreed value must be a valid number greater than 0"
     ),
 });
 
@@ -47,7 +47,7 @@ export type BasicInfoFormData = z.infer<typeof basicInfoSchema>;
 
 // Type for the transformed data (after converting price to number)
 export type BasicInfoSubmitData = Omit<BasicInfoFormData, 'price'> & {
-  price?: number;
+  price: number;
 };
 
 // Technical details step validation

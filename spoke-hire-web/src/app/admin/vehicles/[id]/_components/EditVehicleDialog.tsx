@@ -40,7 +40,7 @@ import { Combobox, type ComboboxOption } from "~/components/ui/combobox";
 const editVehicleSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
   status: z.nativeEnum(VehicleStatus),
-  price: z.number().min(0, "Price must be positive").nullable().optional(),
+  price: z.number().min(1, "Agreed value is required and must be greater than 0"),
   year: z.string().min(4, "Year required"),
   registration: z.string().nullable().optional(),
   makeId: z.string().min(1, "Make is required"),
@@ -85,7 +85,7 @@ export function EditVehicleDialog({
     defaultValues: {
       name: vehicle.name,
       status: vehicle.status,
-      price: vehicle.price ? Number(vehicle.price) : null,
+      price: vehicle.price ? Number(vehicle.price) : 0,
       year: vehicle.year,
       registration: vehicle.registration ?? "",
       makeId: vehicle.makeId,
@@ -108,7 +108,7 @@ export function EditVehicleDialog({
       form.reset({
         name: vehicle.name,
         status: vehicle.status,
-        price: vehicle.price ? Number(vehicle.price) : null,
+        price: vehicle.price ? Number(vehicle.price) : 0,
         year: vehicle.year,
         registration: vehicle.registration ?? "",
         makeId: vehicle.makeId,
@@ -588,13 +588,12 @@ export function EditVehicleDialog({
             <h3 className="text-sm font-semibold">Pricing & Description</h3>
             
             <div className="space-y-2">
-              <Label htmlFor="price">Agreed Value (£)</Label>
+              <Label htmlFor="price">Agreed Value (£) *</Label>
               <Input
                 id="price"
                 type="number"
                 {...form.register("price", { 
                   valueAsNumber: true,
-                  setValueAs: (v) => v === "" ? null : Number(v)
                 })}
                 placeholder="25000"
               />

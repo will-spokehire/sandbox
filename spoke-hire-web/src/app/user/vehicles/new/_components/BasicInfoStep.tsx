@@ -89,7 +89,7 @@ export function BasicInfoStep({ onComplete, defaultValues, onValidationChange }:
       modelId: defaultValues?.modelId ?? "",
       year: defaultValues?.year ?? "",
       registration: defaultValues?.registration ?? "",
-      price: defaultValues?.price !== undefined ? String(defaultValues.price) : "",
+      price: defaultValues?.price ? String(defaultValues.price) : "",
     },
   });
 
@@ -134,7 +134,7 @@ export function BasicInfoStep({ onComplete, defaultValues, onValidationChange }:
         // Convert price string to number before submitting
         const submittedData: BasicInfoSubmitData = {
           ...formData,
-          price: formData.price && formData.price !== "" ? Number(formData.price) : undefined,
+          price: Number(formData.price),
         };
         onComplete(submittedData);
       } catch (error) {
@@ -142,7 +142,7 @@ export function BasicInfoStep({ onComplete, defaultValues, onValidationChange }:
         // Proceed anyway if check fails (backend will catch it)
         const submittedData: BasicInfoSubmitData = {
           ...formData,
-          price: formData.price && formData.price !== "" ? Number(formData.price) : undefined,
+          price: Number(formData.price),
         };
         onComplete(submittedData);
       }
@@ -327,7 +327,7 @@ export function BasicInfoStep({ onComplete, defaultValues, onValidationChange }:
             name="price"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Agreed Value (£)</FormLabel>
+                <FormLabel>Agreed Value (£) *</FormLabel>
                 <FormControl>
                   <Input
                     type="text"

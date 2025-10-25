@@ -39,7 +39,7 @@ const updateMyVehicleInputSchema = z.object({
   id: z.string(),
   name: z.string().min(3).optional(),
   status: z.enum(['DRAFT', 'IN_REVIEW', 'PUBLISHED', 'ARCHIVED']).optional(), // Users can edit IN_REVIEW vehicles but can't set DECLINED
-  price: z.number().min(0).nullable().optional(),
+  price: z.number().min(1, "Agreed value must be greater than 0").optional(),
   year: z.string().optional(),
   registration: z.string().nullable().optional(),
   makeId: z.string().optional(),
@@ -62,7 +62,7 @@ const createMyVehicleInputSchema = z.object({
   name: z.string().min(3, "Vehicle name must be at least 3 characters"),
   year: z.string().min(1, "Year is required"),
   registration: z.string().min(1, "Registration is required"),
-  price: z.number().min(0, "Price cannot be negative").optional(),
+  price: z.number().min(1, "Agreed value is required and must be greater than 0"),
   exteriorColour: z.string().min(1, "Exterior colour is required"),
   interiorColour: z.string().min(1, "Interior colour is required"),
   gearbox: z.string().min(1, "Gearbox is required"),

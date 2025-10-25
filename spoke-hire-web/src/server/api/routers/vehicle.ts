@@ -77,7 +77,7 @@ const updateVehicleInputSchema = z.object({
   id: z.string(),
   name: z.string().min(3).optional(),
   status: z.nativeEnum(VehicleStatus).optional(),
-  price: z.number().min(0).nullable().optional(),
+  price: z.number().min(1, "Agreed value must be greater than 0").optional(),
   year: z.string().optional(),
   registration: z.string().nullable().optional(),
   makeId: z.string().optional(),
