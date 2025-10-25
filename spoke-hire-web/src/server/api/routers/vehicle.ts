@@ -174,6 +174,53 @@ export const vehicleRouter = createTRPCRouter({
     }),
 
   /**
+   * Approve vehicle with make/model approval and deduplication
+   * Admin can edit make/model names during approval
+   * System checks for existing published makes/models to prevent duplicates
+   */
+  approveVehicleWithMakeModel: adminProcedure
+    .input(z.object({
+      vehicleId: z.string(),
+      makeId: z.string(),
+      makeName: z.string().min(1),
+      modelId: z.string(),
+      modelName: z.string().min(1),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      // First, approve make/model (handles deduplication)
+      const approvalService = ServiceFactory.createMakeModelApprovalService(ctx.db);
+      
+      const result = await approvalService.approveMakeModel(
+        input.vehicleId,
+        { id: input.makeId, name: input.makeName },
+        { id: input.modelId, name: input.modelName }
+      );
+
+      // Then approve the vehicle
+      const statusService = ServiceFactory.createVehicleStatusService(ctx.db);
+      
+      await statusService.changeVehicleStatus(
+        input.vehicleId,
+        "PUBLISHED",
+        ctx.user.id,
+        true // isAdmin
+      );
+
+      // Invalidate caches
+      cacheService.delete(CacheKeys.vehicleDetail(input.vehicleId));
+      cacheService.invalidateByPattern("vehicle:list:");
+      cacheService.delete(CacheKeys.vehicleFilterOptions());
+      cacheService.delete(CacheKeys.makes());
+      cacheService.invalidateByPattern("models:by-make:"); // Invalidate all model caches
+
+      return { 
+        success: true,
+        makeWasReused: result.makeWasReused,
+        modelWasReused: result.modelWasReused,
+      };
+    }),
+
+  /**
    * Decline vehicle (IN_REVIEW → DECLINED)
    * Requires decline reason for email notification
    */

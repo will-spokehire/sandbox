@@ -436,6 +436,7 @@ export const userVehicleRouter = createTRPCRouter({
                 name: makeName,
                 slug: generateSlug(makeName),
                 isActive: true,
+                isPublished: false, // User-created makes are unpublished
               },
             });
           }
@@ -483,6 +484,7 @@ export const userVehicleRouter = createTRPCRouter({
                 slug: generateSlug(modelName),
                 makeId: finalMakeId,
                 isActive: true,
+                isPublished: false, // User-created models are unpublished
               },
             });
           }
@@ -682,6 +684,7 @@ export const userVehicleRouter = createTRPCRouter({
               name: makeName,
               slug: generateSlug(makeName),
               isActive: true,
+              isPublished: false, // User-created makes are unpublished
             },
           });
         }
@@ -727,6 +730,7 @@ export const userVehicleRouter = createTRPCRouter({
               slug: generateSlug(modelName),
               makeId: finalMakeId,
               isActive: true,
+              isPublished: false, // User-created models are unpublished
             },
           });
         }

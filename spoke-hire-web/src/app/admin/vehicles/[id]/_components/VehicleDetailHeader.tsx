@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, CheckCircle, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
 import { Button } from "~/components/ui/button";
+import { Badge } from "~/components/ui/badge";
 import { DeclineVehicleDialog } from "./DeclineVehicleDialog";
 import { type VehicleDetail } from "~/types/vehicle";
 import { api } from "~/trpc/react";
@@ -26,7 +27,38 @@ export function VehicleDetailHeader({ vehicle, onEdit }: VehicleDetailHeaderProp
   const utils = api.useUtils();
   const [isDeclineDialogOpen, setIsDeclineDialogOpen] = useState(false);
 
-  // Approve vehicle mutation
+  // Check if make/model are unpublished
+  const makeIsUnpublished = (vehicle.make as unknown as { isPublished?: boolean })?.isPublished === false;
+  const modelIsUnpublished = (vehicle.model as unknown as { isPublished?: boolean })?.isPublished === false;
+  const hasUnpublishedMakeModel = makeIsUnpublished || modelIsUnpublished;
+
+  // Approve vehicle with make/model mutation
+  const approveWithMakeModelMutation = api.vehicle.approveVehicleWithMakeModel.useMutation({
+    onSuccess: (result) => {
+      const messages: string[] = [];
+      if (result.makeWasReused) {
+        messages.push("Make matched with existing published make");
+      }
+      if (result.modelWasReused) {
+        messages.push("Model matched with existing published model");
+      }
+      
+      toast.success("Vehicle approved", {
+        description: messages.length > 0 
+          ? messages.join(". ") + ". Vehicle has been published and owner notified."
+          : "Vehicle has been published and owner notified",
+      });
+      void utils.vehicle.getById.invalidate({ id: vehicle.id });
+      router.refresh();
+    },
+    onError: (error) => {
+      toast.error("Failed to approve vehicle", {
+        description: error.message,
+      });
+    },
+  });
+
+  // Approve vehicle mutation (simple)
   const approveMutation = api.vehicle.approveVehicle.useMutation({
     onSuccess: () => {
       toast.success("Vehicle approved", {
@@ -60,7 +92,28 @@ export function VehicleDetailHeader({ vehicle, onEdit }: VehicleDetailHeaderProp
   });
 
   const handleApprove = () => {
-    approveMutation.mutate({ vehicleId: vehicle.id });
+    if (hasUnpublishedMakeModel) {
+      // If make/model are unpublished, prompt admin to review them first
+      if (onEdit) {
+        toast.info("Please review make/model first", {
+          description: "This vehicle has user-created make/model that needs review",
+        });
+        onEdit();
+      }
+    } else {
+      // Use simple approval
+      approveMutation.mutate({ vehicleId: vehicle.id });
+    }
+  };
+
+  const handleApproveWithMakeModel = () => {
+    approveWithMakeModelMutation.mutate({
+      vehicleId: vehicle.id,
+      makeId: vehicle.makeId,
+      makeName: vehicle.make.name,
+      modelId: vehicle.modelId,
+      modelName: vehicle.model.name,
+    });
   };
 
   const handleDecline = (reason: string) => {
@@ -71,6 +124,7 @@ export function VehicleDetailHeader({ vehicle, onEdit }: VehicleDetailHeaderProp
   };
 
   const isInReview = vehicle.status === "IN_REVIEW";
+  const isApproving = approveMutation.isPending || approveWithMakeModelMutation.isPending;
 
   return (
     <>
@@ -90,9 +144,17 @@ export function VehicleDetailHeader({ vehicle, onEdit }: VehicleDetailHeaderProp
               </Button>
               <div className="h-6 w-px bg-border hidden sm:block" />
               <div className="min-w-0 flex-1">
-                <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-50 truncate">
-                  {vehicle.name}
-                </h1>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-50 truncate">
+                    {vehicle.name}
+                  </h1>
+                  {hasUnpublishedMakeModel && isInReview && (
+                    <Badge variant="outline" className="gap-1 border-yellow-500 text-yellow-600 dark:text-yellow-400 whitespace-nowrap">
+                      <AlertTriangle className="h-3 w-3" />
+                      <span className="hidden sm:inline">Review Make/Model</span>
+                    </Badge>
+                  )}
+                </div>
                 <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400 truncate">
                   {vehicle.make.name} {vehicle.model.name} • {vehicle.year}
                 </p>
@@ -103,15 +165,28 @@ export function VehicleDetailHeader({ vehicle, onEdit }: VehicleDetailHeaderProp
             <div className="flex items-center gap-2 flex-shrink-0 md:ml-4">
               {isInReview && (
                 <>
-                  <Button
-                    onClick={handleApprove}
-                    disabled={approveMutation.isPending}
-                    className="gap-2"
-                    size="sm"
-                  >
-                    <CheckCircle className="h-4 w-4" />
-                    {approveMutation.isPending ? "Approving..." : "Approve"}
-                  </Button>
+                  {hasUnpublishedMakeModel ? (
+                    <Button
+                      onClick={onEdit}
+                      disabled={isApproving}
+                      variant="outline"
+                      className="gap-2"
+                      size="sm"
+                    >
+                      <AlertTriangle className="h-4 w-4" />
+                      Review & Approve
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleApprove}
+                      disabled={isApproving}
+                      className="gap-2"
+                      size="sm"
+                    >
+                      <CheckCircle className="h-4 w-4" />
+                      {isApproving ? "Approving..." : "Approve"}
+                    </Button>
+                  )}
                   <Button
                     onClick={() => setIsDeclineDialogOpen(true)}
                     disabled={declineMutation.isPending}

@@ -20,8 +20,8 @@ export interface VehicleWithRelations {
   price: Prisma.Decimal | null;
   year: string;
   registration: string | null;
-  make: { id: string; name: string };
-  model: { id: string; name: string };
+  make: { id: string; name: string; isPublished?: boolean };
+  model: { id: string; name: string; isPublished?: boolean };
   owner: {
     id: string;
     email: string;
@@ -70,12 +70,14 @@ export class VehicleRepository extends BaseRepository {
             select: {
               id: true,
               name: true,
+              isPublished: true,
             },
           },
           model: {
             select: {
               id: true,
               name: true,
+              isPublished: true,
             },
           },
           owner: {

@@ -20,7 +20,10 @@ export class LookupRepository extends BaseRepository {
   async getAllMakes() {
     try {
       return await this.db.make.findMany({
-        where: { isActive: true },
+        where: { 
+          isActive: true,
+          isPublished: true, // Only show published makes to users
+        },
         orderBy: { name: "asc" },
         select: {
           id: true,
@@ -41,6 +44,7 @@ export class LookupRepository extends BaseRepository {
         where: {
           makeId,
           isActive: true,
+          isPublished: true, // Only show published models to users
         },
         orderBy: { name: "asc" },
         select: {

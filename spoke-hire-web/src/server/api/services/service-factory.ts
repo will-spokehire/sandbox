@@ -20,6 +20,7 @@ import { AuthService } from "./auth.service";
 import { MediaService } from "./media.service";
 import { EmailService } from "./email.service";
 import { AIVehicleGeneratorService } from "./ai-vehicle-generator.service";
+import { MakeModelApprovalService } from "./make-model-approval.service";
 import { VehicleRepository } from "../repositories/vehicle.repository";
 import { UserRepository } from "../repositories/user.repository";
 import { LookupRepository } from "../repositories/lookup.repository";
@@ -93,6 +94,13 @@ export class ServiceFactory {
    */
   static createAIVehicleGeneratorService(): AIVehicleGeneratorService {
     return new AIVehicleGeneratorService();
+  }
+
+  /**
+   * Create MakeModelApprovalService
+   */
+  static createMakeModelApprovalService(db: DbClient): MakeModelApprovalService {
+    return new MakeModelApprovalService(db);
   }
 
   /**

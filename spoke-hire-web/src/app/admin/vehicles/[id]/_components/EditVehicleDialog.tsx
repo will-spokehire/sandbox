@@ -5,7 +5,7 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, Pencil, AlertCircle } from "lucide-react";
+import { Loader2, Pencil, AlertCircle, CheckCircle, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import {
@@ -20,6 +20,7 @@ import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
+import { Badge } from "~/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -142,21 +143,46 @@ export function EditVehicleDialog({
     }
   ) as { data: ModelsByMake[] | undefined, isLoading: boolean };
 
-  // Convert models to combobox options
-  const modelOptions: ComboboxOption[] = React.useMemo(() => {
-    return models?.map((model) => ({
-      value: model.id,
-      label: model.name,
-    })) ?? [];
-  }, [models]);
-
   // Convert makes to combobox options
   const makeOptions: ComboboxOption[] = React.useMemo(() => {
-    return filterOptions?.makes.map((make) => ({
+    const options = filterOptions?.makes.map((make) => ({
       value: make.id,
       label: make.name,
     })) ?? [];
-  }, [filterOptions?.makes]);
+    
+    // Add the vehicle's current make if it's not in the list (unpublished)
+    const currentMakeInList = options.some(opt => opt.value === vehicle.makeId);
+    if (!currentMakeInList) {
+      options.unshift({
+        value: vehicle.makeId,
+        label: vehicle.make.name,
+      });
+    }
+    
+    return options;
+  }, [filterOptions?.makes, vehicle.makeId, vehicle.make.name]);
+
+  // Convert models to combobox options
+  const modelOptions: ComboboxOption[] = React.useMemo(() => {
+    const options = models?.map((model) => ({
+      value: model.id,
+      label: model.name,
+    })) ?? [];
+    
+    // Add the vehicle's current model if it's not in the list (unpublished)
+    // and if it belongs to the current make
+    if (vehicle.makeId === selectedMakeId) {
+      const currentModelInList = options.some(opt => opt.value === vehicle.modelId);
+      if (!currentModelInList) {
+        options.unshift({
+          value: vehicle.modelId,
+          label: vehicle.model.name,
+        });
+      }
+    }
+    
+    return options;
+  }, [models, vehicle.modelId, vehicle.model.name, vehicle.makeId, selectedMakeId]);
 
   // Update mutation
   const updateMutation = api.vehicle.update.useMutation({
@@ -190,6 +216,37 @@ export function EditVehicleDialog({
     },
   });
 
+  // Approve vehicle with make/model mutation
+  const approveWithMakeModelMutation = api.vehicle.approveVehicleWithMakeModel.useMutation({
+    onSuccess: (result) => {
+      const messages: string[] = [];
+      if (result.makeWasReused) {
+        messages.push("Make matched with existing published make");
+      }
+      if (result.modelWasReused) {
+        messages.push("Model matched with existing published model");
+      }
+      
+      toast.success("Vehicle approved and published", {
+        description: messages.length > 0 
+          ? messages.join(". ") + ". Owner has been notified."
+          : "Vehicle has been published and owner notified",
+      });
+      void utils.vehicle.getById.invalidate({ id: vehicle.id });
+      void utils.vehicle.list.invalidate();
+      void utils.vehicle.getFilterOptions.invalidate(); // Invalidate filter options
+      setRegistrationError(null);
+      onSuccess();
+      onOpenChange(false);
+      router.refresh();
+    },
+    onError: (error) => {
+      toast.error("Failed to approve vehicle", {
+        description: error.message,
+      });
+    },
+  });
+
   const onSubmit = (data: EditVehicleFormData) => {
     updateMutation.mutate({
       id: vehicle.id,
@@ -205,6 +262,18 @@ export function EditVehicleDialog({
     });
   };
 
+  const handleApproveAndPublish = () => {
+    const formData = form.getValues();
+    // Use the current form values for make/model
+    approveWithMakeModelMutation.mutate({
+      vehicleId: vehicle.id,
+      makeId: formData.makeId,
+      makeName: makeOptions.find(m => m.value === formData.makeId)?.label ?? formData.makeId,
+      modelId: formData.modelId,
+      modelName: modelOptions.find(m => m.value === formData.modelId)?.label ?? formData.modelId,
+    });
+  };
+
   // Handle make change
   const handleMakeChange = (makeId: string) => {
     setSelectedMakeId(makeId);
@@ -213,7 +282,13 @@ export function EditVehicleDialog({
     form.setValue("modelId", "");
   };
 
-  const isSubmitting = updateMutation.isPending;
+  // Check if make/model are unpublished
+  const makeIsUnpublished = (vehicle.make as unknown as { isPublished?: boolean })?.isPublished === false;
+  const modelIsUnpublished = (vehicle.model as unknown as { isPublished?: boolean })?.isPublished === false;
+  const hasUnpublishedMakeModel = makeIsUnpublished || modelIsUnpublished;
+  const isInReview = vehicle.status === "IN_REVIEW";
+
+  const isSubmitting = updateMutation.isPending || approveWithMakeModelMutation.isPending;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -224,6 +299,19 @@ export function EditVehicleDialog({
             Update vehicle information. All fields are optional except name, make, model, and year.
           </DialogDescription>
         </DialogHeader>
+
+        {/* Unpublished Make/Model Warning */}
+        {hasUnpublishedMakeModel && isInReview && (
+          <Alert className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
+            <AlertTriangle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+            <AlertTitle className="text-yellow-800 dark:text-yellow-300">User-Created {makeIsUnpublished && modelIsUnpublished ? "Make & Model" : makeIsUnpublished ? "Make" : "Model"}</AlertTitle>
+            <AlertDescription className="text-yellow-700 dark:text-yellow-400">
+              <p className="text-sm">
+                Edit the name below if needed, then click &quot;Approve & Publish&quot; to publish together.
+              </p>
+            </AlertDescription>
+          </Alert>
+        )}
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Basic Information */}
@@ -245,7 +333,14 @@ export function EditVehicleDialog({
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="make">Make *</Label>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="make">Make *</Label>
+                    {makeIsUnpublished && (
+                      <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-600 dark:text-yellow-400">
+                        Unpublished
+                      </Badge>
+                    )}
+                  </div>
                   <Combobox
                     options={makeOptions}
                     value={selectedMakeId}
@@ -258,10 +353,22 @@ export function EditVehicleDialog({
                   {form.formState.errors.makeId && (
                     <p className="text-sm text-red-500">{form.formState.errors.makeId.message}</p>
                   )}
+                  {makeIsUnpublished && (
+                    <p className="text-xs text-yellow-600 dark:text-yellow-400">
+                      Type to edit
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="model">Model *</Label>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="model">Model *</Label>
+                    {modelIsUnpublished && (
+                      <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-600 dark:text-yellow-400">
+                        Unpublished
+                      </Badge>
+                    )}
+                  </div>
                   <Combobox
                     options={modelOptions}
                     value={form.watch("modelId")}
@@ -275,7 +382,12 @@ export function EditVehicleDialog({
                   {form.formState.errors.modelId && (
                     <p className="text-sm text-red-500">{form.formState.errors.modelId.message}</p>
                   )}
-                  {!selectedMakeId && (
+                  {modelIsUnpublished && (
+                    <p className="text-xs text-yellow-600 dark:text-yellow-400">
+                      Type to edit
+                    </p>
+                  )}
+                  {!selectedMakeId && !modelIsUnpublished && (
                     <p className="text-xs text-muted-foreground">Select a make first</p>
                   )}
                 </div>
@@ -538,19 +650,58 @@ export function EditVehicleDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Save Changes
-                </>
-              )}
-            </Button>
+            {hasUnpublishedMakeModel && isInReview ? (
+              <>
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  variant="outline"
+                >
+                  {updateMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Save Only
+                    </>
+                  )}
+                </Button>
+                <Button 
+                  type="button" 
+                  onClick={handleApproveAndPublish}
+                  disabled={isSubmitting}
+                >
+                  {approveWithMakeModelMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Approving...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="mr-2 h-4 w-4" />
+                      Approve & Publish
+                    </>
+                  )}
+                </Button>
+              </>
+            ) : (
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Save Changes
+                  </>
+                )}
+              </Button>
+            )}
           </div>
         </form>
       </DialogContent>

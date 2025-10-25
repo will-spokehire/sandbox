@@ -158,6 +158,7 @@ model Make {
     description String?
     logoUrl     String?  // URL to make logo
     isActive    Boolean  @default(true)
+    isPublished Boolean  @default(true) // User-created makes start as unpublished
     
     // Relationships
     models      Model[]
@@ -165,6 +166,7 @@ model Make {
     
     @@index([slug])
     @@index([isActive])
+    @@index([isPublished])
 }
 
 // Vehicle Models Lookup Table
@@ -177,6 +179,7 @@ model Model {
     slug        String   // "3-series", "c-class", "camry"
     description String?
     isActive    Boolean  @default(true)
+    isPublished Boolean  @default(true) // User-created models start as unpublished
     
     // Relationships
     makeId      String
@@ -187,6 +190,7 @@ model Model {
     @@index([makeId])
     @@index([slug])
     @@index([isActive])
+    @@index([isPublished])
 }
 
 // Collections/Tags for filtering
