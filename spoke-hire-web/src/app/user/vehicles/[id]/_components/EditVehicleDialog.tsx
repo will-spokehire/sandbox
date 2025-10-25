@@ -276,6 +276,7 @@ export function EditVehicleDialog({
                   id="name"
                   {...form.register("name")}
                   placeholder="e.g., 2015 BMW 3 Series"
+                  disabled={true}
                 />
                 {form.formState.errors.name && (
                   <p className="text-sm text-red-500">{form.formState.errors.name.message}</p>
@@ -360,13 +361,24 @@ export function EditVehicleDialog({
                           size="sm"
                           onClick={() => router.push(`/user/vehicles/${registrationError.vehicleId}`)}
                         >
-                          View This Vehicle
+                          View Your Vehicle
                         </Button>
                       </div>
                     ) : (
-                      <p>
-                        This registration is already in use. If this is your vehicle, please contact support.
-                      </p>
+                      <div className="space-y-2">
+                        <p>
+                          This registration number is already associated with another vehicle in our system.
+                        </p>
+                        <p>
+                          If you believe this is an error, please contact our support team at{" "}
+                          <a 
+                            href="mailto:hello@spokehire.com" 
+                            className="underline font-medium hover:text-destructive-foreground"
+                          >
+                            hello@spokehire.com
+                          </a>
+                        </p>
+                      </div>
                     )}
                   </AlertDescription>
                 </Alert>
@@ -504,7 +516,7 @@ export function EditVehicleDialog({
             <h3 className="text-sm font-semibold">Pricing & Description</h3>
             
             <div className="space-y-2">
-              <Label htmlFor="price">Price (£)</Label>
+              <Label htmlFor="price">Agreed Value (£)</Label>
               <Input
                 id="price"
                 type="number"
@@ -527,33 +539,6 @@ export function EditVehicleDialog({
                 placeholder="Add vehicle description..."
                 rows={4}
               />
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Status */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold">Status</h3>
-            
-            <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
-              <Select
-                value={form.watch("status")}
-                onValueChange={(value) => form.setValue("status", value as UserVehicleStatus)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="DRAFT">Draft</SelectItem>
-                  <SelectItem value="PUBLISHED">Published</SelectItem>
-                  <SelectItem value="ARCHIVED">Archived</SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                Note: Admin reviews are required before vehicles can be published.
-              </p>
             </div>
           </div>
 

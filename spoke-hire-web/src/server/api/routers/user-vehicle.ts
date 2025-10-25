@@ -725,28 +725,63 @@ export const userVehicleRouter = createTRPCRouter({
       }
 
       // Check registration uniqueness
-      const existingVehicleWithReg = await ctx.db.vehicle.findFirst({
+      // Check 1: User's own vehicles (ALL statuses)
+      const ownVehicleWithReg = await ctx.db.vehicle.findFirst({
         where: {
           registration: {
             equals: input.registration,
             mode: "insensitive",
           },
+          ownerId: ctx.user.id,
         },
         select: {
           id: true,
           name: true,
           ownerId: true,
+          status: true,
         },
       });
 
-      if (existingVehicleWithReg) {
-        const isOwnVehicle = existingVehicleWithReg.ownerId === ctx.user.id;
+      if (ownVehicleWithReg) {
         throw new Error(
           JSON.stringify({
             code: "REGISTRATION_EXISTS",
-            vehicleId: existingVehicleWithReg.id,
-            vehicleName: existingVehicleWithReg.name,
-            isOwnVehicle,
+            vehicleId: ownVehicleWithReg.id,
+            vehicleName: ownVehicleWithReg.name,
+            isOwnVehicle: true,
+            status: ownVehicleWithReg.status,
+          })
+        );
+      }
+
+      // Check 2: Other users' vehicles (PUBLISHED only)
+      const otherVehicleWithReg = await ctx.db.vehicle.findFirst({
+        where: {
+          registration: {
+            equals: input.registration,
+            mode: "insensitive",
+          },
+          ownerId: {
+            not: ctx.user.id,
+          },
+          status: "PUBLISHED",
+        },
+        select: {
+          id: true,
+          name: true,
+          ownerId: true,
+          status: true,
+        },
+      });
+
+      if (otherVehicleWithReg) {
+        throw new Error(
+          JSON.stringify({
+            code: "REGISTRATION_EXISTS",
+            vehicleId: otherVehicleWithReg.id,
+            vehicleName: otherVehicleWithReg.name,
+            isOwnVehicle: false,
+            status: otherVehicleWithReg.status,
           })
         );
       }
@@ -932,46 +967,78 @@ export const userVehicleRouter = createTRPCRouter({
   checkRegistration: protectedProcedure
     .input(checkRegistrationInputSchema)
     .query(async ({ ctx, input }) => {
-      // Build where clause
-      const where: {
-        registration: {
-          equals: string;
-          mode: "insensitive";
-        };
-        id?: {
-          not: string;
-        };
+      // Check 1: User's own vehicles (ALL statuses)
+      const ownVehicleWhere: {
+        registration: { equals: string; mode: "insensitive" };
+        ownerId: string;
+        id?: { not: string };
       } = {
         registration: {
           equals: input.registration,
           mode: "insensitive",
         },
+        ownerId: ctx.user.id,
       };
 
       // Exclude specific vehicle if provided (for edit scenarios)
       if (input.excludeVehicleId) {
-        where.id = { not: input.excludeVehicleId };
+        ownVehicleWhere.id = { not: input.excludeVehicleId };
       }
 
-      // Find existing vehicle with this registration
-      const existingVehicle = await ctx.db.vehicle.findFirst({
-        where,
+      const ownVehicle = await ctx.db.vehicle.findFirst({
+        where: ownVehicleWhere,
         select: {
           id: true,
           name: true,
           ownerId: true,
           registration: true,
+          status: true,
         },
       });
 
-      if (existingVehicle) {
+      if (ownVehicle) {
         return {
           available: false,
           existingVehicle: {
-            id: existingVehicle.id,
-            name: existingVehicle.name,
-            ownerId: existingVehicle.ownerId,
-            isOwnVehicle: existingVehicle.ownerId === ctx.user.id,
+            id: ownVehicle.id,
+            name: ownVehicle.name,
+            ownerId: ownVehicle.ownerId,
+            isOwnVehicle: true,
+            status: ownVehicle.status,
+          },
+        };
+      }
+
+      // Check 2: Other users' vehicles (PUBLISHED only)
+      const otherVehicle = await ctx.db.vehicle.findFirst({
+        where: {
+          registration: {
+            equals: input.registration,
+            mode: "insensitive",
+          },
+          ownerId: {
+            not: ctx.user.id,
+          },
+          status: "PUBLISHED",
+        },
+        select: {
+          id: true,
+          name: true,
+          ownerId: true,
+          registration: true,
+          status: true,
+        },
+      });
+
+      if (otherVehicle) {
+        return {
+          available: false,
+          existingVehicle: {
+            id: otherVehicle.id,
+            name: otherVehicle.name,
+            ownerId: otherVehicle.ownerId,
+            isOwnVehicle: false,
+            status: otherVehicle.status,
           },
         };
       }

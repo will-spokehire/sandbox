@@ -325,9 +325,20 @@ export function EditVehicleDialog({
                         </Button>
                       </div>
                     ) : (
-                      <p>
-                        This registration is already in use by another owner. If this is incorrect, please investigate.
-                      </p>
+                      <div className="space-y-2">
+                        <p>
+                          This registration number is already associated with another vehicle owner.
+                        </p>
+                        <p>
+                          If you believe this is an error, please contact the vehicle owner or support at{" "}
+                          <a 
+                            href="mailto:hello@spokehire.com" 
+                            className="underline font-medium hover:text-destructive-foreground"
+                          >
+                            hello@spokehire.com
+                          </a>
+                        </p>
+                      </div>
                     )}
                   </AlertDescription>
                 </Alert>
@@ -465,7 +476,7 @@ export function EditVehicleDialog({
             <h3 className="text-sm font-semibold">Pricing & Description</h3>
             
             <div className="space-y-2">
-              <Label htmlFor="price">Price (£)</Label>
+              <Label htmlFor="price">Agreed Value (£)</Label>
               <Input
                 id="price"
                 type="number"

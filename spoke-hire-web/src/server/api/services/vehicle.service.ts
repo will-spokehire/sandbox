@@ -393,12 +393,14 @@ export class VehicleService {
 
     // Check registration uniqueness if registration is being updated
     if (data.registration !== undefined && data.registration !== null && data.registration !== exists.registration) {
-      const existingVehicleWithReg = await this.db.vehicle.findFirst({
+      // Check 1: Current owner's vehicles (ALL statuses)
+      const ownVehicleWithReg = await this.db.vehicle.findFirst({
         where: {
           registration: {
             equals: data.registration,
             mode: "insensitive" as const,
           },
+          ownerId: exists.ownerId,
           id: {
             not: id, // Exclude current vehicle
           },
@@ -407,17 +409,50 @@ export class VehicleService {
           id: true,
           name: true,
           ownerId: true,
+          status: true,
         },
       });
 
-      if (existingVehicleWithReg) {
-        const isOwnVehicle = existingVehicleWithReg.ownerId === exists.ownerId;
+      if (ownVehicleWithReg) {
         throw new Error(
           JSON.stringify({
             code: "REGISTRATION_EXISTS",
-            vehicleId: existingVehicleWithReg.id,
-            vehicleName: existingVehicleWithReg.name,
-            isOwnVehicle,
+            vehicleId: ownVehicleWithReg.id,
+            vehicleName: ownVehicleWithReg.name,
+            isOwnVehicle: true,
+            status: ownVehicleWithReg.status,
+          })
+        );
+      }
+
+      // Check 2: Other users' vehicles (PUBLISHED only)
+      const otherVehicleWithReg = await this.db.vehicle.findFirst({
+        where: {
+          registration: {
+            equals: data.registration,
+            mode: "insensitive" as const,
+          },
+          ownerId: {
+            not: exists.ownerId,
+          },
+          status: "PUBLISHED",
+        },
+        select: {
+          id: true,
+          name: true,
+          ownerId: true,
+          status: true,
+        },
+      });
+
+      if (otherVehicleWithReg) {
+        throw new Error(
+          JSON.stringify({
+            code: "REGISTRATION_EXISTS",
+            vehicleId: otherVehicleWithReg.id,
+            vehicleName: otherVehicleWithReg.name,
+            isOwnVehicle: false,
+            status: otherVehicleWithReg.status,
           })
         );
       }

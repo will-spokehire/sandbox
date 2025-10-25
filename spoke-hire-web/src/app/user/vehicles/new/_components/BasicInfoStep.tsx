@@ -285,7 +285,7 @@ export function BasicInfoStep({ onComplete, defaultValues, onValidationChange }:
                   />
                 </FormControl>
                 <FormDescription className="min-h-[20px]">
-                  UK vehicle registration number
+                  Vehicle registration number
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -327,7 +327,7 @@ export function BasicInfoStep({ onComplete, defaultValues, onValidationChange }:
             name="price"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Market Price (£)</FormLabel>
+                <FormLabel>Agreed Value (£)</FormLabel>
                 <FormControl>
                   <Input
                     type="text"
@@ -342,7 +342,7 @@ export function BasicInfoStep({ onComplete, defaultValues, onValidationChange }:
                   />
                 </FormControl>
                 <FormDescription className="min-h-[20px]">
-                  Estimated market price of your vehicle
+                  Estimated agreed value of your vehicle
                 </FormDescription>
                 <FormMessage />
               </FormItem>
