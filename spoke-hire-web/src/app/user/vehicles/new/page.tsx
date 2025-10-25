@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useRequireAuth } from "~/providers/auth-provider";
@@ -68,6 +68,9 @@ export default function AddVehiclePage() {
     vehicleName: string;
     isOwnVehicle: boolean;
   } | null>(null);
+  
+  // Track if profile was just completed to prevent re-initialization
+  const justCompletedProfileRef = useRef(false);
 
   // Fetch filter options for labels
   const { data: filterOptions } = api.userVehicle.getFilterOptions.useQuery();
@@ -127,6 +130,12 @@ export default function AddVehiclePage() {
   // Initialize wizard state on mount
   useEffect(() => {
     if (!user || isAuthLoading) return;
+
+    // Skip re-initialization if profile was just completed
+    if (justCompletedProfileRef.current) {
+      justCompletedProfileRef.current = false;
+      return;
+    }
 
     // Check if profile is complete
     const needsProfile = !isProfileComplete({
@@ -321,9 +330,14 @@ export default function AddVehiclePage() {
   };
 
   const handleProfileComplete = () => {
+    // Set flag to prevent re-initialization when user data refreshes
+    justCompletedProfileRef.current = true;
+    
     // Profile step handles its own submission and navigation
-    // Just move to next step
-    setCurrentStep(currentStep + 1);
+    // After profile completion, profileNeedsCompletion becomes false
+    // In that case, Basic Info is at step 0 (not step 1!)
+    // So explicitly navigate to step 0 to show Basic Info
+    setCurrentStep(0);
   };
 
   const handleBasicInfoComplete = (data: BasicInfoSubmitData) => {
