@@ -59,7 +59,7 @@ const updateMyVehicleInputSchema = z.object({
 const createMyVehicleInputSchema = z.object({
   makeId: z.string().min(1, "Make is required"),
   modelId: z.string().min(1, "Model is required"),
-  name: z.string().min(3, "Vehicle name must be at least 3 characters"),
+  name: z.string().optional(), // Optional - will be auto-generated from year, make, model
   year: z.string().min(1, "Year is required"),
   registration: z.string().min(1, "Registration is required"),
   price: z.number().min(1, "Agreed value is required and must be greater than 0"),
@@ -499,6 +499,19 @@ export const userVehicleRouter = createTRPCRouter({
         (data.modelId && finalModelId !== vehicle.modelId) ||
         (data.year && data.year !== vehicle.year);
 
+      console.log('🔍 USER UPDATE - Name generation check:', {
+        'data.name': data.name,
+        'data.makeId': data.makeId,
+        'data.modelId': data.modelId,
+        'data.year': data.year,
+        'vehicle.makeId': vehicle.makeId,
+        'vehicle.modelId': vehicle.modelId,
+        'vehicle.year': vehicle.year,
+        'finalMakeId': finalMakeId,
+        'finalModelId': finalModelId,
+        'didMakeModelYearChange': didMakeModelYearChange,
+      });
+
       if (didMakeModelYearChange) {
         // Fetch the names to generate new vehicle name
         const make = await ctx.db.make.findUnique({
@@ -515,6 +528,13 @@ export const userVehicleRouter = createTRPCRouter({
         
         if (make && model) {
           finalName = generateVehicleName(year, make.name, model.name);
+          console.log('✅ USER UPDATE - Generated new name:', {
+            year,
+            'make.name': make.name,
+            'model.name': model.name,
+            'old finalName': data.name,
+            'new finalName': finalName,
+          });
         }
       }
 
@@ -823,10 +843,31 @@ export const userVehicleRouter = createTRPCRouter({
         );
       }
 
+      // Auto-generate vehicle name if not provided
+      let finalName = input.name;
+      if (!finalName) {
+        // Fetch make and model names to generate vehicle name
+        const make = await ctx.db.make.findUnique({
+          where: { id: finalMakeId },
+          select: { name: true },
+        });
+        
+        const model = await ctx.db.model.findUnique({
+          where: { id: finalModelId },
+          select: { name: true },
+        });
+        
+        if (make && model) {
+          finalName = generateVehicleName(input.year, make.name, model.name);
+        } else {
+          throw new Error("Unable to generate vehicle name - make or model not found");
+        }
+      }
+
       // Create the vehicle
       const vehicle = await ctx.db.vehicle.create({
         data: {
-          name: input.name,
+          name: finalName,
           makeId: finalMakeId,
           modelId: finalModelId,
           year: input.year,

@@ -293,10 +293,13 @@ export class VehicleService {
       throw new VehicleNotFoundError(id);
     }
 
-    // Helper function to check if a string is a UUID
-    const isUUID = (str: string): boolean => {
+    // Helper function to check if a string is an ID (UUID or cuid format)
+    const isId = (str: string): boolean => {
+      // Check for UUID format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      return uuidRegex.test(str);
+      // Check for cuid format: starts with 'c' followed by 24 alphanumeric chars (25 total)
+      const cuidRegex = /^c[a-z0-9]{24}$/i;
+      return uuidRegex.test(str) || cuidRegex.test(str);
     };
 
     // Helper function to generate slug from name
@@ -311,7 +314,7 @@ export class VehicleService {
 
     // Process makeId - create new make if string name provided
     let finalMakeId = data.makeId ?? exists.makeId;
-    if (data.makeId && !isUUID(data.makeId)) {
+    if (data.makeId && !isId(data.makeId)) {
       // User provided a make name, not an ID - create or find make
       const makeName = data.makeId.trim();
       
@@ -345,7 +348,7 @@ export class VehicleService {
 
     // Process modelId - create new model if string name provided
     let finalModelId = data.modelId ?? exists.modelId;
-    if (data.modelId && !isUUID(data.modelId)) {
+    if (data.modelId && !isId(data.modelId)) {
       // User provided a model name, not an ID - create or find model
       const modelName = data.modelId.trim();
       
