@@ -57,7 +57,17 @@
     "supabase:reset": "npx supabase db reset",
     "supabase:status": "npx supabase status",
     "seed-lookup-tables": "tsx scripts/seed-lookup-tables.ts",
-    "local:setup": "tsx scripts/setup-local-dev.ts"
+    "db:setup": "tsx scripts/setup-database.ts",
+    "db:setup:local": "tsx scripts/setup-database.ts --local",
+    "db:setup:preview": "tsx scripts/setup-database.ts",
+    "sync:env:preview": "./scripts/sync-env-to-vercel.sh .env.preview preview",
+    "sync:env:production": "./scripts/sync-env-to-vercel.sh .env.production production",
+    "db:verify": "tsx scripts/verify-preview-database.ts",
+    "local:setup": "tsx scripts/setup-database.ts --local",
+    "preview:db:setup": "tsx scripts/setup-database.ts",
+    "preview:db:verify": "tsx scripts/verify-preview-database.ts",
+    "export-production-data": "tsx scripts/export-production-data.ts",
+    "import-preview-data": "tsx scripts/import-preview-data.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.23",

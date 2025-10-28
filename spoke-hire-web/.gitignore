@@ -42,6 +42,9 @@ yarn-error.log*
 *.sql
 *.dump
 
+# migration data 
+/data/migration/
+
 # supabase local
 /supabase/.branches
 /supabase/.temp
