@@ -23,11 +23,19 @@ const config = {
         hostname: "static.wixstatic.com",
         pathname: "/media/**",
       },
+      // Production Supabase
       {
         protocol: "https",
         hostname: "fowkrmwxgvmjbdzgrsfn.supabase.co",
         pathname: "/storage/v1/object/public/**",
       },
+      // Preview Supabase
+      {
+        protocol: "https",
+        hostname: "lvaehnoqdzieersmujhb.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
+      // Local Supabase (Docker)
       {
         protocol: "http",
         hostname: "127.0.0.1",
