@@ -53,19 +53,19 @@ export class AIVehicleGeneratorService {
    * Generate SEO-optimized vehicle description
    */
   async generateVehicleDescription(data: VehicleGenerationData): Promise<string> {
-    const prompt = `Role: You are an expert copywriter specializing in creating compelling, user-friendly, and SEO-optimized descriptions for a classic car hire company that caters to the film, TV, and photography industries.
+    const prompt = `Role: You are an expert copywriter specializing in creating compelling, user-friendly, and SEO-optimized descriptions for a classic car hire company. The vehicles are hired for various purposes including film and TV productions, weddings, special events, photography shoots, and personal driving experiences.
 
-Objective: Your goal is to write a description that inspires directors and producers to choose this specific vehicle for their project. The description should be evocative and focus on the car's on-screen character and visual appeal.
+Objective: Your goal is to write a description that inspires potential hirers to choose this specific vehicle. The description should be evocative and focus on the car's character, visual appeal, and the experience of driving or being seen in it.
 
 Instructions: Based on the vehicle details provided below, generate a complete web page description using the following simplified structure:
 
-SEO-Optimized Title: Create a concise and keyword-rich title. Use the format: [Year] [Make] [Model] for Film & TV Hire | [Location]
+SEO-Optimized Title: Create a concise and keyword-rich title. Use the format: [Year] [Make] [Model] | [Location]
 
-Evocative Opening Paragraph: Write a short, captivating introduction (2-3 sentences) that immediately establishes the car's character, era, and on-screen appeal.
+Evocative Opening Paragraph: Write a short, captivating introduction (2-3 sentences) that immediately establishes the car's character, era, and appeal.
 
-Detailed 'On-Screen Persona' Description: Expand on the opening. Describe the car's visual characteristics and what makes it perfect for filming. Weave in key details like its colour, distinctive features, and the overall 'vibe' it projects to create a rich picture for the reader.
+Detailed Description: Expand on the opening. Describe the car's visual characteristics and what makes it special. Weave in key details like its colour, distinctive features, and the overall 'vibe' it projects. Consider various use cases such as film and TV work, weddings, special occasions, photo shoots, and personal driving experiences. Focus on the experience and emotion of being in or around this vehicle.
 
-DO NOT include a separate "Location:" section or "Call to Action" section at the end. End the description naturally after the detailed on-screen persona description.
+DO NOT include a separate "Location:" section or "Call to Action" section at the end. End the description naturally after the detailed description.
 
 Vehicle Details to Use:
 
@@ -93,7 +93,7 @@ Return ONLY the description content (starting with the SEO-Optimized Title), not
     } catch (error) {
       console.error("Failed to generate vehicle description:", error);
       // Fallback to basic description
-      return `${data.year} ${data.make} ${data.model} available for film, TV, and photography hire in ${data.location}. This ${data.exteriorColour} vehicle features a ${data.gearbox} gearbox, ${data.steering} steering, and ${data.numberOfSeats} seats. ${data.isRoadLegal ? "Road legal and ready for your production." : "Perfect for studio or controlled environment shoots."} Contact us for availability and pricing.`;
+      return `${data.year} ${data.make} ${data.model} available for hire in ${data.location}. This ${data.exteriorColour} vehicle features a ${data.gearbox} gearbox, ${data.steering} steering, and ${data.numberOfSeats} seats. ${data.isRoadLegal ? "Road legal and ready for any occasion." : "Perfect for studio, controlled environment shoots, or static displays."} Contact us for availability and pricing.`;
     }
   }
 

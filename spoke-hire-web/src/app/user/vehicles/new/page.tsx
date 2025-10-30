@@ -301,13 +301,13 @@ export default function AddVehiclePage() {
         { number: 0, title: "Profile", description: "Your details" },
         { number: 1, title: "Basic Info", description: "Vehicle basics" },
         { number: 2, title: "Technical", description: "Specifications" },
-        { number: 3, title: "Details", description: "Name & tags" },
+        { number: 3, title: "Listing", description: "Name & tags" },
         { number: 4, title: "Photos", description: "Add images" },
       ]
     : [
         { number: 0, title: "Basic Info", description: "Vehicle basics" },
         { number: 1, title: "Technical", description: "Specifications" },
-        { number: 2, title: "Details", description: "Name & tags" },
+        { number: 2, title: "Listing", description: "Name & tags" },
         { number: 3, title: "Photos", description: "Add images" },
       ];
 

@@ -281,7 +281,7 @@ export function VehicleDetailsStep({
                   </div>
                 </FormControl>
                 <FormDescription className="min-h-[20px] text-xs md:text-sm">
-                  Optional: Select one or more collections to categorize your vehicle
+                  Select one or more collections to help users find your vehicle
                 </FormDescription>
                 <FormMessage />
               </FormItem>
