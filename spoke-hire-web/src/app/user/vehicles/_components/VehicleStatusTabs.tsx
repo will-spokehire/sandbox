@@ -27,20 +27,22 @@ export function VehicleStatusTabs({
 }: VehicleStatusTabsProps) {
   return (
     <div className="flex gap-2">
-      <Button
-        variant={activeStatus === 'ALL_ACTIVE' ? 'default' : 'outline'}
-        onClick={() => onStatusChange('ALL_ACTIVE')}
-        size="sm"
-      >
-        Active {counts && `(${counts.total})`}
-      </Button>
+      {counts && counts.total > 0 && (
+        <Button
+          variant={activeStatus === 'ALL_ACTIVE' ? 'default' : 'outline'}
+          onClick={() => onStatusChange('ALL_ACTIVE')}
+          size="sm"
+        >
+          Registered {`(${counts.total})`}
+        </Button>
+      )}
       {counts && counts.archived > 0 && (
         <Button
           variant={activeStatus === 'ARCHIVED' ? 'default' : 'outline'}
           onClick={() => onStatusChange('ARCHIVED')}
           size="sm"
         >
-          Archived {counts && `(${counts.archived})`}
+          Archived {`(${counts.archived})`}
         </Button>
       )}
     </div>
