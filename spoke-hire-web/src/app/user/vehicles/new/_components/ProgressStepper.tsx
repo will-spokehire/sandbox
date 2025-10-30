@@ -24,16 +24,16 @@ interface ProgressStepperProps {
 export function ProgressStepper({ steps, currentStep }: ProgressStepperProps) {
   return (
     <div className="w-full">
-      {/* Desktop view: Horizontal stepper */}
-      <div className="hidden md:block">
-        <div className="flex items-center justify-between">
+      {/* Desktop view: Horizontal stepper - Centralized */}
+      <div className="hidden md:flex md:justify-center">
+        <div className="flex items-center">
           {steps.map((step, index) => {
             const isCompleted = currentStep > step.number;
             const isCurrent = currentStep === step.number;
             const isUpcoming = currentStep < step.number;
 
             return (
-              <div key={step.number} className="flex items-center flex-1">
+              <div key={step.number} className="flex items-center">
                 {/* Step indicator */}
                 <div className="flex flex-col items-center">
                   <div
@@ -50,7 +50,7 @@ export function ProgressStepper({ steps, currentStep }: ProgressStepperProps) {
                       <span>{step.number + 1}</span>
                     )}
                   </div>
-                  <div className="mt-2 text-center">
+                  <div className="mt-2 text-center min-w-[80px]">
                     <p
                       className={cn(
                         "text-sm font-medium",
@@ -70,7 +70,7 @@ export function ProgressStepper({ steps, currentStep }: ProgressStepperProps) {
 
                 {/* Connector line */}
                 {index < steps.length - 1 && (
-                  <div className="flex-1 h-0.5 mx-4 mb-8">
+                  <div className="w-16 h-0.5 mx-4 mb-8">
                     <div
                       className={cn(
                         "h-full transition-colors",
