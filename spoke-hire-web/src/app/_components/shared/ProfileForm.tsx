@@ -268,13 +268,13 @@ export function ProfileForm({
               <FormLabel>Phone Number *</FormLabel>
               <FormControl>
                 <PhoneInput
-                  placeholder="Enter phone number"
+                  placeholder="7123 456789"
                   value={field.value}
                   onChange={field.onChange}
                 />
               </FormControl>
               <FormDescription>
-                We&apos;ll use this to contact you about opportunities
+                For UK numbers, enter without the leading 0 (e.g., 7123 456789). We&apos;ll use this to contact you about opportunities.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -337,7 +337,7 @@ export function ProfileForm({
             name="street"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Street Address</FormLabel>
+                <FormLabel>Street Address *</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="123 High Street"
@@ -371,7 +371,7 @@ export function ProfileForm({
               name="county"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>County</FormLabel>
+                  <FormLabel>County *</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Greater London"
@@ -391,7 +391,7 @@ export function ProfileForm({
             name="countryId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Country</FormLabel>
+                <FormLabel>Country *</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   value={field.value ?? ""}
