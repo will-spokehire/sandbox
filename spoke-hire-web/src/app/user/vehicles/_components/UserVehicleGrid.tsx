@@ -1,6 +1,8 @@
 'use client';
 
+import Link from 'next/link';
 import { UserVehicleCard } from './UserVehicleCard';
+import { Button } from '~/components/ui/button';
 import type { VehicleStatus } from '@prisma/client';
 
 interface VehicleMedia {
@@ -62,9 +64,28 @@ export function UserVehicleGrid({ vehicles }: UserVehicleGridProps) {
         <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-50 mb-2">
           No vehicles yet
         </h3>
-        <p className="text-slate-600 dark:text-slate-400 max-w-md mx-auto">
-          You don't have any vehicles listed yet. Contact us to add your vehicles to SpokeHire.
+        <p className="text-slate-600 dark:text-slate-400 max-w-md mx-auto mb-6">
+          You don't have any vehicles listed yet.
         </p>
+        <Button asChild>
+          <Link href="/user/vehicles/new">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            Add Your First Vehicle
+          </Link>
+        </Button>
       </div>
     );
   }
