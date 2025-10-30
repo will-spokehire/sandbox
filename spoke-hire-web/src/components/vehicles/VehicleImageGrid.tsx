@@ -5,6 +5,7 @@
  * 
  * Reusable grid for managing vehicle images with:
  * - Drag-and-drop reordering (auto-saved)
+ * - Touch support for mobile (long-press to drag)
  * - Delete functionality with confirmation
  * - Primary badge on first image
  * - Order indicators
@@ -18,6 +19,7 @@ import {
   closestCenter,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
@@ -66,8 +68,11 @@ function SortableImageCard({
     <div
       ref={setNodeRef}
       style={style}
+      {...attributes}
+      {...listeners}
       className={cn(
-        "group relative aspect-[4/3] overflow-hidden rounded-lg border bg-muted",
+        "group relative aspect-[4/3] overflow-hidden rounded-lg border bg-muted touch-none",
+        !disabled && "cursor-grab active:cursor-grabbing",
         isDragging && "z-50 opacity-50"
       )}
     >
@@ -76,26 +81,22 @@ function SortableImageCard({
         src={image.url}
         alt={`Vehicle image ${image.order}`}
         fill
-        className="object-cover"
+        className="object-cover pointer-events-none"
         sizes="(max-width: 768px) 50vw, 33vw"
       />
 
       {/* Primary Badge */}
       {image.isPrimary && (
-        <div className="absolute top-2 left-2 z-10">
+        <div className="absolute top-2 left-2 z-10 pointer-events-none">
           <Badge variant="default" className="bg-primary text-primary-foreground">
             Primary
           </Badge>
         </div>
       )}
 
-      {/* Drag Handle - Always visible on mobile, hover on desktop */}
+      {/* Drag Indicator - Visual hint that item is draggable */}
       {!disabled && (
-        <div
-          {...attributes}
-          {...listeners}
-          className="absolute top-2 right-2 z-10 cursor-move rounded bg-background/80 p-1.5 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100"
-        >
+        <div className="absolute top-2 right-2 z-10 pointer-events-none rounded bg-background/80 p-1.5 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
           <GripVertical className="h-5 w-5" />
         </div>
       )}
@@ -103,7 +104,10 @@ function SortableImageCard({
       {/* Delete Button - Always visible on mobile, hover on desktop */}
       {!disabled && (
         <button
-          onClick={() => onDelete(image.id)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(image.id);
+          }}
           className="absolute bottom-2 right-2 z-10 rounded bg-destructive p-2 text-destructive-foreground opacity-100 transition-opacity hover:bg-destructive/90 md:opacity-0 md:group-hover:opacity-100"
           aria-label="Delete image"
         >
@@ -112,7 +116,7 @@ function SortableImageCard({
       )}
 
       {/* Order Badge */}
-      <div className="absolute bottom-2 left-2 z-10 rounded bg-background/80 px-2 py-1 text-xs font-medium">
+      <div className="absolute bottom-2 left-2 z-10 rounded bg-background/80 px-2 py-1 text-xs font-medium pointer-events-none">
         {image.order}
       </div>
     </div>
@@ -156,9 +160,16 @@ export function VehicleImageGrid({
     },
   });
 
-  // Drag and drop sensors
+  // Drag and drop sensors - optimized for both desktop and mobile
   const sensors = useSensors(
     useSensor(PointerSensor),
+    useSensor(TouchSensor, {
+      // Long press to activate drag on mobile (prevents conflict with scrolling)
+      activationConstraint: {
+        delay: 250,      // 250ms press before drag activates
+        tolerance: 5,    // Allow 5px movement for scrolling
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
