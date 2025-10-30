@@ -42,11 +42,19 @@ export function VehicleBasicInfo({ vehicle, onEditClick }: VehicleBasicInfoProps
     },
     {
       label: "Hourly Rate",
-      value: formatPricingRate(vehicle.hourlyRate?.toNumber()),
+      value: formatPricingRate(
+        vehicle.hourlyRate 
+          ? (typeof vehicle.hourlyRate === 'number' ? vehicle.hourlyRate : vehicle.hourlyRate.toNumber())
+          : undefined
+      ),
     },
     {
       label: "Daily Rate",
-      value: formatPricingRate(vehicle.dailyRate?.toNumber()),
+      value: formatPricingRate(
+        vehicle.dailyRate 
+          ? (typeof vehicle.dailyRate === 'number' ? vehicle.dailyRate : vehicle.dailyRate.toNumber())
+          : undefined
+      ),
     },
     {
       label: "Engine Capacity",

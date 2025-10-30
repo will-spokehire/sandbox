@@ -172,7 +172,7 @@ export function VehicleBasicInfoFields({
             name="registration"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Registration</FormLabel>
+                <FormLabel>Registration *</FormLabel>
                 <FormControl>
                   <Input 
                     placeholder="AB12CDE" 

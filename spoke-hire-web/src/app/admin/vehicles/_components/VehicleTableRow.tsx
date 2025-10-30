@@ -138,14 +138,26 @@ export const VehicleTableRow = memo(function VehicleTableRow({
       {/* Hourly Rate */}
       <TableCell>
         <Link href={`/admin/vehicles/${vehicle.id}`} className="block">
-          <span className="text-sm">{formatPricingRate(vehicle.hourlyRate?.toNumber())}</span>
+          <span className="text-sm">
+            {formatPricingRate(
+              vehicle.hourlyRate 
+                ? (typeof vehicle.hourlyRate === 'number' ? vehicle.hourlyRate : vehicle.hourlyRate.toNumber())
+                : undefined
+            )}
+          </span>
         </Link>
       </TableCell>
 
       {/* Daily Rate */}
       <TableCell>
         <Link href={`/admin/vehicles/${vehicle.id}`} className="block">
-          <span className="text-sm">{formatPricingRate(vehicle.dailyRate?.toNumber())}</span>
+          <span className="text-sm">
+            {formatPricingRate(
+              vehicle.dailyRate 
+                ? (typeof vehicle.dailyRate === 'number' ? vehicle.dailyRate : vehicle.dailyRate.toNumber())
+                : undefined
+            )}
+          </span>
         </Link>
       </TableCell>
 

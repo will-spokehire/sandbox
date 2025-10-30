@@ -15,6 +15,33 @@ interface UserVehicleDetailsProps {
 }
 
 /**
+ * Helper function to safely convert Decimal or number to number
+ */
+function toNumber(value: unknown): number | undefined {
+  if (value == null) return undefined;
+  if (typeof value === 'number') return value;
+  // Check if it's a Prisma Decimal object
+  if (typeof value === 'object' && value !== null) {
+    // Prisma Decimal objects have a toNumber method
+    if ('toNumber' in value && typeof (value as any).toNumber === 'function') {
+      return (value as any).toNumber();
+    }
+    // Sometimes Prisma Decimals are serialized as strings
+    if ('toString' in value && typeof (value as any).toString === 'function') {
+      const strVal = (value as any).toString();
+      const numVal = parseFloat(strVal);
+      if (!isNaN(numVal)) return numVal;
+    }
+  }
+  // Try to parse as number if it's a string
+  if (typeof value === 'string') {
+    const parsed = parseFloat(value);
+    if (!isNaN(parsed)) return parsed;
+  }
+  return undefined;
+}
+
+/**
  * User Vehicle Details Card
  * 
  * Simplified vehicle details for owners - no admin-specific fields
@@ -43,11 +70,11 @@ export function UserVehicleDetails({ vehicle, onEditClick }: UserVehicleDetailsP
     },
     {
       label: "Hourly Rate",
-      value: formatPricingRate(vehicle.hourlyRate?.toNumber()),
+      value: formatPricingRate(toNumber(vehicle.hourlyRate)),
     },
     {
       label: "Daily Rate",
-      value: formatPricingRate(vehicle.dailyRate?.toNumber()),
+      value: formatPricingRate(toNumber(vehicle.dailyRate)),
     },
     {
       label: "Engine Capacity",

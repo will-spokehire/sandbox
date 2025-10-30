@@ -2,6 +2,18 @@ import type { VehicleDetail } from "~/types/vehicle";
 import type { VehicleFormData, RegistrationError } from "~/types/vehicle-form";
 
 /**
+ * Helper to safely convert Decimal or number to number
+ */
+function toNumber(value: unknown): number | null {
+  if (value == null) return null;
+  if (typeof value === 'number') return value;
+  if (typeof value === 'object' && value !== null && 'toNumber' in value && typeof value.toNumber === 'function') {
+    return (value as { toNumber: () => number }).toNumber();
+  }
+  return null;
+}
+
+/**
  * Get default form values from a vehicle
  */
 export function getFormDefaults(vehicle: VehicleDetail): VehicleFormData {
@@ -9,8 +21,8 @@ export function getFormDefaults(vehicle: VehicleDetail): VehicleFormData {
     name: vehicle.name,
     status: vehicle.status,
     price: vehicle.price ? Number(vehicle.price) : 0,
-    hourlyRate: vehicle.hourlyRate ? Number(vehicle.hourlyRate) : null,
-    dailyRate: vehicle.dailyRate ? Number(vehicle.dailyRate) : null,
+    hourlyRate: toNumber(vehicle.hourlyRate),
+    dailyRate: toNumber(vehicle.dailyRate),
     year: vehicle.year,
     registration: vehicle.registration ?? "",
     makeId: vehicle.makeId,
@@ -37,6 +49,9 @@ export function transformFormData(
   return {
     id: vehicleId,
     ...data,
+    // Ensure null values are properly handled
+    hourlyRate: data.hourlyRate === null ? null : data.hourlyRate,
+    dailyRate: data.dailyRate === null ? null : data.dailyRate,
     registration: data.registration || null,
     steeringId: data.steeringId || null,
     gearbox: data.gearbox || null,

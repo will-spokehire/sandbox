@@ -3,6 +3,7 @@
 import { Input } from "~/components/ui/input";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Label } from "~/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -16,8 +17,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "~/components/ui/form";
-import { VEHICLE_COLORS, GEARBOX_TYPES } from "~/lib/constants/vehicle";
+import { VEHICLE_COLORS, GEARBOX_TYPES, VEHICLE_CONDITIONS } from "~/lib/constants/vehicle";
 import type { FormFieldComponentProps } from "~/types/vehicle-form";
 
 export function VehicleSpecificationFields({
@@ -35,7 +37,7 @@ export function VehicleSpecificationFields({
           name="engineCapacity"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Engine Capacity (CC)</FormLabel>
+              <FormLabel>Engine Capacity (CC) *</FormLabel>
               <FormControl>
                 <Input
                   type="number"
@@ -55,7 +57,7 @@ export function VehicleSpecificationFields({
           name="numberOfSeats"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Number of Seats</FormLabel>
+              <FormLabel>Number of Seats *</FormLabel>
               <FormControl>
                 <Input
                   type="number"
@@ -77,14 +79,14 @@ export function VehicleSpecificationFields({
           name="steeringId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Steering</FormLabel>
+              <FormLabel>Steering *</FormLabel>
               <Select
                 value={field.value ?? undefined}
                 onValueChange={field.onChange}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select steering (optional)" />
+                    <SelectValue placeholder="Select steering" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -106,14 +108,14 @@ export function VehicleSpecificationFields({
           name="gearbox"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Gearbox</FormLabel>
+              <FormLabel>Gearbox *</FormLabel>
               <Select
                 value={field.value ?? undefined}
                 onValueChange={field.onChange}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select gearbox (optional)" />
+                    <SelectValue placeholder="Select gearbox" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -137,14 +139,14 @@ export function VehicleSpecificationFields({
           name="exteriorColour"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Exterior Colour</FormLabel>
+              <FormLabel>Exterior Colour *</FormLabel>
               <Select
                 value={field.value ?? undefined}
                 onValueChange={field.onChange}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select colour (optional)" />
+                    <SelectValue placeholder="Select colour" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -166,14 +168,14 @@ export function VehicleSpecificationFields({
           name="interiorColour"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Interior Colour</FormLabel>
+              <FormLabel>Interior Colour *</FormLabel>
               <Select
                 value={field.value ?? undefined}
                 onValueChange={field.onChange}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select colour (optional)" />
+                    <SelectValue placeholder="Select colour" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -189,6 +191,43 @@ export function VehicleSpecificationFields({
           )}
         />
       </div>
+
+      {/* Condition */}
+      <FormField
+        control={form.control}
+        name="condition"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Condition *</FormLabel>
+            <FormControl>
+              <RadioGroup
+                onValueChange={field.onChange}
+                value={field.value ?? undefined}
+                className="flex flex-wrap gap-2"
+              >
+                {VEHICLE_CONDITIONS.map((condition) => (
+                  <label
+                    key={condition}
+                    className="cursor-pointer"
+                  >
+                    <RadioGroupItem
+                      value={condition}
+                      className="sr-only peer"
+                    />
+                    <div className="px-3 md:px-4 py-2 rounded-md border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground transition-colors text-sm">
+                      {condition}
+                    </div>
+                  </label>
+                ))}
+              </RadioGroup>
+            </FormControl>
+            <FormDescription className="text-xs">
+              Current physical condition of the vehicle
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
       {/* Road Legal Checkbox */}
       <FormField

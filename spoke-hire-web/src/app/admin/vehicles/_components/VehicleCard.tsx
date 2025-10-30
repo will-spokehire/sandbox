@@ -209,13 +209,21 @@ export const VehicleCard = memo(function VehicleCard({
             <div>
               <span className="text-muted-foreground text-xs">Hourly Rate</span>
               <p className="font-medium text-xs mt-0.5">
-                {formatPricingRate(vehicle.hourlyRate?.toNumber())}
+                {formatPricingRate(
+                  vehicle.hourlyRate 
+                    ? (typeof vehicle.hourlyRate === 'number' ? vehicle.hourlyRate : vehicle.hourlyRate.toNumber())
+                    : undefined
+                )}
               </p>
             </div>
             <div className="text-right">
               <span className="text-muted-foreground text-xs">Daily Rate</span>
               <p className="font-medium text-xs mt-0.5">
-                {formatPricingRate(vehicle.dailyRate?.toNumber())}
+                {formatPricingRate(
+                  vehicle.dailyRate 
+                    ? (typeof vehicle.dailyRate === 'number' ? vehicle.dailyRate : vehicle.dailyRate.toNumber())
+                    : undefined
+                )}
               </p>
             </div>
           </div>

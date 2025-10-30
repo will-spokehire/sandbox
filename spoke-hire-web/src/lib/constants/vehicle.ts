@@ -64,3 +64,16 @@ export const GEARBOX_TYPES = [
 
 export type GearboxType = typeof GEARBOX_TYPES[number];
 
+/**
+ * Standard vehicle condition options
+ */
+export const VEHICLE_CONDITIONS = [
+  "Excellent",
+  "Very Good",
+  "Good",
+  "Fair",
+  "Restoration",
+] as const;
+
+export type VehicleCondition = typeof VEHICLE_CONDITIONS[number];
+

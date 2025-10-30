@@ -18,7 +18,7 @@ import type { FilterOptions, ModelsByMake } from "~/types/vehicle";
 const USER_VEHICLE_STATUSES = ['DRAFT', 'IN_REVIEW', 'PUBLISHED', 'ARCHIVED'] as const;
 type UserVehicleStatus = typeof USER_VEHICLE_STATUSES[number];
 
-// Validation schema matching backend - users can view/edit IN_REVIEW vehicles
+// Validation schema matching vehicle creation form - users can view/edit IN_REVIEW vehicles
 const editVehicleSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
   status: z.enum(USER_VEHICLE_STATUSES),
@@ -42,21 +42,20 @@ const editVehicleSchema = z.object({
       })
     ),
   registration: z.string()
-    .nullable()
-    .optional()
+    .min(1, "Registration is required")
     .refine(
-      (val) => !val || /^[A-Z0-9]+$/.test(val),
+      (val) => /^[A-Z0-9]+$/.test(val),
       "Registration must contain only uppercase letters and numbers"
     ),
   makeId: z.string().min(1, "Make is required"),
   modelId: z.string().min(1, "Model is required"),
-  engineCapacity: z.number().min(0).nullable().optional(),
-  numberOfSeats: z.number().min(1).max(10).nullable().optional(),
-  steeringId: z.string().nullable().optional(),
-  gearbox: z.string().nullable().optional(),
-  exteriorColour: z.string().nullable().optional(),
-  interiorColour: z.string().nullable().optional(),
-  condition: z.string().nullable().optional(),
+  engineCapacity: z.number().min(1, "Engine capacity is required"),
+  numberOfSeats: z.number().min(1).max(20, "Number of seats must be between 1 and 20"),
+  steeringId: z.string().min(1, "Steering type is required"),
+  gearbox: z.string().min(1, "Gearbox is required"),
+  exteriorColour: z.string().min(1, "Exterior colour is required"),
+  interiorColour: z.string().min(1, "Interior colour is required"),
+  condition: z.string().min(1, "Condition is required"),
   isRoadLegal: z.boolean(),
   description: z.string().nullable().optional(),
 });
