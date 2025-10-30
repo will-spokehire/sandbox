@@ -1,19 +1,19 @@
 "use client";
 
-import { useCallback, useRef, useMemo } from "react";
+import { useCallback, useRef, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useRequireAuth } from "~/providers/auth-provider";
 import { api } from "~/trpc/react";
 import { Card, CardContent } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
-import { ProfileForm } from "~/app/_components/shared";
+import { ProfileForm, ProfilePreview } from "~/app/_components/shared";
 import type { ProfileFormData } from "../vehicles/new/_components/validation";
 
 /**
- * User Profile Edit Page
+ * User Profile Page
  * 
- * Allows users to edit their profile information including:
+ * Allows users to view and edit their profile information including:
  * - Name and contact details
  * - Address with postcode lookup
  * - Geo location data
@@ -23,6 +23,7 @@ export default function UserProfilePage() {
   const { user, isLoading: isAuthLoading } = useRequireAuth();
   const utils = api.useUtils();
   const isSubmittingRef = useRef(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   // Profile update mutation
   const updateProfileMutation = api.userVehicle.updateMyProfile.useMutation({
@@ -31,6 +32,8 @@ export default function UserProfilePage() {
       // Invalidate and refresh auth session
       await utils.auth.invalidate();
       isSubmittingRef.current = false;
+      // Return to preview mode
+      setIsEditing(false);
     },
     onError: (error) => {
       toast.error("Failed to update profile", {
@@ -99,22 +102,41 @@ export default function UserProfilePage() {
           My Profile
         </h2>
         <p className="text-slate-600 dark:text-slate-400">
-          Update your personal information and contact details
+          {isEditing 
+            ? "Update your personal information and contact details"
+            : "View your personal information and contact details"}
         </p>
       </div>
 
-      <Card>
-        <CardContent className="pt-6">
-          <ProfileForm
-            defaultValues={defaultValues}
-            onSubmit={handleSubmit}
-            isSubmitting={updateProfileMutation.isPending}
-            submitButtonText="Save Changes"
-            showCancelButton
-            onCancel={() => router.back()}
-          />
-        </CardContent>
-      </Card>
+      {isEditing ? (
+        <Card>
+          <CardContent className="pt-6">
+            <ProfileForm
+              defaultValues={defaultValues}
+              onSubmit={handleSubmit}
+              isSubmitting={updateProfileMutation.isPending}
+              submitButtonText="Save Changes"
+              showCancelButton
+              onCancel={() => setIsEditing(false)}
+            />
+          </CardContent>
+        </Card>
+      ) : (
+        <ProfilePreview
+          profile={{
+            firstName: user?.firstName,
+            lastName: user?.lastName,
+            email: user?.email,
+            phone: user?.phone,
+            street: user?.street,
+            city: user?.city,
+            county: user?.county,
+            postcode: user?.postcode,
+            countryName: user?.country?.name,
+          }}
+          onEditClick={() => setIsEditing(true)}
+        />
+      )}
     </main>
   );
 }
