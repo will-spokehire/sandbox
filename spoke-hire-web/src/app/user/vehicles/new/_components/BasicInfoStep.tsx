@@ -15,13 +15,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Combobox, type ComboboxOption } from "~/components/ui/combobox";
@@ -164,12 +157,6 @@ export function BasicInfoStep({ onComplete, defaultValues, onValidationChange }:
     }
   }, [watchMake, selectedMakeId, form]);
 
-  // Generate year options (current year down to 1900)
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: currentYear - 1899 }, (_, i) =>
-    (currentYear - i).toString()
-  );
-
   return (
     <div className="space-y-6">
       <div>
@@ -249,22 +236,21 @@ export function BasicInfoStep({ onComplete, defaultValues, onValidationChange }:
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Year *</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select year" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent className="max-h-[300px]">
-                    {years.map((year) => (
-                      <SelectItem key={year} value={year}>
-                        {year}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <Input
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="2015"
+                    {...field}
+                    onChange={(e) => {
+                      // Allow only numbers, max 4 digits
+                      const value = e.target.value.replace(/[^0-9]/g, "").slice(0, 4);
+                      field.onChange(value);
+                    }}
+                  />
+                </FormControl>
                 <FormDescription className="min-h-[20px]">
-                  {/* Reserved space for consistency */}
+                  Enter a year between 1900 and {new Date().getFullYear()}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -280,12 +266,19 @@ export function BasicInfoStep({ onComplete, defaultValues, onValidationChange }:
                 <FormLabel>Registration *</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="E.g., AB12 CDE"
+                    placeholder="AB12CDE"
                     {...field}
+                    onChange={(e) => {
+                      // Convert to uppercase and remove non-alphanumeric characters
+                      const formatted = e.target.value
+                        .replace(/[^A-Z0-9]/gi, "")
+                        .toUpperCase();
+                      field.onChange(formatted);
+                    }}
                   />
                 </FormControl>
                 <FormDescription className="min-h-[20px]">
-                  Vehicle registration number
+                  Uppercase letters and numbers only
                 </FormDescription>
                 <FormMessage />
               </FormItem>

@@ -37,8 +37,29 @@ const editVehicleSchema = z.object({
   price: z.number().min(1, "Agreed value is required and must be greater than 0"),
   hourlyRate: z.number().min(0, "Hourly rate must be a positive number").nullable().optional(),
   dailyRate: z.number().min(0, "Daily rate must be a positive number").nullable().optional(),
-  year: z.string().min(4, "Year required"),
-  registration: z.string().nullable().optional(),
+  year: z.string()
+    .min(1, "Year is required")
+    .refine(
+      (val) => /^\d{4}$/.test(val),
+      "Year must be exactly 4 digits"
+    )
+    .refine(
+      (val) => {
+        const year = parseInt(val, 10);
+        const currentYear = new Date().getFullYear();
+        return year >= 1900 && year <= currentYear;
+      },
+      (val) => ({
+        message: `Year must be between 1900 and ${new Date().getFullYear()}`,
+      })
+    ),
+  registration: z.string()
+    .nullable()
+    .optional()
+    .refine(
+      (val) => !val || /^[A-Z0-9]+$/.test(val),
+      "Registration must contain only uppercase letters and numbers"
+    ),
   makeId: z.string().min(1, "Make is required"),
   modelId: z.string().min(1, "Model is required"),
   engineCapacity: z.number().min(0).nullable().optional(),

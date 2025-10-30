@@ -150,7 +150,17 @@ export function VehicleBasicInfoFields({
               <FormItem>
                 <FormLabel>Year *</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="2015" />
+                  <Input 
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="2015"
+                    {...field} 
+                    onChange={(e) => {
+                      // Allow only numbers, max 4 digits
+                      const value = e.target.value.replace(/[^0-9]/g, "").slice(0, 4);
+                      field.onChange(value);
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -164,7 +174,18 @@ export function VehicleBasicInfoFields({
               <FormItem>
                 <FormLabel>Registration</FormLabel>
                 <FormControl>
-                  <Input {...field} value={field.value ?? ""} placeholder="AB12 CDE" />
+                  <Input 
+                    placeholder="AB12CDE" 
+                    {...field} 
+                    value={field.value ?? ""} 
+                    onChange={(e) => {
+                      // Convert to uppercase and remove non-alphanumeric characters
+                      const formatted = e.target.value
+                        .replace(/[^A-Z0-9]/gi, "")
+                        .toUpperCase();
+                      field.onChange(formatted);
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
