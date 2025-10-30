@@ -15,7 +15,7 @@ interface VehicleStatusBadgeProps {
  * - IN_REVIEW: yellow
  * - PUBLISHED: green
  * - DECLINED: red
- * - ARCHIVED: slate
+ * - ARCHIVED: slate (displays as "Deactivated")
  */
 export function VehicleStatusBadge({ status, className }: VehicleStatusBadgeProps) {
   const getStatusConfig = (status: VehicleStatus) => {
@@ -46,7 +46,7 @@ export function VehicleStatusBadge({ status, className }: VehicleStatusBadgeProp
         };
       case "ARCHIVED":
         return {
-          label: "Archived",
+          label: "Deactivated",
           variant: "secondary" as const,
           className: "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100",
         };

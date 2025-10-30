@@ -41,7 +41,7 @@ export function VehicleStatusTabs({
           Declined {counts && `(${counts.declined})`}
         </TabsTrigger>
         <TabsTrigger value="ARCHIVED" className="flex-1 sm:flex-none">
-          Archived {counts && `(${counts.archived})`}
+          Deactivated {counts && `(${counts.archived})`}
         </TabsTrigger>
       </TabsList>
     </Tabs>

@@ -8,6 +8,7 @@ import { type VehicleStatus } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { type DbClient } from "~/server/types";
 import { EmailService } from "./email.service";
+import { getAppUrl } from "~/lib/app-url";
 
 /**
  * Status transition validation result
@@ -67,7 +68,7 @@ export class VehicleStatusService {
 
     // User transitions allowed:
     // DRAFT, DECLINED, or ARCHIVED → IN_REVIEW (via submitForReview)
-    // Any status → ARCHIVED
+    // Any status → ARCHIVED (deactivate)
     if (newStatus === "ARCHIVED") {
       return { allowed: true };
     }
@@ -230,8 +231,8 @@ export class VehicleStatusService {
     const ownerName = vehicle.owner.firstName ?? "Vehicle Owner";
     const vehicleName = `${vehicle.make.name} ${vehicle.model.name} - ${vehicle.name}`;
     
-    // Base URLs (could be configured via env)
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    // Get base URL (auto-detects Vercel preview URLs)
+    const baseUrl = getAppUrl();
     const dashboardUrl = `${baseUrl}/user/vehicles`;
     const userVehicleUrl = `${baseUrl}/user/vehicles/${vehicle.id}`;
     const adminVehicleUrl = `${baseUrl}/admin/vehicles/${vehicle.id}`;

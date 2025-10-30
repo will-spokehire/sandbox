@@ -12,10 +12,10 @@ import { api } from "~/trpc/react";
  * 
  * @example
  * ```typescript
- * const { archive, publish, decline, deleteVehicle } = useVehicleMutations();
+ * const { deactivate, publish, decline, deleteVehicle } = useVehicleMutations();
  * 
- * // Archive a vehicle
- * await archive("vehicle-id");
+ * // Deactivate a vehicle
+ * await deactivate("vehicle-id");
  * 
  * // Publish a vehicle
  * await publish("vehicle-id");
@@ -47,7 +47,7 @@ export function useVehicleMutations() {
   });
 
   // Wrapper functions with proper typing
-  const archive = useCallback(
+  const deactivate = useCallback(
     async (vehicleId: string) => {
       return updateStatusMutation.mutateAsync({ id: vehicleId, status: "ARCHIVED" });
     },
@@ -83,7 +83,7 @@ export function useVehicleMutations() {
   );
 
   // Bulk operations
-  const archiveBulk = useCallback(
+  const deactivateBulk = useCallback(
     async (vehicleIds: string[]) => {
       const results = await Promise.allSettled(
         vehicleIds.map(id => updateStatusMutation.mutateAsync({ id, status: "ARCHIVED" }))
@@ -93,10 +93,10 @@ export function useVehicleMutations() {
       const failureCount = results.length - successCount;
       
       if (successCount > 0) {
-        toast.success(`${successCount} vehicle${successCount !== 1 ? "s" : ""} archived successfully`);
+        toast.success(`${successCount} vehicle${successCount !== 1 ? "s" : ""} deactivated successfully`);
       }
       if (failureCount > 0) {
-        toast.error(`${failureCount} vehicle${failureCount !== 1 ? "s" : ""} failed to archive`);
+        toast.error(`${failureCount} vehicle${failureCount !== 1 ? "s" : ""} failed to deactivate`);
       }
       
       return results;
@@ -127,14 +127,14 @@ export function useVehicleMutations() {
 
   return {
     // Individual mutations
-    archive,
+    deactivate,
     publish,
     decline,
     deleteVehicle,
     updateStatus,
     
     // Bulk operations
-    archiveBulk,
+    deactivateBulk,
     publishBulk,
     
     // Loading states

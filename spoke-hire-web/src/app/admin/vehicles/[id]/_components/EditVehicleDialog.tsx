@@ -35,6 +35,8 @@ const editVehicleSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
   status: z.nativeEnum(VehicleStatus),
   price: z.number().min(1, "Agreed value is required and must be greater than 0"),
+  hourlyRate: z.number().min(0, "Hourly rate must be a positive number").nullable().optional(),
+  dailyRate: z.number().min(0, "Daily rate must be a positive number").nullable().optional(),
   year: z.string().min(4, "Year required"),
   registration: z.string().nullable().optional(),
   makeId: z.string().min(1, "Make is required"),
@@ -256,7 +258,7 @@ export function EditVehicleDialog({
                   <SelectItem value="IN_REVIEW">In Review</SelectItem>
                   <SelectItem value="PUBLISHED">Published</SelectItem>
                   <SelectItem value="DECLINED">Declined</SelectItem>
-                  <SelectItem value="ARCHIVED">Archived</SelectItem>
+                  <SelectItem value="ARCHIVED">Deactivated</SelectItem>
                 </SelectContent>
               </Select>
                 </FormItem>

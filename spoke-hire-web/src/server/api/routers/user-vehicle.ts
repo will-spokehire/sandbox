@@ -159,7 +159,7 @@ export const userVehicleRouter = createTRPCRouter({
         : ctx.user.id;
 
       // Build where clause
-      // When no status is provided, exclude archived vehicles (show all active)
+      // When no status is provided, exclude deactivated vehicles (show all active)
       const where = {
         ownerId,
         ...(status 
@@ -1257,7 +1257,7 @@ export const userVehicleRouter = createTRPCRouter({
     }),
 
   /**
-   * Archive vehicle (any status → ARCHIVED)
+   * Deactivate vehicle (any status → ARCHIVED)
    */
   archiveMyVehicle: protectedProcedure
     .input(z.object({ vehicleId: z.string() }))

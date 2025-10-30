@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { type VehicleStatus } from "@prisma/client";
-import { CheckCircle, XCircle, Send, Archive } from "lucide-react";
+import { CheckCircle, XCircle, Send, Power } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Button } from "~/components/ui/button";
@@ -179,8 +179,8 @@ export function VehicleStatusActions({
             variant="outline"
             className="gap-2"
           >
-            <Archive className="h-4 w-4" />
-            Archive
+            <Power className="h-4 w-4" />
+            Deactivate
           </Button>
         )}
       </div>

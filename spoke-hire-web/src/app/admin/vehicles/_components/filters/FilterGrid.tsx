@@ -149,7 +149,7 @@ export function FilterGrid() {
           { value: "IN_REVIEW", label: "In Review" },
           { value: "PUBLISHED", label: "Published" },
           { value: "DECLINED", label: "Declined" },
-          { value: "ARCHIVED", label: "Archived" },
+          { value: "ARCHIVED", label: "Deactivated" },
         ]}
         onChange={handleStatusChange}
         placeholder="All Status"

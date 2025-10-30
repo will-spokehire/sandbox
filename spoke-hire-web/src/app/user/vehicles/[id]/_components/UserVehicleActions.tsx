@@ -17,7 +17,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from "~/components/ui/alert";
-import { Archive, Send, AlertCircle, ArchiveRestore } from "lucide-react";
+import { Power, Send, AlertCircle } from "lucide-react";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
 
@@ -31,8 +31,8 @@ interface UserVehicleActionsProps {
  * 
  * Provides actions for vehicle owners:
  * - Publish (DRAFT/DECLINED → IN_REVIEW) with validation
- * - Archive (any status → ARCHIVED)
- * - Unarchive (ARCHIVED → IN_REVIEW)
+ * - Deactivate (any status → ARCHIVED)
+ * - Activate (ARCHIVED → IN_REVIEW)
  */
 export function UserVehicleActions({
   vehicleId,
@@ -41,8 +41,8 @@ export function UserVehicleActions({
   const router = useRouter();
   const utils = api.useUtils();
   const [isPublishDialogOpen, setIsPublishDialogOpen] = useState(false);
-  const [isArchiveDialogOpen, setIsArchiveDialogOpen] = useState(false);
-  const [isUnarchiveDialogOpen, setIsUnarchiveDialogOpen] = useState(false);
+  const [isDeactivateDialogOpen, setIsDeactivateDialogOpen] = useState(false);
+  const [isActivateDialogOpen, setIsActivateDialogOpen] = useState(false);
 
   // Get validation errors
   const { data: validationData } = api.userVehicle.getValidationErrors.useQuery(
@@ -70,33 +70,33 @@ export function UserVehicleActions({
     },
   });
 
-  // Archive mutation
-  const archiveMutation = api.userVehicle.archiveMyVehicle.useMutation({
+  // Deactivate mutation
+  const deactivateMutation = api.userVehicle.archiveMyVehicle.useMutation({
     onSuccess: () => {
-      toast.success("Vehicle archived");
-      setIsArchiveDialogOpen(false);
+      toast.success("Vehicle deactivated");
+      setIsDeactivateDialogOpen(false);
       void utils.userVehicle.myVehicleById.invalidate({ id: vehicleId });
       router.refresh();
     },
     onError: (error) => {
-      toast.error("Failed to archive vehicle", {
+      toast.error("Failed to deactivate vehicle", {
         description: error.message,
       });
     },
   });
 
-  // Unarchive mutation (reuses submit for review)
-  const unarchiveMutation = api.userVehicle.submitForReview.useMutation({
+  // Activate mutation (reuses submit for review)
+  const activateMutation = api.userVehicle.submitForReview.useMutation({
     onSuccess: () => {
-      toast.success("Vehicle unarchived", {
+      toast.success("Vehicle activated", {
         description: "Your vehicle has been moved to review status",
       });
-      setIsUnarchiveDialogOpen(false);
+      setIsActivateDialogOpen(false);
       void utils.userVehicle.myVehicleById.invalidate({ id: vehicleId });
       router.refresh();
     },
     onError: (error) => {
-      toast.error("Failed to unarchive vehicle", {
+      toast.error("Failed to activate vehicle", {
         description: error.message,
       });
     },
@@ -112,30 +112,30 @@ export function UserVehicleActions({
     submitMutation.mutate({ vehicleId });
   };
 
-  const handleArchive = () => {
-    setIsArchiveDialogOpen(true);
+  const handleDeactivate = () => {
+    setIsDeactivateDialogOpen(true);
   };
 
-  const handleConfirmArchive = () => {
-    archiveMutation.mutate({ vehicleId });
+  const handleConfirmDeactivate = () => {
+    deactivateMutation.mutate({ vehicleId });
   };
 
-  const handleUnarchive = () => {
-    setIsUnarchiveDialogOpen(true);
+  const handleActivate = () => {
+    setIsActivateDialogOpen(true);
   };
 
-  const handleConfirmUnarchive = () => {
-    unarchiveMutation.mutate({ vehicleId });
+  const handleConfirmActivate = () => {
+    activateMutation.mutate({ vehicleId });
   };
 
   // Show publish button for DRAFT and DECLINED
   const canSubmitForReview = currentStatus === "DRAFT" || currentStatus === "DECLINED";
 
-  // Can always archive (except if already archived)
-  const canArchive = currentStatus !== "ARCHIVED";
+  // Can always deactivate (except if already deactivated)
+  const canDeactivate = currentStatus !== "ARCHIVED";
 
-  // Show unarchive button for ARCHIVED status
-  const canUnarchive = currentStatus === "ARCHIVED";
+  // Show activate button for ARCHIVED status
+  const canActivate = currentStatus === "ARCHIVED";
 
   return (
     <>
@@ -152,28 +152,28 @@ export function UserVehicleActions({
           </Button>
         )}
 
-        {canUnarchive && (
+        {canActivate && (
           <Button
-            onClick={handleUnarchive}
-            disabled={unarchiveMutation.isPending}
+            onClick={handleActivate}
+            disabled={activateMutation.isPending}
             className="gap-2"
             size="sm"
           >
-            <ArchiveRestore className="h-4 w-4" />
-            {unarchiveMutation.isPending ? "Unarchiving..." : "Unarchive"}
+            <Power className="h-4 w-4" />
+            {activateMutation.isPending ? "Activating..." : "Activate"}
           </Button>
         )}
 
-        {canArchive && (
+        {canDeactivate && (
           <Button
             variant="outline"
-            onClick={handleArchive}
-            disabled={archiveMutation.isPending}
+            onClick={handleDeactivate}
+            disabled={deactivateMutation.isPending}
             className="gap-2"
             size="sm"
           >
-            <Archive className="h-4 w-4" />
-            Archive
+            <Power className="h-4 w-4" />
+            Deactivate
           </Button>
         )}
       </div>
@@ -226,48 +226,48 @@ export function UserVehicleActions({
         </DialogContent>
       </Dialog>
 
-      {/* Archive Confirmation Dialog */}
-      <Dialog open={isArchiveDialogOpen} onOpenChange={setIsArchiveDialogOpen}>
+      {/* Deactivate Confirmation Dialog */}
+      <Dialog open={isDeactivateDialogOpen} onOpenChange={setIsDeactivateDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <div className="flex items-center gap-3 mb-2">
               <div className="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                <Archive className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                <Power className="h-5 w-5 text-slate-600 dark:text-slate-400" />
               </div>
-              <DialogTitle>Archive Vehicle?</DialogTitle>
+              <DialogTitle>Deactivate Vehicle?</DialogTitle>
             </div>
             <DialogDescription>
-              This vehicle will be archived and hidden from your active listings. You can restore it later if needed.
+              This vehicle will be deactivated and hidden from your active listings. You can activate it again later if needed.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setIsArchiveDialogOpen(false)}
-              disabled={archiveMutation.isPending}
+              onClick={() => setIsDeactivateDialogOpen(false)}
+              disabled={deactivateMutation.isPending}
             >
               Cancel
             </Button>
             <Button
               variant="destructive"
-              onClick={handleConfirmArchive}
-              disabled={archiveMutation.isPending}
+              onClick={handleConfirmDeactivate}
+              disabled={deactivateMutation.isPending}
             >
-              {archiveMutation.isPending ? "Archiving..." : "Archive Vehicle"}
+              {deactivateMutation.isPending ? "Deactivating..." : "Deactivate Vehicle"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Unarchive Confirmation Dialog */}
-      <Dialog open={isUnarchiveDialogOpen} onOpenChange={setIsUnarchiveDialogOpen}>
+      {/* Activate Confirmation Dialog */}
+      <Dialog open={isActivateDialogOpen} onOpenChange={setIsActivateDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <div className="flex items-center gap-3 mb-2">
               <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
-                <ArchiveRestore className="h-5 w-5 text-green-600 dark:text-green-400" />
+                <Power className="h-5 w-5 text-green-600 dark:text-green-400" />
               </div>
-              <DialogTitle>Unarchive Vehicle?</DialogTitle>
+              <DialogTitle>Activate Vehicle?</DialogTitle>
             </div>
             <DialogDescription>
               Your vehicle will be moved to &quot;In Review&quot; status and submitted to an admin for review.
@@ -276,16 +276,16 @@ export function UserVehicleActions({
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setIsUnarchiveDialogOpen(false)}
-              disabled={unarchiveMutation.isPending}
+              onClick={() => setIsActivateDialogOpen(false)}
+              disabled={activateMutation.isPending}
             >
               Cancel
             </Button>
             <Button
-              onClick={handleConfirmUnarchive}
-              disabled={unarchiveMutation.isPending}
+              onClick={handleConfirmActivate}
+              disabled={activateMutation.isPending}
             >
-              {unarchiveMutation.isPending ? "Unarchiving..." : "Unarchive Vehicle"}
+              {activateMutation.isPending ? "Activating..." : "Activate Vehicle"}
             </Button>
           </DialogFooter>
         </DialogContent>

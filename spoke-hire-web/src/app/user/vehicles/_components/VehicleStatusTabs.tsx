@@ -42,7 +42,7 @@ export function VehicleStatusTabs({
           onClick={() => onStatusChange('ARCHIVED')}
           size="sm"
         >
-          Archived {`(${counts.archived})`}
+          Deactivated {`(${counts.archived})`}
         </Button>
       )}
     </div>

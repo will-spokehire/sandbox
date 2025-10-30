@@ -64,7 +64,7 @@ export function getStatusLabel(status: VehicleStatus): string {
     IN_REVIEW: "In Review",
     PUBLISHED: "Published",
     DECLINED: "Declined",
-    ARCHIVED: "Archived",
+    ARCHIVED: "Deactivated",
   };
 
   return labels[status];
