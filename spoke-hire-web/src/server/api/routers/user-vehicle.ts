@@ -40,6 +40,8 @@ const updateMyVehicleInputSchema = z.object({
   name: z.string().min(3).optional(),
   status: z.enum(['DRAFT', 'IN_REVIEW', 'PUBLISHED', 'ARCHIVED']).optional(), // Users can edit IN_REVIEW vehicles but can't set DECLINED
   price: z.number().min(1, "Agreed value must be greater than 0").optional(),
+  hourlyRate: z.number().min(0, "Hourly rate must be a positive number").nullable().optional(),
+  dailyRate: z.number().min(0, "Daily rate must be a positive number").nullable().optional(),
   year: z.string().optional(),
   registration: z.string().nullable().optional(),
   makeId: z.string().optional(),
@@ -63,6 +65,8 @@ const createMyVehicleInputSchema = z.object({
   year: z.string().min(1, "Year is required"),
   registration: z.string().min(1, "Registration is required"),
   price: z.number().min(1, "Agreed value is required and must be greater than 0"),
+  hourlyRate: z.number().min(0, "Hourly rate must be a positive number").nullable().optional(),
+  dailyRate: z.number().min(0, "Daily rate must be a positive number").nullable().optional(),
   exteriorColour: z.string().min(1, "Exterior colour is required"),
   interiorColour: z.string().min(1, "Interior colour is required"),
   gearbox: z.string().min(1, "Gearbox is required"),
@@ -192,17 +196,22 @@ export const userVehicleRouter = createTRPCRouter({
           },
           media: {
             where: {
-              isPrimary: true,
               isVisible: true,
               status: "READY",
+              type: "IMAGE",
             },
-            take: 1,
+            orderBy: [
+              { isPrimary: "desc" }, // Primary images first
+              { order: "asc" },      // Then by order
+            ],
             select: {
               id: true,
               publishedUrl: true,
               originalUrl: true,
               type: true,
               altText: true,
+              order: true,
+              isPrimary: true,
             },
           },
           _count: {
@@ -577,6 +586,8 @@ export const userVehicleRouter = createTRPCRouter({
           ...(finalName !== undefined && { name: finalName }),
           ...(data.status !== undefined && { status: data.status }),
           ...(data.price !== undefined && { price: data.price }),
+          ...(data.hourlyRate !== undefined && { hourlyRate: data.hourlyRate }),
+          ...(data.dailyRate !== undefined && { dailyRate: data.dailyRate }),
           ...(data.year !== undefined && { year: data.year }),
           ...(data.registration !== undefined && { registration: data.registration }),
           makeId: finalMakeId,
@@ -873,6 +884,8 @@ export const userVehicleRouter = createTRPCRouter({
           year: input.year,
           registration: input.registration,
           price: input.price,
+          hourlyRate: input.hourlyRate ?? null,
+          dailyRate: input.dailyRate ?? null,
           exteriorColour: input.exteriorColour,
           interiorColour: input.interiorColour,
           gearbox: input.gearbox,
