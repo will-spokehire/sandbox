@@ -137,14 +137,14 @@ export function VehicleSpecificationFields({
           name="exteriorColour"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Exterior Color</FormLabel>
+              <FormLabel>Exterior Colour</FormLabel>
               <Select
                 value={field.value ?? undefined}
                 onValueChange={field.onChange}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select color (optional)" />
+                    <SelectValue placeholder="Select colour (optional)" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -166,14 +166,14 @@ export function VehicleSpecificationFields({
           name="interiorColour"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Interior Color</FormLabel>
+              <FormLabel>Interior Colour</FormLabel>
               <Select
                 value={field.value ?? undefined}
                 onValueChange={field.onChange}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select color (optional)" />
+                    <SelectValue placeholder="Select colour (optional)" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>

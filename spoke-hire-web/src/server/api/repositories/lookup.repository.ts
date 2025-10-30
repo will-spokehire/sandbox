@@ -95,7 +95,7 @@ export class LookupRepository extends BaseRepository {
   }
 
   /**
-   * Get distinct exterior colors
+   * Get distinct exterior colours
    */
   async getDistinctExteriorColors(): Promise<string[]> {
     try {
@@ -107,12 +107,12 @@ export class LookupRepository extends BaseRepository {
       `;
       return result.map((r) => r.exteriorColour).filter(Boolean);
     } catch (error) {
-      throw new DatabaseError("Failed to fetch exterior colors", error);
+      throw new DatabaseError("Failed to fetch exterior colours", error);
     }
   }
 
   /**
-   * Get distinct interior colors
+   * Get distinct interior colours
    */
   async getDistinctInteriorColors(): Promise<string[]> {
     try {
@@ -124,7 +124,7 @@ export class LookupRepository extends BaseRepository {
       `;
       return result.map((r) => r.interiorColour).filter(Boolean);
     } catch (error) {
-      throw new DatabaseError("Failed to fetch interior colors", error);
+      throw new DatabaseError("Failed to fetch interior colours", error);
     }
   }
 

@@ -63,7 +63,7 @@ const editVehicleSchema = z.object({
   makeId: z.string().min(1, "Make is required"),
   modelId: z.string().min(1, "Model is required"),
   engineCapacity: z.number().min(0).nullable().optional(),
-  numberOfSeats: z.number().min(1).max(20).nullable().optional(),
+  numberOfSeats: z.number().min(1).max(10).nullable().optional(),
   steeringId: z.string().nullable().optional(),
   gearbox: z.string().nullable().optional(),
   exteriorColour: z.string().nullable().optional(),

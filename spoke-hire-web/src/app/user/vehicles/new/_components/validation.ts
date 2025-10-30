@@ -79,7 +79,7 @@ export const technicalDetailsSchema = z.object({
       (val) => !isNaN(Number(val)) && Number(val) >= 1,
       "Engine capacity must be a valid number greater than 0"
     ),
-  numberOfSeats: z.number().min(1).max(20, "Number of seats must be between 1 and 20"),
+  numberOfSeats: z.number().min(1).max(10, "Number of seats must be between 1 and 10"),
   steeringId: z.string().min(1, "Steering type is required"),
   gearbox: z.string().min(1, "Gearbox is required"),
   exteriorColour: z.string().min(1, "Exterior colour is required"),

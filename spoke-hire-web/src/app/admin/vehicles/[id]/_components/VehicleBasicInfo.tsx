@@ -65,11 +65,11 @@ export function VehicleBasicInfo({ vehicle, onEditClick }: VehicleBasicInfoProps
       value: vehicle.gearbox ?? "N/A",
     },
     {
-      label: "Exterior Color",
+      label: "Exterior Colour",
       value: vehicle.exteriorColour ?? "N/A",
     },
     {
-      label: "Interior Color",
+      label: "Interior Colour",
       value: vehicle.interiorColour ?? "N/A",
     },
     {

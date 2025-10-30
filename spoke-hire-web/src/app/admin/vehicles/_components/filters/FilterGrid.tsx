@@ -191,27 +191,27 @@ export function FilterGrid() {
         className="md:w-[200px]"
       />
 
-      {/* Exterior Color Filter */}
+      {/* Exterior Colour Filter */}
       <MultiSelectFilter
-        label="Select Exterior Colors"
-        placeholder="Exterior colors..."
+        label="Select Exterior Colours"
+        placeholder="Exterior colours..."
         options={exteriorColorOptions}
         selectedIds={filters.exteriorColors ?? []}
         onChange={(exteriorColors) => updateFilters({ exteriorColors })}
         renderOption={renderStandardOption}
-        searchPlaceholder="Search colors..."
+        searchPlaceholder="Search colours..."
         className="md:w-[180px]"
       />
 
-      {/* Interior Color Filter */}
+      {/* Interior Colour Filter */}
       <MultiSelectFilter
-        label="Select Interior Colors"
-        placeholder="Interior colors..."
+        label="Select Interior Colours"
+        placeholder="Interior colours..."
         options={interiorColorOptions}
         selectedIds={filters.interiorColors ?? []}
         onChange={(interiorColors) => updateFilters({ interiorColors })}
         renderOption={renderStandardOption}
-        searchPlaceholder="Search colors..."
+        searchPlaceholder="Search colours..."
         className="md:w-[180px]"
       />
 

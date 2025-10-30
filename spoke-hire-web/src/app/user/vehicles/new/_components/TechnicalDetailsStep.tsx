@@ -22,7 +22,7 @@ import {
 } from "~/components/ui/select";
 import { api } from "~/trpc/react";
 import { technicalDetailsSchema, type TechnicalDetailsFormData, type TechnicalDetailsSubmitData } from "./validation";
-import { VEHICLE_COLORS, GEARBOX_TYPES } from "~/lib/constants/vehicle";
+import { VEHICLE_COLORS, GEARBOX_TYPES, COLOR_HEX_MAP } from "~/lib/constants/vehicle";
 import type { FilterOptions, SteeringItem } from "./types";
 
 interface TechnicalDetailsStepProps {
@@ -89,7 +89,7 @@ export function TechnicalDetailsStep({
   }, [form, onComplete]);
 
   // Seats options (1-20)
-  const seatOptions = Array.from({ length: 20 }, (_, i) => i + 1);
+  const seatOptions = Array.from({ length: 10 }, (_, i) => i + 1);
 
   // Condition options
   const conditionOptions = [
@@ -268,7 +268,7 @@ export function TechnicalDetailsStep({
                   <RadioGroup
                     onValueChange={field.onChange}
                     value={field.value}
-                    className="flex flex-wrap gap-2"
+                    className="flex flex-wrap gap-1.5 md:gap-2"
                   >
                     {VEHICLE_COLORS.map((color) => (
                       <label
@@ -279,15 +279,19 @@ export function TechnicalDetailsStep({
                           value={color}
                           className="sr-only peer"
                         />
-                        <div className="px-3 md:px-4 py-2 rounded-md border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground transition-colors text-sm md:text-base">
-                          {color}
+                        <div className="flex items-center gap-1.5 px-2 md:px-3 py-1.5 md:py-2 rounded-md border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground transition-colors text-xs md:text-sm">
+                          <span 
+                            className="inline-block w-3 h-3 md:w-3.5 md:h-3.5 rounded-full border border-gray-300"
+                            style={{ backgroundColor: COLOR_HEX_MAP[color] }}
+                          />
+                          <span>{color}</span>
                         </div>
                       </label>
                     ))}
                   </RadioGroup>
                 </FormControl>
                 <FormDescription className="min-h-[20px] text-xs md:text-sm">
-                  Exterior paint color
+                  Exterior paint colour
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -305,7 +309,7 @@ export function TechnicalDetailsStep({
                   <RadioGroup
                     onValueChange={field.onChange}
                     value={field.value}
-                    className="flex flex-wrap gap-2"
+                    className="flex flex-wrap gap-1.5 md:gap-2"
                   >
                     {VEHICLE_COLORS.map((color) => (
                       <label
@@ -316,15 +320,19 @@ export function TechnicalDetailsStep({
                           value={color}
                           className="sr-only peer"
                         />
-                        <div className="px-3 md:px-4 py-2 rounded-md border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground transition-colors text-sm md:text-base">
-                          {color}
+                        <div className="flex items-center gap-1.5 px-2 md:px-3 py-1.5 md:py-2 rounded-md border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground transition-colors text-xs md:text-sm">
+                          <span 
+                            className="inline-block w-3 h-3 md:w-3.5 md:h-3.5 rounded-full border border-gray-300"
+                            style={{ backgroundColor: COLOR_HEX_MAP[color] }}
+                          />
+                          <span>{color}</span>
                         </div>
                       </label>
                     ))}
                   </RadioGroup>
                 </FormControl>
                 <FormDescription className="min-h-[20px] text-xs md:text-sm">
-                  Interior upholstery color
+                  Interior upholstery colour
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -383,7 +391,7 @@ export function TechnicalDetailsStep({
                 <div className="space-y-1 leading-none">
                   <FormLabel className="text-sm md:text-base cursor-pointer">Road Legal</FormLabel>
                   <FormDescription className="text-xs md:text-sm">
-                    Vehicle is legal to drive on public roads
+                    I confirm this vehicle is legal to drive on public roads
                   </FormDescription>
                 </div>
               </FormItem>
