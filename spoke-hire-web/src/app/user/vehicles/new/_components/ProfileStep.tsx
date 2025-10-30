@@ -54,7 +54,7 @@ export function ProfileStep({ onComplete, defaultValues }: ProfileStepProps) {
       <div>
         <h2 className="text-2xl font-bold">Complete Your Profile</h2>
         <p className="text-muted-foreground mt-1">
-          We need some basic information to help buyers contact you about your vehicle.
+          Please provide your basic information to create your account.
         </p>
       </div>
 
