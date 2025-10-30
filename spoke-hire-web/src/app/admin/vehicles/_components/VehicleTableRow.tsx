@@ -24,6 +24,7 @@ import {
   formatLocation,
   getVehicleImageUrl,
 } from "~/lib/vehicles";
+import { formatPricingRate } from "~/lib/pricing";
 import { getWhatsAppChatUrl } from "~/lib/whatsapp";
 
 interface VehicleTableRowProps {
@@ -131,6 +132,20 @@ export const VehicleTableRow = memo(function VehicleTableRow({
       <TableCell>
         <Link href={`/admin/vehicles/${vehicle.id}`} className="block">
           <span className="font-medium">{formatPrice(vehicle.price)}</span>
+        </Link>
+      </TableCell>
+
+      {/* Hourly Rate */}
+      <TableCell>
+        <Link href={`/admin/vehicles/${vehicle.id}`} className="block">
+          <span className="text-sm">{formatPricingRate(vehicle.hourlyRate?.toNumber())}</span>
+        </Link>
+      </TableCell>
+
+      {/* Daily Rate */}
+      <TableCell>
+        <Link href={`/admin/vehicles/${vehicle.id}`} className="block">
+          <span className="text-sm">{formatPricingRate(vehicle.dailyRate?.toNumber())}</span>
         </Link>
       </TableCell>
 

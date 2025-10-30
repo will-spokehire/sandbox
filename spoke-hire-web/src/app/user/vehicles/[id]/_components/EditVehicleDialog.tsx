@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { api } from "~/trpc/react";
 import type { VehicleDetail } from "~/types/vehicle";
@@ -22,6 +23,8 @@ const editVehicleSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
   status: z.enum(USER_VEHICLE_STATUSES),
   price: z.number().min(1, "Agreed value is required and must be greater than 0"),
+  hourlyRate: z.number().min(0, "Hourly rate must be a positive number").nullable().optional(),
+  dailyRate: z.number().min(0, "Daily rate must be a positive number").nullable().optional(),
   year: z.string().min(4, "Year required"),
   registration: z.string().nullable().optional(),
   makeId: z.string().min(1, "Make is required"),
@@ -132,6 +135,7 @@ export function EditVehicleDialog({
       setRegistrationError(null);
       onSuccess();
       onOpenChange(false);
+      router.refresh(); // Force page refresh to show updated data
     },
     onError: (error) => {
       try {

@@ -85,7 +85,7 @@ export class AuthService {
    * Auto-creates user record for new registrations
    */
   async verifyOtp(params: VerifyOtpParams) {
-    const { email } = params;
+    const { email, termsAccepted, termsAcceptanceId, privacyPolicyAccepted, privacyAcceptanceId } = params;
 
     // Check if user is authenticated in Supabase
     const {
@@ -101,12 +101,23 @@ export class AuthService {
 
     if (!user) {
       // New user - create account with REGISTERED type
-      user = await this.userRepository.create({
+      // Include T&Cs acceptance data if provided
+      const userData: Parameters<typeof this.userRepository.create>[0] = {
         email,
         supabaseId: supabaseUser.id,
         userType: "REGISTERED",
         status: "ACTIVE",
-      });
+      };
+
+      // Add T&Cs acceptance data if both terms and privacy policy were accepted
+      if (termsAccepted && termsAcceptanceId && privacyPolicyAccepted && privacyAcceptanceId) {
+        userData.termsAcceptedAt = new Date();
+        userData.termsAcceptanceId = termsAcceptanceId;
+        userData.privacyPolicyAcceptedAt = new Date();
+        userData.privacyAcceptanceId = privacyAcceptanceId;
+      }
+
+      user = await this.userRepository.create(userData);
     }
 
     // Verify user is admin or registered user
@@ -138,6 +149,8 @@ export class AuthService {
         firstName: user.firstName,
         lastName: user.lastName,
         userType: user.userType,
+        termsAcceptedAt: user.termsAcceptedAt,
+        privacyPolicyAcceptedAt: user.privacyPolicyAcceptedAt,
       },
     };
   }
@@ -194,6 +207,39 @@ export class AuthService {
     return {
       success: true,
       message: "Verification code resent",
+    };
+  }
+
+  /**
+   * Accept Terms & Conditions and Privacy Policy
+   * Updates user record with acceptance timestamps and unique IDs
+   */
+  async acceptTerms(
+    userId: string,
+    params: { termsAccepted: boolean; privacyPolicyAccepted: boolean }
+  ) {
+    const { termsAccepted, privacyPolicyAccepted } = params;
+
+    // Validate both are accepted
+    if (!termsAccepted || !privacyPolicyAccepted) {
+      throw new Error("Both Terms & Conditions and Privacy Policy must be accepted");
+    }
+
+    // Generate unique acceptance IDs
+    const termsAcceptanceId = crypto.randomUUID();
+    const privacyAcceptanceId = crypto.randomUUID();
+
+    // Update user record
+    await this.userRepository.updateTermsAcceptance(userId, {
+      termsAcceptedAt: new Date(),
+      termsAcceptanceId,
+      privacyPolicyAcceptedAt: new Date(),
+      privacyAcceptanceId,
+    });
+
+    return {
+      success: true,
+      message: "Terms and Privacy Policy accepted successfully",
     };
   }
 }

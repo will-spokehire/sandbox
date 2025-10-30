@@ -6,6 +6,7 @@ import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
 import { Pencil } from "lucide-react";
 import { formatPrice, formatRegistration } from "~/lib/vehicles";
+import { formatPricingRate } from "~/lib/pricing";
 import { type VehicleDetail } from "~/types/vehicle";
 
 interface UserVehicleDetailsProps {
@@ -39,6 +40,14 @@ export function UserVehicleDetails({ vehicle, onEditClick }: UserVehicleDetailsP
       label: "Price",
       value: formatPrice(vehicle.price),
       highlight: true,
+    },
+    {
+      label: "Hourly Rate",
+      value: formatPricingRate(vehicle.hourlyRate?.toNumber()),
+    },
+    {
+      label: "Daily Rate",
+      value: formatPricingRate(vehicle.dailyRate?.toNumber()),
     },
     {
       label: "Engine Capacity",

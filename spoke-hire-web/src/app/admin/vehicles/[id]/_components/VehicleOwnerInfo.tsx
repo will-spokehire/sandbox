@@ -1,6 +1,6 @@
 "use client";
 
-import { Mail, Phone, User, MapPin, Car, MessageCircle } from "lucide-react";
+import { Mail, Phone, User, MapPin, Car, MessageCircle, Shield, Copy } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
@@ -17,6 +17,23 @@ import { getWhatsAppChatUrl } from "~/lib/whatsapp";
 interface VehicleOwnerInfoProps {
   owner: VehicleDetail["owner"];
   vehicleId: string;
+}
+
+/**
+ * Format date for display
+ */
+function formatAcceptanceDate(date: Date | string | null): string {
+  if (!date) return "Not provided";
+  
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  
+  return new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(dateObj);
 }
 
 /**
@@ -144,6 +161,93 @@ export function VehicleOwnerInfo({ owner, vehicleId }: VehicleOwnerInfoProps) {
             </div>
           )}
         </dl>
+
+        {/* T&Cs and Privacy Policy Acceptance */}
+        <Separator />
+        <div className="space-y-3">
+          <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <Shield className="h-4 w-4" />
+            Legal Acceptance
+          </h4>
+          
+          <dl className="space-y-3">
+            {/* Terms & Conditions */}
+            <div>
+              <dt className="text-xs text-muted-foreground mb-1">Terms & Conditions</dt>
+              <dd className="text-sm">
+                {owner.termsAcceptedAt ? (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="default" className="text-xs">
+                        Accepted
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">
+                        {formatAcceptanceDate(owner.termsAcceptedAt)}
+                      </span>
+                    </div>
+                    {owner.termsAcceptanceId && (
+                      <div className="flex items-center gap-2 mt-1">
+                        <code className="text-xs bg-muted px-2 py-1 rounded font-mono">
+                          {owner.termsAcceptanceId}
+                        </code>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyToClipboard(owner.termsAcceptanceId!, 'Terms acceptance ID')}
+                          className="h-6 w-6 p-0"
+                        >
+                          <Copy className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Badge variant="secondary" className="text-xs">
+                    Not Accepted
+                  </Badge>
+                )}
+              </dd>
+            </div>
+
+            {/* Privacy Policy */}
+            <div>
+              <dt className="text-xs text-muted-foreground mb-1">Privacy Policy</dt>
+              <dd className="text-sm">
+                {owner.privacyPolicyAcceptedAt ? (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="default" className="text-xs">
+                        Accepted
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">
+                        {formatAcceptanceDate(owner.privacyPolicyAcceptedAt)}
+                      </span>
+                    </div>
+                    {owner.privacyAcceptanceId && (
+                      <div className="flex items-center gap-2 mt-1">
+                        <code className="text-xs bg-muted px-2 py-1 rounded font-mono">
+                          {owner.privacyAcceptanceId}
+                        </code>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyToClipboard(owner.privacyAcceptanceId!, 'Privacy acceptance ID')}
+                          className="h-6 w-6 p-0"
+                        >
+                          <Copy className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Badge variant="secondary" className="text-xs">
+                    Not Accepted
+                  </Badge>
+                )}
+              </dd>
+            </div>
+          </dl>
+        </div>
 
         {/* Contact Actions */}
         <Separator />

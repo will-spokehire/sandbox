@@ -78,6 +78,8 @@ const updateVehicleInputSchema = z.object({
   name: z.string().min(3).optional(),
   status: z.nativeEnum(VehicleStatus).optional(),
   price: z.number().min(1, "Agreed value must be greater than 0").optional(),
+  hourlyRate: z.number().min(0, "Hourly rate must be a positive number").nullable().optional(),
+  dailyRate: z.number().min(0, "Daily rate must be a positive number").nullable().optional(),
   year: z.string().optional(),
   registration: z.string().nullable().optional(),
   makeId: z.string().optional(),

@@ -165,7 +165,12 @@ export class EmailService {
       const data = await response.json() as { id?: string };
 
       if (!response.ok) {
-        const errorMessage = `Loops API error: ${response.status} - ${JSON.stringify(data)}`;
+        // Extract first and last 4 characters of transactionalId for debugging
+        const idPreview = this.transactionalId.length >= 8 
+          ? `${this.transactionalId.substring(0, 4)}...${this.transactionalId.substring(this.transactionalId.length - 4)}`
+          : this.transactionalId;
+        
+        const errorMessage = `Loops API error: ${response.status} - ${JSON.stringify(data)} (transactionalId: ${idPreview})`;
         console.error(errorMessage);
         
         return {
@@ -292,7 +297,12 @@ export class EmailService {
       const data = await response.json() as { id?: string };
 
       if (!response.ok) {
-        const errorMessage = `Loops API error: ${response.status} - ${JSON.stringify(data)}`;
+        // Extract first and last 4 characters of transactionalId for debugging
+        const idPreview = transactionalId.length >= 8 
+          ? `${transactionalId.substring(0, 4)}...${transactionalId.substring(transactionalId.length - 4)}`
+          : transactionalId;
+        
+        const errorMessage = `Loops API error: ${response.status} - ${JSON.stringify(data)} (transactionalId: ${idPreview})`;
         console.error(errorMessage);
         return { success: false, error: errorMessage };
       }
@@ -368,7 +378,12 @@ export class EmailService {
       const data = await response.json() as { id?: string };
 
       if (!response.ok) {
-        const errorMessage = `Loops API error: ${response.status} - ${JSON.stringify(data)}`;
+        // Extract first and last 4 characters of transactionalId for debugging
+        const idPreview = transactionalId.length >= 8 
+          ? `${transactionalId.substring(0, 4)}...${transactionalId.substring(transactionalId.length - 4)}`
+          : transactionalId;
+        
+        const errorMessage = `Loops API error: ${response.status} - ${JSON.stringify(data)} (transactionalId: ${idPreview})`;
         console.error(errorMessage);
         return { success: false, error: errorMessage };
       }
@@ -442,7 +457,12 @@ export class EmailService {
       const data = await response.json() as { id?: string };
 
       if (!response.ok) {
-        const errorMessage = `Loops API error: ${response.status} - ${JSON.stringify(data)}`;
+        // Extract first and last 4 characters of transactionalId for debugging
+        const idPreview = transactionalId.length >= 8 
+          ? `${transactionalId.substring(0, 4)}...${transactionalId.substring(transactionalId.length - 4)}`
+          : transactionalId;
+        
+        const errorMessage = `Loops API error: ${response.status} - ${JSON.stringify(data)} (transactionalId: ${idPreview})`;
         console.error(errorMessage);
         return { success: false, error: errorMessage };
       }

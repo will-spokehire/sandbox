@@ -24,6 +24,7 @@ import {
   formatLocation,
   getVehicleImageUrl,
 } from "~/lib/vehicles";
+import { formatPricingRate } from "~/lib/pricing";
 import { getWhatsAppChatUrl } from "~/lib/whatsapp";
 
 interface VehicleCardProps {
@@ -204,6 +205,18 @@ export const VehicleCard = memo(function VehicleCard({
             <div className="text-right">
               <span className="text-muted-foreground text-xs">Year</span>
               <p className="font-semibold mt-0.5">{vehicle.year}</p>
+            </div>
+            <div>
+              <span className="text-muted-foreground text-xs">Hourly Rate</span>
+              <p className="font-medium text-xs mt-0.5">
+                {formatPricingRate(vehicle.hourlyRate?.toNumber())}
+              </p>
+            </div>
+            <div className="text-right">
+              <span className="text-muted-foreground text-xs">Daily Rate</span>
+              <p className="font-medium text-xs mt-0.5">
+                {formatPricingRate(vehicle.dailyRate?.toNumber())}
+              </p>
             </div>
           </div>
           

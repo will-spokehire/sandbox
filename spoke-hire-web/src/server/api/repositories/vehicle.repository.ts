@@ -150,6 +150,10 @@ export class VehicleRepository extends BaseRepository {
               city: true,
               county: true,
               postcode: true,
+              termsAcceptedAt: true,
+              termsAcceptanceId: true,
+              privacyPolicyAcceptedAt: true,
+              privacyAcceptanceId: true,
               country: {
                 select: {
                   id: true,

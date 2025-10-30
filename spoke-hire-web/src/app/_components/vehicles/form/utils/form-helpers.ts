@@ -9,6 +9,8 @@ export function getFormDefaults(vehicle: VehicleDetail): VehicleFormData {
     name: vehicle.name,
     status: vehicle.status,
     price: vehicle.price ? Number(vehicle.price) : 0,
+    hourlyRate: vehicle.hourlyRate ? Number(vehicle.hourlyRate) : null,
+    dailyRate: vehicle.dailyRate ? Number(vehicle.dailyRate) : null,
     year: vehicle.year,
     registration: vehicle.registration ?? "",
     makeId: vehicle.makeId,

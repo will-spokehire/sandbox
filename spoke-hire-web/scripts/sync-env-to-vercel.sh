@@ -102,6 +102,10 @@ while IFS= read -r line || [ -n "$line" ]; do
         VALUE="${VALUE#\'}"
         VALUE="${VALUE%\'}"
         
+        # Trim trailing spaces and newlines
+        VALUE="${VALUE%%[[:space:]]}"
+        VALUE=$(echo "$VALUE" | sed 's/[[:space:]]*$//')
+        
         # Skip if value is empty or is a placeholder
         if [[ -z "$VALUE" ]] || [[ "$VALUE" =~ \[.*\] ]] || [[ "$VALUE" == *"example.com"* ]]; then
             echo -e "${YELLOW}⊘ Skipping${NC} ${KEY} (empty or placeholder)"

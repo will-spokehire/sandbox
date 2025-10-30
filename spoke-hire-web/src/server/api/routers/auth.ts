@@ -26,15 +26,28 @@ import { ServiceFactory } from "../services/service-factory";
 const signInWithOtpInputSchema = z.object({
   email: z.string().email("Invalid email address"),
   redirectTo: z.string().url().optional(),
+  termsAccepted: z.boolean().optional(),
+  termsAcceptanceId: z.string().optional(),
+  privacyPolicyAccepted: z.boolean().optional(),
+  privacyAcceptanceId: z.string().optional(),
 });
 
 const verifyOtpInputSchema = z.object({
   email: z.string().email("Invalid email address"),
   token: z.string().min(6, "Code must be at least 6 characters"),
+  termsAccepted: z.boolean().optional(),
+  termsAcceptanceId: z.string().optional(),
+  privacyPolicyAccepted: z.boolean().optional(),
+  privacyAcceptanceId: z.string().optional(),
 });
 
 const resendOtpInputSchema = z.object({
   email: z.string().email("Invalid email address"),
+});
+
+const acceptTermsInputSchema = z.object({
+  termsAccepted: z.boolean(),
+  privacyPolicyAccepted: z.boolean(),
 });
 
 // ============================================================================
@@ -118,5 +131,16 @@ export const authRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const service = ServiceFactory.createAuthService(ctx.db, ctx.supabase);
       return await service.resendOtp(input.email);
+    }),
+
+  /**
+   * Accept Terms & Conditions and Privacy Policy
+   * Must be called after successful authentication
+   */
+  acceptTerms: protectedProcedure
+    .input(acceptTermsInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const service = ServiceFactory.createAuthService(ctx.db, ctx.supabase);
+      return await service.acceptTerms(ctx.user.id, input);
     }),
 });

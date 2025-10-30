@@ -468,6 +468,8 @@ export class VehicleService {
         ...(data.name !== undefined && { name: data.name }),
         ...(data.status !== undefined && { status: data.status }),
         ...(data.price !== undefined && { price: data.price }),
+        ...(data.hourlyRate !== undefined && { hourlyRate: data.hourlyRate }),
+        ...(data.dailyRate !== undefined && { dailyRate: data.dailyRate }),
         ...(data.year !== undefined && { year: data.year }),
         ...(data.registration !== undefined && { registration: data.registration }),
         makeId: finalMakeId,

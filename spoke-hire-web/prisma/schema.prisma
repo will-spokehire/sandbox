@@ -114,6 +114,12 @@ model User {
     lastLoginAt       DateTime?
     profileCompleted  Boolean    @default(false)
 
+    // T&Cs and Privacy Policy acceptance tracking
+    termsAcceptedAt         DateTime?
+    termsAcceptanceId       String?    // Unique ID for this acceptance event
+    privacyPolicyAcceptedAt DateTime?
+    privacyAcceptanceId     String?    // Unique ID for this acceptance event
+
     // Relationships
     vehicles          Vehicle[]
     dealsCreated      Deal[]          @relation("DealsCreated")
@@ -238,6 +244,8 @@ model Vehicle {
     
     // Business Fields
     price             Decimal? @db.Decimal(10,2)
+    hourlyRate        Decimal? @db.Decimal(10,2)  // Hourly hire rate in GBP
+    dailyRate         Decimal? @db.Decimal(10,2)  // Daily hire rate in GBP (up to 12 hours)
     status            VehicleStatus @default(DRAFT)
     description       String?
     declinedReason    String?  // Admin's support text when vehicle is declined

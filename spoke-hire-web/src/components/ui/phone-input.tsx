@@ -28,7 +28,22 @@ export interface PhoneInputProps {
  * - Automatically parses existing E.164 numbers from database
  */
 export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
-  ({ value, onChange, placeholder = "Enter phone number", disabled, className }, ref) => {
+  ({ value, onChange, placeholder = "7123 456789", disabled, className }, ref) => {
+    /**
+     * Smart onChange handler that strips leading zeros for UK numbers
+     * Prevents truncation when users instinctively enter "0" before their number
+     */
+    const handleChange = (phone: string) => {
+      // Detect UK number with leading zero after country code (+440...)
+      // Strip the zero to prevent truncation of the last digit
+      if (phone.startsWith('+440')) {
+        const cleaned = phone.replace('+440', '+44');
+        onChange?.(cleaned);
+      } else {
+        onChange?.(phone);
+      }
+    };
+
     return (
       <div
         className={cn(
@@ -40,7 +55,7 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
         <BasePhoneInput
           defaultCountry="gb"
           value={value ?? ""}
-          onChange={(phone) => onChange?.(phone)}
+          onChange={handleChange}
           disabled={disabled}
           placeholder={placeholder}
           style={{ width: '100%' }}

@@ -25,6 +25,10 @@ export class UserRepository extends BaseRepository {
     status: "ACTIVE" | "INACTIVE" | "SUSPENDED";
     firstName?: string;
     lastName?: string;
+    termsAcceptedAt?: Date;
+    termsAcceptanceId?: string;
+    privacyPolicyAcceptedAt?: Date;
+    privacyAcceptanceId?: string;
   }) {
     try {
       return await this.db.user.create({
@@ -37,6 +41,10 @@ export class UserRepository extends BaseRepository {
           userType: true,
           status: true,
           supabaseId: true,
+          termsAcceptedAt: true,
+          termsAcceptanceId: true,
+          privacyPolicyAcceptedAt: true,
+          privacyAcceptanceId: true,
         },
       });
     } catch (error) {
@@ -145,10 +153,36 @@ export class UserRepository extends BaseRepository {
           userType: true,
           status: true,
           supabaseId: true,
+          termsAcceptedAt: true,
+          termsAcceptanceId: true,
+          privacyPolicyAcceptedAt: true,
+          privacyAcceptanceId: true,
         },
       });
     } catch (error) {
       throw new DatabaseError("Failed to fetch session user", error);
+    }
+  }
+
+  /**
+   * Update Terms & Conditions acceptance
+   */
+  async updateTermsAcceptance(
+    userId: string,
+    data: {
+      termsAcceptedAt: Date;
+      termsAcceptanceId: string;
+      privacyPolicyAcceptedAt: Date;
+      privacyAcceptanceId: string;
+    }
+  ) {
+    try {
+      return await this.db.user.update({
+        where: { id: userId },
+        data,
+      });
+    } catch (error) {
+      throw new DatabaseError("Failed to update terms acceptance", error);
     }
   }
 }

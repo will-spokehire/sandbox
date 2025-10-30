@@ -146,6 +146,8 @@ export function VehicleListTable({
               <TableHead className="w-[120px]">Registration</TableHead>
               <TableHead className="w-[100px]">Status</TableHead>
               <TableHead className="w-[100px]">Price</TableHead>
+              <TableHead className="w-[90px]">Hourly</TableHead>
+              <TableHead className="w-[90px]">Daily</TableHead>
               <TableHead className="w-[140px]">Location</TableHead>
               <TableHead>Owner</TableHead>
               <TableHead className="w-[60px]">

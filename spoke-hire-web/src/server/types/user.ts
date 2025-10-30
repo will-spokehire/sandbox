@@ -12,6 +12,10 @@ import { type UserType, type UserStatus } from "@prisma/client";
 export interface SignInWithOtpParams {
   email: string;
   redirectTo?: string;
+  termsAccepted?: boolean;
+  termsAcceptanceId?: string;
+  privacyPolicyAccepted?: boolean;
+  privacyAcceptanceId?: string;
 }
 
 /**
@@ -20,6 +24,10 @@ export interface SignInWithOtpParams {
 export interface VerifyOtpParams {
   email: string;
   token: string;
+  termsAccepted?: boolean;
+  termsAcceptanceId?: string;
+  privacyPolicyAccepted?: boolean;
+  privacyAcceptanceId?: string;
 }
 
 /**
@@ -42,6 +50,10 @@ export interface UserWithDetails extends UserBasicInfo {
   createdAt: Date;
   updatedAt: Date;
   lastLoginAt: Date | null;
+  termsAcceptedAt: Date | null;
+  termsAcceptanceId: string | null;
+  privacyPolicyAcceptedAt: Date | null;
+  privacyAcceptanceId: string | null;
 }
 
 /**

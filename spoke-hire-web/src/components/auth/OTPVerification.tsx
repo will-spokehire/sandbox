@@ -60,6 +60,16 @@ export function OTPVerification() {
       await utils.auth.getSession.invalidate();
       await refreshSession();
       
+      // Check if user has accepted T&Cs
+      // If not, redirect to T&Cs acceptance page
+      if (!data.user.termsAcceptedAt || !data.user.privacyPolicyAcceptedAt) {
+        // Redirect to T&Cs acceptance page
+        setTimeout(() => {
+          router.push('/auth/accept-terms');
+        }, 100);
+        return;
+      }
+      
       // Redirect based on user type
       const redirectPath = data.user.userType === 'ADMIN' ? '/admin' : '/user/vehicles';
       

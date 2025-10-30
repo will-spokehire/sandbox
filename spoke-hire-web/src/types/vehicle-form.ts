@@ -10,6 +10,8 @@ export interface VehicleFormData {
   name: string;
   status: VehicleStatus | string; // string to allow user-specific status types
   price: number;
+  hourlyRate: number | null;
+  dailyRate: number | null;
   year: string;
   registration: string | null | undefined;
   makeId: string;
