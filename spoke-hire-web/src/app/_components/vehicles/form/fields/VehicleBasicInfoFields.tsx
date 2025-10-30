@@ -187,7 +187,7 @@ export function VehicleBasicInfoFields({
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => router.push(`${isAdmin ? '/admin' : '/user'}/vehicles/${registrationError.vehicleId}`)}
+                    onClick={() => router.push(`${isAdmin ? '/admin' : '/user'}/vehicles/${registrationError.vehicleId}?from=registration`)}
                   >
                     View {isAdmin ? 'This' : 'Your'} Vehicle
                   </Button>

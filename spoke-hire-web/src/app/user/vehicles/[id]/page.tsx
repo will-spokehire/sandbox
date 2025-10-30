@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "~/trpc/react";
 import { useRequireAuth } from "~/providers/auth-provider";
 import { UserVehicleMedia } from "./_components/UserVehicleMedia";
@@ -30,7 +30,11 @@ export default function UserVehicleDetailPage({
 }) {
   const { user, isLoading: isAuthLoading } = useRequireAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  
+  // Check if user came from registration flow
+  const fromRegistration = searchParams.get("from") === "registration";
   
   // Unwrap params Promise as required by Next.js 15
   const resolvedParams = use(params);
@@ -130,9 +134,9 @@ export default function UserVehicleDetailPage({
           </AlertDescription>
         </Alert>
         <div className="mt-4">
-          <Button onClick={() => router.push("/user/vehicles")}>
+          <Button onClick={() => router.push(fromRegistration ? "/user/vehicles/new" : "/user/vehicles")}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to My Vehicles
+            {fromRegistration ? "Back to Registration" : "Back to My Vehicles"}
           </Button>
         </div>
       </div>
@@ -150,10 +154,10 @@ export default function UserVehicleDetailPage({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => router.push("/user/vehicles")}
+                onClick={() => router.push(fromRegistration ? "/user/vehicles/new" : "/user/vehicles")}
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
+                {fromRegistration ? "Back to Registration" : "Back"}
               </Button>
               <div className="min-w-0 flex-1">
                 <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-50 truncate">

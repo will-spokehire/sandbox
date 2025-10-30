@@ -307,7 +307,7 @@ export function BasicInfoStep({ onComplete, defaultValues, onValidationChange }:
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => router.push(`/user/vehicles/${registrationError.vehicleId}`)}
+                      onClick={() => router.push(`/user/vehicles/${registrationError.vehicleId}?from=registration`)}
                     >
                       View This Vehicle
                     </Button>

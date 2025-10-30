@@ -456,6 +456,7 @@ export default function AddVehiclePage() {
         basicInfoData.makeId && 
         basicInfoData.modelId && 
         basicInfoData.year && 
+        basicInfoData.price &&
         technicalDetailsData.engineCapacity &&
         technicalDetailsData.numberOfSeats &&
         technicalDetailsData.steeringId &&
@@ -467,6 +468,7 @@ export default function AddVehiclePage() {
               makeId: basicInfoData.makeId,
               modelId: basicInfoData.modelId,
               year: basicInfoData.year,
+              price: basicInfoData.price,
               engineCapacity: technicalDetailsData.engineCapacity,
               numberOfSeats: technicalDetailsData.numberOfSeats,
               steeringId: technicalDetailsData.steeringId,
@@ -550,7 +552,7 @@ export default function AddVehiclePage() {
               Close
             </Button>
             {registrationErrorDialog?.isOwnVehicle && (
-              <Button onClick={() => router.push(`/user/vehicles/${registrationErrorDialog.vehicleId}`)}>
+              <Button onClick={() => router.push(`/user/vehicles/${registrationErrorDialog.vehicleId}?from=registration`)}>
                 View This Vehicle
               </Button>
             )}
