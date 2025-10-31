@@ -115,6 +115,8 @@ export interface UpdateVehicleData {
   name?: string;
   status?: VehicleStatus;
   price?: number | null;
+  hourlyRate?: number | null;
+  dailyRate?: number | null;
   year?: string;
   registration?: string | null;
   makeId?: string;
