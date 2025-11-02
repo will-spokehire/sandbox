@@ -2,6 +2,7 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 import { authRouter } from "~/server/api/routers/auth";
 import { vehicleRouter } from "~/server/api/routers/vehicle";
 import { userVehicleRouter } from "~/server/api/routers/user-vehicle";
+import { publicVehicleRouter } from "~/server/api/routers/public-vehicle";
 import { dealRouter } from "~/server/api/routers/deal";
 import { mediaRouter } from "~/server/api/routers/media";
 
@@ -14,6 +15,7 @@ export const appRouter = createTRPCRouter({
   auth: authRouter,
   vehicle: vehicleRouter,
   userVehicle: userVehicleRouter,
+  publicVehicle: publicVehicleRouter,
   deal: dealRouter,
   media: mediaRouter,
 });

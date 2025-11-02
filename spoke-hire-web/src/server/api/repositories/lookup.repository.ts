@@ -228,4 +228,300 @@ export class LookupRepository extends BaseRepository {
       throw new DatabaseError("Failed to fetch counties", error);
     }
   }
+
+  /**
+   * Get makes that have at least one published vehicle
+   */
+  async getMakesWithPublishedVehicles() {
+    try {
+      return await this.db.make.findMany({
+        where: {
+          isActive: true,
+          isPublished: true,
+          vehicles: {
+            some: {
+              status: "PUBLISHED",
+            },
+          },
+        },
+        orderBy: { name: "asc" },
+        select: {
+          id: true,
+          name: true,
+        },
+      });
+    } catch (error) {
+      throw new DatabaseError("Failed to fetch makes with published vehicles", error);
+    }
+  }
+
+  /**
+   * Get models by make ID that have at least one published vehicle
+   */
+  async getModelsByMakeWithPublishedVehicles(makeId: string) {
+    try {
+      return await this.db.model.findMany({
+        where: {
+          makeId,
+          isActive: true,
+          isPublished: true,
+          vehicles: {
+            some: {
+              status: "PUBLISHED",
+            },
+          },
+        },
+        orderBy: { name: "asc" },
+        select: {
+          id: true,
+          name: true,
+        },
+      });
+    } catch (error) {
+      throw new DatabaseError("Failed to fetch models with published vehicles", error);
+    }
+  }
+
+  /**
+   * Get collections that have at least one published vehicle
+   */
+  async getCollectionsWithPublishedVehicles() {
+    try {
+      return await this.db.collection.findMany({
+        where: {
+          isActive: true,
+          vehicles: {
+            some: {
+              vehicle: {
+                status: "PUBLISHED",
+              },
+            },
+          },
+        },
+        orderBy: { name: "asc" },
+        select: {
+          id: true,
+          name: true,
+          color: true,
+        },
+      });
+    } catch (error) {
+      throw new DatabaseError("Failed to fetch collections with published vehicles", error);
+    }
+  }
+
+  /**
+   * Get countries that have at least one published vehicle
+   */
+  async getCountriesWithPublishedVehicles() {
+    try {
+      return await this.db.country.findMany({
+        where: {
+          isActive: true,
+          users: {
+            some: {
+              vehicles: {
+                some: {
+                  status: "PUBLISHED",
+                },
+              },
+            },
+          },
+        },
+        orderBy: { name: "asc" },
+        select: {
+          id: true,
+          name: true,
+          code: true,
+        },
+      });
+    } catch (error) {
+      throw new DatabaseError("Failed to fetch countries with published vehicles", error);
+    }
+  }
+
+  /**
+   * Get distinct counties that have at least one published vehicle
+   */
+  async getCountiesWithPublishedVehicles(): Promise<string[]> {
+    try {
+      const result = await this.db.$queryRaw<Array<{ county: string }>>`
+        SELECT DISTINCT u.county
+        FROM "User" u
+        INNER JOIN "Vehicle" v ON v."ownerId" = u.id
+        WHERE u.county IS NOT NULL
+          AND v.status = 'PUBLISHED'
+        ORDER BY u.county ASC
+      `;
+      return result.map((r) => r.county).filter(Boolean);
+    } catch (error) {
+      throw new DatabaseError("Failed to fetch counties with published vehicles", error);
+    }
+  }
+
+  /**
+   * Get filter options based on current filters (cascading filters)
+   * Only returns options that would yield results given current filter state
+   */
+  async getPublicFilterOptions(filters: {
+    makeIds?: string[];
+    modelId?: string;
+    collectionIds?: string[];
+    yearFrom?: string;
+    yearTo?: string;
+    countryIds?: string[];
+    counties?: string[];
+  }) {
+    // Helper to build WHERE clause excluding specific filter
+    const buildWhereClause = (excludeFilter?: 'make' | 'model' | 'collection' | 'country' | 'county') => {
+      const conditions: any[] = [{ status: "PUBLISHED" }];
+
+      if (excludeFilter !== 'make' && filters.makeIds && filters.makeIds.length > 0) {
+        conditions.push({ makeId: { in: filters.makeIds } });
+      }
+      if (excludeFilter !== 'model' && filters.modelId) {
+        conditions.push({ modelId: filters.modelId });
+      }
+      if (excludeFilter !== 'collection' && filters.collectionIds && filters.collectionIds.length > 0) {
+        conditions.push({
+          collections: {
+            some: {
+              collectionId: { in: filters.collectionIds },
+            },
+          },
+        });
+      }
+      if (filters.yearFrom || filters.yearTo) {
+        const yearConditions: any = {};
+        if (filters.yearFrom) yearConditions.gte = filters.yearFrom;
+        if (filters.yearTo) yearConditions.lte = filters.yearTo;
+        conditions.push({ year: yearConditions });
+      }
+      if (excludeFilter !== 'country' && filters.countryIds && filters.countryIds.length > 0) {
+        conditions.push({
+          owner: {
+            countryId: { in: filters.countryIds },
+          },
+        });
+      }
+      if (excludeFilter !== 'county' && filters.counties && filters.counties.length > 0) {
+        conditions.push({
+          owner: {
+            county: { in: filters.counties },
+          },
+        });
+      }
+
+      return { AND: conditions };
+    };
+
+    try {
+      // Fetch distinct values in parallel
+      const [makes, models, collections, countries, counties] = await Promise.all([
+        // Get makes - exclude make filter so selected makes are still visible
+        this.db.make.findMany({
+          where: {
+            isActive: true,
+            isPublished: true,
+            vehicles: {
+              some: buildWhereClause('make'),
+            },
+          },
+          select: { id: true, name: true },
+          orderBy: { name: "asc" },
+        }),
+
+        // Get models - filter by makeIds but exclude model filter
+        this.db.model.findMany({
+          where: {
+            isActive: true,
+            isPublished: true,
+            ...(filters.makeIds && filters.makeIds.length > 0 ? { makeId: { in: filters.makeIds } } : {}),
+            vehicles: {
+              some: buildWhereClause('model'),
+            },
+          },
+          select: { id: true, name: true },
+          orderBy: { name: "asc" },
+        }),
+
+        // Get collections - exclude collection filter so selected collections are still visible
+        this.db.collection.findMany({
+          where: {
+            isActive: true,
+            vehicles: {
+              some: {
+                vehicle: buildWhereClause('collection'),
+              },
+            },
+          },
+          select: { id: true, name: true, color: true },
+          orderBy: { name: "asc" },
+        }),
+
+        // Get countries - exclude country filter so selected countries are still visible
+        this.db.country.findMany({
+          where: {
+            isActive: true,
+            users: {
+              some: {
+                vehicles: {
+                  some: buildWhereClause('country'),
+                },
+              },
+            },
+          },
+          select: { id: true, name: true, code: true },
+          orderBy: { name: "asc" },
+        }),
+
+        // Get counties - exclude county filter so selected counties are still visible
+        (async () => {
+          const conditions: string[] = ['v.status = \'PUBLISHED\'', 'u.county IS NOT NULL'];
+          
+          if (filters.makeIds && filters.makeIds.length > 0) {
+            const makeIdList = filters.makeIds.map(id => `'${id}'`).join(',');
+            conditions.push(`v."makeId" IN (${makeIdList})`);
+          }
+          if (filters.modelId) {
+            conditions.push(`v."modelId" = '${filters.modelId}'`);
+          }
+          if (filters.yearFrom) {
+            conditions.push(`v.year >= '${filters.yearFrom}'`);
+          }
+          if (filters.yearTo) {
+            conditions.push(`v.year <= '${filters.yearTo}'`);
+          }
+          if (filters.countryIds && filters.countryIds.length > 0) {
+            const countryIdList = filters.countryIds.map(id => `'${id}'`).join(',');
+            conditions.push(`u."countryId" IN (${countryIdList})`);
+          }
+          // Exclude county filter - don't filter by county when fetching counties
+
+          const whereClause = conditions.join(' AND ');
+          
+          const query = `
+            SELECT DISTINCT u.county
+            FROM "User" u
+            INNER JOIN "Vehicle" v ON v."ownerId" = u.id
+            WHERE ${whereClause}
+            ORDER BY u.county ASC
+          `;
+
+          const result = await this.db.$queryRawUnsafe<Array<{ county: string }>>(query);
+          return result.map((r) => r.county).filter(Boolean);
+        })(),
+      ]);
+
+      return {
+        makes,
+        models,
+        collections,
+        countries,
+        counties,
+      };
+    } catch (error) {
+      throw new DatabaseError("Failed to fetch dynamic filter options", error);
+    }
+  }
 }

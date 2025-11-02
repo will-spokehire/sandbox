@@ -101,11 +101,14 @@ export class VehicleRepository extends BaseRepository {
           },
           media: {
             where: {
-              isPrimary: true,
               isVisible: true,
               status: "READY",
+              type: "IMAGE",
             },
-            take: 1,
+            orderBy: [
+              { isPrimary: "desc" },
+              { order: "asc" },
+            ],
             select: {
               id: true,
               publishedUrl: true,
