@@ -1,10 +1,10 @@
-import { use } from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/server";
+import { db } from "~/server/db";
 import { PublicVehicleMediaSection } from "./_components/PublicVehicleMediaSection";
 import { PublicVehicleBasicInfo } from "./_components/PublicVehicleBasicInfo";
 import { VehicleDetailBreadcrumbs } from "./_components/VehicleDetailBreadcrumbs";
@@ -14,6 +14,45 @@ interface PageProps {
   params: Promise<{
     id: string;
   }>;
+}
+
+/**
+ * Enable Incremental Static Regeneration (ISR)
+ * Revalidate every hour to keep content fresh while benefiting from static generation
+ */
+export const revalidate = 3600; // 1 hour
+
+/**
+ * Generate static params for popular vehicles at build time
+ * This pre-renders the most important vehicle pages for better SEO and performance
+ * 
+ * Note: Uses Prisma directly to avoid tRPC header issues during build
+ */
+export async function generateStaticParams() {
+  try {
+    // Fetch top 50 most recently published vehicles to pre-render at build time
+    // Use Prisma directly instead of tRPC to avoid headers() issues during build
+    const vehicles = await db.vehicle.findMany({
+      where: {
+        status: "PUBLISHED",
+      },
+      select: {
+        id: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 50,
+    });
+
+    return vehicles.map((vehicle) => ({
+      id: vehicle.id,
+    }));
+  } catch (error) {
+    console.error("Failed to generate static params for vehicles:", error);
+    // Return empty array to allow dynamic rendering as fallback
+    return [];
+  }
 }
 
 /**
@@ -99,11 +138,72 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  // Generate JSON-LD structured data
+  // Generate JSON-LD structured data with BreadcrumbList
   const appUrl = getAppUrl();
   const primaryImage = vehicle.media.find((m) => m.isPrimary)?.publishedUrl ?? 
                        vehicle.media[0]?.publishedUrl ?? 
                        vehicle.media[0]?.originalUrl;
+  
+  // Build breadcrumb list for structured data
+  const breadcrumbItems = [];
+  
+  // Always start with home
+  breadcrumbItems.push({
+    "@type": "ListItem",
+    position: 1,
+    name: "Home",
+    item: appUrl,
+  });
+  
+  // Add vehicles catalog
+  breadcrumbItems.push({
+    "@type": "ListItem",
+    position: 2,
+    name: "Vehicles",
+    item: `${appUrl}/vehicles`,
+  });
+  
+  // Add location if available
+  if (vehicle.owner.country) {
+    const locationParts: string[] = [];
+    if (vehicle.owner.city) locationParts.push(vehicle.owner.city);
+    if (vehicle.owner.county) locationParts.push(vehicle.owner.county);
+    if (locationParts.length === 0 && vehicle.owner.country) {
+      locationParts.push(vehicle.owner.country.name);
+    }
+    const locationString = locationParts.join(", ");
+    
+    breadcrumbItems.push({
+      "@type": "ListItem",
+      position: 3,
+      name: locationString || vehicle.owner.country.name,
+      item: `${appUrl}/vehicles?countryIds=${vehicle.owner.country.id}`,
+    });
+  }
+  
+  // Add make
+  breadcrumbItems.push({
+    "@type": "ListItem",
+    position: breadcrumbItems.length + 1,
+    name: vehicle.make.name,
+    item: `${appUrl}/vehicles?makeIds=${vehicle.make.id}`,
+  });
+  
+  // Add model
+  breadcrumbItems.push({
+    "@type": "ListItem",
+    position: breadcrumbItems.length + 1,
+    name: vehicle.model.name,
+    item: `${appUrl}/vehicles?makeIds=${vehicle.make.id}&modelId=${vehicle.model.id}`,
+  });
+  
+  // Add current page
+  breadcrumbItems.push({
+    "@type": "ListItem",
+    position: breadcrumbItems.length + 1,
+    name: `${vehicle.year} ${vehicle.make.name} ${vehicle.model.name}`,
+    item: `${appUrl}/vehicles/${vehicle.id}`,
+  });
   
   const structuredData = {
     "@context": "https://schema.org",
@@ -139,13 +239,26 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
       } : null,
     ].filter(Boolean),
   };
+  
+  // BreadcrumbList structured data
+  const breadcrumbStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: breadcrumbItems,
+  };
 
   return (
     <>
-      {/* JSON-LD Structured Data */}
+      {/* JSON-LD Structured Data - Product */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      
+      {/* JSON-LD Structured Data - BreadcrumbList */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbStructuredData) }}
       />
 
       <div className="min-h-screen bg-background">

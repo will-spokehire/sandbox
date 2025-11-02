@@ -4,30 +4,45 @@ import { useEffect, useMemo, Suspense } from "react";
 import { toast } from "sonner";
 import { api } from "~/trpc/react";
 import { usePublicVehicleFiltersContext } from "~/contexts/PublicVehicleFiltersContext";
-import { usePublicVehiclePageTitle } from "~/hooks/usePublicVehiclePageTitle";
 import { PublicVehicleFilters } from "./_components/PublicVehicleFilters";
 import { PublicVehicleBreadcrumbs } from "./_components/PublicVehicleBreadcrumbs";
 import { PublicVehicleGrid } from "./_components/PublicVehicleGrid";
 import { Button } from "~/components/ui/button";
 import { PageLoading } from "~/components/loading";
 
+interface VehicleData {
+  vehicles: any[];
+  items: any[];
+  nextCursor?: string | undefined;
+  totalCount: number;
+}
+
+interface PublicVehiclesCatalogContentProps {
+  initialData: VehicleData;
+  serverTitles: {
+    h1: string;
+    h2: string;
+  };
+  serverFilterOptions: any;
+}
+
 /**
  * Public Vehicles Catalog Content
  * 
  * Displays published vehicles with filters.
- * Client component for interactivity.
+ * Client component for interactivity with SSR initial data.
  */
-function PublicVehiclesCatalogContent() {
+function PublicVehiclesCatalogContent({ initialData, serverTitles, serverFilterOptions }: PublicVehiclesCatalogContentProps) {
   const { filters, updateFilters, clearFilters, hasActiveFilters } = usePublicVehicleFiltersContext();
   
-  // Generate dynamic page titles based on filters
-  const { h1, h2 } = usePublicVehiclePageTitle(filters);
+  // Use server-rendered titles (no client-side fetch needed!)
+  const { h1, h2 } = serverTitles;
 
   // Pagination settings
   const itemsPerPage = 30;
   const skip = ((filters.page ?? 1) - 1) * itemsPerPage;
 
-  // Fetch vehicles
+  // Fetch vehicles with initial data from server
   const {
     data,
     isLoading,
@@ -50,6 +65,8 @@ function PublicVehiclesCatalogContent() {
     },
     {
       staleTime: 30000, // 30 seconds
+      // Use initial data from server-side render
+      initialData: initialData as any,
     }
   );
 
@@ -91,7 +108,7 @@ function PublicVehiclesCatalogContent() {
       <div className="container mx-auto px-4 py-8 md:py-12">
         <div className="space-y-6">
           {/* Breadcrumbs - Show active filters path */}
-          <PublicVehicleBreadcrumbs />
+          <PublicVehicleBreadcrumbs serverFilterOptions={serverFilterOptions} />
 
           {/* Filters */}
           <PublicVehicleFilters />
@@ -221,13 +238,17 @@ function PublicVehiclesCatalogContent() {
 /**
  * Public Vehicles Catalog Page
  * 
- * Public-facing vehicle catalog with SEO optimization.
+ * Public-facing vehicle catalog with SSR and SEO optimization.
  * No authentication required.
  */
-export default function PublicVehiclesPage() {
+export default function PublicVehiclesPageContent({ initialData, serverTitles, serverFilterOptions }: PublicVehiclesCatalogContentProps) {
   return (
     <Suspense fallback={<PageLoading />}>
-      <PublicVehiclesCatalogContent />
+      <PublicVehiclesCatalogContent 
+        initialData={initialData}
+        serverTitles={serverTitles}
+        serverFilterOptions={serverFilterOptions}
+      />
     </Suspense>
   );
 }

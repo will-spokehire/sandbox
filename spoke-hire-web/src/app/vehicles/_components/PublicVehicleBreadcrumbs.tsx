@@ -1,8 +1,11 @@
 "use client";
 
 import { usePublicVehicleFiltersContext } from "~/contexts/PublicVehicleFiltersContext";
-import { api } from "~/trpc/react";
 import { VehicleBreadcrumbs, type BreadcrumbSegment } from "~/components/vehicles/VehicleBreadcrumbs";
+
+interface PublicVehicleBreadcrumbsProps {
+  serverFilterOptions: any;
+}
 
 /**
  * Public Vehicle Catalog Breadcrumbs
@@ -11,25 +14,14 @@ import { VehicleBreadcrumbs, type BreadcrumbSegment } from "~/components/vehicle
  * Home > Vehicles > Country > County > Make > Model > Decade > Collections
  * 
  * Each level is clickable - clicking removes all filters to the right.
+ * 
+ * Uses server-provided filter options for instant rendering (no client fetch).
  */
-export function PublicVehicleBreadcrumbs() {
+export function PublicVehicleBreadcrumbs({ serverFilterOptions }: PublicVehicleBreadcrumbsProps) {
   const { filters, updateFilters } = usePublicVehicleFiltersContext();
 
-  // Fetch current filter options to get names for IDs
-  const { data: filterOptions } = api.publicVehicle.getFilterOptions.useQuery(
-    {
-      makeIds: filters.makeIds,
-      modelId: filters.modelId,
-      collectionIds: filters.collectionIds,
-      yearFrom: filters.yearFrom,
-      yearTo: filters.yearTo,
-      countryIds: filters.countryIds,
-      counties: filters.counties,
-    },
-    {
-      staleTime: 30000,
-    }
-  );
+  // Use server-provided filter options (no client-side fetch needed!)
+  const filterOptions = serverFilterOptions;
 
   // Build breadcrumb segments in hierarchical order
   const segments: Array<{
