@@ -73,7 +73,7 @@ export function PublicVehicleCard({ vehicle }: PublicVehicleCardProps) {
 
   return (
     <Link href={`/vehicles/${vehicle.id}`} className="group block">
-      <Card className="overflow-hidden transition-shadow hover:shadow-lg h-full flex flex-col p-0">
+      <Card className="overflow-hidden transition-shadow hover:shadow-lg h-full flex flex-col gap-0 p-0">
         {/* Image with Navigation */}
         <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
           <Image
@@ -83,6 +83,13 @@ export function PublicVehicleCard({ vehicle }: PublicVehicleCardProps) {
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover transition-transform group-hover:scale-105"
           />
+
+          {/* Image Counter - Bottom right */}
+          {hasMultipleImages && (
+            <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-md">
+              {currentImageIndex + 1} / {images.length}
+            </div>
+          )}
 
           {/* Navigation Arrows - Show only on hover */}
           {hasMultipleImages && (
@@ -105,17 +112,16 @@ export function PublicVehicleCard({ vehicle }: PublicVehicleCardProps) {
           )}
         </div>
 
-        <div className="p-4 space-y-3 flex-1 flex flex-col">
+        {/* Content Area - Manual padding instead of CardContent */}
+        <div className="p-4 flex-1 flex flex-col">
           {/* Vehicle Name */}
-          <div>
-            <h3 className="font-semibold text-lg leading-tight group-hover:text-primary transition-colors">
-              {vehicle.year} {vehicle.make.name} {vehicle.model.name}
-            </h3>
-          </div>
+          <h3 className="font-semibold text-lg leading-tight group-hover:text-primary transition-colors mb-2">
+            {vehicle.year} {vehicle.make.name} {vehicle.model.name}
+          </h3>
 
           {/* Location */}
           {location && (
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-3">
               <MapPin className="h-4 w-4 flex-shrink-0" />
               <span className="truncate">{location}</span>
             </div>
