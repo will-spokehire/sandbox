@@ -156,81 +156,52 @@ export class VehicleService {
     sortByDistance = false,
     includeTotalCount = false
   ): Promise<{ vehicles: VehicleWithRelations[]; totalCount?: number }> {
-    try {
-      // Build and execute distance query
-      const query = this.queryBuilder.buildDistanceQuery({
-        userLatitude: userLat,
-        userLongitude: userLon,
-        maxDistanceMiles,
-        filters,
-        limit,
-        skip,
-        sortBy,
-        sortOrder,
-        sortByDistance,
-      });
+    // Build and execute distance query
+    const query = this.queryBuilder.buildDistanceQuery({
+      userLatitude: userLat,
+      userLongitude: userLon,
+      maxDistanceMiles,
+      filters,
+      limit,
+      skip,
+      sortBy,
+      sortOrder,
+      sortByDistance,
+    });
 
-      const rawVehicles = await this.repository.queryRaw<{ id: string; distance: number }>(query);
+    const rawVehicles = await this.repository.queryRaw<{ id: string; distance: number }>(query);
 
-      // Fetch related data for each vehicle
-      const vehicleIds = rawVehicles.map((v) => v.id);
-      let vehicles: (VehicleWithRelations & { distance: number })[] = [];
-      
-      if (vehicleIds.length > 0) {
-        const vehiclesWithRelations = await this.repository.findManyByIds(vehicleIds);
+    // Fetch related data for each vehicle
+    const vehicleIds = rawVehicles.map((v) => v.id);
+    let vehicles: (VehicleWithRelations & { distance: number })[] = [];
+    
+    if (vehicleIds.length > 0) {
+      const vehiclesWithRelations = await this.repository.findManyByIds(vehicleIds);
 
-        // Merge distance data with relations, maintaining order
-        const vehicleMap = new Map(vehiclesWithRelations.map((v) => [v.id, v]));
-        vehicles = rawVehicles
-          .map((rv) => {
-            const vehicle = vehicleMap.get(rv.id);
-            return vehicle ? { ...vehicle, distance: rv.distance } : null;
-          })
-          .filter((v) => v !== null);
-      }
-
-      // Get total count if requested
-      let totalCount: number | undefined;
-      if (includeTotalCount) {
-        const countQuery = this.queryBuilder.buildDistanceCountQuery(
-          userLat,
-          userLon,
-          maxDistanceMiles,
-          filters
-        );
-        const countResult = await this.repository.queryRaw<{ count: bigint }>(countQuery);
-        totalCount = Number(countResult[0]?.count ?? 0);
-      }
-
-      return { vehicles, totalCount };
-    } catch (error) {
-      // Check if it's a PostGIS-related error (function not found, extension not installed, etc.)
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      const isPostGISError = 
-        errorMessage.includes('postgis') ||
-        errorMessage.includes('ST_Distance') ||
-        errorMessage.includes('ST_MakePoint') ||
-        errorMessage.includes('ST_DWithin') ||
-        errorMessage.includes('function st_') ||
-        errorMessage.includes('geometry') && errorMessage.includes('does not exist');
-
-      if (isPostGISError) {
-        console.warn('PostGIS not available, falling back to standard query without distance filtering');
-        // Fallback to standard query without distance filtering
-        return await this.listStandard(
-          filters,
-          limit,
-          skip,
-          undefined,
-          sortBy === "distance" ? "createdAt" : sortBy, // Can't sort by distance without PostGIS
-          sortOrder,
-          includeTotalCount
-        );
-      }
-
-      // Re-throw non-PostGIS errors
-      throw error;
+      // Merge distance data with relations, maintaining order
+      const vehicleMap = new Map(vehiclesWithRelations.map((v) => [v.id, v]));
+      vehicles = rawVehicles
+        .map((rv) => {
+          const vehicle = vehicleMap.get(rv.id);
+          return vehicle ? { ...vehicle, distance: rv.distance } : null;
+        })
+        .filter((v) => v !== null);
     }
+
+    // Get total count if requested
+    let totalCount: number | undefined;
+    if (includeTotalCount) {
+      const countQuery = this.queryBuilder.buildDistanceCountQuery(
+        userLat,
+        userLon,
+        maxDistanceMiles,
+        filters
+      );
+      const countResult = await this.repository.queryRaw<{ count: bigint }>(countQuery);
+      totalCount = Number(countResult[0]?.count ?? 0);
+    }
+
+    return { vehicles, totalCount };
   }
 
   /**
