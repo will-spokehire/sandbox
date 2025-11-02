@@ -7,8 +7,7 @@ import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/server";
 import { PublicVehicleMediaSection } from "./_components/PublicVehicleMediaSection";
 import { PublicVehicleBasicInfo } from "./_components/PublicVehicleBasicInfo";
-import { VehicleLocation } from "./_components/VehicleLocation";
-import { VehicleCollectionsDisplay } from "~/components/vehicles/VehicleCollectionsDisplay";
+import { VehicleDetailBreadcrumbs } from "./_components/VehicleDetailBreadcrumbs";
 import { getAppUrl } from "~/lib/app-url";
 
 interface PageProps {
@@ -128,11 +127,6 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
         name: "Year",
         value: vehicle.year,
       },
-      vehicle.registration ? {
-        "@type": "PropertyValue",
-        name: "Registration",
-        value: vehicle.registration,
-      } : null,
       vehicle.engineCapacity ? {
         "@type": "PropertyValue",
         name: "Engine Capacity",
@@ -169,45 +163,41 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 md:py-12">
+        {/* Breadcrumbs */}
+        <VehicleDetailBreadcrumbs vehicle={vehicle} />
+
         {/* Vehicle Title */}
         <header className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
             {vehicle.year} {vehicle.make.name} {vehicle.model.name}
           </h1>
-          {vehicle.registration && (
-            <p className="text-lg text-muted-foreground font-mono">
-              {vehicle.registration}
-            </p>
-          )}
         </header>
 
         {/* Two-Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-          {/* Left Column - Media Gallery (2/3 width on desktop) */}
+          {/* Left Column - Media Gallery & Description (2/3 width on desktop) */}
           <div className="lg:col-span-2 space-y-6">
             <section aria-label="Vehicle gallery">
               <h2 className="sr-only">Gallery</h2>
               <PublicVehicleMediaSection vehicle={vehicle} />
             </section>
+
+            {/* Description Section */}
+            {vehicle.description && (
+              <section aria-label="Vehicle description" className="prose prose-slate dark:prose-invert max-w-none">
+                <h2 className="text-2xl font-semibold mb-4">Description</h2>
+                <div className="text-muted-foreground whitespace-pre-line leading-relaxed">
+                  {vehicle.description}
+                </div>
+              </section>
+            )}
           </div>
 
           {/* Right Column - Details (1/3 width on desktop) */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className="lg:col-span-1">
             <section aria-label="Vehicle specifications">
               <h2 className="sr-only">Specifications</h2>
               <PublicVehicleBasicInfo vehicle={vehicle} />
-            </section>
-
-            {vehicle.collections && vehicle.collections.length > 0 && (
-              <section aria-label="Vehicle collections">
-                <h2 className="sr-only">Collections</h2>
-                <VehicleCollectionsDisplay collections={vehicle.collections} />
-              </section>
-            )}
-
-            <section aria-label="Vehicle location">
-              <h2 className="sr-only">Location</h2>
-              <VehicleLocation owner={vehicle.owner} />
             </section>
           </div>
         </div>

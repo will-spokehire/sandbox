@@ -122,12 +122,11 @@ export const publicVehicleRouter = createTRPCRouter({
         throw new Error("Vehicle not found or not available");
       }
 
-      // Return vehicle with limited owner information (no contact details)
+      // Return vehicle with limited owner information (no contact details, no names)
       return {
         id: vehicle.id,
         name: vehicle.name,
         year: vehicle.year,
-        registration: vehicle.registration,
         status: vehicle.status,
         engineCapacity: vehicle.engineCapacity,
         numberOfSeats: vehicle.numberOfSeats,
@@ -145,14 +144,11 @@ export const publicVehicleRouter = createTRPCRouter({
         media: vehicle.media,
         specifications: vehicle.specifications,
         collections: vehicle.collections,
-        // Owner location only (no email, phone, or other contact info)
+        // Owner location only (no email, phone, names, or postcode)
         owner: {
           id: vehicle.owner.id,
-          firstName: vehicle.owner.firstName,
-          lastName: vehicle.owner.lastName,
           city: vehicle.owner.city,
           county: vehicle.owner.county,
-          postcode: vehicle.owner.postcode,
           country: vehicle.owner.country,
         },
       };

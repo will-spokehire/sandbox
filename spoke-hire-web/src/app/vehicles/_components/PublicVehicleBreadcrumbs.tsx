@@ -1,15 +1,14 @@
 "use client";
 
-import { ChevronRight, Home } from "lucide-react";
-import Link from "next/link";
 import { usePublicVehicleFiltersContext } from "~/contexts/PublicVehicleFiltersContext";
 import { api } from "~/trpc/react";
+import { VehicleBreadcrumbs, type BreadcrumbSegment } from "~/components/vehicles/VehicleBreadcrumbs";
 
 /**
- * Public Vehicle Breadcrumbs
+ * Public Vehicle Catalog Breadcrumbs
  * 
  * Displays active filters as a cumulative breadcrumb path:
- * Home > Country > County > Make > Model > Decade > Collections
+ * Home > Vehicles > Country > County > Make > Model > Decade > Collections
  * 
  * Each level is clickable - clicking removes all filters to the right.
  */
@@ -32,7 +31,7 @@ export function PublicVehicleBreadcrumbs() {
     }
   );
 
-  // Build breadcrumb segments in hierarchical order with their filter level
+  // Build breadcrumb segments in hierarchical order
   const segments: Array<{
     label: string;
     level: 'country' | 'county' | 'make' | 'model' | 'decade' | 'collection';
@@ -57,8 +56,6 @@ export function PublicVehicleBreadcrumbs() {
       level: 'county',
     });
   }
-
-  // Note: City would go here when implemented
 
   // 3. Makes
   if (filters.makeIds && filters.makeIds.length > 0) {
@@ -103,11 +100,6 @@ export function PublicVehicleBreadcrumbs() {
     }
   }
 
-  // Don't show breadcrumbs if no filters are active
-  if (segments.length === 0) {
-    return null;
-  }
-
   // Handle clicking on a breadcrumb level - remove all filters to the right
   const handleBreadcrumbClick = (clickedLevel: string) => {
     const updates: any = {};
@@ -143,47 +135,15 @@ export function PublicVehicleBreadcrumbs() {
     updateFilters(updates);
   };
 
-  return (
-    <nav aria-label="Breadcrumb" className="mb-4">
-      <ol className="flex flex-wrap items-center gap-2 text-sm">
-        {/* Home */}
-        <li className="flex items-center gap-2">
-          <Link 
-            href="/vehicles" 
-            className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <Home className="h-4 w-4" />
-            <span>Vehicles</span>
-          </Link>
-        </li>
+  // Convert segments to BreadcrumbSegment format with click handlers
+  const breadcrumbSegments: BreadcrumbSegment[] = segments.map((segment, index) => {
+    const isLast = index === segments.length - 1;
+    
+    return {
+      label: segment.label,
+      onClick: isLast ? undefined : () => handleBreadcrumbClick(segment.level),
+    };
+  });
 
-        {/* All filter segments */}
-        {segments.map((segment, index) => {
-          const isLast = index === segments.length - 1;
-          
-          return (
-            <li key={index} className="flex items-center gap-2">
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              {isLast ? (
-                // Last segment - not clickable
-                <span className="font-medium text-foreground">
-                  {segment.label}
-                </span>
-              ) : (
-                // Intermediate segments - clickable to remove filters to the right
-                <button
-                  onClick={() => handleBreadcrumbClick(segment.level)}
-                  className="font-medium text-foreground hover:text-primary hover:underline transition-colors cursor-pointer"
-                  title={`Keep only filters up to ${segment.label}`}
-                >
-                  {segment.label}
-                </button>
-              )}
-            </li>
-          );
-        })}
-      </ol>
-    </nav>
-  );
+  return <VehicleBreadcrumbs segments={breadcrumbSegments} />;
 }
-
