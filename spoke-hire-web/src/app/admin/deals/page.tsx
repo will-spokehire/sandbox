@@ -1,9 +1,10 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, Mail, Archive, ArchiveRestore, Car, User, Plus, Pencil, MoreHorizontal } from "lucide-react";
 import { format } from "date-fns";
+import type { DealStatus } from "@prisma/client";
 import { useRequireAdmin } from "~/providers/auth-provider";
 import { Button } from "~/components/ui/button";
 import {
@@ -40,6 +41,7 @@ function DealsListContent() {
   const { user, isLoading: isAuthLoading } = useRequireAdmin();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const utils = api.useUtils();
 
   // Dialog state
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -47,6 +49,11 @@ function DealsListContent() {
 
   // Get archived status from URL (default to false - show active)
   const showArchived = searchParams.get("archived") === "true";
+
+  // Clear any old cached queries on mount (fixes enum migration issues)
+  useEffect(() => {
+    void utils.deal.list.invalidate();
+  }, [utils.deal.list]);
 
   // Fetch deals with pagination
   const {
@@ -58,7 +65,8 @@ function DealsListContent() {
   } = api.deal.list.useInfiniteQuery(
     {
       limit: 20,
-      status: showArchived ? "ARCHIVED" : "ACTIVE",
+      // Only filter by status if showing archived, otherwise show all non-archived statuses
+      status: showArchived ? "ARCHIVED" : undefined,
     },
     {
       enabled: !isAuthLoading && !!user,
@@ -89,7 +97,7 @@ function DealsListContent() {
   };
 
   const getStatusBadge = (status: string) => {
-    const config = getDealStatusConfig(status as "ACTIVE" | "ARCHIVED");
+    const config = getDealStatusConfig(status as DealStatus);
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
@@ -203,6 +211,7 @@ function DealsListContent() {
                     <TableRow>
                       <TableHead>Deal Name</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Company</TableHead>
                       <TableHead>Vehicles</TableHead>
                       <TableHead>Recipients</TableHead>
                       <TableHead>Created</TableHead>
@@ -214,6 +223,7 @@ function DealsListContent() {
                       <TableRow key={i}>
                         <TableCell><Skeleton className="h-5 w-48" /></TableCell>
                         <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                        <TableCell><Skeleton className="h-5 w-32" /></TableCell>
                         <TableCell><Skeleton className="h-5 w-12" /></TableCell>
                         <TableCell><Skeleton className="h-5 w-12" /></TableCell>
                         <TableCell><Skeleton className="h-5 w-24" /></TableCell>
@@ -360,6 +370,7 @@ function DealsListContent() {
                   <TableRow>
                     <TableHead>Deal Name</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Company</TableHead>
                     <TableHead>Vehicles</TableHead>
                     <TableHead>Recipients</TableHead>
                     <TableHead>Created</TableHead>
@@ -387,6 +398,13 @@ function DealsListContent() {
                           )}
                         </TableCell>
                         <TableCell className="cursor-pointer" onClick={() => handleView(deal.id)}>{getStatusBadge(deal.status)}</TableCell>
+                        <TableCell className="cursor-pointer" onClick={() => handleView(deal.id)}>
+                          {deal.clientContact?.company ? (
+                            <span className="text-sm">{deal.clientContact.company}</span>
+                          ) : (
+                            <span className="text-sm text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
                         <TableCell className="cursor-pointer" onClick={() => handleView(deal.id)}>
                           <Badge variant="secondary">
                             {deal._count.vehicles}

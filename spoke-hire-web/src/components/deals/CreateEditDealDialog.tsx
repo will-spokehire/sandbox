@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -14,11 +14,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import { Label } from "~/components/ui/label";
+import { Separator } from "~/components/ui/separator";
 import { api } from "~/trpc/react";
+import { UserSearchSelect } from "~/components/shared/UserSearchSelect";
+import { CreateContactDialog } from "~/components/shared/CreateContactDialog";
+import { UserPlus } from "lucide-react";
 
 const createDealSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters").max(100, "Name must be less than 100 characters"),
@@ -27,6 +38,12 @@ const createDealSchema = z.object({
   location: z.string().optional(),
   brief: z.string().optional(),
   fee: z.string().optional(),
+  clientContactId: z.string().optional(),
+  fullQuote: z.number().min(0).max(999999.99).nullable().optional(),
+  spokeFee: z.number().min(0).max(999999.99).nullable().optional(),
+  baselineFee: z.number().min(0).max(999999.99).nullable().optional(),
+  notes: z.string().max(2000).optional(),
+  status: z.enum(["OPTIONS", "CONTRACTS_INVOICE", "COMPLETE", "POSTPONED", "ABANDONED", "ARCHIVED"]).optional(),
 });
 
 type CreateDealFormData = z.infer<typeof createDealSchema>;
@@ -45,6 +62,7 @@ export function CreateEditDealDialog({
   dealId,
 }: CreateEditDealDialogProps) {
   const utils = api.useUtils();
+  const [showCreateContactDialog, setShowCreateContactDialog] = useState(false);
 
   const form = useForm<CreateDealFormData>({
     resolver: zodResolver(createDealSchema),
@@ -55,8 +73,19 @@ export function CreateEditDealDialog({
       location: "",
       brief: "",
       fee: "",
+      clientContactId: "",
+      fullQuote: undefined,
+      spokeFee: undefined,
+      baselineFee: undefined,
+      notes: "",
+      status: "OPTIONS",
     },
   });
+
+  // Handle contact creation
+  const handleContactCreated = (contactId: string) => {
+    form.setValue("clientContactId", contactId);
+  };
 
   // Fetch existing deal data when editing
   const { data: existingDeal, isLoading: isLoadingDeal } = api.deal.getById.useQuery(
@@ -74,6 +103,12 @@ export function CreateEditDealDialog({
         location: existingDeal.location ?? "",
         brief: existingDeal.brief ?? "",
         fee: existingDeal.fee ?? "",
+        clientContactId: existingDeal.clientContactId ?? "",
+        fullQuote: existingDeal.fullQuote ? Number(existingDeal.fullQuote) : undefined,
+        spokeFee: existingDeal.spokeFee ? Number(existingDeal.spokeFee) : undefined,
+        baselineFee: existingDeal.baselineFee ? Number(existingDeal.baselineFee) : undefined,
+        notes: existingDeal.notes ?? "",
+        status: existingDeal.status,
       });
     } else if (!dealId) {
       // Reset to empty when creating new deal
@@ -84,6 +119,12 @@ export function CreateEditDealDialog({
         location: "",
         brief: "",
         fee: "",
+        clientContactId: "",
+        fullQuote: undefined,
+        spokeFee: undefined,
+        baselineFee: undefined,
+        notes: "",
+        status: "OPTIONS",
       });
     }
   }, [existingDeal, dealId, form]);
@@ -137,6 +178,12 @@ export function CreateEditDealDialog({
         location: data.location,
         brief: data.brief,
         fee: data.fee,
+        clientContactId: data.clientContactId && data.clientContactId.trim() !== "" ? data.clientContactId : null,
+        fullQuote: data.fullQuote ?? null,
+        spokeFee: data.spokeFee ?? null,
+        baselineFee: data.baselineFee ?? null,
+        notes: data.notes,
+        status: data.status,
       });
     } else {
       // Create new deal
@@ -147,6 +194,11 @@ export function CreateEditDealDialog({
         location: data.location,
         brief: data.brief,
         fee: data.fee,
+        clientContactId: data.clientContactId && data.clientContactId.trim() !== "" ? data.clientContactId : undefined,
+        fullQuote: data.fullQuote,
+        spokeFee: data.spokeFee,
+        baselineFee: data.baselineFee,
+        notes: data.notes,
         vehicleIds: [], // Empty array - vehicles will be added later
         recipientIds: [], // Empty array - recipients will be added with vehicles
       });
@@ -155,13 +207,13 @@ export function CreateEditDealDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{dealId ? "Edit Deal" : "Create New Deal"}</DialogTitle>
           <DialogDescription>
             {dealId 
               ? "Update the deal details below."
-              : "Create a deal without vehicles. You can add vehicles later from the vehicles page."
+              : "Create a deal. You can add vehicles later from the vehicles page."
             }
           </DialogDescription>
         </DialogHeader>
@@ -237,6 +289,129 @@ export function CreateEditDealDialog({
             />
           </div>
 
+          <Separator className="my-4" />
+
+          {/* Client Information */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-medium">Client Information</h3>
+            
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="clientContact">Client Contact</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-auto py-0 px-2 text-xs"
+                  onClick={() => setShowCreateContactDialog(true)}
+                  disabled={isSubmitting}
+                >
+                  <UserPlus className="h-3 w-3 mr-1" />
+                  New
+                </Button>
+              </div>
+              <UserSearchSelect
+                value={form.watch("clientContactId")}
+                onValueChange={(value) => form.setValue("clientContactId", value)}
+                disabled={isSubmitting}
+                placeholder="Select client contact..."
+              />
+              <p className="text-xs text-muted-foreground">
+                The person/company requesting this job
+              </p>
+            </div>
+          </div>
+
+          <Separator className="my-4" />
+
+          {/* Financial Information */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-medium">Financial Information</h3>
+            
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="fullQuote">Full Quote (£)</Label>
+                <Input
+                  id="fullQuote"
+                  type="number"
+                  step="0.01"
+                  placeholder="e.g., 800"
+                  {...form.register("fullQuote", { valueAsNumber: true })}
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="spokeFee">Spoke Fee (£)</Label>
+                <Input
+                  id="spokeFee"
+                  type="number"
+                  step="0.01"
+                  placeholder="e.g., 300"
+                  {...form.register("spokeFee", { valueAsNumber: true })}
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="baselineFee">Baseline Fee (£)</Label>
+                <Input
+                  id="baselineFee"
+                  type="number"
+                  step="0.01"
+                  placeholder="e.g., 300"
+                  {...form.register("baselineFee", { valueAsNumber: true })}
+                  disabled={isSubmitting}
+                />
+              </div>
+            </div>
+          </div>
+
+          {dealId && (
+            <>
+              <Separator className="my-4" />
+
+              {/* Status - only show when editing */}
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select
+                  value={form.watch("status")}
+                  onValueChange={(value) => form.setValue("status", value as any)}
+                  disabled={isSubmitting}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="OPTIONS">Options</SelectItem>
+                    <SelectItem value="CONTRACTS_INVOICE">Contracts & Invoice</SelectItem>
+                    <SelectItem value="COMPLETE">Complete</SelectItem>
+                    <SelectItem value="POSTPONED">Postponed</SelectItem>
+                    <SelectItem value="ABANDONED">Abandoned</SelectItem>
+                    <SelectItem value="ARCHIVED">Archived</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
+          )}
+
+          <Separator className="my-4" />
+
+          {/* Notes */}
+          <div className="space-y-2">
+            <Label htmlFor="notes">Internal Notes</Label>
+            <Textarea
+              id="notes"
+              placeholder="Add any internal notes or updates about this deal..."
+              {...form.register("notes")}
+              disabled={isSubmitting}
+              rows={3}
+            />
+            <p className="text-xs text-muted-foreground">
+              For internal use only (not sent to clients)
+            </p>
+          </div>
+
           <DialogFooter>
             <Button
               type="button"
@@ -264,6 +439,13 @@ export function CreateEditDealDialog({
           </DialogFooter>
         </form>
       </DialogContent>
+
+      {/* Create Contact Dialog */}
+      <CreateContactDialog
+        open={showCreateContactDialog}
+        onOpenChange={setShowCreateContactDialog}
+        onContactCreated={handleContactCreated}
+      />
     </Dialog>
   );
 }

@@ -18,6 +18,10 @@ import {
   DEAL_VALIDATION_MESSAGES,
   DEAL_NAME_MIN_LENGTH,
   DEAL_NAME_MAX_LENGTH,
+  MIN_FINANCIAL_AMOUNT,
+  MAX_FINANCIAL_AMOUNT,
+  FINANCIAL_VALIDATION_MESSAGES,
+  MAX_NOTES_LENGTH,
 } from "../constants/deals";
 import { EmailService } from "./email.service";
 import { DealRepository } from "../repositories/deal.repository";
@@ -76,10 +80,26 @@ export class DealService {
    * Create a new deal
    */
   async createDeal(params: CreateDealParams) {
-    const { name, date, time, location, brief, fee, vehicleIds, recipientIds, createdById } = params;
+    const { name, date, time, location, brief, fee, clientContactId, fullQuote, spokeFee, baselineFee, notes, vehicleIds, recipientIds, createdById } = params;
 
     // Validate deal name
     this.validateDealName(name);
+    
+    // Validate financial fields if provided
+    this.validateFinancialFields({ fullQuote, spokeFee, baselineFee });
+    
+    // Validate client contact if provided
+    if (clientContactId) {
+      await this.validateClientContact(clientContactId);
+    }
+    
+    // Validate notes length if provided
+    if (notes && notes.length > MAX_NOTES_LENGTH) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: FINANCIAL_VALIDATION_MESSAGES.NOTES_TOO_LONG,
+      });
+    }
 
     // Validate vehicles count (allow empty for deals created without vehicles)
     if (vehicleIds.length > MAX_VEHICLES_PER_DEAL) {
@@ -131,7 +151,12 @@ export class DealService {
         location,
         brief,
         fee,
-        status: DealStatus.ACTIVE,
+        clientContactId,
+        fullQuote,
+        spokeFee,
+        baselineFee,
+        notes,
+        status: DealStatus.OPTIONS,
         createdById,
         vehicleIds,
         recipientIds,
@@ -176,6 +201,69 @@ export class DealService {
       throw new TRPCError({
         code: "BAD_REQUEST",
         message: DEAL_VALIDATION_MESSAGES.NAME_TOO_LONG,
+      });
+    }
+  }
+  
+  /**
+   * Validate financial fields
+   * @private
+   */
+  private validateFinancialFields(fields: { 
+    fullQuote?: number; 
+    spokeFee?: number; 
+    baselineFee?: number;
+  }) {
+    const { fullQuote, spokeFee, baselineFee } = fields;
+    
+    if (fullQuote !== undefined) {
+      if (fullQuote < MIN_FINANCIAL_AMOUNT || fullQuote > MAX_FINANCIAL_AMOUNT) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: fullQuote < MIN_FINANCIAL_AMOUNT 
+            ? FINANCIAL_VALIDATION_MESSAGES.NEGATIVE_AMOUNT 
+            : FINANCIAL_VALIDATION_MESSAGES.AMOUNT_TOO_LARGE,
+        });
+      }
+    }
+    
+    if (spokeFee !== undefined) {
+      if (spokeFee < MIN_FINANCIAL_AMOUNT || spokeFee > MAX_FINANCIAL_AMOUNT) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: spokeFee < MIN_FINANCIAL_AMOUNT 
+            ? FINANCIAL_VALIDATION_MESSAGES.NEGATIVE_AMOUNT 
+            : FINANCIAL_VALIDATION_MESSAGES.AMOUNT_TOO_LARGE,
+        });
+      }
+    }
+    
+    if (baselineFee !== undefined) {
+      if (baselineFee < MIN_FINANCIAL_AMOUNT || baselineFee > MAX_FINANCIAL_AMOUNT) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: baselineFee < MIN_FINANCIAL_AMOUNT 
+            ? FINANCIAL_VALIDATION_MESSAGES.NEGATIVE_AMOUNT 
+            : FINANCIAL_VALIDATION_MESSAGES.AMOUNT_TOO_LARGE,
+        });
+      }
+    }
+  }
+  
+  /**
+   * Validate client contact exists
+   * @private
+   */
+  private async validateClientContact(clientContactId: string) {
+    const user = await this.repository.db.user.findUnique({
+      where: { id: clientContactId },
+      select: { id: true },
+    });
+    
+    if (!user) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Client contact not found",
       });
     }
   }
@@ -267,7 +355,7 @@ export class DealService {
    * Update deal details
    */
   async updateDeal(dealId: string, params: UpdateDealParams) {
-    const { name, date, time, location, brief, fee } = params;
+    const { name, date, time, location, brief, fee, clientContactId, fullQuote, spokeFee, baselineFee, notes, status } = params;
 
     // Validate deal exists
     const deal = await this.repository.findById(dealId);
@@ -280,6 +368,24 @@ export class DealService {
     if (name !== undefined) {
       this.validateDealName(name);
     }
+    
+    // Validate financial fields if provided
+    this.validateFinancialFields({ fullQuote, spokeFee, baselineFee });
+    
+    // Validate client contact if provided
+    if (clientContactId !== undefined) {
+      if (clientContactId) {
+        await this.validateClientContact(clientContactId);
+      }
+    }
+    
+    // Validate notes length if provided
+    if (notes !== undefined && notes && notes.length > MAX_NOTES_LENGTH) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: FINANCIAL_VALIDATION_MESSAGES.NOTES_TOO_LONG,
+      });
+    }
 
     // Update deal with provided fields
     return await this.repository.updateDetails(dealId, {
@@ -289,6 +395,12 @@ export class DealService {
       location,
       brief,
       fee,
+      clientContactId,
+      fullQuote,
+      spokeFee,
+      baselineFee,
+      notes,
+      status,
     });
   }
 
@@ -315,7 +427,7 @@ export class DealService {
       throw new DealNotFoundError(dealId);
     }
 
-    return await this.repository.updateStatus(dealId, DealStatus.ACTIVE);
+    return await this.repository.updateStatus(dealId, DealStatus.OPTIONS);
   }
 
   /**

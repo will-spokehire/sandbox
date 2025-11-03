@@ -17,6 +17,11 @@ export interface CreateDealParams {
   location?: string;
   brief?: string;
   fee?: string;
+  clientContactId?: string;
+  fullQuote?: number;
+  spokeFee?: number;
+  baselineFee?: number;
+  notes?: string;
   vehicleIds: string[];
   recipientIds: string[];
   createdById: string;
@@ -32,6 +37,12 @@ export interface UpdateDealParams {
   location?: string;
   brief?: string;
   fee?: string;
+  clientContactId?: string;
+  fullQuote?: number;
+  spokeFee?: number;
+  baselineFee?: number;
+  notes?: string;
+  status?: DealStatus;
 }
 
 /**
@@ -104,6 +115,7 @@ export interface DealRecipient {
     firstName: string | null;
     lastName: string | null;
     phone: string | null;
+    company: string | null;
   };
 }
 
@@ -118,6 +130,19 @@ export interface DealWithDetails {
   location: string | null;
   brief: string | null;
   fee: string | null;
+  clientContactId: string | null;
+  clientContact: {
+    id: string;
+    email: string;
+    firstName: string | null;
+    lastName: string | null;
+    phone: string | null;
+    company: string | null;
+  } | null;
+  fullQuote: string | number | null;
+  spokeFee: string | number | null;
+  baselineFee: string | number | null;
+  notes: string | null;
   status: DealStatus;
   createdAt: Date;
   updatedAt: Date;
@@ -142,6 +167,10 @@ export interface DealSummary {
   id: string;
   name: string;
   status: DealStatus;
+  clientContact: {
+    company: string | null;
+  } | null;
+  fullQuote: string | number | null;
   createdAt: Date;
   vehicleCount: number;
   recipientCount: number;

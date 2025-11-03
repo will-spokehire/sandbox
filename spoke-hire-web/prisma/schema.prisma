@@ -4,9 +4,9 @@ generator client {
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
-    directUrl = env("DIRECT_URL")
+    provider  = "postgresql"
+    url       = env("DATABASE_URL")
+    directUrl = env("DIRECT_URL") // Can be empty string for local dev, required for production
 }
 
 // User Types
@@ -49,8 +49,12 @@ enum VehicleStatus {
 
 // Deal Status Enum
 enum DealStatus {
-  ACTIVE
-  ARCHIVED
+  OPTIONS           // Initial quote/options stage
+  CONTRACTS_INVOICE // Contracts sent and invoicing
+  COMPLETE          // Job completed successfully
+  POSTPONED         // Temporarily on hold
+  ABANDONED         // Deal fell through
+  ARCHIVED          // Old/archived deals
 }
 
 // Recipient Status Enum
@@ -92,6 +96,7 @@ model User {
     firstName         String?
     lastName          String?
     phone             String?
+    company           String?    // Company/organization name (e.g., "Pretend Agency")
     userType          UserType   @default(OWNER_ONLY) // Default to owner without account
     status            UserStatus @default(ACTIVE)
 
@@ -123,6 +128,7 @@ model User {
     // Relationships
     vehicles          Vehicle[]
     dealsCreated      Deal[]          @relation("DealsCreated")
+    dealsAsClient     Deal[]          @relation("ClientContact")
     dealRecipients    DealRecipient[]
 
     @@index([email])
@@ -132,6 +138,7 @@ model User {
     @@index([firstName])
     @@index([lastName])
     @@index([phone])
+    @@index([company])
     @@index([postcode])
     @@index([latitude, longitude])
     // Note: GIST spatial index on geoPoint is created via raw SQL migration
@@ -388,7 +395,19 @@ model Deal {
     brief       String?     // Production brief - free text
     fee         String?     // Fee guide (e.g., "£500-£750") - free text
     
-    status      DealStatus  @default(ACTIVE)
+    // Client Information
+    clientContactId String?  // Reference to User who is the client contact/hirer
+    clientContact   User?    @relation("ClientContact", fields: [clientContactId], references: [id])
+    
+    // Financial Information
+    fullQuote       Decimal? @db.Decimal(10,2) // Total quote amount in GBP
+    spokeFee        Decimal? @db.Decimal(10,2) // Spoke Hire's commission/fee in GBP
+    baselineFee     Decimal? @db.Decimal(10,2) // Base fee for vehicle owner in GBP
+    
+    // Internal Notes
+    notes       String?     @db.Text // Internal notes for tracking updates
+    
+    status      DealStatus  @default(OPTIONS)
     
     // Metadata
     createdById String
@@ -400,6 +419,7 @@ model Deal {
     
     @@index([status])
     @@index([createdById])
+    @@index([clientContactId])
     @@index([createdAt])
 }
 

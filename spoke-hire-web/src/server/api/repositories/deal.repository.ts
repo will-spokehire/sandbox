@@ -19,6 +19,11 @@ export interface CreateDealData {
   location?: string;
   brief?: string;
   fee?: string;
+  clientContactId?: string;
+  fullQuote?: number;
+  spokeFee?: number;
+  baselineFee?: number;
+  notes?: string;
   status: DealStatus;
   createdById: string;
   vehicleIds: string[];
@@ -46,6 +51,16 @@ export class DealRepository extends BaseRepository {
               email: true,
               firstName: true,
               lastName: true,
+            },
+          },
+          clientContact: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+              phone: true,
+              company: true,
             },
           },
           vehicles: {
@@ -94,6 +109,7 @@ export class DealRepository extends BaseRepository {
                   firstName: true,
                   lastName: true,
                   phone: true,
+                  company: true,
                 },
               },
             },
@@ -117,6 +133,9 @@ export class DealRepository extends BaseRepository {
       
       return {
         ...dealWithRelations,
+        fullQuote: dealWithRelations.fullQuote?.toString() ?? null,
+        spokeFee: dealWithRelations.spokeFee?.toString() ?? null,
+        baselineFee: dealWithRelations.baselineFee?.toString() ?? null,
         vehicles: dealWithRelations.vehicles.map((dealVehicle: any) => ({
           ...dealVehicle,
           vehicle: {
@@ -159,6 +178,11 @@ export class DealRepository extends BaseRepository {
               lastName: true,
             },
           },
+          clientContact: {
+            select: {
+              company: true,
+            },
+          },
           _count: {
             select: {
               vehicles: true,
@@ -187,6 +211,11 @@ export class DealRepository extends BaseRepository {
           location: data.location,
           brief: data.brief,
           fee: data.fee,
+          clientContactId: data.clientContactId,
+          fullQuote: data.fullQuote,
+          spokeFee: data.spokeFee,
+          baselineFee: data.baselineFee,
+          notes: data.notes,
           status: data.status,
           createdById: data.createdById,
           vehicles: data.vehicleIds.length > 0 ? {
@@ -252,6 +281,12 @@ export class DealRepository extends BaseRepository {
       location?: string;
       brief?: string;
       fee?: string;
+      clientContactId?: string;
+      fullQuote?: number;
+      spokeFee?: number;
+      baselineFee?: number;
+      notes?: string;
+      status?: DealStatus;
     }
   ) {
     try {
@@ -265,6 +300,16 @@ export class DealRepository extends BaseRepository {
               email: true,
               firstName: true,
               lastName: true,
+            },
+          },
+          clientContact: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+              phone: true,
+              company: true,
             },
           },
           _count: {

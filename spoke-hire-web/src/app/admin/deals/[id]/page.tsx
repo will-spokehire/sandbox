@@ -3,7 +3,7 @@
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ArrowLeft, Car, Archive, ArchiveRestore, MessageCircle, MoreHorizontal, Eye, User, Mail, Phone, Pencil } from "lucide-react";
+import { ArrowLeft, Car, Archive, ArchiveRestore, MessageCircle, MoreHorizontal, Eye, User, Mail, Phone, Pencil, Building2, DollarSign, StickyNote } from "lucide-react";
 import { format } from "date-fns";
 import { useRequireAdmin } from "~/providers/auth-provider";
 import { UserMenu } from "~/components/auth/UserMenu";
@@ -167,7 +167,7 @@ export default function DealDetailPage({
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        {deal.status === "ACTIVE" && (
+                        {deal.status !== "ARCHIVED" && (
                           <DropdownMenuItem
                             onClick={() => setShowEditDialog(true)}
                           >
@@ -176,7 +176,7 @@ export default function DealDetailPage({
                           </DropdownMenuItem>
                         )}
                         <DropdownMenuSeparator />
-                        {deal.status === "ACTIVE" ? (
+                        {deal.status !== "ARCHIVED" ? (
                           <DropdownMenuItem
                             onClick={() => void archive(deal.id)}
                           >
@@ -260,6 +260,142 @@ export default function DealDetailPage({
                 </div>
               </CardContent>
             </Card>
+
+            {/* Client Information Card */}
+            {deal.clientContact && (
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-5 w-5" />
+                    <CardTitle>Client Information</CardTitle>
+                  </div>
+                  <CardDescription>
+                    Details about the client/hirer for this job
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="rounded-lg border p-4 space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      {deal.clientContact.company && (
+                        <div>
+                          <p className="text-muted-foreground">Company</p>
+                          <p className="font-medium text-base">{deal.clientContact.company}</p>
+                        </div>
+                      )}
+                      {(deal.clientContact.firstName ?? deal.clientContact.lastName) && (
+                        <div>
+                          <p className="text-muted-foreground">Contact Person</p>
+                          <p className="font-medium text-base">
+                            {[deal.clientContact.firstName, deal.clientContact.lastName].filter(Boolean).join(" ")}
+                          </p>
+                        </div>
+                      )}
+                      <div>
+                        <p className="text-muted-foreground">Email</p>
+                        <p className="font-medium text-base">{deal.clientContact.email}</p>
+                      </div>
+                      {deal.clientContact.phone && (
+                        <div>
+                          <p className="text-muted-foreground">Phone</p>
+                          <p className="font-medium text-base">{deal.clientContact.phone}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Financial Summary Card */}
+            {(deal.fullQuote ?? deal.spokeFee ?? deal.baselineFee) && (
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="h-5 w-5" />
+                    <CardTitle>Financial Summary</CardTitle>
+                  </div>
+                  <CardDescription>
+                    Quote and fee breakdown
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="rounded-lg border p-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+                      {deal.fullQuote && (
+                        <div>
+                          <p className="text-muted-foreground mb-1">Full Quote</p>
+                          <p className="text-2xl font-bold text-primary">
+                            {new Intl.NumberFormat("en-GB", {
+                              style: "currency",
+                              currency: "GBP",
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            }).format(Number(deal.fullQuote))}
+                          </p>
+                        </div>
+                      )}
+                      {deal.spokeFee && (
+                        <div>
+                          <p className="text-muted-foreground mb-1">Spoke Fee</p>
+                          <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                            {new Intl.NumberFormat("en-GB", {
+                              style: "currency",
+                              currency: "GBP",
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            }).format(Number(deal.spokeFee))}
+                          </p>
+                        </div>
+                      )}
+                      {deal.baselineFee && (
+                        <div>
+                          <p className="text-muted-foreground mb-1">Baseline Fee</p>
+                          <p className="text-2xl font-bold">
+                            {new Intl.NumberFormat("en-GB", {
+                              style: "currency",
+                              currency: "GBP",
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            }).format(Number(deal.baselineFee))}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    {/* Margin Calculation */}
+                    {deal.fullQuote && deal.spokeFee && (
+                      <div className="mt-4 pt-4 border-t">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">Margin</span>
+                          <span className="font-semibold text-lg">
+                            {((Number(deal.spokeFee) / Number(deal.fullQuote)) * 100).toFixed(1)}%
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Internal Notes Card */}
+            {deal.notes && (
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <StickyNote className="h-5 w-5" />
+                    <CardTitle>Internal Notes</CardTitle>
+                  </div>
+                  <CardDescription>
+                    Private notes for tracking updates and context
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="rounded-lg border p-4 bg-muted/30">
+                    <p className="text-sm whitespace-pre-wrap">{deal.notes}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Vehicles Card */}
             <Card>

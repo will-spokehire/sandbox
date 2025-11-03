@@ -10,6 +10,7 @@ import { UserMenu } from "~/components/auth/UserMenu";
 import { useRequireAdmin } from "~/providers/auth-provider";
 import { cn } from "~/lib/utils";
 import { PageLoading } from "~/components/loading";
+import { api } from "~/trpc/react";
 
 interface NavItem {
   name: string;
@@ -75,10 +76,16 @@ export default function AdminLayout({
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const utils = api.useUtils();
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // Clear any old cached deal queries on mount (fixes enum migration issues)
+  useEffect(() => {
+    void utils.deal.list.invalidate();
+  }, [utils.deal.list]);
 
   if (isLoading || !user) {
     return <PageLoading />;

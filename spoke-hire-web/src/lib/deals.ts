@@ -12,10 +12,15 @@ import type { DealStatus } from "@prisma/client";
 export function getDealStatusConfig(status: DealStatus): {
   variant: "default" | "secondary" | "destructive" | "outline";
   label: string;
+  color: string;
 } {
-  const variants: Record<DealStatus, { variant: "default" | "secondary" | "destructive" | "outline"; label: string }> = {
-    ACTIVE: { variant: "default", label: "Active" },
-    ARCHIVED: { variant: "secondary", label: "Archived" },
+  const variants: Record<DealStatus, { variant: "default" | "secondary" | "destructive" | "outline"; label: string; color: string }> = {
+    OPTIONS: { variant: "default", label: "Options", color: "blue" },
+    CONTRACTS_INVOICE: { variant: "secondary", label: "Contracts & Invoice", color: "yellow" },
+    COMPLETE: { variant: "outline", label: "Complete", color: "green" },
+    POSTPONED: { variant: "secondary", label: "Postponed", color: "orange" },
+    ABANDONED: { variant: "destructive", label: "Abandoned", color: "red" },
+    ARCHIVED: { variant: "secondary", label: "Archived", color: "gray" },
   };
 
   return variants[status];

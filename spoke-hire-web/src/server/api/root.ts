@@ -5,6 +5,7 @@ import { userVehicleRouter } from "~/server/api/routers/user-vehicle";
 import { publicVehicleRouter } from "~/server/api/routers/public-vehicle";
 import { dealRouter } from "~/server/api/routers/deal";
 import { mediaRouter } from "~/server/api/routers/media";
+import { userRouter } from "~/server/api/routers/user";
 
 /**
  * This is the primary router for your server.
@@ -18,6 +19,7 @@ export const appRouter = createTRPCRouter({
   publicVehicle: publicVehicleRouter,
   deal: dealRouter,
   media: mediaRouter,
+  user: userRouter,
 });
 
 // export type definition of API

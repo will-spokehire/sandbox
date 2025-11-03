@@ -23,6 +23,9 @@ import {
   DEALS_DROPDOWN_LIMIT,
   DEAL_NAME_MIN_LENGTH,
   DEAL_NAME_MAX_LENGTH,
+  MIN_FINANCIAL_AMOUNT,
+  MAX_FINANCIAL_AMOUNT,
+  MAX_NOTES_LENGTH,
 } from "~/server/api/constants/deals";
 
 /**
@@ -31,7 +34,7 @@ import {
 const listDealsInputSchema = z.object({
   limit: z.number().min(1).max(DEALS_DROPDOWN_LIMIT).optional().default(DEALS_PAGE_LIMIT),
   cursor: z.string().optional(),
-  status: z.enum(["ACTIVE", "ARCHIVED"]).optional(),
+  status: z.enum(["OPTIONS", "CONTRACTS_INVOICE", "COMPLETE", "POSTPONED", "ABANDONED", "ARCHIVED"]).optional(),
 });
 
 const getDealByIdInputSchema = z.object({
@@ -45,6 +48,11 @@ const createDealInputSchema = z.object({
   location: z.string().optional(),
   brief: z.string().optional(),
   fee: z.string().optional(),
+  clientContactId: z.string().cuid().optional(),
+  fullQuote: z.number().min(MIN_FINANCIAL_AMOUNT).max(MAX_FINANCIAL_AMOUNT).optional(),
+  spokeFee: z.number().min(MIN_FINANCIAL_AMOUNT).max(MAX_FINANCIAL_AMOUNT).optional(),
+  baselineFee: z.number().min(MIN_FINANCIAL_AMOUNT).max(MAX_FINANCIAL_AMOUNT).optional(),
+  notes: z.string().max(MAX_NOTES_LENGTH).optional(),
   vehicleIds: z.array(z.string().cuid()).max(MAX_VEHICLES_PER_DEAL).optional().default([]),
   recipientIds: z.array(z.string().cuid()).max(MAX_RECIPIENTS_PER_DEAL).optional().default([]),
 });
@@ -68,11 +76,17 @@ const updateDealInputSchema = z.object({
   location: z.string().optional(),
   brief: z.string().optional(),
   fee: z.string().optional(),
+  clientContactId: z.string().cuid().nullable().optional(),
+  fullQuote: z.number().min(MIN_FINANCIAL_AMOUNT).max(MAX_FINANCIAL_AMOUNT).nullable().optional(),
+  spokeFee: z.number().min(MIN_FINANCIAL_AMOUNT).max(MAX_FINANCIAL_AMOUNT).nullable().optional(),
+  baselineFee: z.number().min(MIN_FINANCIAL_AMOUNT).max(MAX_FINANCIAL_AMOUNT).nullable().optional(),
+  notes: z.string().max(MAX_NOTES_LENGTH).nullable().optional(),
+  status: z.enum(["OPTIONS", "CONTRACTS_INVOICE", "COMPLETE", "POSTPONED", "ABANDONED", "ARCHIVED"]).optional(),
 });
 
 const updateDealStatusInputSchema = z.object({
   id: z.string().cuid(),
-  status: z.enum(["ACTIVE", "ARCHIVED"]),
+  status: z.enum(["OPTIONS", "CONTRACTS_INVOICE", "COMPLETE", "POSTPONED", "ABANDONED", "ARCHIVED"]),
 });
 
 const archiveDealInputSchema = z.object({

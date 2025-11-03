@@ -45,3 +45,48 @@ export const DEAL_VALIDATION_MESSAGES = {
 export const DEAL_NAME_MIN_LENGTH = 3;
 export const DEAL_NAME_MAX_LENGTH = 200;
 
+/**
+ * Financial field constraints (in GBP)
+ */
+export const MIN_FINANCIAL_AMOUNT = 0;
+export const MAX_FINANCIAL_AMOUNT = 999999.99;
+
+/**
+ * Notes constraints
+ */
+export const MAX_NOTES_LENGTH = 2000;
+
+/**
+ * Financial validation messages
+ */
+export const FINANCIAL_VALIDATION_MESSAGES = {
+  NEGATIVE_AMOUNT: "Financial amounts must be positive",
+  AMOUNT_TOO_LARGE: `Financial amounts cannot exceed £${MAX_FINANCIAL_AMOUNT.toLocaleString()}`,
+  INVALID_AMOUNT: "Invalid financial amount",
+  NOTES_TOO_LONG: `Notes cannot exceed ${MAX_NOTES_LENGTH} characters`,
+} as const;
+
+/**
+ * Deal status display names
+ */
+export const DEAL_STATUS_DISPLAY_NAMES = {
+  OPTIONS: "Options",
+  CONTRACTS_INVOICE: "Contracts & Invoice",
+  COMPLETE: "Complete",
+  POSTPONED: "Postponed",
+  ABANDONED: "Abandoned",
+  ARCHIVED: "Archived",
+} as const;
+
+/**
+ * Deal status badge colors
+ */
+export const DEAL_STATUS_COLORS = {
+  OPTIONS: "blue",
+  CONTRACTS_INVOICE: "yellow",
+  COMPLETE: "green",
+  POSTPONED: "orange",
+  ABANDONED: "red",
+  ARCHIVED: "gray",
+} as const;
+
