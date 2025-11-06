@@ -4,7 +4,7 @@
  * Types related to deal operations, creation, and management.
  */
 
-import { type DealStatus, type RecipientStatus } from "@prisma/client";
+import { type DealStatus, type RecipientStatus, type DealVehicleStatus } from "@prisma/client";
 import { type ListParams } from "./common";
 
 /**
@@ -46,6 +46,24 @@ export interface UpdateDealParams {
 }
 
 /**
+ * Update deal vehicle status parameters
+ */
+export interface UpdateDealVehicleStatusParams {
+  dealId: string;
+  vehicleId: string;
+  status: DealVehicleStatus;
+}
+
+/**
+ * Update deal vehicle fee parameters
+ */
+export interface UpdateDealVehicleFeeParams {
+  dealId: string;
+  vehicleId: string;
+  ownerRequestedFee: number | null;
+}
+
+/**
  * Send deal parameters
  */
 export interface SendDealParams {
@@ -60,6 +78,7 @@ export interface AddVehiclesToDealParams {
   dealId: string;
   vehicleIds: string[];
   recipientIds: string[]; // New recipients to add
+  sendEmails?: boolean; // Whether to send email notifications (default: false)
 }
 
 /**
@@ -76,6 +95,8 @@ export interface ListDealsParams extends ListParams {
 export interface DealVehicle {
   id: string;
   order: number;
+  status: DealVehicleStatus;
+  ownerRequestedFee: string | number | null;
   vehicle: {
     id: string;
     name: string;

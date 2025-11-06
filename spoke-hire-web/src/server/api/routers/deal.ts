@@ -66,6 +66,7 @@ const addVehiclesToDealInputSchema = z.object({
   dealId: z.string().cuid(),
   vehicleIds: z.array(z.string().cuid()).min(1).max(MAX_VEHICLES_PER_DEAL),
   recipientIds: z.array(z.string().cuid()).min(1).max(MAX_RECIPIENTS_PER_DEAL),
+  sendEmails: z.boolean().default(false),
 });
 
 const updateDealInputSchema = z.object({
@@ -99,6 +100,18 @@ const unarchiveDealInputSchema = z.object({
 
 const deleteDealInputSchema = z.object({
   id: z.string().cuid(),
+});
+
+const updateVehicleStatusInputSchema = z.object({
+  dealId: z.string().cuid(),
+  vehicleId: z.string().cuid(),
+  status: z.enum(["ACTIVE", "REMOVED", "WINNER"]),
+});
+
+const updateVehicleFeeInputSchema = z.object({
+  dealId: z.string().cuid(),
+  vehicleId: z.string().cuid(),
+  ownerRequestedFee: z.number().min(MIN_FINANCIAL_AMOUNT).max(MAX_FINANCIAL_AMOUNT).nullable(),
 });
 
 /**
@@ -261,6 +274,7 @@ export const dealRouter = createTRPCRouter({
         dealId: input.dealId,
         vehicleIds: input.vehicleIds,
         recipientIds: input.recipientIds,
+        sendEmails: input.sendEmails,
       });
     }),
 
@@ -389,6 +403,34 @@ export const dealRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const service = ServiceFactory.createDealService(ctx.db);
       return await service.getNewVehiclesAndOwners(input.dealId, input.vehicleIds);
+    }),
+
+  /**
+   * Update vehicle status in deal
+   */
+  updateVehicleStatus: adminProcedure
+    .input(updateVehicleStatusInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const service = ServiceFactory.createDealService(ctx.db);
+      return await service.updateDealVehicleStatus({
+        dealId: input.dealId,
+        vehicleId: input.vehicleId,
+        status: input.status,
+      });
+    }),
+
+  /**
+   * Update vehicle fee in deal
+   */
+  updateVehicleFee: adminProcedure
+    .input(updateVehicleFeeInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const service = ServiceFactory.createDealService(ctx.db);
+      return await service.updateDealVehicleFee({
+        dealId: input.dealId,
+        vehicleId: input.vehicleId,
+        ownerRequestedFee: input.ownerRequestedFee,
+      });
     }),
 });
 

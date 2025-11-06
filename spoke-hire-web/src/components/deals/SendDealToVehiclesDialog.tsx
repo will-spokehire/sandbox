@@ -13,6 +13,7 @@ import {
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
 import { Badge } from "~/components/ui/badge";
+import { Checkbox } from "~/components/ui/checkbox";
 import { api } from "~/trpc/react";
 import { CreateEditDealDialog } from "./CreateEditDealDialog";
 
@@ -38,6 +39,7 @@ export function SendDealToVehiclesDialog({
   }>>([]);
   const [newVehicleCount, setNewVehicleCount] = useState(0);
   const [newOwnerCount, setNewOwnerCount] = useState(0);
+  const [sendEmails, setSendEmails] = useState(false);
 
   const utils = api.useUtils();
 
@@ -90,6 +92,13 @@ export function SendDealToVehiclesDialog({
     isLoadingVehicles || 
     (!!_selectedDealId && (isLoadingSelectedDeal || isLoadingNewItems));
 
+  // Reset states when dialog opens
+  useEffect(() => {
+    if (open) {
+      setSendEmails(false); // Reset to unchecked by default
+    }
+  }, [open]);
+
   // Extract unique owners from vehicles
   useEffect(() => {
     // Only run when dialog is open
@@ -133,7 +142,8 @@ export function SendDealToVehiclesDialog({
   const addVehiclesMutation = api.deal.addVehiclesToDeal.useMutation({
     onSuccess: async () => {
       await utils.deal.list.invalidate();
-      toast.success("Vehicles added to deal and emails sent!");
+      await utils.deal.getById.invalidate();
+      toast.success(sendEmails ? "Vehicles added to deal and emails sent!" : "Vehicles added to deal!");
       onSuccess();
     },
     onError: (error: { message?: string }) => {
@@ -158,6 +168,7 @@ export function SendDealToVehiclesDialog({
       dealId,
       vehicleIds: selectedVehicleIds,
       recipientIds: vehicleOwners.map((o) => o.id),
+      sendEmails,
     });
   };
 
@@ -271,24 +282,33 @@ export function SendDealToVehiclesDialog({
                             )}
                           </div>
                           {isSelected && (
-                            <Button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleAddToDeal(deal.id);
-                              }}
-                              disabled={isSubmitting || isCalculating || newVehicleCount === 0 || newOwnerCount === 0}
-                              className="flex-shrink-0"
-                            >
-                              {isSubmitting ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <>
-                                  <Send className="h-4 w-4 mr-2" />
-                                  Add & Send
-                                </>
-                              )}
-                            </Button>
+                            <div className="flex flex-col gap-2 flex-shrink-0">
+                              <Button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleAddToDeal(deal.id);
+                                }}
+                                disabled={isSubmitting || isCalculating || newVehicleCount === 0 || newOwnerCount === 0}
+                              >
+                                {isSubmitting ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <>
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    Add
+                                  </>
+                                )}
+                              </Button>
+                              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                                <Checkbox
+                                  checked={sendEmails}
+                                  onCheckedChange={(checked) => setSendEmails(checked === true)}
+                                  disabled={isSubmitting || isCalculating}
+                                />
+                                <span className="text-muted-foreground">Send email notifications</span>
+                              </label>
+                            </div>
                           )}
                         </div>
                       </div>

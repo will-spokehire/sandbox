@@ -10,7 +10,7 @@
  */
 
 import { TRPCError } from "@trpc/server";
-import { DealStatus, RecipientStatus, type Prisma } from "@prisma/client";
+import { DealStatus, RecipientStatus, type Prisma, type DealVehicleStatus } from "@prisma/client";
 import { DealNotFoundError } from "../errors/app-errors";
 import {
   MAX_VEHICLES_PER_DEAL,
@@ -31,6 +31,8 @@ import type {
   AddVehiclesToDealParams,
   ListDealsParams,
   DealWithDetails,
+  UpdateDealVehicleStatusParams,
+  UpdateDealVehicleFeeParams,
 } from "~/server/types";
 
 /**
@@ -272,10 +274,9 @@ export class DealService {
    * Add vehicles to an existing deal
    */
   async addVehiclesToDeal(params: AddVehiclesToDealParams) {
-    const { dealId, vehicleIds, recipientIds } = params;
+    const { dealId, vehicleIds, recipientIds, sendEmails = false } = params;
 
-    console.log(`Adding ${vehicleIds.length} vehicles and ${recipientIds.length} recipients to deal ${dealId}`);
-
+    console.log(`Adding ${vehicleIds.length} vehicles and ${recipientIds.length} recipients to deal ${dealId}${sendEmails ? ' (with emails)' : ' (without emails)'}`);
     // Use transaction for consistency
     const result = await this.repository.transaction(async (tx) => {
       const repo = new DealRepository(tx);
@@ -336,15 +337,17 @@ export class DealService {
       return { dealId, newRecipientIds };
     });
     
-    // After transaction completes, send emails ONLY to new recipients
+    // After transaction completes, send emails ONLY to new recipients (if sendEmails is true)
     // Note: Emails are sent AFTER the transaction to avoid holding locks
-    if (result.newRecipientIds.length > 0) {
+    if (sendEmails && result.newRecipientIds.length > 0) {
       try {
         await this.sendDealEmails(result.dealId, result.newRecipientIds);
       } catch (error) {
         // Log error but don't fail the operation
         console.error(`Failed to send emails for deal ${result.dealId}:`, error);
       }
+    } else if (!sendEmails) {
+      console.log(`Skipping email notifications for deal ${result.dealId} as requested`);
     }
     
     // Return updated deal for client
@@ -550,6 +553,98 @@ export class DealService {
    */
   async getNewVehiclesAndOwners(dealId: string, vehicleIds: string[]) {
     return await this.repository.getNewVehiclesAndOwners(dealId, vehicleIds);
+  }
+
+  /**
+   * Update deal vehicle status
+   */
+  async updateDealVehicleStatus(params: UpdateDealVehicleStatusParams) {
+    const { dealId, vehicleId, status } = params;
+
+    // Validate deal exists
+    const deal = await this.repository.findById(dealId);
+    if (!deal) {
+      throw new DealNotFoundError(dealId);
+    }
+
+    // Find the specific DealVehicle record
+    const dealVehicle = await this.repository.db.dealVehicle.findUnique({
+      where: {
+        dealId_vehicleId: {
+          dealId,
+          vehicleId,
+        },
+      },
+    });
+
+    if (!dealVehicle) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Vehicle not found in this deal",
+      });
+    }
+
+    // Update the status
+    return await this.repository.db.dealVehicle.update({
+      where: {
+        id: dealVehicle.id,
+      },
+      data: {
+        status,
+      },
+    });
+  }
+
+  /**
+   * Update deal vehicle fee
+   */
+  async updateDealVehicleFee(params: UpdateDealVehicleFeeParams) {
+    const { dealId, vehicleId, ownerRequestedFee } = params;
+
+    // Validate deal exists
+    const deal = await this.repository.findById(dealId);
+    if (!deal) {
+      throw new DealNotFoundError(dealId);
+    }
+
+    // Validate fee if provided
+    if (ownerRequestedFee !== null) {
+      if (ownerRequestedFee < MIN_FINANCIAL_AMOUNT || ownerRequestedFee > MAX_FINANCIAL_AMOUNT) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: ownerRequestedFee < MIN_FINANCIAL_AMOUNT 
+            ? FINANCIAL_VALIDATION_MESSAGES.NEGATIVE_AMOUNT 
+            : FINANCIAL_VALIDATION_MESSAGES.AMOUNT_TOO_LARGE,
+        });
+      }
+    }
+
+    // Find the specific DealVehicle record
+    const dealVehicle = await this.repository.db.dealVehicle.findUnique({
+      where: {
+        dealId_vehicleId: {
+          dealId,
+          vehicleId,
+        },
+      },
+    });
+
+    if (!dealVehicle) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Vehicle not found in this deal",
+      });
+    }
+
+    // Update the fee
+    return await this.repository.db.dealVehicle.update({
+      where: {
+        id: dealVehicle.id,
+      },
+      data: {
+        ownerRequestedFee,
+      },
+    });
   }
 }
 

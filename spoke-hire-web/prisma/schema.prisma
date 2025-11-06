@@ -64,6 +64,13 @@ enum RecipientStatus {
   FAILED
 }
 
+// Deal Vehicle Status Enum
+enum DealVehicleStatus {
+  ACTIVE
+  REMOVED
+  WINNER
+}
+
 // Country Lookup Table
 model Country {
     id          String   @id @default(cuid())
@@ -425,20 +432,24 @@ model Deal {
 
 // Many-to-many relationship between Deals and Vehicles
 model DealVehicle {
-    id        String   @id @default(cuid())
-    createdAt DateTime @default(now())
+    id                 String             @id @default(cuid())
+    createdAt          DateTime           @default(now())
+    updatedAt          DateTime           @default(now()) @updatedAt
     
-    dealId    String
-    deal      Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+    dealId             String
+    deal               Deal               @relation(fields: [dealId], references: [id], onDelete: Cascade)
     
-    vehicleId String
-    vehicle   Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+    vehicleId          String
+    vehicle            Vehicle            @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
     
-    order     Int      @default(0) // Display order in deal
+    order              Int                @default(0) // Display order in deal
+    status             DealVehicleStatus  @default(ACTIVE) // Track vehicle availability
+    ownerRequestedFee  Decimal?           @db.Decimal(10,2) // Fee requested by owner in GBP
     
     @@unique([dealId, vehicleId])
     @@index([dealId])
     @@index([vehicleId])
+    @@index([status])
 }
 
 // Deal Recipients - Tracks who received the deal and delivery status

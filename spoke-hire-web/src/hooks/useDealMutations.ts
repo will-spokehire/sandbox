@@ -94,6 +94,28 @@ export function useDealMutations() {
     },
   });
 
+  // Update vehicle status mutation
+  const updateVehicleStatusMutation = api.deal.updateVehicleStatus.useMutation({
+    onSuccess: () => {
+      toast.success("Vehicle status updated successfully");
+      void utils.deal.getById.invalidate();
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to update vehicle status");
+    },
+  });
+
+  // Update vehicle fee mutation
+  const updateVehicleFeeMutation = api.deal.updateVehicleFee.useMutation({
+    onSuccess: () => {
+      toast.success("Owner fee updated successfully");
+      void utils.deal.getById.invalidate();
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to update owner fee");
+    },
+  });
+
   // Wrapper functions with proper typing
   const create = useCallback(
     async (data: {
@@ -157,6 +179,20 @@ export function useDealMutations() {
     [unarchiveMutation]
   );
 
+  const updateVehicleStatus = useCallback(
+    async (dealId: string, vehicleId: string, status: "ACTIVE" | "REMOVED" | "WINNER") => {
+      return updateVehicleStatusMutation.mutateAsync({ dealId, vehicleId, status });
+    },
+    [updateVehicleStatusMutation]
+  );
+
+  const updateVehicleFee = useCallback(
+    async (dealId: string, vehicleId: string, ownerRequestedFee: number | null) => {
+      return updateVehicleFeeMutation.mutateAsync({ dealId, vehicleId, ownerRequestedFee });
+    },
+    [updateVehicleFeeMutation]
+  );
+
   // Bulk operations
   const deleteBulk = useCallback(
     async (dealIds: string[]) => {
@@ -187,6 +223,8 @@ export function useDealMutations() {
     addVehicles,
     archive,
     unarchive,
+    updateVehicleStatus,
+    updateVehicleFee,
     
     // Bulk operations
     deleteBulk,
@@ -198,6 +236,8 @@ export function useDealMutations() {
     isAddingVehicles: addVehiclesMutation.isPending,
     isArchiving: archiveMutation.isPending,
     isUnarchiving: unarchiveMutation.isPending,
+    isUpdatingVehicleStatus: updateVehicleStatusMutation.isPending,
+    isUpdatingVehicleFee: updateVehicleFeeMutation.isPending,
     
     // Any mutation is pending
     isAnyPending: createMutation.isPending || 
@@ -205,6 +245,8 @@ export function useDealMutations() {
                   deleteMutation.isPending || 
                   addVehiclesMutation.isPending || 
                   archiveMutation.isPending || 
-                  unarchiveMutation.isPending,
+                  unarchiveMutation.isPending ||
+                  updateVehicleStatusMutation.isPending ||
+                  updateVehicleFeeMutation.isPending,
   };
 }

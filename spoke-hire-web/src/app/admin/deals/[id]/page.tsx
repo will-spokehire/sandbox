@@ -3,13 +3,14 @@
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ArrowLeft, Car, Archive, ArchiveRestore, MessageCircle, MoreHorizontal, Eye, User, Mail, Phone, Pencil, Building2, DollarSign, StickyNote } from "lucide-react";
+import { ArrowLeft, Car, Archive, ArchiveRestore, MessageCircle, MoreHorizontal, Eye, User, Mail, Phone, Pencil, Building2, DollarSign, StickyNote, CheckCircle2, Clock, XCircle, Send, Check, X, Trophy } from "lucide-react";
 import { format } from "date-fns";
 import { useRequireAdmin } from "~/providers/auth-provider";
 import { UserMenu } from "~/components/auth/UserMenu";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
+import { toast } from "sonner";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,10 +27,18 @@ import {
 } from "~/lib/whatsapp";
 import { formatOwnerName } from "~/lib/vehicles";
 import { useClipboard } from "~/hooks/useClipboard";
-import { CreateEditDealDialog } from "~/components/deals";
+import { CreateEditDealDialog, UpdateOwnerFeeDialog } from "~/components/deals";
 import { useDealMutations } from "~/hooks/useDealMutations";
 import { getDealStatusConfig } from "~/lib/deals";
 import { Badge } from "~/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
+import type { DealVehicleStatus } from "@prisma/client";
+import { cn } from "~/lib/utils";
 
 /**
  * Deal Detail Page
@@ -46,6 +55,13 @@ export default function DealDetailPage({
   const resolvedParams = use(params);
   const { copyToClipboard } = useClipboard();
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showFeeDialog, setShowFeeDialog] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState<{
+    id: string;
+    name: string;
+    currentFee: number | null;
+  } | null>(null);
+  const utils = api.useUtils();
 
   // Fetch deal details
   const {
@@ -61,7 +77,40 @@ export default function DealDetailPage({
   );
 
   // Use custom mutation hooks for centralized error handling
-  const { archive, unarchive } = useDealMutations();
+  const { archive, unarchive, updateVehicleStatus, updateVehicleFee } = useDealMutations();
+
+  // Send email mutation
+  const sendEmailMutation = api.deal.send.useMutation({
+    onSuccess: async (result) => {
+      toast.success(`Emails sent to ${result.sent} recipient${result.sent !== 1 ? 's' : ''}${result.failed > 0 ? ` (${result.failed} failed)` : ''}`);
+      // Refetch deal to update recipient statuses
+      await utils.deal.getById.invalidate({ id: resolvedParams.id });
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to send emails");
+    },
+  });
+
+  // Get pending recipients (those who haven't received the email yet)
+  const getPendingRecipients = () => {
+    if (!deal?.recipients) return [];
+    return deal.recipients.filter(r => r.status === "PENDING");
+  };
+
+  // Handler to send emails to pending recipients
+  const handleSendPendingEmails = () => {
+    const pendingRecipients = getPendingRecipients();
+    
+    if (pendingRecipients.length === 0) {
+      toast.info("All recipients have already received the email");
+      return;
+    }
+
+    sendEmailMutation.mutate({
+      dealId: deal!.id,
+      recipientIds: pendingRecipients.map(r => r.userId),
+    });
+  };
 
   if (isAuthLoading || !user) {
     return (
@@ -93,6 +142,133 @@ export default function DealDetailPage({
       maximumFractionDigits: 0,
     }).format(numPrice);
   };
+
+  // Helper function to get email status for a vehicle owner
+  const getOwnerEmailStatus = (ownerId: string) => {
+    if (!deal?.recipients) return null;
+    return deal.recipients.find(r => r.userId === ownerId);
+  };
+
+  // Helper function to render email status badge
+  const renderEmailStatusBadge = (ownerId: string) => {
+    const recipient = getOwnerEmailStatus(ownerId);
+    
+    if (!recipient) return null;
+
+    let icon;
+    let variant: "default" | "secondary" | "destructive" | "outline" = "secondary";
+    let label = "No Email";
+    let tooltipText = "Email not sent";
+
+    if (recipient.status === "SENT") {
+      icon = <CheckCircle2 className="h-3 w-3 text-green-600" />;
+      variant = "outline";
+      label = "Email Sent";
+      tooltipText = recipient.emailSentAt 
+        ? `Sent on ${format(new Date(recipient.emailSentAt), "MMM d, yyyy 'at' h:mm a")}`
+        : "Email sent";
+    } else if (recipient.status === "FAILED") {
+      icon = <XCircle className="h-3 w-3" />;
+      variant = "destructive";
+      label = "Failed";
+      tooltipText = recipient.errorMessage || "Email failed to send";
+    } else {
+      icon = <Clock className="h-3 w-3" />;
+      variant = "outline";
+      label = "Not Sent";
+      tooltipText = "Email not sent yet";
+    }
+
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Badge variant={variant} className="flex items-center gap-1 cursor-help">
+              {icon}
+              <span className="text-xs">{label}</span>
+            </Badge>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{tooltipText}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  };
+
+  // Helper function to get vehicle status badge config
+  const getVehicleStatusBadge = (status: DealVehicleStatus) => {
+    switch (status) {
+      case "ACTIVE":
+        return {
+          icon: <Check className="h-3 w-3" />,
+          variant: "default" as const,
+          label: "Active",
+          className: "bg-green-600 hover:bg-green-700",
+        };
+      case "REMOVED":
+        return {
+          icon: <X className="h-3 w-3" />,
+          variant: "secondary" as const,
+          label: "Removed",
+          className: "bg-gray-500 hover:bg-gray-600",
+        };
+      case "WINNER":
+        return {
+          icon: <Trophy className="h-3 w-3" />,
+          variant: "default" as const,
+          label: "Winner",
+          className: "bg-blue-600 hover:bg-blue-700",
+        };
+      default:
+        return {
+          icon: <Check className="h-3 w-3" />,
+          variant: "default" as const,
+          label: "Active",
+          className: "bg-green-600 hover:bg-green-700",
+        };
+    }
+  };
+
+  // Helper function to handle vehicle status update
+  const handleStatusUpdate = async (vehicleId: string, status: DealVehicleStatus) => {
+    try {
+      await updateVehicleStatus(resolvedParams.id, vehicleId, status);
+      await utils.deal.getById.invalidate({ id: resolvedParams.id });
+    } catch (error) {
+      // Error handled by mutation hook
+      console.error("Failed to update vehicle status:", error);
+    }
+  };
+
+  // Helper function to handle fee dialog open
+  const handleOpenFeeDialog = (vehicleId: string, vehicleName: string, currentFee: number | null) => {
+    setSelectedVehicle({ id: vehicleId, name: vehicleName, currentFee });
+    setShowFeeDialog(true);
+  };
+
+  // Helper function to handle fee update
+  const handleFeeUpdate = async (fee: number | null) => {
+    if (!selectedVehicle) return;
+    
+    try {
+      await updateVehicleFee(resolvedParams.id, selectedVehicle.id, fee);
+      await utils.deal.getById.invalidate({ id: resolvedParams.id });
+    } catch (error) {
+      // Error handled by mutation hook
+      console.error("Failed to update vehicle fee:", error);
+    }
+  };
+
+  // Sort vehicles: Winner first, then Active, then Removed at bottom
+  const sortedVehicles = deal?.vehicles.slice().sort((a, b) => {
+    const statusOrder = { WINNER: 0, ACTIVE: 1, REMOVED: 2 };
+    const aOrder = statusOrder[a.status] ?? 1;
+    const bOrder = statusOrder[b.status] ?? 1;
+    if (aOrder !== bOrder) return aOrder - bOrder;
+    // Secondary sort by order field
+    return a.order - b.order;
+  }) ?? [];
 
 
   return (
@@ -168,12 +344,21 @@ export default function DealDetailPage({
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         {deal.status !== "ARCHIVED" && (
-                          <DropdownMenuItem
-                            onClick={() => setShowEditDialog(true)}
-                          >
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Edit Deal
-                          </DropdownMenuItem>
+                          <>
+                            <DropdownMenuItem
+                              onClick={() => setShowEditDialog(true)}
+                            >
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Edit Deal
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={handleSendPendingEmails}
+                              disabled={sendEmailMutation.isPending || getPendingRecipients().length === 0}
+                            >
+                              <Send className="mr-2 h-4 w-4" />
+                              Send Email to Pending ({getPendingRecipients().length})
+                            </DropdownMenuItem>
+                          </>
                         )}
                         <DropdownMenuSeparator />
                         {deal.status !== "ARCHIVED" ? (
@@ -410,17 +595,23 @@ export default function DealDetailPage({
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {deal.vehicles.map((dv) => {
+                  {sortedVehicles.map((dv) => {
                     const ownerName = formatOwnerName(
                       dv.vehicle.owner.firstName,
                       dv.vehicle.owner.lastName,
                       dv.vehicle.owner.email
                     );
 
+                    const statusBadge = getVehicleStatusBadge(dv.status);
+                    const isRemoved = dv.status === "REMOVED";
+
                     return (
                       <div
                         key={dv.id}
-                        className="group relative border rounded-lg hover:shadow-md transition-shadow overflow-hidden bg-card"
+                        className={cn(
+                          "group relative border rounded-lg hover:shadow-md transition-shadow overflow-hidden bg-card",
+                          isRemoved && "opacity-60 bg-muted"
+                        )}
                       >
                         {/* Mobile Layout: Vertical Card */}
                         <div className="md:hidden">
@@ -457,6 +648,50 @@ export default function DealDetailPage({
                                     >
                                       <Eye className="mr-2 h-4 w-4" />
                                       View Details
+                                    </DropdownMenuItem>
+                                    
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuLabel>Vehicle Status</DropdownMenuLabel>
+                                    <DropdownMenuItem
+                                      onClick={() => void handleStatusUpdate(dv.vehicle.id, "ACTIVE")}
+                                      disabled={dv.status === "ACTIVE"}
+                                    >
+                                      <Check className="mr-2 h-4 w-4" />
+                                      Mark as Active
+                                      {dv.status === "ACTIVE" && <Check className="ml-auto h-4 w-4" />}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => void handleStatusUpdate(dv.vehicle.id, "REMOVED")}
+                                      disabled={dv.status === "REMOVED"}
+                                    >
+                                      <X className="mr-2 h-4 w-4" />
+                                      Mark as Removed
+                                      {dv.status === "REMOVED" && <Check className="ml-auto h-4 w-4" />}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => void handleStatusUpdate(dv.vehicle.id, "WINNER")}
+                                      disabled={dv.status === "WINNER"}
+                                    >
+                                      <Trophy className="mr-2 h-4 w-4" />
+                                      Mark as Winner
+                                      {dv.status === "WINNER" && <Check className="ml-auto h-4 w-4" />}
+                                    </DropdownMenuItem>
+
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      onClick={() => handleOpenFeeDialog(
+                                        dv.vehicle.id,
+                                        dv.vehicle.name,
+                                        dv.ownerRequestedFee ? Number(dv.ownerRequestedFee) : null
+                                      )}
+                                    >
+                                      <DollarSign className="mr-2 h-4 w-4" />
+                                      Set Owner Fee
+                                      {dv.ownerRequestedFee && (
+                                        <span className="ml-2 text-xs text-muted-foreground">
+                                          (£{Number(dv.ownerRequestedFee).toFixed(2)})
+                                        </span>
+                                      )}
                                     </DropdownMenuItem>
                                     
                                     <DropdownMenuSeparator />
@@ -536,7 +771,17 @@ export default function DealDetailPage({
 
                           {/* Content - Mobile */}
                           <div className="p-4 space-y-3">
-                            {/* Title & Price */}
+                            {/* Status Badge - Only show for REMOVED and WINNER */}
+                            {dv.status !== "ACTIVE" && (
+                              <div className="flex items-center gap-2">
+                                <Badge variant={statusBadge.variant} className={cn("flex items-center gap-1", statusBadge.className)}>
+                                  {statusBadge.icon}
+                                  <span className="text-xs">{statusBadge.label}</span>
+                                </Badge>
+                              </div>
+                            )}
+
+                            {/* Title & Owner Fee */}
                             <div 
                               className="cursor-pointer"
                               onClick={() => router.push(`/admin/vehicles/${dv.vehicle.id}`)}
@@ -545,9 +790,16 @@ export default function DealDetailPage({
                                 <h3 className="font-semibold text-lg leading-tight flex-1">
                                   {dv.vehicle.name}
                                 </h3>
-                                <span className="font-bold text-lg text-primary whitespace-nowrap">
-                                  {formatPrice(dv.vehicle.price)}
-                                </span>
+                                {dv.ownerRequestedFee && (
+                                  <span className="font-bold text-lg text-primary whitespace-nowrap">
+                                    {new Intl.NumberFormat("en-GB", {
+                                      style: "currency",
+                                      currency: "GBP",
+                                      minimumFractionDigits: 0,
+                                      maximumFractionDigits: 0,
+                                    }).format(Number(dv.ownerRequestedFee))}
+                                  </span>
+                                )}
                               </div>
                               <p className="text-sm text-muted-foreground">
                                 {dv.vehicle.make.name} {dv.vehicle.model.name} • {dv.vehicle.year}
@@ -559,6 +811,11 @@ export default function DealDetailPage({
                               <User className="h-4 w-4 text-muted-foreground" />
                               <span className="text-muted-foreground">Owner:</span>
                               <span className="font-medium">{ownerName}</span>
+                            </div>
+                            
+                            {/* Email Status */}
+                            <div className="flex items-center gap-2 pt-2">
+                              {renderEmailStatusBadge(dv.vehicle.owner.id)}
                             </div>
                           </div>
                         </div>
@@ -586,9 +843,18 @@ export default function DealDetailPage({
                             onClick={() => router.push(`/admin/vehicles/${dv.vehicle.id}`)}
                           >
                             <div>
-                              <h3 className="font-semibold text-lg leading-tight mb-1">
-                                {dv.vehicle.name}
-                              </h3>
+                              <div className="flex items-center gap-2 mb-1">
+                                <h3 className="font-semibold text-lg leading-tight">
+                                  {dv.vehicle.name}
+                                </h3>
+                                {/* Status Badge - Only show for REMOVED and WINNER */}
+                                {dv.status !== "ACTIVE" && (
+                                  <Badge variant={statusBadge.variant} className={cn("flex items-center gap-1", statusBadge.className)}>
+                                    {statusBadge.icon}
+                                    <span className="text-xs">{statusBadge.label}</span>
+                                  </Badge>
+                                )}
+                              </div>
                               <p className="text-sm text-muted-foreground">
                                 {dv.vehicle.make.name} {dv.vehicle.model.name} • {dv.vehicle.year}
                               </p>
@@ -600,14 +866,26 @@ export default function DealDetailPage({
                               <span className="text-muted-foreground">Owner:</span>
                               <span className="font-medium">{ownerName}</span>
                             </div>
+                            
+                            {/* Email Status - Desktop */}
+                            <div className="flex items-center gap-2">
+                              {renderEmailStatusBadge(dv.vehicle.owner.id)}
+                            </div>
                           </div>
 
-                          {/* Price */}
-                          <div className="flex-shrink-0">
-                            <p className="text-xl font-bold text-primary">
-                              {formatPrice(dv.vehicle.price)}
-                            </p>
-                          </div>
+                          {/* Owner Fee */}
+                          {dv.ownerRequestedFee && (
+                            <div className="flex-shrink-0">
+                              <p className="text-xl font-bold text-primary">
+                                {new Intl.NumberFormat("en-GB", {
+                                  style: "currency",
+                                  currency: "GBP",
+                                  minimumFractionDigits: 0,
+                                  maximumFractionDigits: 0,
+                                }).format(Number(dv.ownerRequestedFee))}
+                              </p>
+                            </div>
+                          )}
 
                           {/* Registration */}
                           {dv.vehicle.registration && (
@@ -637,6 +915,50 @@ export default function DealDetailPage({
                                 >
                                   <Eye className="mr-2 h-4 w-4" />
                                   View Details
+                                </DropdownMenuItem>
+                                
+                                <DropdownMenuSeparator />
+                                <DropdownMenuLabel>Vehicle Status</DropdownMenuLabel>
+                                <DropdownMenuItem
+                                  onClick={() => void handleStatusUpdate(dv.vehicle.id, "ACTIVE")}
+                                  disabled={dv.status === "ACTIVE"}
+                                >
+                                  <Check className="mr-2 h-4 w-4" />
+                                  Mark as Active
+                                  {dv.status === "ACTIVE" && <Check className="ml-auto h-4 w-4" />}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => void handleStatusUpdate(dv.vehicle.id, "REMOVED")}
+                                  disabled={dv.status === "REMOVED"}
+                                >
+                                  <X className="mr-2 h-4 w-4" />
+                                  Mark as Removed
+                                  {dv.status === "REMOVED" && <Check className="ml-auto h-4 w-4" />}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => void handleStatusUpdate(dv.vehicle.id, "WINNER")}
+                                  disabled={dv.status === "WINNER"}
+                                >
+                                  <Trophy className="mr-2 h-4 w-4" />
+                                  Mark as Winner
+                                  {dv.status === "WINNER" && <Check className="ml-auto h-4 w-4" />}
+                                </DropdownMenuItem>
+
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  onClick={() => handleOpenFeeDialog(
+                                    dv.vehicle.id,
+                                    dv.vehicle.name,
+                                    dv.ownerRequestedFee ? Number(dv.ownerRequestedFee) : null
+                                  )}
+                                >
+                                  <DollarSign className="mr-2 h-4 w-4" />
+                                  Set Owner Fee
+                                  {dv.ownerRequestedFee && (
+                                    <span className="ml-2 text-xs text-muted-foreground">
+                                      (£{Number(dv.ownerRequestedFee).toFixed(2)})
+                                    </span>
+                                  )}
                                 </DropdownMenuItem>
                                 
                                 <DropdownMenuSeparator />
@@ -719,6 +1041,17 @@ export default function DealDetailPage({
           open={showEditDialog}
           onOpenChange={setShowEditDialog}
           dealId={deal.id}
+        />
+      )}
+
+      {/* Update Owner Fee Dialog */}
+      {selectedVehicle && (
+        <UpdateOwnerFeeDialog
+          open={showFeeDialog}
+          onOpenChange={setShowFeeDialog}
+          vehicleName={selectedVehicle.name}
+          currentFee={selectedVehicle.currentFee}
+          onSubmit={handleFeeUpdate}
         />
       )}
     </div>
