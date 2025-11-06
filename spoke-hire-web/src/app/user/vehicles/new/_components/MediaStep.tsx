@@ -91,9 +91,9 @@ export function MediaStep({ vehicleId, onComplete }: MediaStepProps) {
 
         {/* Show alert if no images */}
         {!hasImages && (
-          <Alert>
-            <ImageIcon className="h-4 w-4" />
-            <AlertDescription className="text-sm">
+          <Alert variant="destructive" className="flex flex-col items-center text-center justify-center">
+            <ImageIcon className="h-5 w-5 mb-2" />
+            <AlertDescription className="text-sm md:text-base font-medium">
               At least one photo is required. Good photos help your vehicle stand out and attract more opportunities.
             </AlertDescription>
           </Alert>
