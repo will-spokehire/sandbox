@@ -17,6 +17,8 @@ import { Alert, AlertDescription } from "~/components/ui/alert";
 import { api } from "~/trpc/react";
 import { useRequireAuth } from "~/providers/auth-provider";
 import { enquiryFormSchema, type EnquiryFormData } from "~/lib/schemas/enquiry";
+import { LAYOUT_CONSTANTS, TYPOGRAPHY } from "~/lib/design-tokens";
+import { cn } from "~/lib/utils";
 
 /**
  * Enquiry Form Content Component
@@ -102,10 +104,10 @@ function EnquiryFormContent() {
   }
 
   return (
-    <div className="py-8">
-      <div className="container mx-auto px-4 max-w-3xl">
-        {/* Header */}
-        <div className="mb-8">
+    <>
+      {/* Header with background (like app pages) */}
+      <div className="bg-slate-50 dark:bg-slate-900 border-b">
+        <div className={cn(LAYOUT_CONSTANTS.container, "py-6 md:py-8 max-w-3xl")}>
           {vehicleIdFromUrl && (
             <Button
               variant="ghost"
@@ -117,15 +119,17 @@ function EnquiryFormContent() {
               Back to Vehicle
             </Button>
           )}
-          
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
             Make an Enquiry
           </h1>
-          <p className="text-slate-600 dark:text-slate-400 mt-2">
+          <p className="text-muted-foreground text-base md:text-lg mt-2">
             Tell us about your requirements and we'll get back to you soon
           </p>
         </div>
+      </div>
 
+      {/* Main Content */}
+      <div className={cn(LAYOUT_CONSTANTS.container, LAYOUT_CONSTANTS.pageSpacing, "max-w-3xl")}>
         {/* Vehicle Info Card (if coming from vehicle page) */}
         {vehicle && (
           <Alert className="mb-6">
@@ -341,7 +345,7 @@ function EnquiryFormContent() {
           </div>
         </form>
       </div>
-    </div>
+    </>
   );
 }
 

@@ -9,6 +9,9 @@ import { PublicVehicleMediaSection } from "./_components/PublicVehicleMediaSecti
 import { PublicVehicleBasicInfo } from "./_components/PublicVehicleBasicInfo";
 import { VehicleDetailBreadcrumbs } from "./_components/VehicleDetailBreadcrumbs";
 import { getAppUrl } from "~/lib/app-url";
+import { LAYOUT_CONSTANTS, TYPOGRAPHY } from "~/lib/design-tokens";
+import { cn } from "~/lib/utils";
+import { StandardPageHeader } from "~/app/_components/layouts";
 
 interface PageProps {
   params: Promise<{
@@ -261,35 +264,29 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbStructuredData) }}
       />
 
-      <div className="min-h-screen bg-background">
-        {/* Back Navigation */}
-        <div className="border-b bg-slate-50 dark:bg-slate-900">
-          <div className="container mx-auto px-4 py-4">
+      <div className={LAYOUT_CONSTANTS.bgDefault}>
+        {/* Header with Back Button */}
+        <StandardPageHeader
+          variant="detail"
+          title={`${vehicle.year} ${vehicle.make.name} ${vehicle.model.name}`}
+          breadcrumbs={<VehicleDetailBreadcrumbs vehicle={vehicle} />}
+          backButton={
             <Link href="/vehicles">
               <Button variant="ghost" size="sm" className="gap-2">
                 <ArrowLeft className="h-4 w-4" />
                 Back to Catalog
               </Button>
             </Link>
-          </div>
-        </div>
+          }
+        />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 md:py-12">
-        {/* Breadcrumbs */}
-        <VehicleDetailBreadcrumbs vehicle={vehicle} />
-
-        {/* Vehicle Title */}
-        <header className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-            {vehicle.year} {vehicle.make.name} {vehicle.model.name}
-          </h1>
-        </header>
+      <main className={cn(LAYOUT_CONSTANTS.container, LAYOUT_CONSTANTS.pageSpacing)}>
 
         {/* Two-Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+        <div className={LAYOUT_CONSTANTS.detailGrid}>
           {/* Left Column - Media Gallery & Description (2/3 width on desktop) */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className={LAYOUT_CONSTANTS.detailGridLeft}>
             <section aria-label="Vehicle gallery">
               <h2 className="sr-only">Gallery</h2>
               <PublicVehicleMediaSection vehicle={vehicle} />
@@ -298,7 +295,7 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
             {/* Description Section */}
             {vehicle.description && (
               <section aria-label="Vehicle description" className="prose prose-slate dark:prose-invert max-w-none">
-                <h2 className="text-2xl font-semibold mb-4">Description</h2>
+                <h2 className={TYPOGRAPHY.sectionTitle + " mb-4"}>Description</h2>
                 <div className="text-muted-foreground whitespace-pre-line leading-relaxed">
                   {vehicle.description}
                 </div>
@@ -307,7 +304,7 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
           </div>
 
           {/* Right Column - Details (1/3 width on desktop) */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className={LAYOUT_CONSTANTS.detailGridRight}>
             {/* Make Enquiry Button - Prominent CTA at the top */}
             <section aria-label="Contact">
               <Link href={`/enquiry/new?vehicleId=${vehicle.id}`}>

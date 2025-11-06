@@ -6,6 +6,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { cn } from "~/lib/utils";
 import { ProgressStepper } from "./ProgressStepper";
+import { LAYOUT_CONSTANTS, TYPOGRAPHY } from "~/lib/design-tokens";
 
 interface WizardLayoutProps {
   children: ReactNode;
@@ -53,16 +54,16 @@ export function WizardLayout({
 
   return (
     <>
-      {/* Wizard Header - Integrates with parent layout navigation */}
-      <div className="border-b bg-background">
-        <div className="container mx-auto px-4 py-4 md:py-6">
+      {/* Wizard Header - Aligns with app variant style */}
+      <div className="bg-slate-50 dark:bg-slate-900 border-b">
+        <div className={cn(LAYOUT_CONSTANTS.containerNarrow, "py-6 md:py-8")}>
           {/* Page Title and Draft Actions */}
           <div className="flex items-center justify-between mb-4 md:mb-6">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-50">
+              <h1 className={cn(TYPOGRAPHY.pageTitle)}>
                 Add Your Vehicle
               </h1>
-              <p className="text-sm md:text-base text-muted-foreground mt-1">
+              <p className={cn(TYPOGRAPHY.pageDescription, "mt-2")}>
                 Fill in the details about your vehicle
               </p>
             </div>
@@ -86,8 +87,8 @@ export function WizardLayout({
       </div>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6 md:py-8">
-        <div className="max-w-3xl mx-auto">
+      <main className="flex-1">
+        <div className={cn(LAYOUT_CONSTANTS.containerNarrow, LAYOUT_CONSTANTS.pageSpacingCompact)}>
           <Card>
             <CardContent className="p-4 md:p-6 lg:p-8">
               {/* Form Content */}

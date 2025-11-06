@@ -13,6 +13,9 @@ import { Skeleton } from '~/components/ui/skeleton';
 import { Card, CardContent } from '~/components/ui/card';
 import { z } from 'zod';
 import type { VehicleStatus } from '@prisma/client';
+import { StandardPageHeader } from '~/app/_components/layouts';
+import { LAYOUT_CONSTANTS } from '~/lib/design-tokens';
+import { cn } from '~/lib/utils';
 
 // Filter schema for URL-based filter management
 const userVehicleFiltersSchema = z.object({
@@ -130,37 +133,37 @@ function UserVehiclesPageContent() {
   const vehicles = vehiclesData?.vehicles || [];
 
   return (
-    <main className="container mx-auto px-4 py-8">
-      {/* Page Title with Add Button */}
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-50 mb-2">
-            My Vehicles
-          </h2>
-          <p className="text-slate-600 dark:text-slate-400">
-            View and manage your vehicle listings
-          </p>
+    <>
+      {/* Page Header */}
+      <StandardPageHeader 
+        variant="app"
+        title="My Vehicles"
+        subtitle="View and manage your vehicle listings"
+        actions={
+          <Link href="/user/vehicles/new">
+            <Button size="lg">
+              <Plus className="h-5 w-5 mr-2" />
+              Add Vehicle
+            </Button>
+          </Link>
+        }
+      />
+
+      {/* Main Content */}
+      <div className={cn(LAYOUT_CONSTANTS.container, LAYOUT_CONSTANTS.pageSpacing)}>
+        {/* Status Filter Tabs */}
+        <div className="mb-6">
+          <VehicleStatusTabs
+            activeStatus={(filters.status ?? 'ALL_ACTIVE') as VehicleStatus | 'ALL_ACTIVE'}
+            onStatusChange={(status) => updateFilters({ status })}
+            counts={counts}
+          />
         </div>
-        <Link href="/user/vehicles/new">
-          <Button size="lg">
-            <Plus className="h-5 w-5 mr-2" />
-            Add Vehicle
-          </Button>
-        </Link>
-      </div>
 
-      {/* Status Filter Tabs */}
-      <div className="mb-6">
-        <VehicleStatusTabs
-          activeStatus={(filters.status ?? 'ALL_ACTIVE') as VehicleStatus | 'ALL_ACTIVE'}
-          onStatusChange={(status) => updateFilters({ status })}
-          counts={counts}
-        />
+        {/* Vehicle Grid */}
+        <UserVehicleGrid vehicles={vehicles} />
       </div>
-
-      {/* Vehicle Grid */}
-      <UserVehicleGrid vehicles={vehicles} />
-    </main>
+    </>
   );
 }
 
@@ -174,11 +177,11 @@ function UserVehiclesPageContent() {
 export default function UserVehiclesPage() {
   return (
     <Suspense fallback={
-      <main className="container mx-auto px-4 py-8">
+      <div className={cn(LAYOUT_CONSTANTS.container, LAYOUT_CONSTANTS.pageSpacing)}>
         <div className="flex items-center justify-center py-16">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900 dark:border-slate-50"></div>
         </div>
-      </main>
+      </div>
     }>
       <UserVehiclesPageContent />
     </Suspense>

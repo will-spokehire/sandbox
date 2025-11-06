@@ -9,6 +9,8 @@ import { PublicVehicleBreadcrumbs } from "./_components/PublicVehicleBreadcrumbs
 import { PublicVehicleGrid } from "./_components/PublicVehicleGrid";
 import { Button } from "~/components/ui/button";
 import { PageLoading } from "~/components/loading";
+import { StandardPageHeader } from "~/app/_components/layouts/StandardPageHeader";
+import { LAYOUT_CONSTANTS } from "~/lib/design-tokens";
 
 interface VehicleData {
   vehicles: any[];
@@ -89,24 +91,13 @@ function PublicVehiclesCatalogContent({ initialData, serverTitles, serverFilterO
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
       {/* Hero Section */}
-      <div className="bg-slate-50 dark:bg-slate-900 border-b">
-        <div className="container mx-auto px-4 py-12 md:py-16">
-          <div className="max-w-3xl mx-auto text-center space-y-4">
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-              {h1}
-            </h1>
-            <h2 className="text-xl md:text-2xl text-muted-foreground font-medium">
-              {h2}
-            </h2>
-          </div>
-        </div>
-      </div>
+      <StandardPageHeader title={h1} subtitle={h2} variant="hero" />
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8 md:py-12">
-        <div className="space-y-6">
+      <div className={LAYOUT_CONSTANTS.container + " " + LAYOUT_CONSTANTS.pageSpacing}>
+        <div className={LAYOUT_CONSTANTS.sectionSpacing}>
           {/* Breadcrumbs - Show active filters path */}
           <PublicVehicleBreadcrumbs serverFilterOptions={serverFilterOptions} />
 
@@ -231,7 +222,7 @@ function PublicVehiclesCatalogContent({ initialData, serverTitles, serverFilterO
           )}
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

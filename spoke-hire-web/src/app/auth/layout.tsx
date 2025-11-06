@@ -1,5 +1,7 @@
 import { PublicUserNavigation } from "~/components/navigation/PublicUserNavigation";
 import { PublicFooter } from "~/app/vehicles/_components/PublicFooter";
+import { LAYOUT_CONSTANTS } from "~/lib/design-tokens";
+import { cn } from "~/lib/utils";
 
 /**
  * Auth Layout
@@ -13,9 +15,9 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className={cn(LAYOUT_CONSTANTS.pageWrapper, LAYOUT_CONSTANTS.bgDefault)}>
       <PublicUserNavigation />
-      <main className="flex-1">{children}</main>
+      <main className={LAYOUT_CONSTANTS.mainContent}>{children}</main>
       <PublicFooter />
     </div>
   );
