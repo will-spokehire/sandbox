@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { Card } from '~/components/ui/card';
 import { VehicleStatusBadge } from '~/components/vehicles/VehicleStatusBadge';
 import { useSwipeGesture } from '~/hooks/useSwipeGesture';
+import { formatPricingRate } from '~/lib/pricing';
 import type { VehicleStatus } from '@prisma/client';
 
 interface VehicleMedia {
@@ -25,6 +26,8 @@ interface UserVehicleCardProps {
     name: string;
     year: string;
     status: VehicleStatus;
+    hourlyRate?: number | null;
+    dailyRate?: number | null;
     make: {
       id: string;
       name: string;
@@ -179,11 +182,11 @@ export function UserVehicleCard({ vehicle, href }: UserVehicleCardProps) {
           <h3 className="font-semibold text-lg mb-1 text-slate-900 dark:text-slate-50 truncate">
             {vehicle.name}
           </h3>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
-            {vehicle.make.name} {vehicle.model.name}
-          </p>
-          <p className="text-sm text-slate-500 dark:text-slate-500">
-            {vehicle.year}
+          <p className="text-sm font-medium text-primary mb-2">
+            {[
+              vehicle.hourlyRate && `£${vehicle.hourlyRate} hourly`,
+              vehicle.dailyRate && `£${vehicle.dailyRate} daily`
+            ].filter(Boolean).join(' • ') || 'Pricing not set'}
           </p>
         </div>
       </Card>

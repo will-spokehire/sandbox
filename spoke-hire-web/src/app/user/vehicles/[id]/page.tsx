@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import { AlertCircle, ArrowLeft } from "lucide-react";
 import type { VehicleDetail } from "~/types/vehicle";
 import { EditVehicleDialog } from "./_components/EditVehicleDialog";
+import { formatPricingRate } from "~/lib/pricing";
 
 /**
  * User Vehicle Detail Page
@@ -161,10 +162,13 @@ export default function UserVehicleDetailPage({
               </Button>
               <div className="min-w-0 flex-1">
                 <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-50 truncate">
-                  {vehicle.name}
+                  {vehicle.year} {vehicle.make.name} {vehicle.model.name}
                 </h1>
                 <p className="text-sm text-slate-600 dark:text-slate-400 truncate">
-                  {vehicle.make.name} {vehicle.model.name} • {vehicle.year}
+                  {[
+                    vehicle.hourlyRate && `£${vehicle.hourlyRate} hourly`,
+                    vehicle.dailyRate && `£${vehicle.dailyRate} daily`
+                  ].filter(Boolean).join(' • ') || 'Pricing not set'}
                 </p>
               </div>
             </div>

@@ -181,7 +181,13 @@ export const userVehicleRouter = createTRPCRouter({
         orderBy: {
           updatedAt: "desc",
         },
-        include: {
+        select: {
+          id: true,
+          name: true,
+          year: true,
+          status: true,
+          hourlyRate: true,
+          dailyRate: true,
           make: {
             select: {
               id: true,
@@ -229,8 +235,15 @@ export const userVehicleRouter = createTRPCRouter({
         nextCursor = nextItem?.id;
       }
 
+      // Convert Decimal values to numbers for client compatibility
+      const vehiclesWithConvertedPricing = vehicles.map(vehicle => ({
+        ...vehicle,
+        hourlyRate: vehicle.hourlyRate ? Number(vehicle.hourlyRate) : null,
+        dailyRate: vehicle.dailyRate ? Number(vehicle.dailyRate) : null,
+      }));
+
       return {
-        vehicles,
+        vehicles: vehiclesWithConvertedPricing,
         nextCursor,
       };
     }),

@@ -11,6 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { AlertCircle, ArrowLeft } from "lucide-react";
 import type { VehicleDetail } from "~/types/vehicle";
+import { formatPricingRate } from "~/lib/pricing";
 
 /**
  * Test Vehicle Detail Page - DEV ONLY
@@ -113,10 +114,13 @@ export default function TestVehicleDetailPage({
             </Button>
             <div>
               <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-50">
-                {vehicle.name}
+                {vehicle.year} {vehicle.make.name} {vehicle.model.name}
               </h1>
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                {vehicle.make.name} {vehicle.model.name} • {vehicle.year}
+                {[
+                  vehicle.hourlyRate && `£${vehicle.hourlyRate} hourly`,
+                  vehicle.dailyRate && `£${vehicle.dailyRate} daily`
+                ].filter(Boolean).join(' • ') || 'Pricing not set'}
               </p>
             </div>
           </div>

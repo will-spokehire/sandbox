@@ -179,18 +179,16 @@ export const VehicleCard = memo(function VehicleCard({
 
         {/* Content */}
         <Link href={`/admin/vehicles/${vehicle.id}`} className="block p-4">
-          {/* Title and Price */}
+          {/* Title and Pricing */}
           <div className="mb-3">
-            <div className="flex items-start justify-between gap-2 mb-1">
-              <h3 className="font-semibold text-lg text-foreground leading-tight">
-                {vehicle.name}
-              </h3>
-              <span className="font-bold text-lg text-primary whitespace-nowrap">
-                {formatPrice(vehicle.price)}
-              </span>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              {vehicle.make.name} {vehicle.model.name} • {vehicle.year}
+            <h3 className="font-semibold text-lg text-foreground leading-tight mb-1">
+              {vehicle.name}
+            </h3>
+            <p className="text-sm font-medium text-primary">
+              {[
+                vehicle.hourlyRate && `£${vehicle.hourlyRate} hourly`,
+                vehicle.dailyRate && `£${vehicle.dailyRate} daily`
+              ].filter(Boolean).join(' • ') || 'Pricing not set'}
             </p>
           </div>
 

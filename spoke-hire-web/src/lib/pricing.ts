@@ -81,14 +81,18 @@ export function calculateDefaultPricing(agreedValue: number): DefaultPricing {
 /**
  * Format pricing value with currency symbol
  * 
- * @param value - Numeric price value
+ * @param value - Numeric price value (can be number or Prisma Decimal)
  * @returns Formatted string with £ symbol
  */
-export function formatPricingRate(value: number | null | undefined): string {
+export function formatPricingRate(value: number | { toNumber?: () => number } | null | undefined): string {
   if (value === null || value === undefined) {
     return "Not set";
   }
-  return `£${value.toFixed(0)}`;
+  
+  // Handle Prisma Decimal objects
+  const numValue = typeof value === 'number' ? value : value.toNumber?.() ?? 0;
+  
+  return `£${numValue.toFixed(0)}`;
 }
 
 /**

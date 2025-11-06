@@ -9,6 +9,7 @@ import { DeclineVehicleDialog } from "./DeclineVehicleDialog";
 import { type VehicleDetail } from "~/types/vehicle";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
+import { formatPricingRate } from "~/lib/pricing";
 
 interface VehicleDetailHeaderProps {
   vehicle: VehicleDetail;
@@ -146,7 +147,7 @@ export function VehicleDetailHeader({ vehicle, onEdit }: VehicleDetailHeaderProp
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-50 truncate">
-                    {vehicle.name}
+                    {vehicle.year} {vehicle.make.name} {vehicle.model.name}
                   </h1>
                   {hasUnpublishedMakeModel && isInReview && (
                     <Badge variant="outline" className="gap-1 border-yellow-500 text-yellow-600 dark:text-yellow-400 whitespace-nowrap">
@@ -156,7 +157,10 @@ export function VehicleDetailHeader({ vehicle, onEdit }: VehicleDetailHeaderProp
                   )}
                 </div>
                 <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400 truncate">
-                  {vehicle.make.name} {vehicle.model.name} • {vehicle.year}
+                  {[
+                    vehicle.hourlyRate && `£${vehicle.hourlyRate} hourly`,
+                    vehicle.dailyRate && `£${vehicle.dailyRate} daily`
+                  ].filter(Boolean).join(' • ') || 'Pricing not set'}
                 </p>
               </div>
             </div>
