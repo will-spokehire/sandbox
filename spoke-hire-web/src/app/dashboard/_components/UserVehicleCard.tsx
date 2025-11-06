@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card } from '~/components/ui/card';
 import { VehicleStatusBadge } from '~/components/vehicles/VehicleStatusBadge';
+import { useSwipeGesture } from '~/hooks/useSwipeGesture';
 import type { VehicleStatus } from '@prisma/client';
 
 interface VehicleMedia {
@@ -41,21 +43,56 @@ interface UserVehicleCardProps {
  * User Vehicle Card Component
  * 
  * Displays a vehicle card for regular users (non-admin).
- * Shows primary image, name, make/model, year, and status.
+ * Shows primary image with carousel navigation, name, make/model, year, and status.
  */
 export function UserVehicleCard({ vehicle, href }: UserVehicleCardProps) {
-  const primaryImage = vehicle.media[0];
-  const imageUrl = primaryImage?.publishedUrl || primaryImage?.originalUrl;
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const linkHref = href ?? `/dashboard/${vehicle.id}`;
+
+  // Navigation functions
+  const goToNext = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev + 1) % vehicle.media.length);
+  };
+
+  const goToPrevious = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? vehicle.media.length - 1 : prev - 1
+    );
+  };
+
+  // Touch navigation functions (without event handling)
+  const goToNextTouch = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % vehicle.media.length);
+  };
+
+  const goToPreviousTouch = () => {
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? vehicle.media.length - 1 : prev - 1
+    );
+  };
+
+  // Swipe gesture for mobile
+  const swipeRef = useSwipeGesture<HTMLDivElement>({
+    onSwipeLeft: goToNextTouch,
+    onSwipeRight: goToPreviousTouch,
+  });
+
+  // Get current image based on index
+  const currentImage = vehicle.media[currentImageIndex];
+  const imageUrl = currentImage?.publishedUrl || currentImage?.originalUrl;
 
   return (
     <Link href={linkHref}>
       <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer p-0 gap-0">
-        <div className="relative aspect-[3/2] bg-slate-100 dark:bg-slate-800">
+        <div ref={swipeRef} className="relative aspect-[3/2] bg-slate-100 dark:bg-slate-800 group">
           {imageUrl ? (
             <Image
               src={imageUrl}
-              alt={primaryImage?.altText || vehicle.name}
+              alt={currentImage?.altText || vehicle.name}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -84,10 +121,54 @@ export function UserVehicleCard({ vehicle, href }: UserVehicleCardProps) {
             <VehicleStatusBadge status={vehicle.status} />
           </div>
 
-          {/* Image Count - Bottom Right */}
-          {vehicle._count.media > 0 && (
-            <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
-              {vehicle._count.media} {vehicle._count.media === 1 ? 'photo' : 'photos'}
+          {/* Navigation Arrows - Hidden on mobile, show on hover on desktop */}
+          {vehicle.media.length > 1 && (
+            <>
+              <button
+                onClick={goToPrevious}
+                className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 md:p-3 transition-all hidden lg:flex lg:opacity-0 lg:group-hover:opacity-100"
+                aria-label="Previous image"
+              >
+                <svg
+                  className="h-5 w-5 md:h-6 md:w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={3}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+              </button>
+              <button
+                onClick={goToNext}
+                className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 md:p-3 transition-all hidden lg:flex lg:opacity-0 lg:group-hover:opacity-100"
+                aria-label="Next image"
+              >
+                <svg
+                  className="h-5 w-5 md:h-6 md:w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={3}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </button>
+            </>
+          )}
+
+          {/* Image Counter - Bottom Right */}
+          {vehicle.media.length > 1 && (
+            <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded z-10">
+              {currentImageIndex + 1} / {vehicle.media.length}
             </div>
           )}
         </div>

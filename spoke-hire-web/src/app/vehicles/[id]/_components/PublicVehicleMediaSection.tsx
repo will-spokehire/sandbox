@@ -4,10 +4,10 @@ import { useState } from "react";
 import Image from "next/image";
 import { Card } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { getVehicleImageUrl } from "~/lib/vehicles";
 import { cn } from "~/lib/utils";
+import { useSwipeGesture } from "~/hooks/useSwipeGesture";
 
 interface PublicVehicleMediaSectionProps {
   vehicle: {
@@ -62,11 +62,17 @@ export function PublicVehicleMediaSection({ vehicle }: PublicVehicleMediaSection
     );
   };
 
+  // Swipe gesture for mobile
+  const swipeRef = useSwipeGesture<HTMLDivElement>({
+    onSwipeLeft: goToNext,
+    onSwipeRight: goToPrevious,
+  });
+
   return (
     <article className="space-y-4">
       {/* Main Image with Navigation */}
       <Card className="relative overflow-hidden p-0">
-        <div className="relative aspect-[3/2] bg-muted">
+        <div ref={swipeRef} className="relative aspect-[3/2] bg-muted">
           <Image
             src={
               currentImage?.publishedUrl ??
@@ -95,28 +101,26 @@ export function PublicVehicleMediaSection({ vehicle }: PublicVehicleMediaSection
             </div>
           )}
 
-          {/* Navigation Arrows */}
+          {/* Navigation Arrows - Hidden on mobile, show on desktop */}
           {sortedMedia.length > 1 && (
             <>
-              <Button
-                variant="secondary"
-                size="icon"
-                className="absolute left-4 top-1/2 -translate-y-1/2 opacity-70 hover:opacity-100 backdrop-blur-sm"
+              <button
                 onClick={goToPrevious}
+                className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 md:p-3 transition-all hidden md:flex md:opacity-70 md:hover:opacity-100"
+                aria-label="Previous image"
               >
-                <ChevronLeft className="h-6 w-6" />
-              </Button>
-              <Button
-                variant="secondary"
-                size="icon"
-                className="absolute right-4 top-1/2 -translate-y-1/2 opacity-70 hover:opacity-100 backdrop-blur-sm"
+                <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
+              </button>
+              <button
                 onClick={goToNext}
+                className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 md:p-3 transition-all hidden md:flex md:opacity-70 md:hover:opacity-100"
+                aria-label="Next image"
               >
-                <ChevronRight className="h-6 w-6" />
-              </Button>
+                <ChevronRight className="h-5 w-5 md:h-6 md:w-6" />
+              </button>
 
               {/* Image Counter */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-full bg-background/80 backdrop-blur-sm text-sm font-medium">
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 bg-black/60 text-white text-xs md:text-sm px-3 py-1 rounded-full font-medium">
                 {selectedImageIndex + 1} / {sortedMedia.length}
               </div>
             </>

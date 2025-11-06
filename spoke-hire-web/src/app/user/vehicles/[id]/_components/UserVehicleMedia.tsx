@@ -10,6 +10,7 @@ import { ImageEditDialog } from "~/components/vehicles/ImageEditDialog";
 import { cn } from "~/lib/utils";
 import type { VehicleDetail } from "~/types/vehicle";
 import { useRequireAuth } from "~/providers/auth-provider";
+import { useSwipeGesture } from "~/hooks/useSwipeGesture";
 
 interface UserVehicleMediaProps {
   vehicle: VehicleDetail;
@@ -62,13 +63,19 @@ export function UserVehicleMedia({ vehicle }: UserVehicleMediaProps) {
     );
   };
 
+  // Swipe gesture for mobile
+  const swipeRef = useSwipeGesture<HTMLDivElement>({
+    onSwipeLeft: goToNext,
+    onSwipeRight: goToPrevious,
+  });
+
   return (
     <div className="space-y-4">
       {/* Always stacked vertically: Hero image on top, thumbnails below */}
       <div className="flex flex-col gap-4">
         {/* Main/Hero Image - 3:2 aspect ratio */}
         <Card className="relative overflow-hidden p-0 group">
-          <div className="relative aspect-[3/2] bg-muted">
+          <div ref={swipeRef} className="relative aspect-[3/2] bg-muted">
             {hasImages && mainImage ? (
               <Image
                 src={mainImage.publishedUrl ?? mainImage.originalUrl}
@@ -108,12 +115,12 @@ export function UserVehicleMedia({ vehicle }: UserVehicleMediaProps) {
               </div>
             )}
 
-            {/* Navigation Arrows */}
+            {/* Navigation Arrows - Hidden on mobile, show on hover on desktop */}
             {sortedMedia.length > 1 && (
               <>
                 <button
                   onClick={goToPrevious}
-                  className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 md:p-3 transition-all opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                  className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 md:p-3 transition-all hidden lg:flex lg:opacity-0 lg:group-hover:opacity-100"
                   aria-label="Previous image"
                 >
                   <svg
@@ -132,7 +139,7 @@ export function UserVehicleMedia({ vehicle }: UserVehicleMediaProps) {
                 </button>
                 <button
                   onClick={goToNext}
-                  className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 md:p-3 transition-all opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                  className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 md:p-3 transition-all hidden lg:flex lg:opacity-0 lg:group-hover:opacity-100"
                   aria-label="Next image"
                 >
                   <svg

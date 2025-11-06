@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Card, CardContent } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { MapPin, ChevronLeft, ChevronRight } from "lucide-react";
+import { useSwipeGesture } from "~/hooks/useSwipeGesture";
 
 interface PublicVehicleCardProps {
   vehicle: {
@@ -65,17 +66,31 @@ export function PublicVehicleCard({ vehicle }: PublicVehicleCardProps) {
     setCurrentImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
   };
 
-  const goToNext = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const goToNext = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
     setCurrentImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
   };
+
+  const goToPreviousTouch = () => {
+    setCurrentImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
+  };
+
+  const goToNextTouch = () => {
+    setCurrentImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+  };
+
+  // Swipe gesture for mobile
+  const swipeRef = useSwipeGesture<HTMLDivElement>({
+    onSwipeLeft: goToNextTouch,
+    onSwipeRight: goToPreviousTouch,
+  });
 
   return (
     <Link href={`/vehicles/${vehicle.id}`} className="group block">
       <Card className="overflow-hidden transition-shadow hover:shadow-lg h-full flex flex-col gap-0 p-0">
         {/* Image with Navigation */}
-        <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+        <div ref={swipeRef} className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
           <Image
             src={imageUrl}
             alt={`${vehicle.year} ${vehicle.make.name} ${vehicle.model.name}`}
@@ -91,19 +106,19 @@ export function PublicVehicleCard({ vehicle }: PublicVehicleCardProps) {
             </div>
           )}
 
-          {/* Navigation Arrows - Show only on hover */}
+          {/* Navigation Arrows - Hidden on mobile, show on hover on desktop */}
           {hasMultipleImages && (
             <>
               <button
                 onClick={goToPrevious}
-                className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 transition-all shadow-lg opacity-0 group-hover:opacity-100"
+                className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 transition-all shadow-lg hidden md:flex opacity-0 group-hover:opacity-100"
                 aria-label="Previous image"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
               <button
                 onClick={goToNext}
-                className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 transition-all shadow-lg opacity-0 group-hover:opacity-100"
+                className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 transition-all shadow-lg hidden md:flex opacity-0 group-hover:opacity-100"
                 aria-label="Next image"
               >
                 <ChevronRight className="h-5 w-5" />

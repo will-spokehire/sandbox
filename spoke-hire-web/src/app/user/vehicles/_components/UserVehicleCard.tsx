@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Card } from '~/components/ui/card';
 import { VehicleStatusBadge } from '~/components/vehicles/VehicleStatusBadge';
+import { useSwipeGesture } from '~/hooks/useSwipeGesture';
 import type { VehicleStatus } from '@prisma/client';
 
 interface VehicleMedia {
@@ -65,6 +66,23 @@ export function UserVehicleCard({ vehicle, href }: UserVehicleCardProps) {
     );
   };
 
+  // Touch navigation functions (without event handling)
+  const goToNextTouch = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % vehicle.media.length);
+  };
+
+  const goToPreviousTouch = () => {
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? vehicle.media.length - 1 : prev - 1
+    );
+  };
+
+  // Swipe gesture for mobile
+  const swipeRef = useSwipeGesture<HTMLDivElement>({
+    onSwipeLeft: goToNextTouch,
+    onSwipeRight: goToPreviousTouch,
+  });
+
   // Get current image based on index
   const currentImage = vehicle.media[currentImageIndex];
   const imageUrl = currentImage?.publishedUrl || currentImage?.originalUrl;
@@ -72,7 +90,7 @@ export function UserVehicleCard({ vehicle, href }: UserVehicleCardProps) {
   return (
     <Link href={linkHref}>
       <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer p-0 gap-0">
-        <div className="relative aspect-[3/2] bg-slate-100 dark:bg-slate-800 group">
+        <div ref={swipeRef} className="relative aspect-[3/2] bg-slate-100 dark:bg-slate-800 group">
           {imageUrl ? (
             <Image
               src={imageUrl}
@@ -105,12 +123,12 @@ export function UserVehicleCard({ vehicle, href }: UserVehicleCardProps) {
             <VehicleStatusBadge status={vehicle.status} />
           </div>
 
-          {/* Navigation Arrows - Show on hover (desktop) or always visible (mobile) */}
+          {/* Navigation Arrows - Hidden on mobile, show on hover on desktop */}
           {vehicle.media.length > 1 && (
             <>
               <button
                 onClick={goToPrevious}
-                className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 md:p-3 transition-all opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 md:p-3 transition-all hidden lg:flex lg:opacity-0 lg:group-hover:opacity-100"
                 aria-label="Previous image"
               >
                 <svg
@@ -129,7 +147,7 @@ export function UserVehicleCard({ vehicle, href }: UserVehicleCardProps) {
               </button>
               <button
                 onClick={goToNext}
-                className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 md:p-3 transition-all opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 md:p-3 transition-all hidden lg:flex lg:opacity-0 lg:group-hover:opacity-100"
                 aria-label="Next image"
               >
                 <svg

@@ -20,6 +20,7 @@ import { cn } from "~/lib/utils";
 import { type VehicleDetail } from "~/types/vehicle";
 import { toast } from "sonner";
 import { getWhatsAppChatUrl } from "~/lib/whatsapp";
+import { useSwipeGesture } from "~/hooks/useSwipeGesture";
 
 interface VehicleMediaSectionProps {
   vehicle: VehicleDetail;
@@ -81,6 +82,25 @@ export function VehicleMediaSection({ vehicle, onSendDeal }: VehicleMediaSection
     );
   };
 
+  // Touch navigation functions (without event handling)
+  const goToPreviousTouch = () => {
+    setSelectedImageIndex((prev) =>
+      prev > 0 ? prev - 1 : sortedMedia.length - 1
+    );
+  };
+
+  const goToNextTouch = () => {
+    setSelectedImageIndex((prev) =>
+      prev < sortedMedia.length - 1 ? prev + 1 : 0
+    );
+  };
+
+  // Swipe gesture for mobile
+  const swipeRef = useSwipeGesture<HTMLDivElement>({
+    onSwipeLeft: goToNextTouch,
+    onSwipeRight: goToPreviousTouch,
+  });
+
   const currentImage = sortedMedia[selectedImageIndex] ?? mainImage;
 
   return (
@@ -89,7 +109,7 @@ export function VehicleMediaSection({ vehicle, onSendDeal }: VehicleMediaSection
       <div className="flex flex-col gap-4">
         {/* Main/Hero Image - 3:2 aspect ratio */}
         <Card className="relative overflow-hidden p-0 group">
-          <div className="relative aspect-[3/2] bg-muted">
+          <div ref={swipeRef} className="relative aspect-[3/2] bg-muted">
           <Image
             src={
               currentImage?.publishedUrl ??
@@ -196,12 +216,12 @@ export function VehicleMediaSection({ vehicle, onSendDeal }: VehicleMediaSection
             </DropdownMenu>
           </div>
 
-          {/* Navigation Arrows - Always visible on mobile, show on hover on desktop */}
+          {/* Navigation Arrows - Hidden on mobile, show on hover on desktop */}
           {sortedMedia.length > 1 && (
             <>
               <button
                 onClick={goToPrevious}
-                className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 md:p-3 transition-all opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 md:p-3 transition-all hidden lg:flex lg:opacity-0 lg:group-hover:opacity-100"
                 aria-label="Previous image"
               >
                 <svg
@@ -220,7 +240,7 @@ export function VehicleMediaSection({ vehicle, onSendDeal }: VehicleMediaSection
               </button>
               <button
                 onClick={goToNext}
-                className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 md:p-3 transition-all opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 md:p-3 transition-all hidden lg:flex lg:opacity-0 lg:group-hover:opacity-100"
                 aria-label="Next image"
               >
                 <svg
