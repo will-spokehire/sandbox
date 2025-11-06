@@ -5,7 +5,7 @@
  * Handles all Prisma queries related to deals, vehicles, and recipients.
  */
 
-import { type Prisma, type DealStatus, RecipientStatus } from "@prisma/client";
+import { type Prisma, type DealStatus, type DealType, RecipientStatus } from "@prisma/client";
 import { BaseRepository } from "./base.repository";
 import { DatabaseError, DealNotFoundError } from "../errors/app-errors";
 import type { DealWithDetails } from "~/server/types";
@@ -14,6 +14,7 @@ import type { DealWithDetails } from "~/server/types";
 
 export interface CreateDealData {
   name: string;
+  dealType: DealType;
   date?: string;
   time?: string;
   location?: string;
@@ -206,6 +207,7 @@ export class DealRepository extends BaseRepository {
       const deal = await this.db.deal.create({
         data: {
           name: data.name,
+          dealType: data.dealType,
           date: data.date,
           time: data.time,
           location: data.location,
@@ -276,6 +278,7 @@ export class DealRepository extends BaseRepository {
     dealId: string,
     data: {
       name?: string;
+      dealType?: DealType;
       date?: string;
       time?: string;
       location?: string;

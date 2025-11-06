@@ -29,7 +29,7 @@ import { formatOwnerName } from "~/lib/vehicles";
 import { useClipboard } from "~/hooks/useClipboard";
 import { CreateEditDealDialog, UpdateOwnerFeeDialog } from "~/components/deals";
 import { useDealMutations } from "~/hooks/useDealMutations";
-import { getDealStatusConfig } from "~/lib/deals";
+import { getDealStatusConfig, getDealTypeLabel } from "~/lib/deals";
 import { Badge } from "~/components/ui/badge";
 import {
   Tooltip,
@@ -387,6 +387,10 @@ export default function DealDetailPage({
                   <div className="rounded-lg border p-4 space-y-3">
                     <h3 className="font-semibold text-sm">Production Details</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">📋 Type</p>
+                        <p className="font-medium">{getDealTypeLabel(deal.dealType)}</p>
+                      </div>
                       {deal.date && (
                         <div>
                           <p className="text-muted-foreground">📅 Date(s)</p>

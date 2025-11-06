@@ -12,6 +12,7 @@ import { type ListParams } from "./common";
  */
 export interface CreateDealParams {
   name: string;
+  dealType: DealType;
   date?: string;
   time?: string;
   location?: string;
@@ -32,6 +33,7 @@ export interface CreateDealParams {
  */
 export interface UpdateDealParams {
   name?: string;
+  dealType?: DealType;
   date?: string;
   time?: string;
   location?: string;
@@ -125,6 +127,7 @@ export interface DealVehicle {
  */
 export interface DealRecipient {
   id: string;
+  userId: string;
   status: RecipientStatus;
   emailSentAt: Date | null;
   emailOpenedAt: Date | null;
@@ -146,6 +149,7 @@ export interface DealRecipient {
 export interface DealWithDetails {
   id: string;
   name: string;
+  dealType: DealType;
   date: string | null;
   time: string | null;
   location: string | null;
@@ -187,6 +191,7 @@ export interface DealWithDetails {
 export interface DealSummary {
   id: string;
   name: string;
+  dealType: DealType;
   status: DealStatus;
   clientContact: {
     company: string | null;

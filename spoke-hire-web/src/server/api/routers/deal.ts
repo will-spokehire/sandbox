@@ -16,6 +16,7 @@ import { RecipientStatus,  type Prisma } from "@prisma/client";
 import { createTRPCRouter, adminProcedure } from "~/server/api/trpc";
 import { ServiceFactory } from "~/server/api/services/service-factory";
 import { EmailService } from "~/server/api/services/email.service";
+import { getDealTypeLabel } from "~/lib/deals";
 import {
   MAX_VEHICLES_PER_DEAL,
   MAX_RECIPIENTS_PER_DEAL,
@@ -43,6 +44,7 @@ const getDealByIdInputSchema = z.object({
 
 const createDealInputSchema = z.object({
   name: z.string().min(DEAL_NAME_MIN_LENGTH).max(DEAL_NAME_MAX_LENGTH),
+  dealType: z.enum(["PERSONAL_HIRE", "PRODUCTION"]),
   date: z.string().optional(),
   time: z.string().optional(),
   location: z.string().optional(),
@@ -72,6 +74,7 @@ const addVehiclesToDealInputSchema = z.object({
 const updateDealInputSchema = z.object({
   id: z.string().cuid(),
   name: z.string().min(DEAL_NAME_MIN_LENGTH).max(DEAL_NAME_MAX_LENGTH).optional(),
+  dealType: z.enum(["PERSONAL_HIRE", "PRODUCTION"]).optional(),
   date: z.string().optional(),
   time: z.string().optional(),
   location: z.string().optional(),
@@ -155,6 +158,7 @@ export const dealRouter = createTRPCRouter({
 
       return await service.createDeal({
         name: input.name,
+        dealType: input.dealType,
         date: input.date,
         time: input.time,
         location: input.location,
@@ -203,10 +207,14 @@ export const dealRouter = createTRPCRouter({
         // Get user name (firstName or fallback to email username)
         const userName = recipient.user.firstName ?? "Owner";
         
+        // Convert deal type enum to readable label
+        const dealTypeLabel = getDealTypeLabel(deal.dealType).toLowerCase();
+        
         return {
           to: recipient.user.email,
           userName,
           dealName: deal.name,
+          dealType: dealTypeLabel,
           date: deal.date,
           time: deal.time,
           location: deal.location,

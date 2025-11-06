@@ -57,6 +57,12 @@ enum DealStatus {
   ARCHIVED          // Old/archived deals
 }
 
+// Deal Type Enum
+enum DealType {
+  PERSONAL_HIRE
+  PRODUCTION
+}
+
 // Recipient Status Enum
 enum RecipientStatus {
   PENDING
@@ -394,6 +400,7 @@ model Deal {
     updatedAt   DateTime    @updatedAt
     
     name        String
+    dealType    DealType    // Type of deal (required)
     
     // Template fields for WhatsApp and Email messages
     date        String?     // Production date(s) - free text

@@ -30,7 +30,7 @@ import { api } from "~/trpc/react";
 import { CreateEditDealDialog } from "~/components/deals";
 import { PageLoading } from "~/components/loading";
 import { useDealMutations } from "~/hooks/useDealMutations";
-import { getDealStatusConfig } from "~/lib/deals";
+import { getDealStatusConfig, getDealTypeBadgeConfig } from "~/lib/deals";
 import { Badge } from "~/components/ui/badge";
 
 /**
@@ -98,6 +98,11 @@ function DealsListContent() {
 
   const getStatusBadge = (status: string) => {
     const config = getDealStatusConfig(status as DealStatus);
+    return <Badge variant={config.variant}>{config.label}</Badge>;
+  };
+
+  const getDealTypeBadge = (dealType: DealType) => {
+    const config = getDealTypeBadgeConfig(dealType);
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
@@ -274,6 +279,7 @@ function DealsListContent() {
                               {/* Status badge and metadata row */}
                               <div className="flex flex-wrap items-center gap-2">
                                 {getStatusBadge(deal.status)}
+                                {getDealTypeBadge(deal.dealType)}
                                 {(deal.date ?? deal.location) && (
                                   <>
                                     <span className="text-muted-foreground">•</span>

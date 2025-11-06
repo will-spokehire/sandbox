@@ -25,6 +25,7 @@ import {
 } from "../constants/deals";
 import { EmailService } from "./email.service";
 import { DealRepository } from "../repositories/deal.repository";
+import { getDealTypeLabel } from "~/lib/deals";
 import type {
   CreateDealParams,
   UpdateDealParams,
@@ -82,7 +83,7 @@ export class DealService {
    * Create a new deal
    */
   async createDeal(params: CreateDealParams) {
-    const { name, date, time, location, brief, fee, clientContactId, fullQuote, spokeFee, baselineFee, notes, vehicleIds, recipientIds, createdById } = params;
+    const { name, dealType, date, time, location, brief, fee, clientContactId, fullQuote, spokeFee, baselineFee, notes, vehicleIds, recipientIds, createdById } = params;
 
     // Validate deal name
     this.validateDealName(name);
@@ -148,6 +149,7 @@ export class DealService {
       // Create deal with vehicles and recipients
       return await repo.createWithRelations({
         name,
+        dealType,
         date,
         time,
         location,
@@ -358,7 +360,7 @@ export class DealService {
    * Update deal details
    */
   async updateDeal(dealId: string, params: UpdateDealParams) {
-    const { name, date, time, location, brief, fee, clientContactId, fullQuote, spokeFee, baselineFee, notes, status } = params;
+    const { name, dealType, date, time, location, brief, fee, clientContactId, fullQuote, spokeFee, baselineFee, notes, status } = params;
 
     // Validate deal exists
     const deal = await this.repository.findById(dealId);
@@ -393,6 +395,7 @@ export class DealService {
     // Update deal with provided fields
     return await this.repository.updateDetails(dealId, {
       name,
+      dealType,
       date,
       time,
       location,
@@ -499,11 +502,16 @@ export class DealService {
       const vehicleNames = recipientVehicles.map((v) => v.name).join(", ");
       
       // Get user name (firstName or fallback to email username)
-      const userName = recipient.user.firstName ?? "User";      
+      const userName = recipient.user.firstName ?? "User";
+      
+      // Convert deal type enum to readable label
+      const dealTypeLabel = getDealTypeLabel(deal.dealType);
+      
       return {
         to: recipient.user.email,
         userName,
         dealName: deal.name,
+        dealType: dealTypeLabel,
         date: deal.date,
         time: deal.time,
         location: deal.location,

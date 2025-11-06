@@ -15,6 +15,7 @@ export interface LoopsDealEmailParams {
   to: string;
   userName: string;
   dealName: string;
+  dealType: string;
   date: string | null;
   time: string | null;
   location: string | null;
@@ -95,7 +96,7 @@ export class EmailService {
    * Send deal notification email
    */
   async sendDealEmail(params: LoopsDealEmailParams): Promise<{ success: boolean; messageId?: string; error?: string }> {
-    const { to, userName, dealName, date, time, location, brief, fee, vehicleNames, dealUrl } = params;
+    const { to, userName, dealName, dealType, date, time, location, brief, fee, vehicleNames, dealUrl } = params;
     
     // Determine actual recipient email (use override if set)
     const originalRecipient = to;
@@ -114,6 +115,7 @@ export class EmailService {
         console.log("(Using test email override)");
       }
       console.log("Deal Name:", dealName);
+      console.log("Deal Type:", dealType);
       console.log("Date:", date ?? "(none)");
       console.log("Time:", time ?? "(none)");
       console.log("Location:", location ?? "(none)");
@@ -151,6 +153,7 @@ export class EmailService {
           dataVariables: {
             userName,
             dealName,
+            dealType,
             date: date ?? "",
             time: time ?? "",
             location: location ?? "",

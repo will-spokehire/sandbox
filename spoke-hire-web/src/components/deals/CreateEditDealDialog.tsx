@@ -33,6 +33,9 @@ import { UserPlus } from "lucide-react";
 
 const createDealSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters").max(100, "Name must be less than 100 characters"),
+  dealType: z.enum(["PERSONAL_HIRE", "PRODUCTION"], {
+    required_error: "Please select a deal type",
+  }),
   date: z.string().optional(),
   time: z.string().optional(),
   location: z.string().optional(),
@@ -68,6 +71,7 @@ export function CreateEditDealDialog({
     resolver: zodResolver(createDealSchema),
     defaultValues: {
       name: "",
+      dealType: "PRODUCTION",
       date: "",
       time: "",
       location: "",
@@ -98,6 +102,7 @@ export function CreateEditDealDialog({
     if (existingDeal && dealId) {
       form.reset({
         name: existingDeal.name,
+        dealType: existingDeal.dealType,
         date: existingDeal.date ?? "",
         time: existingDeal.time ?? "",
         location: existingDeal.location ?? "",
@@ -114,6 +119,7 @@ export function CreateEditDealDialog({
       // Reset to empty when creating new deal
       form.reset({
         name: "",
+        dealType: "PRODUCTION",
         date: "",
         time: "",
         location: "",
@@ -173,6 +179,7 @@ export function CreateEditDealDialog({
       updateDealMutation.mutate({
         id: dealId,
         name: data.name,
+        dealType: data.dealType,
         date: data.date,
         time: data.time,
         location: data.location,
@@ -189,6 +196,7 @@ export function CreateEditDealDialog({
       // Create new deal
       createDealMutation.mutate({
         name: data.name,
+        dealType: data.dealType,
         date: data.date,
         time: data.time,
         location: data.location,
@@ -232,6 +240,30 @@ export function CreateEditDealDialog({
             {form.formState.errors.name && (
               <p className="text-sm text-red-500">
                 {form.formState.errors.name.message}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="dealType">
+              Deal Type <span className="text-red-500">*</span>
+            </Label>
+            <Select
+              value={form.watch("dealType")}
+              onValueChange={(value) => form.setValue("dealType", value as "PERSONAL_HIRE" | "PRODUCTION")}
+              disabled={isSubmitting}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select deal type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="PERSONAL_HIRE">Personal Hire</SelectItem>
+                <SelectItem value="PRODUCTION">Production</SelectItem>
+              </SelectContent>
+            </Select>
+            {form.formState.errors.dealType && (
+              <p className="text-sm text-red-500">
+                {form.formState.errors.dealType.message}
               </p>
             )}
           </div>
