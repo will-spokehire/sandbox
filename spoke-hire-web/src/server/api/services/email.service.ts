@@ -58,6 +58,34 @@ export interface VehicleInReviewEmailParams {
 }
 
 /**
+ * Admin enquiry notification parameters
+ */
+export interface AdminEnquiryEmailParams {
+  to: string;
+  userName: string;
+  userEmail: string;
+  userPhone: string;
+  userCompany: string | null;
+  dealName: string;
+  dealType: string;
+  date: string | null;
+  time: string | null;
+  location: string | null;
+  brief: string | null;
+  vehicleName: string | null;
+  dealUrl: string;
+}
+
+/**
+ * User enquiry confirmation parameters
+ */
+export interface UserEnquiryConfirmationParams {
+  to: string;
+  userName: string;
+  dealType: string;
+}
+
+/**
  * Email Service Class
  */
 export class EmailService {
@@ -474,6 +502,178 @@ export class EmailService {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to send email";
       console.error("Failed to send vehicle in review email:", error);
+      return { success: false, error: errorMessage };
+    }
+  }
+
+  /**
+   * Send admin notification for new enquiry
+   */
+  async sendAdminEnquiryNotification(params: AdminEnquiryEmailParams): Promise<{ success: boolean; messageId?: string; error?: string }> {
+    const { to, userName, userEmail, userPhone, userCompany, dealName, dealType, date, time, location, brief, vehicleName, dealUrl } = params;
+    
+    const transactionalId = process.env.LOOPS_ENQUIRY_ADMIN_ID ?? "enquiry-admin-notification";
+    
+    // Determine actual recipient email (use override if set)
+    const originalRecipient = to;
+    const actualRecipient = this.testEmailOverride ?? to;
+    const isOverrideActive = this.testEmailOverride && this.testEmailOverride !== to;
+
+    // If debug mode or no API key, log instead of sending
+    if (this.isDebugMode || !this.apiKey) {
+      console.log("\n" + "=".repeat(80));
+      console.log("📧 [EMAIL DEBUG] Admin Enquiry Notification:");
+      console.log("=".repeat(80));
+      console.log("To:", actualRecipient);
+      if (isOverrideActive) {
+        console.log("Original Recipient:", originalRecipient);
+        console.log("(Using test email override)");
+      }
+      console.log("User Name:", userName);
+      console.log("User Email:", userEmail);
+      console.log("User Phone:", userPhone);
+      console.log("User Company:", userCompany ?? "(none)");
+      console.log("Deal Name:", dealName);
+      console.log("Deal Type:", dealType);
+      console.log("Date:", date ?? "(none)");
+      console.log("Time:", time ?? "(none)");
+      console.log("Location:", location ?? "(none)");
+      console.log("Brief:", brief ?? "(none)");
+      console.log("Vehicle:", vehicleName ?? "(none)");
+      console.log("Deal URL:", dealUrl);
+      console.log("=".repeat(80) + "\n");
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      return {
+        success: true,
+        messageId: `debug_enquiry_admin_${Date.now()}`,
+      };
+    }
+
+    try {
+      if (isOverrideActive) {
+        console.log(`🧪 [TEST EMAIL OVERRIDE] Redirecting email from ${originalRecipient} to ${actualRecipient}`);
+      }
+
+      const response = await fetch(`${this.apiUrl}/transactional`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${this.apiKey}`,
+        },
+        body: JSON.stringify({
+          transactionalId,
+          email: actualRecipient,
+          dataVariables: {
+            userName,
+            userEmail,
+            userPhone,
+            userCompany: userCompany ?? "",
+            dealName,
+            dealType,
+            date: date ?? "",
+            time: time ?? "",
+            location: location ?? "",
+            brief: brief ?? "",
+            vehicleName: vehicleName ?? "",
+            dealUrl,
+          },
+        }),
+      });
+
+      const data = await response.json() as { id?: string };
+
+      if (!response.ok) {
+        const idPreview = transactionalId.length >= 8 
+          ? `${transactionalId.substring(0, 4)}...${transactionalId.substring(transactionalId.length - 4)}`
+          : transactionalId;
+        
+        const errorMessage = `Loops API error: ${response.status} - ${JSON.stringify(data)} (transactionalId: ${idPreview})`;
+        console.error(errorMessage);
+        return { success: false, error: errorMessage };
+      }
+
+      return { success: true, messageId: data.id };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to send email";
+      console.error("Failed to send admin enquiry notification:", error);
+      return { success: false, error: errorMessage };
+    }
+  }
+
+  /**
+   * Send user confirmation for enquiry submission
+   */
+  async sendUserEnquiryConfirmation(params: UserEnquiryConfirmationParams): Promise<{ success: boolean; messageId?: string; error?: string }> {
+    const { to, userName, dealType } = params;
+    
+    const transactionalId = process.env.LOOPS_ENQUIRY_USER_ID ?? "enquiry-user-confirmation";
+    
+    // Determine actual recipient email (use override if set)
+    const originalRecipient = to;
+    const actualRecipient = this.testEmailOverride ?? to;
+    const isOverrideActive = this.testEmailOverride && this.testEmailOverride !== to;
+
+    // If debug mode or no API key, log instead of sending
+    if (this.isDebugMode || !this.apiKey) {
+      console.log("\n" + "=".repeat(80));
+      console.log("📧 [EMAIL DEBUG] User Enquiry Confirmation:");
+      console.log("=".repeat(80));
+      console.log("To:", actualRecipient);
+      if (isOverrideActive) {
+        console.log("Original Recipient:", originalRecipient);
+        console.log("(Using test email override)");
+      }
+      console.log("User Name:", userName);
+      console.log("Deal Type:", dealType);
+      console.log("=".repeat(80) + "\n");
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      return {
+        success: true,
+        messageId: `debug_enquiry_user_${Date.now()}`,
+      };
+    }
+
+    try {
+      if (isOverrideActive) {
+        console.log(`🧪 [TEST EMAIL OVERRIDE] Redirecting email from ${originalRecipient} to ${actualRecipient}`);
+      }
+
+      const response = await fetch(`${this.apiUrl}/transactional`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${this.apiKey}`,
+        },
+        body: JSON.stringify({
+          transactionalId,
+          email: actualRecipient,
+          dataVariables: {
+            userName,
+            dealType,
+          },
+        }),
+      });
+
+      const data = await response.json() as { id?: string };
+
+      if (!response.ok) {
+        const idPreview = transactionalId.length >= 8 
+          ? `${transactionalId.substring(0, 4)}...${transactionalId.substring(transactionalId.length - 4)}`
+          : transactionalId;
+        
+        const errorMessage = `Loops API error: ${response.status} - ${JSON.stringify(data)} (transactionalId: ${idPreview})`;
+        console.error(errorMessage);
+        return { success: false, error: errorMessage };
+      }
+
+      return { success: true, messageId: data.id };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to send email";
+      console.error("Failed to send user enquiry confirmation:", error);
       return { success: false, error: errorMessage };
     }
   }

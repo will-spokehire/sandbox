@@ -28,6 +28,11 @@ export function PublicHeader() {
 
         {/* Navigation */}
         <nav className="flex items-center gap-4">
+          {/* Enquiries link - available to all users */}
+          <Button variant="ghost" asChild>
+            <Link href="/enquiry/new">Enquiries</Link>
+          </Button>
+          
           {isAuthenticated ? (
             <>
               {/* User is logged in - show dashboard and list vehicle */}

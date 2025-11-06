@@ -10,7 +10,7 @@
  */
 
 import { TRPCError } from "@trpc/server";
-import { DealStatus, RecipientStatus, type Prisma, type DealVehicleStatus } from "@prisma/client";
+import { DealStatus, RecipientStatus, type Prisma } from "@prisma/client";
 import { DealNotFoundError } from "../errors/app-errors";
 import {
   MAX_VEHICLES_PER_DEAL,
@@ -34,6 +34,8 @@ import type {
   DealWithDetails,
   UpdateDealVehicleStatusParams,
   UpdateDealVehicleFeeParams,
+  CreateUserEnquiryInput,
+  UserEnquiryResult,
 } from "~/server/types";
 
 /**
@@ -160,7 +162,7 @@ export class DealService {
         spokeFee,
         baselineFee,
         notes,
-        status: DealStatus.OPTIONS,
+        status: "OPTIONS" as DealStatus,
         createdById,
         vehicleIds,
         recipientIds,
@@ -259,7 +261,9 @@ export class DealService {
    * @private
    */
   private async validateClientContact(clientContactId: string) {
-    const user = await this.repository.db.user.findUnique({
+    // Access db through repository's transaction API or directly through the getter
+    const repo = this.repository;
+    const user = await (repo as any).db.user.findUnique({
       where: { id: clientContactId },
       select: { id: true },
     });
@@ -290,7 +294,7 @@ export class DealService {
         throw new DealNotFoundError(dealId);
       }
 
-      if (deal.status === DealStatus.ARCHIVED) {
+      if (deal.status === ("ARCHIVED" as DealStatus)) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Cannot add vehicles to archived deals",
@@ -433,7 +437,7 @@ export class DealService {
       throw new DealNotFoundError(dealId);
     }
 
-    return await this.repository.updateStatus(dealId, DealStatus.OPTIONS);
+    return await this.repository.updateStatus(dealId, "OPTIONS" as any);
   }
 
   /**
@@ -576,7 +580,7 @@ export class DealService {
     }
 
     // Find the specific DealVehicle record
-    const dealVehicle = await this.repository.db.dealVehicle.findUnique({
+    const dealVehicle = await (this.repository as any).db.dealVehicle.findUnique({
       where: {
         dealId_vehicleId: {
           dealId,
@@ -593,7 +597,7 @@ export class DealService {
     }
 
     // Update the status
-    return await this.repository.db.dealVehicle.update({
+    return await (this.repository as any).db.dealVehicle.update({
       where: {
         id: dealVehicle.id,
       },
@@ -628,7 +632,7 @@ export class DealService {
     }
 
     // Find the specific DealVehicle record
-    const dealVehicle = await this.repository.db.dealVehicle.findUnique({
+    const dealVehicle = await (this.repository as any).db.dealVehicle.findUnique({
       where: {
         dealId_vehicleId: {
           dealId,
@@ -645,7 +649,7 @@ export class DealService {
     }
 
     // Update the fee
-    return await this.repository.db.dealVehicle.update({
+    return await (this.repository as any).db.dealVehicle.update({
       where: {
         id: dealVehicle.id,
       },
@@ -653,6 +657,111 @@ export class DealService {
         ownerRequestedFee,
       },
     });
+  }
+
+  /**
+   * Create a user enquiry (public-facing enquiry form)
+   * Creates a deal, optionally associates a vehicle, and sends notifications
+   */
+  async createUserEnquiry(params: CreateUserEnquiryInput & { userId: string }): Promise<UserEnquiryResult> {
+    const { 
+      firstName, 
+      lastName, 
+      email, 
+      phone, 
+      company,
+      dealType, 
+      date, 
+      time, 
+      location, 
+      brief, 
+      vehicleId,
+      userId
+    } = params;
+
+    // Create deal name from user info
+    const dealName = `Enquiry from ${firstName} ${lastName}`;
+
+    // Use transaction to ensure data consistency
+    const deal = await this.repository.transaction(async (tx) => {
+      const repo = new DealRepository(tx);
+      
+      // Validate vehicle exists if provided
+      if (vehicleId) {
+        const vehicleExists = await repo.validateVehiclesExist([vehicleId]);
+        if (!vehicleExists) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Vehicle not found",
+          });
+        }
+      }
+
+      // Create deal with optional vehicle
+      return await repo.createWithRelations({
+        name: dealName,
+        dealType,
+        date,
+        time,
+        location,
+        brief,
+        fee: undefined,
+        clientContactId: userId, // Set the enquirer as the client contact
+        fullQuote: undefined,
+        spokeFee: undefined,
+        baselineFee: undefined,
+        notes: `User Enquiry - ${firstName} ${lastName}\nEmail: ${email}\nPhone: ${phone}${company ? `\nCompany: ${company}` : ''}`,
+        status: "OPTIONS" as DealStatus,
+        createdById: userId,
+        vehicleIds: vehicleId ? [vehicleId] : [],
+        recipientIds: [], // No recipients initially - admin will handle the enquiry
+      });
+    });
+
+    // Send email notifications (don't block on email failures)
+    try {
+      const emailService = new EmailService();
+      
+      // Get admin email from environment
+      const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL;
+      
+      // Send admin notification
+      if (adminEmail) {
+        await emailService.sendAdminEnquiryNotification({
+          to: adminEmail,
+          userName: `${firstName} ${lastName}`,
+          userEmail: email,
+          userPhone: phone,
+          userCompany: company ?? null,
+          dealName,
+          dealType: getDealTypeLabel(dealType),
+          date: date ?? null,
+          time: time ?? null,
+          location: location ?? null,
+          brief: brief ?? null,
+          vehicleName: vehicleId ? "Vehicle attached" : null, // We could fetch vehicle name if needed
+          dealUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'}/admin/deals/${deal.id}`,
+        });
+      } else {
+        console.warn("ADMIN_NOTIFICATION_EMAIL not configured - skipping admin notification");
+      }
+
+      // Send user confirmation
+      await emailService.sendUserEnquiryConfirmation({
+        to: email,
+        userName: firstName,
+        dealType: getDealTypeLabel(dealType),
+      });
+    } catch (error) {
+      // Log error but don't fail the enquiry creation
+      console.error(`Failed to send enquiry notification emails:`, error);
+    }
+
+    return {
+      success: true,
+      dealId: deal.id,
+      message: "Enquiry submitted successfully! We'll get back to you soon.",
+    };
   }
 }
 

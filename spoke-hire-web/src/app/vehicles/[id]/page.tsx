@@ -307,7 +307,16 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
           </div>
 
           {/* Right Column - Details (1/3 width on desktop) */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 space-y-6">
+            {/* Make Enquiry Button - Prominent CTA at the top */}
+            <section aria-label="Contact">
+              <Link href={`/enquiry/new?vehicleId=${vehicle.id}`}>
+                <Button className="w-full" size="lg">
+                  Make Enquiry
+                </Button>
+              </Link>
+            </section>
+
             <section aria-label="Vehicle specifications">
               <h2 className="sr-only">Specifications</h2>
               <PublicVehicleBasicInfo vehicle={vehicle} />

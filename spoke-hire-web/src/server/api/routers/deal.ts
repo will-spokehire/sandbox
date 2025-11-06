@@ -13,7 +13,7 @@
 
 import { z } from "zod";
 import { RecipientStatus,  type Prisma } from "@prisma/client";
-import { createTRPCRouter, adminProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, adminProcedure, protectedProcedure } from "~/server/api/trpc";
 import { ServiceFactory } from "~/server/api/services/service-factory";
 import { EmailService } from "~/server/api/services/email.service";
 import { getDealTypeLabel } from "~/lib/deals";
@@ -117,6 +117,23 @@ const updateVehicleFeeInputSchema = z.object({
   ownerRequestedFee: z.number().min(MIN_FINANCIAL_AMOUNT).max(MAX_FINANCIAL_AMOUNT).nullable(),
 });
 
+const createUserEnquiryInputSchema = z.object({
+  // Personal information
+  firstName: z.string().min(1, "First name is required").max(100),
+  lastName: z.string().min(1, "Last name is required").max(100),
+  email: z.string().email("Valid email is required"),
+  phone: z.string().min(1, "Phone is required").max(50),
+  company: z.string().max(200).optional(),
+  // Enquiry details
+  dealType: z.enum(["PERSONAL_HIRE", "PRODUCTION"]),
+  date: z.string().optional(),
+  time: z.string().optional(),
+  location: z.string().optional(),
+  brief: z.string().optional(),
+  // Optional vehicle association
+  vehicleId: z.string().cuid().optional(),
+});
+
 /**
  * Deal Router
  */
@@ -131,7 +148,7 @@ export const dealRouter = createTRPCRouter({
       return await service.listDeals({
         limit: input.limit,
         cursor: input.cursor,
-        status: input.status,
+        status: input.status as any,
       });
     }),
 
@@ -293,8 +310,16 @@ export const dealRouter = createTRPCRouter({
     .input(updateDealInputSchema)
     .mutation(async ({ ctx, input }) => {
       const service = ServiceFactory.createDealService(ctx.db);
-      const { id, ...updateParams } = input;
-      return await service.updateDeal(id, updateParams);
+      const { id, clientContactId, fullQuote, spokeFee, baselineFee, notes, status, ...restParams } = input;
+      return await service.updateDeal(id, {
+        ...restParams,
+        clientContactId: clientContactId ?? undefined,
+        fullQuote: fullQuote ?? undefined,
+        spokeFee: spokeFee ?? undefined,
+        baselineFee: baselineFee ?? undefined,
+        notes: notes ?? undefined,
+        status: status as any,
+      });
     }),
 
   /**
@@ -438,6 +463,24 @@ export const dealRouter = createTRPCRouter({
         dealId: input.dealId,
         vehicleId: input.vehicleId,
         ownerRequestedFee: input.ownerRequestedFee,
+      });
+    }),
+
+  /**
+   * Create a new enquiry from a user (public-facing)
+   * Non-admin users can submit enquiries that create deals
+   */
+  createUserEnquiry: protectedProcedure
+    .input(createUserEnquiryInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const service = ServiceFactory.createDealService(ctx.db);
+      
+      // Get current user ID from context
+      const userId = ctx.user.id;
+
+      return await service.createUserEnquiry({
+        ...input,
+        userId,
       });
     }),
 });

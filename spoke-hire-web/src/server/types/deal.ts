@@ -4,7 +4,7 @@
  * Types related to deal operations, creation, and management.
  */
 
-import { type DealStatus, type RecipientStatus, type DealVehicleStatus } from "@prisma/client";
+import { type DealStatus, type RecipientStatus, type DealVehicleStatus, type DealType } from "@prisma/client";
 import { type ListParams } from "./common";
 
 /**
@@ -236,5 +236,34 @@ export interface DealStats {
   activeDeals: number;
   sentDeals: number;
   archivedDeals: number;
+}
+
+/**
+ * User enquiry input (from public-facing enquiry form)
+ */
+export interface CreateUserEnquiryInput {
+  // Personal information
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  company?: string;
+  // Enquiry details
+  dealType: DealType;
+  date?: string;
+  time?: string;
+  location?: string;
+  brief?: string;
+  // Optional vehicle association
+  vehicleId?: string;
+}
+
+/**
+ * User enquiry creation result
+ */
+export interface UserEnquiryResult {
+  success: boolean;
+  dealId: string;
+  message: string;
 }
 

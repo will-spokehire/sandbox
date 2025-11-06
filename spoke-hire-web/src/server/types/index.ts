@@ -59,6 +59,10 @@ export type {
   CreateDealResult,
   SendDealResult,
   DealStats,
+  UpdateDealVehicleStatusParams,
+  UpdateDealVehicleFeeParams,
+  CreateUserEnquiryInput,
+  UserEnquiryResult,
 } from "./deal";
 
 // User types
