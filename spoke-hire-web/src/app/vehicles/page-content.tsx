@@ -98,8 +98,8 @@ function PublicVehiclesCatalogContent({ initialData, serverTitles, serverFilterO
       {/* Main Content */}
       <div className={LAYOUT_CONSTANTS.container + " " + LAYOUT_CONSTANTS.pageSpacing}>
         <div className={LAYOUT_CONSTANTS.sectionSpacing}>
-          {/* Breadcrumbs - Show active filters path */}
-          <PublicVehicleBreadcrumbs serverFilterOptions={serverFilterOptions} />
+          {/* Breadcrumbs - Temporarily hidden */}
+          {/* <PublicVehicleBreadcrumbs serverFilterOptions={serverFilterOptions} /> */}
 
           {/* Filters */}
           <PublicVehicleFilters />

@@ -281,8 +281,8 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
 
       {/* Main Content */}
       <main className={cn(LAYOUT_CONSTANTS.container, LAYOUT_CONSTANTS.pageSpacing)}>
-        {/* Breadcrumbs */}
-        <VehicleDetailBreadcrumbs vehicle={vehicle} />
+        {/* Breadcrumbs - Temporarily hidden */}
+        {/* <VehicleDetailBreadcrumbs vehicle={vehicle} /> */}
 
         {/* Two-Column Layout */}
         <div className={LAYOUT_CONSTANTS.detailGrid}>
