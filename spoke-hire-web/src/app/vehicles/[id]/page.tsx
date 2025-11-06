@@ -269,7 +269,6 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
         <StandardPageHeader
           variant="detail"
           title={`${vehicle.year} ${vehicle.make.name} ${vehicle.model.name}`}
-          breadcrumbs={<VehicleDetailBreadcrumbs vehicle={vehicle} />}
           backButton={
             <Link href="/vehicles">
               <Button variant="ghost" size="sm" className="gap-2">
@@ -282,6 +281,8 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
 
       {/* Main Content */}
       <main className={cn(LAYOUT_CONSTANTS.container, LAYOUT_CONSTANTS.pageSpacing)}>
+        {/* Breadcrumbs */}
+        <VehicleDetailBreadcrumbs vehicle={vehicle} />
 
         {/* Two-Column Layout */}
         <div className={LAYOUT_CONSTANTS.detailGrid}>

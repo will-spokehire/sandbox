@@ -30,15 +30,6 @@ interface VehicleDetailBreadcrumbsProps {
  * Each segment is clickable and links back to the catalog with appropriate filters
  */
 export function VehicleDetailBreadcrumbs({ vehicle }: VehicleDetailBreadcrumbsProps) {
-  // Build location string (City, County or just County, or just Country)
-  const locationParts: string[] = [];
-  if (vehicle.owner.city) locationParts.push(vehicle.owner.city);
-  if (vehicle.owner.county) locationParts.push(vehicle.owner.county);
-  if (vehicle.owner.country && locationParts.length === 0) {
-    locationParts.push(vehicle.owner.country.name);
-  }
-  const locationString = locationParts.join(", ");
-
   // Build URL params for filters
   const buildFilterUrl = (filters: Record<string, string>) => {
     const params = new URLSearchParams(filters);
@@ -47,10 +38,18 @@ export function VehicleDetailBreadcrumbs({ vehicle }: VehicleDetailBreadcrumbsPr
 
   const segments: BreadcrumbSegment[] = [];
 
-  // Add location if available
+  // Add country as first location segment (if available)
   if (vehicle.owner.country) {
     segments.push({
-      label: locationString || vehicle.owner.country.name,
+      label: vehicle.owner.country.name,
+      href: buildFilterUrl({ countryIds: vehicle.owner.country.id }),
+    });
+  }
+
+  // Add city as second location segment (if available)
+  if (vehicle.owner.city && vehicle.owner.country) {
+    segments.push({
+      label: vehicle.owner.city,
       href: buildFilterUrl({ countryIds: vehicle.owner.country.id }),
     });
   }
