@@ -13,6 +13,34 @@ import { TRPCError } from "@trpc/server";
  */
 export const userRouter = createTRPCRouter({
   /**
+   * Get user by ID (for displaying selected users)
+   */
+  getById: adminProcedure
+    .input(z.object({ id: z.string().cuid() }))
+    .query(async ({ ctx, input }) => {
+      const user = await ctx.db.user.findUnique({
+        where: { id: input.id },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          company: true,
+          phone: true,
+        },
+      });
+
+      if (!user) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found",
+        });
+      }
+
+      return user;
+    }),
+
+  /**
    * Search users by name, email, or company
    */
   searchUsers: adminProcedure
@@ -94,7 +122,7 @@ export const userRouter = createTRPCRouter({
           lastName: input.lastName,
           company: input.company,
           phone: input.phone,
-          role: "USER", // Default role for contacts
+          userType: "OWNER_ONLY", // Default user type for contacts
         },
         select: {
           id: true,

@@ -55,8 +55,16 @@ export function UserSearchSelect({
     }
   );
 
-  // Find selected user
-  const selectedUser = users?.find((u) => u.id === value);
+  // Fetch selected user by ID if we have a value and it's not in the search results
+  const { data: selectedUserFromId } = api.user.getById.useQuery(
+    { id: value! },
+    {
+      enabled: !!value && !users?.find((u) => u.id === value), // Only fetch if we have a value but user is not in search results
+    }
+  );
+
+  // Find selected user - prioritize search results, fallback to ID fetch
+  const selectedUser = users?.find((u) => u.id === value) ?? selectedUserFromId;
 
   // Handle contact creation
   const handleContactCreated = (contactId: string) => {

@@ -39,9 +39,9 @@ const createDealSchema = z.object({
   brief: z.string().optional(),
   fee: z.string().optional(),
   clientContactId: z.string().optional(),
-  fullQuote: z.number().min(0).max(999999.99).nullable().optional(),
-  spokeFee: z.number().min(0).max(999999.99).nullable().optional(),
-  baselineFee: z.number().min(0).max(999999.99).nullable().optional(),
+  fullQuote: z.union([z.number().min(0).max(999999.99), z.nan()]).nullable().optional().transform((val) => (isNaN(val as number) || val === null || val === undefined) ? undefined : val),
+  spokeFee: z.union([z.number().min(0).max(999999.99), z.nan()]).nullable().optional().transform((val) => (isNaN(val as number) || val === null || val === undefined) ? undefined : val),
+  baselineFee: z.union([z.number().min(0).max(999999.99), z.nan()]).nullable().optional().transform((val) => (isNaN(val as number) || val === null || val === undefined) ? undefined : val),
   notes: z.string().max(2000).optional(),
   status: z.enum(["OPTIONS", "CONTRACTS_INVOICE", "COMPLETE", "POSTPONED", "ABANDONED", "ARCHIVED"]).optional(),
 });
@@ -326,7 +326,10 @@ export function CreateEditDealDialog({
 
           {/* Financial Information */}
           <div className="space-y-4">
-            <h3 className="text-sm font-medium">Financial Information</h3>
+            <div>
+              <h3 className="text-sm font-medium">Financial Information</h3>
+              <p className="text-xs text-muted-foreground mt-1">Optional - you can add this later</p>
+            </div>
             
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
