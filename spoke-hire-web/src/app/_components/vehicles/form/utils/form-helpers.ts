@@ -21,8 +21,8 @@ export function getFormDefaults(vehicle: VehicleDetail): VehicleFormData {
     name: vehicle.name,
     status: vehicle.status,
     price: vehicle.price ? Number(vehicle.price) : 0,
-    hourlyRate: toNumber(vehicle.hourlyRate),
-    dailyRate: toNumber(vehicle.dailyRate),
+    hourlyRate: toNumber(vehicle.hourlyRate) ?? 0,
+    dailyRate: toNumber(vehicle.dailyRate) ?? 0,
     year: vehicle.year,
     registration: vehicle.registration ?? "",
     makeId: vehicle.makeId,
@@ -49,9 +49,9 @@ export function transformFormData(
   return {
     id: vehicleId,
     ...data,
-    // Ensure null values are properly handled
-    hourlyRate: data.hourlyRate === null ? null : data.hourlyRate,
-    dailyRate: data.dailyRate === null ? null : data.dailyRate,
+    // Ensure pricing values are properly handled (never null)
+    hourlyRate: data.hourlyRate,
+    dailyRate: data.dailyRate,
     registration: data.registration || null,
     steeringId: data.steeringId || null,
     gearbox: data.gearbox || null,

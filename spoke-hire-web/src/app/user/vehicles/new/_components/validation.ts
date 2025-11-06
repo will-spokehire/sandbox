@@ -103,16 +103,16 @@ export const vehicleDetailsSchema = z.object({
   collectionIds: z.array(z.string()).optional(),
   hourlyRate: z
     .string()
-    .optional()
+    .min(1, "Hourly rate is required")
     .refine(
-      (val) => !val || (!isNaN(Number(val)) && Number(val) >= 0),
+      (val) => !isNaN(Number(val)) && Number(val) >= 0,
       "Hourly rate must be a valid number"
     ),
   dailyRate: z
     .string()
-    .optional()
+    .min(1, "Daily rate is required")
     .refine(
-      (val) => !val || (!isNaN(Number(val)) && Number(val) >= 0),
+      (val) => !isNaN(Number(val)) && Number(val) >= 0,
       "Daily rate must be a valid number"
     ),
 });
@@ -121,8 +121,8 @@ export type VehicleDetailsFormData = z.infer<typeof vehicleDetailsSchema>;
 
 // Type for the submit data (after converting rates to numbers)
 export type VehicleDetailsSubmitData = Omit<VehicleDetailsFormData, 'hourlyRate' | 'dailyRate'> & {
-  hourlyRate?: number | null;
-  dailyRate?: number | null;
+  hourlyRate: number;
+  dailyRate: number;
 };
 
 // Combined schema for full vehicle creation

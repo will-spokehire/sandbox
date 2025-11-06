@@ -105,7 +105,7 @@ export function BaseVehicleEditDialog({
             <Separator />
 
             {/* Pricing & Description */}
-            <VehiclePricingFields form={form} />
+            <VehiclePricingFields form={form} isEditMode={true} />
 
             {/* Additional Actions (e.g., status field, approve button) */}
             {renderAdditionalActions?.()}

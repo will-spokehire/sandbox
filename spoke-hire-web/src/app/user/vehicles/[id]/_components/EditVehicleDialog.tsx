@@ -23,8 +23,8 @@ const editVehicleSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
   status: z.enum(USER_VEHICLE_STATUSES),
   price: z.number().min(1, "Agreed value is required and must be greater than 0"),
-  hourlyRate: z.number().min(0, "Hourly rate must be a positive number").nullable().optional(),
-  dailyRate: z.number().min(0, "Daily rate must be a positive number").nullable().optional(),
+  hourlyRate: z.number().min(0, "Hourly rate must be a positive number"),
+  dailyRate: z.number().min(0, "Daily rate must be a positive number"),
   year: z.string()
     .min(1, "Year is required")
     .refine(

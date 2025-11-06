@@ -10,8 +10,8 @@ export interface VehicleFormData {
   name: string;
   status: VehicleStatus | string; // string to allow user-specific status types
   price: number;
-  hourlyRate: number | null;
-  dailyRate: number | null;
+  hourlyRate: number;
+  dailyRate: number;
   year: string;
   registration: string | null | undefined;
   makeId: string;
@@ -57,5 +57,6 @@ export interface FormFieldComponentProps {
   readOnlyName?: boolean;
   makeOptions?: Array<{ value: string; label: string }>;
   modelOptions?: Array<{ value: string; label: string }>;
+  isEditMode?: boolean; // Flag to indicate if editing existing vehicle
 }
 

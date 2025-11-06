@@ -361,6 +361,8 @@ export default function AddVehiclePage() {
       year: basicInfoData.year!,
       registration: basicInfoData.registration!,
       price: basicInfoData.price,
+      hourlyRate: data.hourlyRate,
+      dailyRate: data.dailyRate,
       engineCapacity: technicalDetailsData.engineCapacity!,
       numberOfSeats: technicalDetailsData.numberOfSeats!,
       steeringId: technicalDetailsData.steeringId!,

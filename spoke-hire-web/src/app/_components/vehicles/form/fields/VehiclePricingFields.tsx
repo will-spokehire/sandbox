@@ -16,7 +16,7 @@ import type { FormFieldComponentProps } from "~/types/vehicle-form";
 import { calculateDefaultPricing, formatPricingRate } from "~/lib/pricing";
 import { useEffect, useMemo } from "react";
 
-export function VehiclePricingFields({ form }: FormFieldComponentProps) {
+export function VehiclePricingFields({ form, isEditMode = false }: FormFieldComponentProps) {
   // Watch the price field to calculate defaults
   const watchPrice = form.watch("price");
   
@@ -28,8 +28,13 @@ export function VehiclePricingFields({ form }: FormFieldComponentProps) {
     return null;
   }, [watchPrice]);
 
-  // Update pricing fields when price changes (only if they're empty)
+  // Update pricing fields when price changes (only if they're empty and NOT in edit mode)
   useEffect(() => {
+    // Don't auto-populate defaults when editing existing vehicles
+    if (isEditMode) {
+      return;
+    }
+    
     if (defaultPricing) {
       const currentHourlyRate = form.getValues("hourlyRate");
       const currentDailyRate = form.getValues("dailyRate");
@@ -42,7 +47,7 @@ export function VehiclePricingFields({ form }: FormFieldComponentProps) {
         form.setValue("dailyRate", defaultPricing.dailyRate);
       }
     }
-  }, [defaultPricing, form]);
+  }, [defaultPricing, form, isEditMode]);
 
   return (
     <div className="space-y-4">
