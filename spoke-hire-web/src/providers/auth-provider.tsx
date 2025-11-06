@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useState,
+  useMemo,
   type ReactNode,
 } from 'react';
 import { useRouter } from 'next/navigation';
@@ -171,12 +172,22 @@ export function useAuth() {
 export function useRequireAuth() {
   const context = useAuth();
   const router = useRouter();
+  const [redirectPath, setRedirectPath] = useState('');
+  
+  // Capture the path only once on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !redirectPath) {
+      setRedirectPath(window.location.pathname + window.location.search);
+    }
+  }, [redirectPath]);
 
   useEffect(() => {
-    if (!context.isLoading && !context.isAuthenticated) {
-      router.push('/auth/login');
+    if (!context.isLoading && !context.isAuthenticated && redirectPath) {
+      // Redirect to login with callback URL so user returns here after auth
+      const callbackUrl = encodeURIComponent(redirectPath);
+      router.push(`/auth/login?callbackUrl=${callbackUrl}`);
     }
-  }, [context.isLoading, context.isAuthenticated, router]);
+  }, [context.isLoading, context.isAuthenticated, router, redirectPath]);
 
   return context;
 }

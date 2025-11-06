@@ -106,15 +106,17 @@ function EnquiryFormContent() {
       <div className="container mx-auto px-4 max-w-3xl">
         {/* Header */}
         <div className="mb-8">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.back()}
-            className="mb-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
+          {vehicleIdFromUrl && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => router.push(`/vehicles/${vehicleIdFromUrl}`)}
+              className="mb-4"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Vehicle
+            </Button>
+          )}
           
           <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50">
             Make an Enquiry
@@ -316,14 +318,16 @@ function EnquiryFormContent() {
 
           {/* Submit Section */}
           <div className="flex justify-end gap-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => router.back()}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
+            {vehicleIdFromUrl && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.push(`/vehicles/${vehicleIdFromUrl}`)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+            )}
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>

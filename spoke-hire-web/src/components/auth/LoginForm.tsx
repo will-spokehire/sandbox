@@ -31,6 +31,9 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Get callbackUrl from search params
+  const callbackUrl = searchParams.get('callbackUrl');
 
   // Show error if redirected from callback
   useEffect(() => {
@@ -47,8 +50,11 @@ export function LoginForm() {
       toast.success('Verification code sent!', {
         description: 'Check your email for the code.',
       });
-      // Store email in sessionStorage instead of URL for security
+      // Store email and callbackUrl in sessionStorage instead of URL for security
       sessionStorage.setItem('otp_email', email);
+      if (callbackUrl) {
+        sessionStorage.setItem('otp_callback_url', callbackUrl);
+      }
       // Redirect to OTP verification page without email in URL
       router.push('/auth/verify-otp');
     },

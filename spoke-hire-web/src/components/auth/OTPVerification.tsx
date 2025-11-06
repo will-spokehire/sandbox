@@ -38,12 +38,17 @@ export function OTPVerification() {
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [callbackUrl, setCallbackUrl] = useState<string | null>(null);
 
-  // Load email from sessionStorage on mount
+  // Load email and callbackUrl from sessionStorage on mount
   useEffect(() => {
     const storedEmail = sessionStorage.getItem('otp_email');
+    const storedCallbackUrl = sessionStorage.getItem('otp_callback_url');
     if (storedEmail) {
       setEmail(storedEmail);
+    }
+    if (storedCallbackUrl) {
+      setCallbackUrl(storedCallbackUrl);
     }
   }, []);
 
@@ -53,8 +58,9 @@ export function OTPVerification() {
       toast.success('Successfully authenticated!', {
         description: `Welcome back, ${data.user.email}`,
       });
-      // Clear stored email after successful verification
+      // Clear stored email and callback URL after successful verification
       sessionStorage.removeItem('otp_email');
+      sessionStorage.removeItem('otp_callback_url');
       
       // Invalidate and refetch session to update auth state
       await utils.auth.getSession.invalidate();
@@ -63,6 +69,10 @@ export function OTPVerification() {
       // Check if user has accepted T&Cs
       // If not, redirect to T&Cs acceptance page
       if (!data.user.termsAcceptedAt || !data.user.privacyPolicyAcceptedAt) {
+        // Store callback URL before redirecting to T&C page so it can be restored after
+        if (callbackUrl) {
+          sessionStorage.setItem('post_terms_callback_url', callbackUrl);
+        }
         // Redirect to T&Cs acceptance page
         setTimeout(() => {
           router.push('/auth/accept-terms');
@@ -70,8 +80,8 @@ export function OTPVerification() {
         return;
       }
       
-      // Redirect based on user type
-      const redirectPath = data.user.userType === 'ADMIN' ? '/admin' : '/user/vehicles';
+      // Redirect to callback URL if provided, otherwise based on user type
+      const redirectPath = callbackUrl ?? (data.user.userType === 'ADMIN' ? '/admin' : '/user/vehicles');
       
       // Small delay to ensure auth state is updated
       setTimeout(() => {

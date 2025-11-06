@@ -8,14 +8,14 @@ import { SignupForm } from '~/components/auth/SignupForm';
  */
 export default function SignupPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4">
+    <div className="flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50 mb-2">
-            SpokeHire
+            Join SpokeHire
           </h1>
           <p className="text-slate-600 dark:text-slate-400">
-            Join us today
+            Create your account to get started
           </p>
         </div>
 

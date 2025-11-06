@@ -1,6 +1,6 @@
 "use client";
 
-import { UserNavigation } from "./_components/UserNavigation";
+import { PublicUserNavigation } from "~/components/navigation/PublicUserNavigation";
 
 /**
  * User Layout
@@ -15,7 +15,7 @@ export default function UserLayout({
 }) {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <UserNavigation />
+      <PublicUserNavigation />
       {children}
     </div>
   );

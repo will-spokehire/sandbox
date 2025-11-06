@@ -1,13 +1,13 @@
 import { PublicUserNavigation } from "~/components/navigation/PublicUserNavigation";
-import { PublicFooter } from "./_components/PublicFooter";
+import { PublicFooter } from "~/app/vehicles/_components/PublicFooter";
 
 /**
- * Public Vehicles Layout
+ * Auth Layout
  * 
- * Layout for public vehicle pages (/vehicles)
- * Includes unified navigation and footer
+ * Shared layout for all /auth/* routes (login, signup, etc.)
+ * Includes navigation header and footer for consistency
  */
-export default function PublicVehiclesLayout({
+export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;

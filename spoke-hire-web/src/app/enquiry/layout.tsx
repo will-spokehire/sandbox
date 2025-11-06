@@ -1,12 +1,12 @@
 "use client";
 
-import { UserNavigation } from "~/app/user/_components/UserNavigation";
+import { PublicUserNavigation } from "~/components/navigation/PublicUserNavigation";
 
 /**
  * Enquiry Layout
  * 
  * Shared layout for all /enquiry/* routes.
- * Provides consistent navigation using UserNavigation component.
+ * Provides consistent navigation using unified PublicUserNavigation component.
  */
 export default function EnquiryLayout({
   children,
@@ -15,7 +15,7 @@ export default function EnquiryLayout({
 }) {
   return (
     <>
-      <UserNavigation />
+      <PublicUserNavigation />
       {children}
     </>
   );

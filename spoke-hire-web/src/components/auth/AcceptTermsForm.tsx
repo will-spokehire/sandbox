@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '~/components/ui/button';
@@ -25,6 +25,15 @@ export function AcceptTermsForm() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [privacyPolicyAccepted, setPrivacyPolicyAccepted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [callbackUrl, setCallbackUrl] = useState<string | null>(null);
+
+  // Load callback URL from sessionStorage on mount
+  useEffect(() => {
+    const storedCallbackUrl = sessionStorage.getItem('post_terms_callback_url');
+    if (storedCallbackUrl) {
+      setCallbackUrl(storedCallbackUrl);
+    }
+  }, []);
 
   const acceptTermsMutation = api.auth.acceptTerms.useMutation({
     onSuccess: () => {
@@ -32,8 +41,11 @@ export function AcceptTermsForm() {
         description: 'Thank you for accepting our terms.',
       });
       
-      // Redirect based on user type
-      const redirectPath = user?.userType === 'ADMIN' ? '/admin' : '/user/vehicles';
+      // Clear the callback URL from sessionStorage
+      sessionStorage.removeItem('post_terms_callback_url');
+      
+      // Redirect to callback URL if provided, otherwise based on user type
+      const redirectPath = callbackUrl ?? (user?.userType === 'ADMIN' ? '/admin' : '/user/vehicles');
       
       setTimeout(() => {
         router.push(redirectPath);
