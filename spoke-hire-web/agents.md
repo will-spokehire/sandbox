@@ -546,6 +546,13 @@ Always use `DIRECT_URL` for migrations, `DATABASE_URL` for app queries.
 - Document new env vars in `env.example.txt`
 - Use `~/env.js` for validation
 
+### Analytics Tracking
+- **Import:** `import { trackEvent } from "~/lib/analytics"`
+- **Track events:** `trackEvent('event_name', { property: 'value' })`
+- **No PII:** Never track emails, names, addresses
+- **Auto-tracked:** Page views, session starts (handled by AnalyticsProvider)
+- **Full guide:** See `docs/features/analytics.md`
+
 ## Additional Resources
 
 ### Project Documentation

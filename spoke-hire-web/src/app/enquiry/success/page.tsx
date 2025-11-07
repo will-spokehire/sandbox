@@ -1,9 +1,11 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import { trackEvent } from "~/lib/analytics";
 
 /**
  * Enquiry Success Page
@@ -11,6 +13,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
  */
 export default function EnquirySuccessPage() {
   const router = useRouter();
+  
+  // Track if conversion event has been fired (prevent duplicates in Strict Mode)
+  const hasTrackedConversionRef = useRef(false);
+  
+  // Track enquiry conversion on mount (only once to prevent duplicates in Strict Mode)
+  useEffect(() => {
+    if (!hasTrackedConversionRef.current) {
+      hasTrackedConversionRef.current = true;
+      trackEvent('enquiry_conversion');
+    }
+  }, []);
 
   return (
     <div className="flex items-center justify-center py-8">

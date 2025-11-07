@@ -16,6 +16,7 @@ import { api } from '~/trpc/react';
 import { toast } from 'sonner';
 import { createClient } from '~/lib/supabase/client';
 import { useAuth } from '~/providers/auth-provider';
+import { trackEvent } from '~/lib/analytics';
 
 /**
  * OTP Verification Component
@@ -55,6 +56,14 @@ export function OTPVerification() {
   // We still use the tRPC mutation to validate in our database
   const verifyMutation = api.auth.verifyOtp.useMutation({
     onSuccess: async (data) => {
+      // Track successful verification - check if new user or returning user
+      const isNewUser = !data.user.termsAcceptedAt || !data.user.privacyPolicyAcceptedAt;
+      trackEvent(isNewUser ? 'user_signed_up' : 'otp_verification_success', {
+        userType: data.user.userType,
+        userStatus: data.user.status,
+        isNewUser,
+      });
+      
       toast.success('Successfully authenticated!', {
         description: `Welcome back, ${data.user.email}`,
       });
@@ -90,6 +99,11 @@ export function OTPVerification() {
       }, 100);
     },
     onError: (error) => {
+      // Track verification failure
+      trackEvent('otp_verification_failed', {
+        error_message: error.message,
+      });
+      
       toast.error('Verification failed', {
         description: error.message,
       });

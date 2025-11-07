@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/com
 import { api } from '~/trpc/react';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { trackEvent } from '~/lib/analytics';
 
 /**
  * Signup Form Component
@@ -45,6 +46,9 @@ export function SignupForm() {
 
   const signInMutation = api.auth.signInWithOtp.useMutation({
     onSuccess: () => {
+      // Track successful code sent
+      trackEvent('signup_code_sent', { email_domain: email.split('@')[1] });
+      
       toast.success('Verification code sent!', {
         description: 'Check your email for the code.',
       });
@@ -76,6 +80,9 @@ export function SignupForm() {
     }
 
     setIsLoading(true);
+    
+    // Track signup initiation
+    trackEvent('signup_initiated');
 
     try {
       await signInMutation.mutateAsync({

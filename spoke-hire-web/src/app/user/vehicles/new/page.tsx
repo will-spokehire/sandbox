@@ -30,6 +30,7 @@ import {
   type VehicleDetailsFormData,
   type VehicleDetailsSubmitData,
 } from "./_components";
+import { trackEvent } from "~/lib/analytics";
 
 // Storage keys for auto-save
 const STORAGE_KEY_PREFIX = "vehicle_wizard_";
@@ -71,6 +72,9 @@ export default function AddVehiclePage() {
   
   // Track if profile was just completed to prevent re-initialization
   const justCompletedProfileRef = useRef(false);
+  
+  // Track if wizard started event has been fired (prevent duplicates in Strict Mode)
+  const hasTrackedWizardStartRef = useRef(false);
 
   // Fetch filter options for labels
   const { data: filterOptions } = api.userVehicle.getFilterOptions.useQuery();
@@ -86,6 +90,13 @@ export default function AddVehiclePage() {
     onSuccess: (vehicle) => {
       toast.success("Vehicle created successfully!");
       setCreatedVehicleId(vehicle.id);
+      
+      // Track vehicle creation success
+      trackEvent('vehicle_created', {
+        vehicleId: vehicle.id,
+        makeId: vehicle.makeId,
+        modelId: vehicle.modelId,
+      });
       
       // Invalidate caches to ensure new make/model appears in lists
       void utils.userVehicle.myVehicles.invalidate();
@@ -157,6 +168,14 @@ export default function AddVehiclePage() {
     if (!hasSavedData) {
       // Fresh start - clear everything to be safe
       clearStoredData();
+      
+      // Track wizard started (only once to prevent duplicates in Strict Mode)
+      if (!hasTrackedWizardStartRef.current) {
+        hasTrackedWizardStartRef.current = true;
+        trackEvent('vehicle_wizard_started', {
+          profileNeedsCompletion: needsProfile,
+        });
+      }
       
       // Pre-fill profile with user data if available
       if (user) {
@@ -333,6 +352,12 @@ export default function AddVehiclePage() {
     // Set flag to prevent re-initialization when user data refreshes
     justCompletedProfileRef.current = true;
     
+    // Track profile step completion
+    trackEvent('vehicle_wizard_step_completed', {
+      step: 'profile',
+      stepNumber: 0,
+    });
+    
     // Profile step handles its own submission and navigation
     // After profile completion, profileNeedsCompletion becomes false
     // In that case, Basic Info is at step 0 (not step 1!)
@@ -341,16 +366,31 @@ export default function AddVehiclePage() {
   };
 
   const handleBasicInfoComplete = (data: BasicInfoSubmitData) => {
+    trackEvent('vehicle_wizard_step_completed', {
+      step: 'basic_info',
+      stepNumber: profileNeedsCompletion ? 1 : 0,
+    });
+    
     setBasicInfoData(data);
     setCurrentStep(currentStep + 1);
   };
 
   const handleTechnicalDetailsComplete = (data: TechnicalDetailsSubmitData) => {
+    trackEvent('vehicle_wizard_step_completed', {
+      step: 'technical_details',
+      stepNumber: profileNeedsCompletion ? 2 : 1,
+    });
+    
     setTechnicalDetailsData(data);
     setCurrentStep(currentStep + 1);
   };
 
   const handleVehicleDetailsComplete = (data: VehicleDetailsSubmitData) => {
+    trackEvent('vehicle_wizard_step_completed', {
+      step: 'vehicle_details',
+      stepNumber: profileNeedsCompletion ? 3 : 2,
+    });
+    
     setVehicleDetailsData(data);
     
     // Create the vehicle after vehicle details are complete
@@ -380,6 +420,11 @@ export default function AddVehiclePage() {
   };
 
   const handleMediaComplete = () => {
+    // Track media step completion (wizard complete)
+    trackEvent('vehicle_wizard_completed', {
+      vehicleId: createdVehicleId,
+    });
+    
     // Redirect to vehicle detail page
     if (createdVehicleId) {
       router.push(`/user/vehicles/${createdVehicleId}`);

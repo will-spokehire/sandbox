@@ -720,6 +720,14 @@ export class DealService {
 
     // Send email notifications (don't block on email failures)
     try {
+      // Log server-side analytics event for successful enquiry
+      console.log('[Analytics] enquiry_success', {
+        dealId: deal.id,
+        dealType: deal.dealType,
+        hasVehicle: !!vehicleId,
+        vehicleId: vehicleId ?? undefined,
+      });
+      
       const emailService = new EmailService();
       
       // Get admin email from environment

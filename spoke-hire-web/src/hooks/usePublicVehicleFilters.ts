@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { trackEvent } from "~/lib/analytics";
 
 /**
  * Public Vehicle Filters
@@ -58,6 +59,9 @@ export interface PublicVehicleFiltersUpdate {
 export function usePublicVehicleFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  
+  // Track filter changes with debouncing
+  const filterTrackingTimeout = useRef<NodeJS.Timeout>();
 
   // Parse filters from URL
   const filters = useMemo((): PublicVehicleFilters => {
@@ -87,6 +91,56 @@ export function usePublicVehicleFilters() {
       viewMode,
     };
   }, [searchParams]);
+  
+  // Track vehicle search when filters change (debounced)
+  useEffect(() => {
+    // Clear previous timeout
+    if (filterTrackingTimeout.current) {
+      clearTimeout(filterTrackingTimeout.current);
+    }
+    
+    // Only track if there are active filters (not just defaults)
+    const hasFilters = !!(
+      filters.makeIds?.length ||
+      filters.modelId ||
+      filters.collectionIds?.length ||
+      filters.yearFrom ||
+      filters.yearTo ||
+      filters.countryIds?.length ||
+      filters.counties?.length
+    );
+    
+    if (hasFilters) {
+      // Debounce tracking by 1 second
+      filterTrackingTimeout.current = setTimeout(() => {
+        trackEvent('vehicle_search', {
+          makeIds: filters.makeIds,
+          modelId: filters.modelId,
+          decade: filters.yearFrom && filters.yearTo 
+            ? `${filters.yearFrom}-${filters.yearTo}`
+            : undefined,
+          collectionIds: filters.collectionIds,
+          countryIds: filters.countryIds,
+          counties: filters.counties,
+          filterCount: [
+            filters.makeIds?.length ?? 0,
+            filters.modelId ? 1 : 0,
+            filters.collectionIds?.length ?? 0,
+            filters.yearFrom || filters.yearTo ? 1 : 0,
+            filters.countryIds?.length ?? 0,
+            filters.counties?.length ?? 0,
+          ].reduce((a, b) => a + b, 0),
+        });
+      }, 1000);
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      if (filterTrackingTimeout.current) {
+        clearTimeout(filterTrackingTimeout.current);
+      }
+    };
+  }, [filters]);
 
   // Update filters and URL
   const updateFilters = useCallback(

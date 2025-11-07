@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation';
 import type { User } from '@prisma/client';
 import { createClient } from '~/lib/supabase/client';
 import { api } from '~/trpc/react';
+import { identifyUser, resetAnalytics, trackEvent } from '~/lib/analytics';
 
 interface AuthContextType {
   user: User | null;
@@ -68,8 +69,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Only update state once the session query has completed
     if (!sessionLoading) {
       if (session?.user) {
-        setUser(session.user as User);
+        const userData = session.user as User;
+        setUser(userData);
         setIsLoading(false);
+        
+        // Track user sign in and identify user in analytics
+        identifyUser(userData.id, {
+          email: userData.email,
+          userType: userData.userType,
+          userStatus: userData.status,
+        });
       } else {
         setUser(null);
         setIsLoading(false);
@@ -91,6 +100,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (event === 'SIGNED_OUT') {
+        // Track sign out and reset analytics
+        trackEvent('user_signed_out');
+        resetAnalytics();
+        
         setUser(null);
         router.push('/auth/login');
         router.refresh();

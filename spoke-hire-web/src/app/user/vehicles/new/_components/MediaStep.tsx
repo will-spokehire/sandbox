@@ -16,6 +16,7 @@ import { ImageIcon, CheckCircle2, Send } from "lucide-react";
 import { VehicleImageManager } from "~/components/vehicles/VehicleImageManager";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
+import { trackEvent } from "~/lib/analytics";
 
 interface MediaStepProps {
   vehicleId: string;
@@ -33,6 +34,7 @@ export function MediaStep({ vehicleId, onComplete }: MediaStepProps) {
   const router = useRouter();
   const [hasImages, setHasImages] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [hasTrackedFirstImage, setHasTrackedFirstImage] = useState(false);
 
   // Fetch vehicle images to check if any exist
   const { data: images } = api.media.getVehicleImages.useQuery(
@@ -46,6 +48,12 @@ export function MediaStep({ vehicleId, onComplete }: MediaStepProps) {
   // Submit for review mutation
   const submitForReviewMutation = api.userVehicle.submitForReview.useMutation({
     onSuccess: () => {
+      // Track submit for review
+      trackEvent('vehicle_submitted_for_review', {
+        vehicleId,
+        imageCount: images?.length ?? 0,
+      });
+      
       toast.success("Vehicle submitted for review", {
         description: "An admin will review your vehicle shortly",
       });
@@ -60,10 +68,22 @@ export function MediaStep({ vehicleId, onComplete }: MediaStepProps) {
     },
   });
 
-  // Update hasImages when data changes
+  // Update hasImages when data changes and track first image upload
   useEffect(() => {
-    setHasImages((images?.length ?? 0) > 0);
-  }, [images]);
+    const imageCount = images?.length ?? 0;
+    const hadImages = hasImages;
+    const nowHasImages = imageCount > 0;
+    
+    setHasImages(nowHasImages);
+    
+    // Track first image upload (transition from 0 to 1+ images)
+    if (!hadImages && nowHasImages && !hasTrackedFirstImage) {
+      trackEvent('vehicle_first_image_uploaded', {
+        vehicleId,
+      });
+      setHasTrackedFirstImage(true);
+    }
+  }, [images, hasImages, vehicleId, hasTrackedFirstImage]);
 
   const handleContinue = () => {
     setShowSuccessDialog(true);

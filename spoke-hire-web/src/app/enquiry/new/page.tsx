@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,6 +19,7 @@ import { useRequireAuth } from "~/providers/auth-provider";
 import { enquiryFormSchema, type EnquiryFormData } from "~/lib/schemas/enquiry";
 import { LAYOUT_CONSTANTS, TYPOGRAPHY } from "~/lib/design-tokens";
 import { cn } from "~/lib/utils";
+import { trackEvent } from "~/lib/analytics";
 
 /**
  * Enquiry Form Content Component
@@ -29,6 +30,9 @@ function EnquiryFormContent() {
   const searchParams = useSearchParams();
   const { user, isLoading: isAuthLoading } = useRequireAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Track if enquiry started event has been fired (prevent duplicates in Strict Mode)
+  const hasTrackedEnquiryStartRef = useRef(false);
   
   // Get vehicleId from URL if coming from vehicle page
   const vehicleIdFromUrl = searchParams.get("vehicleId");
@@ -67,6 +71,17 @@ function EnquiryFormContent() {
       form.setValue("company", user.company ?? "");
     }
   }, [user, form]);
+  
+  // Track enquiry started on mount (only once to prevent duplicates in Strict Mode)
+  useEffect(() => {
+    if (!hasTrackedEnquiryStartRef.current) {
+      hasTrackedEnquiryStartRef.current = true;
+      trackEvent('enquiry_started', {
+        hasVehicle: !!vehicleIdFromUrl,
+        vehicleId: vehicleIdFromUrl ?? undefined,
+      });
+    }
+  }, [vehicleIdFromUrl]);
 
   // Create enquiry mutation
   const createEnquiryMutation = api.deal.createUserEnquiry.useMutation({
@@ -83,6 +98,14 @@ function EnquiryFormContent() {
   // Handle form submission
   const onSubmit = form.handleSubmit(async (data) => {
     setIsSubmitting(true);
+    
+    // Track enquiry submission
+    trackEvent('enquiry_submitted', {
+      dealType: data.dealType,
+      hasVehicle: !!data.vehicleId,
+      vehicleId: data.vehicleId,
+    });
+    
     try {
       await createEnquiryMutation.mutateAsync(data);
     } catch (error) {

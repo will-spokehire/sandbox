@@ -8,6 +8,7 @@ import { db } from "~/server/db";
 import { PublicVehicleMediaSection } from "./_components/PublicVehicleMediaSection";
 import { PublicVehicleBasicInfo } from "./_components/PublicVehicleBasicInfo";
 import { VehicleDetailBreadcrumbs } from "./_components/VehicleDetailBreadcrumbs";
+import { VehicleViewTracker } from "./_components/VehicleViewTracker";
 import { getAppUrl } from "~/lib/app-url";
 import { LAYOUT_CONSTANTS, TYPOGRAPHY } from "~/lib/design-tokens";
 import { cn } from "~/lib/utils";
@@ -252,6 +253,15 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
 
   return (
     <>
+      {/* Analytics Tracking */}
+      <VehicleViewTracker
+        vehicleId={vehicle.id}
+        vehicleName={`${vehicle.make.name} ${vehicle.model.name}`}
+        make={vehicle.make.name}
+        model={vehicle.model.name}
+        year={vehicle.year}
+      />
+      
       {/* JSON-LD Structured Data - Product */}
       <script
         type="application/ld+json"
