@@ -275,7 +275,7 @@ function FilterControls({
       />
 
       {/* Model Filter */}
-      <div className="relative mb-6 md:mb-0">
+      {/* <div className="relative mb-6 md:mb-0">
         <MultiSelectFilter
           label="Select Model"
           placeholder={multipleMakesSelected ? "Select one make first" : "All models"}
@@ -291,7 +291,7 @@ function FilterControls({
             Select one make to filter by model
           </div>
         )}
-      </div>
+      </div> */}
 
       {/* Decade Filter */}
       <MultiSelectFilter
@@ -306,7 +306,7 @@ function FilterControls({
       />
 
       {/* Country Filter */}
-      <MultiSelectFilter
+      {/* <MultiSelectFilter
         label="Select Countries"
         placeholder="All countries"
         options={countryOptions}
@@ -315,10 +315,10 @@ function FilterControls({
         renderOption={renderStandardOption}
         searchPlaceholder="Search countries..."
         className="md:w-[180px]"
-      />
+      /> */}
 
       {/* County Filter */}
-      <MultiSelectFilter
+      {/* <MultiSelectFilter
         label="Select Counties"
         placeholder="All counties"
         options={countyOptions}
@@ -327,7 +327,7 @@ function FilterControls({
         renderOption={renderStandardOption}
         searchPlaceholder="Search counties..."
         className="md:w-[180px]"
-      />
+      /> */}
 
       {/* Collections Filter */}
       <MultiSelectFilter
