@@ -31,6 +31,18 @@ export interface VerifyOtpParams {
 }
 
 /**
+ * Sign in with Google OAuth parameters
+ */
+export interface SignInWithGoogleParams {
+  email: string;
+  name?: string;
+  termsAccepted?: boolean;
+  termsAcceptanceId?: string;
+  privacyPolicyAccepted?: boolean;
+  privacyAcceptanceId?: string;
+}
+
+/**
  * User basic info
  */
 export interface UserBasicInfo {

@@ -69,6 +69,7 @@ export type {
 export type {
   SignInWithOtpParams,
   VerifyOtpParams,
+  SignInWithGoogleParams,
   UserBasicInfo,
   UserWithDetails,
   UserProfile,

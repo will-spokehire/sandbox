@@ -9,6 +9,7 @@ import { Label } from '~/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { api } from '~/trpc/react';
 import { toast } from 'sonner';
+import { GoogleAuthButton } from './GoogleAuthButton';
 
 /**
  * Login Form Component
@@ -125,6 +126,19 @@ export function LoginForm() {
           >
             {isLoading ? 'Sending code...' : 'Send verification code'}
           </Button>
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Or continue with
+              </span>
+            </div>
+          </div>
+
+          <GoogleAuthButton mode="signin" />
 
           <div className="text-center">
             <p className="text-sm text-muted-foreground">

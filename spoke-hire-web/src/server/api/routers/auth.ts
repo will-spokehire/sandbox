@@ -50,6 +50,15 @@ const acceptTermsInputSchema = z.object({
   privacyPolicyAccepted: z.boolean(),
 });
 
+const verifyGoogleAuthInputSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  name: z.string().optional(),
+  termsAccepted: z.boolean().optional(),
+  termsAcceptanceId: z.string().optional(),
+  privacyPolicyAccepted: z.boolean().optional(),
+  privacyAcceptanceId: z.string().optional(),
+});
+
 // ============================================================================
 // Router Definition
 // ============================================================================
@@ -76,6 +85,18 @@ export const authRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const service = ServiceFactory.createAuthService(ctx.db, ctx.supabase);
       return await service.verifyOtp(input);
+    }),
+
+  /**
+   * Verify Google OAuth
+   * This is called AFTER client-side Supabase OAuth verification
+   * Validates user exists in DB or creates new user, and updates login time
+   */
+  verifyGoogleAuth: publicProcedure
+    .input(verifyGoogleAuthInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const service = ServiceFactory.createAuthService(ctx.db, ctx.supabase);
+      return await service.signInWithGoogle(input);
     }),
 
   /**
