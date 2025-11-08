@@ -25,6 +25,7 @@ import {
 } from "../constants/deals";
 import { EmailService } from "./email.service";
 import { DealRepository } from "../repositories/deal.repository";
+import { UserRepository } from "../repositories/user.repository";
 import { getDealTypeLabel } from "~/lib/deals";
 import type {
   CreateDealParams,
@@ -662,6 +663,7 @@ export class DealService {
   /**
    * Create a user enquiry (public-facing enquiry form)
    * Creates a deal, optionally associates a vehicle, and sends notifications
+   * Also updates user profile with enquiry data if profile fields are empty
    */
   async createUserEnquiry(params: CreateUserEnquiryInput & { userId: string }): Promise<UserEnquiryResult> {
     const { 
@@ -684,21 +686,46 @@ export class DealService {
 
     // Use transaction to ensure data consistency
     const deal = await this.repository.transaction(async (tx) => {
-      const repo = new DealRepository(tx);
+      const dealRepo = new DealRepository(tx);
+      const userRepo = new UserRepository(tx);
       
-      // Validate vehicle exists if provided
+      // Update user profile with enquiry data (only if fields are empty)
+      const { updatedFields } = await userRepo.updateEmptyProfileFields(userId, {
+        firstName,
+        lastName,
+        phone,
+        company,
+      });
+
+      if (updatedFields.length > 0) {
+        console.log(`[Enquiry] Updated user profile fields: ${updatedFields.join(", ")}`);
+      }
+      
+      // Validate vehicle exists and get owner if provided
+      let vehicleOwnerId: string | undefined;
       if (vehicleId) {
-        const vehicleExists = await repo.validateVehiclesExist([vehicleId]);
+        const vehicleExists = await dealRepo.validateVehiclesExist([vehicleId]);
         if (!vehicleExists) {
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "Vehicle not found",
           });
         }
+        
+        // Get the vehicle owner to add as recipient
+        const vehicle = await tx.vehicle.findUnique({
+          where: { id: vehicleId },
+          select: { ownerId: true },
+        });
+        
+        if (vehicle) {
+          vehicleOwnerId = vehicle.ownerId;
+          console.log(`[Enquiry] Adding vehicle owner ${vehicleOwnerId} as recipient for deal`);
+        }
       }
 
-      // Create deal with optional vehicle
-      return await repo.createWithRelations({
+      // Create deal with optional vehicle and owner as recipient
+      return await dealRepo.createWithRelations({
         name: dealName,
         dealType,
         date,
@@ -714,7 +741,7 @@ export class DealService {
         status: "OPTIONS" as DealStatus,
         createdById: userId,
         vehicleIds: vehicleId ? [vehicleId] : [],
-        recipientIds: [], // No recipients initially - admin will handle the enquiry
+        recipientIds: vehicleOwnerId ? [vehicleOwnerId] : [], // Add vehicle owner as recipient
       });
     });
 
