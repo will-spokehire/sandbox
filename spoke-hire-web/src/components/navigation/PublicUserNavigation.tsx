@@ -82,7 +82,20 @@ function LeftNavLinks({ pathname, onClick }: { pathname: string; onClick?: () =>
       {navItems
         .filter(item => !item.requireAuth || isAuthenticated)
         .map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+          // Check for active state with proper specificity
+          // Exact match always wins
+          const isActive = (() => {
+            if (pathname === item.href) return true;
+            
+            // For specific terminal routes (like /user/vehicles/new), 
+            // don't match parent routes
+            if (item.href === "/user/vehicles" && pathname === "/user/vehicles/new") {
+              return false;
+            }
+            
+            // For parent routes, check if current path is a child
+            return pathname.startsWith(item.href + "/");
+          })();
 
           return (
             <Link
