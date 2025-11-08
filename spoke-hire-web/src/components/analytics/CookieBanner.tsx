@@ -39,23 +39,23 @@ export function CookieBanner() {
       }}
       cookieName="spokehire_analytics_consent"
       style={{
-        background: "hsl(var(--background))",
-        border: "1px solid hsl(var(--border))",
-        borderTop: "1px solid hsl(var(--border))",
+        background: "var(--color-background)",
+        border: "1px solid var(--color-border)",
+        borderTop: "1px solid var(--color-border)",
         boxShadow: "0 -2px 10px rgba(0, 0, 0, 0.1)",
         padding: "1rem 1.5rem",
         alignItems: "center",
         gap: "1rem",
       }}
       contentStyle={{
-        color: "hsl(var(--foreground))",
+        color: "var(--color-foreground)",
         fontSize: "0.875rem",
         margin: 0,
         flex: "1 1 auto",
       }}
       buttonStyle={{
-        background: "hsl(var(--primary))",
-        color: "hsl(var(--primary-foreground))",
+        background: "var(--color-primary)",
+        color: "var(--color-primary-foreground)",
         fontSize: "0.875rem",
         fontWeight: "500",
         padding: "0.5rem 1.5rem",
@@ -66,12 +66,12 @@ export function CookieBanner() {
       }}
       declineButtonStyle={{
         background: "transparent",
-        color: "hsl(var(--muted-foreground))",
+        color: "var(--color-muted-foreground)",
         fontSize: "0.875rem",
         fontWeight: "500",
         padding: "0.5rem 1.5rem",
         borderRadius: "0.375rem",
-        border: "1px solid hsl(var(--border))",
+        border: "1px solid var(--color-border)",
         cursor: "pointer",
         transition: "all 0.2s",
       }}
@@ -84,7 +84,7 @@ export function CookieBanner() {
         <a
           href="/privacy-policy"
           className="underline hover:no-underline"
-          style={{ color: "hsl(var(--primary))" }}
+          style={{ color: "var(--color-primary)" }}
         >
           Privacy Policy
         </a>
