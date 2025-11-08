@@ -2,12 +2,13 @@
 
 import { useEffect, useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Loader2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import { PhoneInput } from "~/components/ui/phone-input";
 import { Textarea } from "~/components/ui/textarea";
 import { Label } from "~/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
@@ -230,16 +231,26 @@ function EnquiryFormContent() {
                   <Label htmlFor="phone">
                     Phone <span className="text-red-500">*</span>
                   </Label>
-                  <Input
-                    id="phone"
-                    {...form.register("phone")}
-                    disabled={isSubmitting}
+                  <Controller
+                    name="phone"
+                    control={form.control}
+                    render={({ field }) => (
+                      <PhoneInput
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="7123 456789"
+                        disabled={isSubmitting}
+                      />
+                    )}
                   />
                   {form.formState.errors.phone && (
                     <p className="text-sm text-red-500">
                       {form.formState.errors.phone.message}
                     </p>
                   )}
+                  <p className="text-sm text-muted-foreground">
+                    For UK numbers, enter without the leading 0 (e.g., 7123 456789)
+                  </p>
                 </div>
 
                 <div className="space-y-2">
