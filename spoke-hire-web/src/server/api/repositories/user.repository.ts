@@ -185,4 +185,69 @@ export class UserRepository extends BaseRepository {
       throw new DatabaseError("Failed to update terms acceptance", error);
     }
   }
+
+  /**
+   * Update user profile fields if they're currently empty
+   * This is useful when collecting data from enquiry forms
+   * @returns Object with updated fields (empty if nothing was updated)
+   */
+  async updateEmptyProfileFields(
+    userId: string,
+    data: {
+      firstName?: string;
+      lastName?: string;
+      phone?: string;
+      company?: string;
+    }
+  ): Promise<{ updatedFields: string[] }> {
+    try {
+      // First, get the current user to check which fields are empty
+      const currentUser = await this.db.user.findUnique({
+        where: { id: userId },
+        select: {
+          firstName: true,
+          lastName: true,
+          phone: true,
+          company: true,
+        },
+      });
+
+      if (!currentUser) {
+        throw new DatabaseError("User not found");
+      }
+
+      // Build update object only for empty fields
+      const updates: Record<string, string> = {};
+      const updatedFields: string[] = [];
+
+      if (!currentUser.firstName && data.firstName) {
+        updates.firstName = data.firstName;
+        updatedFields.push("firstName");
+      }
+      if (!currentUser.lastName && data.lastName) {
+        updates.lastName = data.lastName;
+        updatedFields.push("lastName");
+      }
+      if (!currentUser.phone && data.phone) {
+        updates.phone = data.phone;
+        updatedFields.push("phone");
+      }
+      if (!currentUser.company && data.company) {
+        updates.company = data.company;
+        updatedFields.push("company");
+      }
+
+      // Only update if there are fields to update
+      if (Object.keys(updates).length > 0) {
+        await this.db.user.update({
+          where: { id: userId },
+          data: updates,
+        });
+      }
+
+      return { updatedFields };
+    } catch (error) {
+      throw new DatabaseError("Failed to update profile fields", error);
+    }
+  }
 }

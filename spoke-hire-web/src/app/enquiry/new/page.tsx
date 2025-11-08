@@ -31,6 +31,7 @@ function EnquiryFormContent() {
   const searchParams = useSearchParams();
   const { user, isLoading: isAuthLoading } = useRequireAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const utils = api.useUtils();
   
   // Track if enquiry started event has been fired (prevent duplicates in Strict Mode)
   const hasTrackedEnquiryStartRef = useRef(false);
@@ -86,8 +87,10 @@ function EnquiryFormContent() {
 
   // Create enquiry mutation
   const createEnquiryMutation = api.deal.createUserEnquiry.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success("Enquiry submitted successfully!");
+      // Invalidate auth cache to refresh user data for next enquiry
+      await utils.auth.invalidate();
       router.push("/enquiry/success");
     },
     onError: (error) => {
