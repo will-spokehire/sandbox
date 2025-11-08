@@ -41,7 +41,7 @@ function PublicVehiclesCatalogContent({ initialData, serverTitles, serverFilterO
   const { h1, h2 } = serverTitles;
 
   // Pagination settings
-  const itemsPerPage = 30;
+  const itemsPerPage = 40;
   const skip = ((filters.page ?? 1) - 1) * itemsPerPage;
 
   // Fetch vehicles with initial data from server

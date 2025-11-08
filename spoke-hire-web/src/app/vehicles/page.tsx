@@ -94,7 +94,7 @@ export default async function PublicVehiclesPage({ searchParams }: PageProps) {
   const countryIds = params.countryIds?.split(",").filter(Boolean);
   const counties = params.counties?.split(",").filter(Boolean);
   const page = params.page ? parseInt(params.page, 10) : 1;
-  const itemsPerPage = 30;
+  const itemsPerPage = 40;
   const skip = (page - 1) * itemsPerPage;
 
   // Fetch initial data and filter options server-side in parallel
