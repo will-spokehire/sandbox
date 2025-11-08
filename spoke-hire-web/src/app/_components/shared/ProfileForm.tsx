@@ -4,7 +4,7 @@ import { useEffect, useCallback, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Search, Loader2, Save } from "lucide-react";
+import { Loader2, Save } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -285,46 +285,29 @@ export function ProfileForm({
         <div className="space-y-4 pt-4 border-t">
           <h3 className="text-lg font-semibold">Address</h3>
 
-          {/* Postcode with Lookup Button */}
+          {/* Postcode */}
           <FormField
             control={form.control}
             name="postcode"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Postcode *</FormLabel>
-                <div className="flex gap-2">
-                  <FormControl>
-                    <Input
-                      placeholder="SW1A 1AA"
-                      {...field}
-                      onChange={(e) => {
-                        const value = e.target.value.toUpperCase();
-                        field.onChange(value);
-                        isUserTyping.current = true; // Mark that user is typing
-                      }}
-                      onKeyDown={handleKeyDown}
-                      className="uppercase flex-1"
-                      disabled={isLookingUp}
-                    />
-                  </FormControl>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    onClick={() => void handlePostcodeLookup()}
-                    disabled={isLookingUp || !postcodeValue}
-                    className="shrink-0"
-                  >
-                    {isLookingUp ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Search className="h-4 w-4" />
-                    )}
-                    <span className="sr-only">Lookup postcode</span>
-                  </Button>
-                </div>
+                <FormControl>
+                  <Input
+                    placeholder="SW1A 1AA"
+                    {...field}
+                    onChange={(e) => {
+                      const value = e.target.value.toUpperCase();
+                      field.onChange(value);
+                      isUserTyping.current = true; // Mark that user is typing
+                    }}
+                    onKeyDown={handleKeyDown}
+                    className="uppercase"
+                    disabled={isLookingUp}
+                  />
+                </FormControl>
                 <FormDescription>
-                  Address will auto-fill when you enter a valid postcode
+                  Address will auto-fill as you type a valid postcode
                 </FormDescription>
                 <FormMessage />
               </FormItem>

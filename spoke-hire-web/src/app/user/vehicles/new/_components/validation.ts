@@ -20,7 +20,19 @@ export const profileSchema = z.object({
   street: z.string().min(1, "Street address is required"),
   city: z.string().min(1, "City is required"),
   county: z.string().min(1, "County is required"),
-  postcode: z.string().min(1, "Postcode is required"),
+  postcode: z
+    .string()
+    .min(1, "Postcode is required")
+    .refine(
+      (val) => {
+        // Remove spaces and convert to uppercase for validation
+        const normalized = val.replace(/\s+/g, "").toUpperCase();
+        // UK postcode format: 1-2 letters, 1-2 digits, optional letter, digit, 2 letters
+        // Examples: SW1A1AA, M11AE, B338TH, CR26XH
+        return /^[A-Z]{1,2}\d{1,2}[A-Z]?\d[A-Z]{2}$/.test(normalized);
+      },
+      "Please enter a valid UK postcode (e.g., SW1A 1AA)"
+    ),
   countryId: z.string().min(1, "Country is required"),
   latitude: z.number().optional(),
   longitude: z.number().optional(),
