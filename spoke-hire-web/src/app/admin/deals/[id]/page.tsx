@@ -91,24 +91,36 @@ export default function DealDetailPage({
     },
   });
 
-  // Get pending recipients (those who haven't received the email yet)
-  const getPendingRecipients = () => {
-    if (!deal?.recipients) return [];
-    return deal.recipients.filter(r => r.status === "PENDING");
+  // Get recipients who need emails sent (pending or failed, with active vehicles only)
+  const getRecipientsToSend = () => {
+    if (!deal?.recipients || !deal?.vehicles) return [];
+    
+    // Get IDs of vehicle owners with ACTIVE vehicles
+    const activeVehicleOwnerIds = new Set(
+      deal.vehicles
+        .filter(dv => dv.status === "ACTIVE")
+        .map(dv => dv.vehicle.owner.id)
+    );
+    
+    // Filter recipients: (PENDING or FAILED) AND owner has ACTIVE vehicle
+    return deal.recipients.filter(r => 
+      (r.status === "PENDING" || r.status === "FAILED") &&
+      activeVehicleOwnerIds.has(r.userId)
+    );
   };
 
-  // Handler to send emails to pending recipients
+  // Handler to send emails to recipients with pending or failed status and active vehicles
   const handleSendPendingEmails = () => {
-    const pendingRecipients = getPendingRecipients();
+    const recipientsToSend = getRecipientsToSend();
     
-    if (pendingRecipients.length === 0) {
-      toast.info("All recipients have already received the email");
+    if (recipientsToSend.length === 0) {
+      toast.info("No active vehicle owners to send emails to");
       return;
     }
 
     sendEmailMutation.mutate({
       dealId: deal!.id,
-      recipientIds: pendingRecipients.map(r => r.userId),
+      recipientIds: recipientsToSend.map(r => r.userId),
     });
   };
 
@@ -353,10 +365,10 @@ export default function DealDetailPage({
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={handleSendPendingEmails}
-                              disabled={sendEmailMutation.isPending || getPendingRecipients().length === 0}
+                              disabled={sendEmailMutation.isPending || getRecipientsToSend().length === 0}
                             >
                               <Send className="mr-2 h-4 w-4" />
-                              Send Email to Pending ({getPendingRecipients().length})
+                              Send Email to Pending ({getRecipientsToSend().length})
                             </DropdownMenuItem>
                           </>
                         )}
