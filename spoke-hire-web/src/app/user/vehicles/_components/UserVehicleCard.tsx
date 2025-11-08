@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card } from '~/components/ui/card';
 import { VehicleStatusBadge } from '~/components/vehicles/VehicleStatusBadge';
 import { useSwipeGesture } from '~/hooks/useSwipeGesture';
 import { formatPricingRate } from '~/lib/pricing';
+import { cn } from '~/lib/utils';
 import type { VehicleStatus } from '@prisma/client';
 
 interface VehicleMedia {
@@ -52,7 +53,15 @@ interface UserVehicleCardProps {
  */
 export function UserVehicleCard({ vehicle, href }: UserVehicleCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [fadeKey, setFadeKey] = useState(0);
   const linkHref = href ?? `/user/vehicles/${vehicle.id}`;
+
+  // Trigger fade animation when image index changes
+  useEffect(() => {
+    setIsImageLoaded(false);
+    setFadeKey(prev => prev + 1);
+  }, [currentImageIndex]);
 
   // Navigation functions
   const goToNext = (e: React.MouseEvent) => {
@@ -96,11 +105,16 @@ export function UserVehicleCard({ vehicle, href }: UserVehicleCardProps) {
         <div ref={swipeRef} className="relative aspect-[3/2] bg-slate-100 dark:bg-slate-800 group">
           {imageUrl ? (
             <Image
+              key={fadeKey}
               src={imageUrl}
               alt={currentImage?.altText || vehicle.name}
               fill
-              className="object-cover"
+              className={cn(
+                "object-cover transition-opacity duration-300",
+                isImageLoaded ? "opacity-100" : "opacity-0"
+              )}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              onLoad={() => setIsImageLoaded(true)}
             />
           ) : (
             <div className="flex items-center justify-center h-full text-slate-400">

@@ -3,7 +3,7 @@
 import { MoreHorizontal, Eye, Mail, Phone, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { memo } from "react";
+import { memo, useState } from "react";
 import { type VehicleListItem } from "~/types/vehicle";
 import { TableCell, TableRow } from "~/components/ui/table";
 import { Button } from "~/components/ui/button";
@@ -26,6 +26,7 @@ import {
 } from "~/lib/vehicles";
 import { formatPricingRate } from "~/lib/pricing";
 import { getWhatsAppChatUrl } from "~/lib/whatsapp";
+import { cn } from "~/lib/utils";
 
 interface VehicleTableRowProps {
   vehicle: VehicleListItem;
@@ -55,6 +56,8 @@ export const VehicleTableRow = memo(function VehicleTableRow({
   onCopyEmail,
   onCopyPhone,
 }: VehicleTableRowProps) {
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  
   const imageUrl = getVehicleImageUrl(vehicle.media);
   const ownerName = formatOwnerName(
     vehicle.owner.firstName,
@@ -86,8 +89,12 @@ export const VehicleTableRow = memo(function VehicleTableRow({
               src={imageUrl}
               alt={vehicle.name}
               fill
-              className="object-cover"
+              className={cn(
+                "object-cover transition-opacity duration-500",
+                isImageLoaded ? "opacity-100" : "opacity-0"
+              )}
               sizes="112px"
+              onLoad={() => setIsImageLoaded(true)}
             />
           </div>
         </Link>

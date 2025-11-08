@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Pencil } from "lucide-react";
 import { Card } from "~/components/ui/card";
@@ -27,6 +27,11 @@ export function UserVehicleMedia({ vehicle }: UserVehicleMediaProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [fadeKey, setFadeKey] = useState(0);
+  const [loadedThumbnails, setLoadedThumbnails] = useState<Set<string>>(new Set());
+  const [lightboxImageLoaded, setLightboxImageLoaded] = useState(false);
+  const [lightboxFadeKey, setLightboxFadeKey] = useState(0);
 
   // Check if current user owns this vehicle or is an admin
   const canEdit = user && (
@@ -47,6 +52,20 @@ export function UserVehicleMedia({ vehicle }: UserVehicleMediaProps) {
 
   const mainImage = sortedMedia[selectedImageIndex];
   const hasImages = sortedMedia.length > 0;
+
+  // Trigger fade animation when image index changes
+  useEffect(() => {
+    setIsImageLoaded(false);
+    setFadeKey(prev => prev + 1);
+  }, [selectedImageIndex]);
+
+  // Trigger fade animation when lightbox image changes
+  useEffect(() => {
+    if (isLightboxOpen) {
+      setLightboxImageLoaded(false);
+      setLightboxFadeKey(prev => prev + 1);
+    }
+  }, [selectedImageIndex, isLightboxOpen]);
 
   const openLightbox = (index: number) => {
     setSelectedImageIndex(index);
@@ -78,13 +97,18 @@ export function UserVehicleMedia({ vehicle }: UserVehicleMediaProps) {
           <div ref={swipeRef} className="relative aspect-[3/2] bg-muted">
             {hasImages && mainImage ? (
               <Image
+                key={fadeKey}
                 src={mainImage.publishedUrl ?? mainImage.originalUrl}
                 alt={`${vehicle.name} - Main image`}
                 fill
-                className="object-cover cursor-pointer"
+                className={cn(
+                  "object-cover cursor-pointer transition-opacity duration-300",
+                  isImageLoaded ? "opacity-100" : "opacity-0"
+                )}
                 priority
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 900px"
                 onClick={() => openLightbox(selectedImageIndex)}
+                onLoad={() => setIsImageLoaded(true)}
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
@@ -199,8 +223,12 @@ export function UserVehicleMedia({ vehicle }: UserVehicleMediaProps) {
                       src={media.publishedUrl ?? media.originalUrl}
                       alt={`${vehicle.name} - Thumbnail ${index + 1}`}
                       fill
-                      className="object-cover"
+                      className={cn(
+                        "object-cover transition-opacity duration-500",
+                        loadedThumbnails.has(media.id) ? "opacity-100" : "opacity-0"
+                      )}
                       sizes="(max-width: 768px) 25vw, 150px"
+                      onLoad={() => setLoadedThumbnails(prev => new Set(prev).add(media.id))}
                     />
                     {isLastThumb && remainingCount > 0 && (
                       <div className="absolute inset-0 bg-black/70 flex items-center justify-center text-white font-semibold text-sm">
@@ -247,12 +275,17 @@ export function UserVehicleMedia({ vehicle }: UserVehicleMediaProps) {
           <div className="max-w-4xl max-h-full flex flex-col items-center">
             <div className="relative max-w-full max-h-[80vh] flex items-center justify-center">
               <Image
+                key={lightboxFadeKey}
                 src={sortedMedia[selectedImageIndex]?.publishedUrl ?? sortedMedia[selectedImageIndex]?.originalUrl ?? ""}
                 alt={`${vehicle.name} - Image ${selectedImageIndex + 1}`}
                 width={1200}
                 height={800}
-                className="max-w-full max-h-full object-contain rounded-lg"
+                className={cn(
+                  "max-w-full max-h-full object-contain rounded-lg transition-opacity duration-300",
+                  lightboxImageLoaded ? "opacity-100" : "opacity-0"
+                )}
                 onClick={(e) => e.stopPropagation()}
+                onLoad={() => setLightboxImageLoaded(true)}
               />
             </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { MoreHorizontal, Mail, Phone, MessageCircle, Send, Pencil } from "lucide-react";
 import { Card } from "~/components/ui/card";
@@ -37,6 +37,11 @@ export function VehicleMediaSection({ vehicle, onSendDeal }: VehicleMediaSection
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxImages, setLightboxImages] = useState<string[]>([]);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [fadeKey, setFadeKey] = useState(0);
+  const [loadedThumbnails, setLoadedThumbnails] = useState<Set<string>>(new Set());
+  const [lightboxImageLoaded, setLightboxImageLoaded] = useState(false);
+  const [lightboxFadeKey, setLightboxFadeKey] = useState(0);
 
   // Filter and sort media - only show visible, ready images
   const sortedMedia = vehicle.media
@@ -51,6 +56,20 @@ export function VehicleMediaSection({ vehicle, onSendDeal }: VehicleMediaSection
 
   const mainImage = sortedMedia[0];
   const hasImages = sortedMedia.length > 0;
+
+  // Trigger fade animation when image index changes
+  useEffect(() => {
+    setIsImageLoaded(false);
+    setFadeKey(prev => prev + 1);
+  }, [selectedImageIndex]);
+
+  // Trigger fade animation when lightbox image changes
+  useEffect(() => {
+    if (isLightboxOpen) {
+      setLightboxImageLoaded(false);
+      setLightboxFadeKey(prev => prev + 1);
+    }
+  }, [selectedImageIndex, isLightboxOpen]);
 
   const copyToClipboard = async (text: string, label: string) => {
     try {
@@ -111,6 +130,7 @@ export function VehicleMediaSection({ vehicle, onSendDeal }: VehicleMediaSection
         <Card className="relative overflow-hidden p-0 group">
           <div ref={swipeRef} className="relative aspect-[3/2] bg-muted">
           <Image
+            key={fadeKey}
             src={
               currentImage?.publishedUrl ??
               currentImage?.originalUrl ??
@@ -118,9 +138,13 @@ export function VehicleMediaSection({ vehicle, onSendDeal }: VehicleMediaSection
             }
             alt={vehicle.name}
             fill
-            className="object-cover"
+            className={cn(
+              "object-cover transition-opacity duration-300",
+              isImageLoaded ? "opacity-100" : "opacity-0"
+            )}
             priority
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 900px"
+            onLoad={() => setIsImageLoaded(true)}
           />
 
           {/* Status Badge Overlay (Top-Left) */}
@@ -302,8 +326,12 @@ export function VehicleMediaSection({ vehicle, onSendDeal }: VehicleMediaSection
                       src={media.publishedUrl ?? media.originalUrl}
                       alt={media.title ?? `Image ${index + 1}`}
                       fill
-                      className="object-cover"
+                      className={cn(
+                        "object-cover transition-opacity duration-500",
+                        loadedThumbnails.has(media.id) ? "opacity-100" : "opacity-0"
+                      )}
                       sizes="(max-width: 1024px) 96px, 140px"
+                      onLoad={() => setLoadedThumbnails(prev => new Set(prev).add(media.id))}
                     />
                     {media.isPrimary && (
                       <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded font-medium z-10">
@@ -358,12 +386,17 @@ export function VehicleMediaSection({ vehicle, onSendDeal }: VehicleMediaSection
           <div className="max-w-4xl max-h-full flex flex-col items-center">
             <div className="relative max-w-full max-h-[80vh] flex items-center justify-center">
               <Image
+                key={lightboxFadeKey}
                 src={lightboxImages[selectedImageIndex] ?? ""}
                 alt={`${vehicle.name} - Image ${selectedImageIndex + 1}`}
                 width={1200}
                 height={800}
-                className="max-w-full max-h-full object-contain rounded-lg"
+                className={cn(
+                  "max-w-full max-h-full object-contain rounded-lg transition-opacity duration-300",
+                  lightboxImageLoaded ? "opacity-100" : "opacity-0"
+                )}
                 onClick={(e) => e.stopPropagation()}
+                onLoad={() => setLightboxImageLoaded(true)}
               />
             </div>
 

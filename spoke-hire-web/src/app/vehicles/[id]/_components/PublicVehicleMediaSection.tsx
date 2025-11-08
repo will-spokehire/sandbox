@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Card } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
@@ -37,6 +37,9 @@ interface PublicVehicleMediaSectionProps {
  */
 export function PublicVehicleMediaSection({ vehicle }: PublicVehicleMediaSectionProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [fadeKey, setFadeKey] = useState(0);
+  const [loadedThumbnails, setLoadedThumbnails] = useState<Set<string>>(new Set());
 
   // Filter and sort media
   const sortedMedia = vehicle.media
@@ -49,6 +52,12 @@ export function PublicVehicleMediaSection({ vehicle }: PublicVehicleMediaSection
 
   const hasImages = sortedMedia.length > 0;
   const currentImage = sortedMedia[selectedImageIndex];
+
+  // Trigger fade animation when image index changes
+  useEffect(() => {
+    setIsImageLoaded(false);
+    setFadeKey(prev => prev + 1);
+  }, [selectedImageIndex]);
 
   const goToPrevious = () => {
     setSelectedImageIndex((prev) =>
@@ -74,6 +83,7 @@ export function PublicVehicleMediaSection({ vehicle }: PublicVehicleMediaSection
       <Card className="relative overflow-hidden p-0">
         <div ref={swipeRef} className="relative aspect-[3/2] bg-muted">
           <Image
+            key={fadeKey}
             src={
               currentImage?.publishedUrl ??
               currentImage?.originalUrl ??
@@ -82,8 +92,12 @@ export function PublicVehicleMediaSection({ vehicle }: PublicVehicleMediaSection
             alt={vehicle.name}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
-            className="object-cover"
+            className={cn(
+              "object-cover transition-opacity duration-300",
+              isImageLoaded ? "opacity-100" : "opacity-0"
+            )}
             priority
+            onLoad={() => setIsImageLoaded(true)}
           />
 
           {/* Collections Badge Overlay */}
@@ -147,7 +161,11 @@ export function PublicVehicleMediaSection({ vehicle }: PublicVehicleMediaSection
                 alt={`${vehicle.name} - Image ${index + 1}`}
                 fill
                 sizes="100px"
-                className="object-cover"
+                className={cn(
+                  "object-cover transition-opacity duration-500",
+                  loadedThumbnails.has(media.id) ? "opacity-100" : "opacity-0"
+                )}
+                onLoad={() => setLoadedThumbnails(prev => new Set(prev).add(media.id))}
               />
             </button>
           ))}

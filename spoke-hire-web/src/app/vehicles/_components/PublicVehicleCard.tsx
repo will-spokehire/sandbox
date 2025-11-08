@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 import { useSwipeGesture } from "~/hooks/useSwipeGesture";
+import { cn } from "~/lib/utils";
 
 interface PublicVehicleCardProps {
   vehicle: {
@@ -46,10 +47,19 @@ interface PublicVehicleCardProps {
  */
 export function PublicVehicleCard({ vehicle }: PublicVehicleCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [fadeKey, setFadeKey] = useState(0);
+  
   const images = vehicle.media.filter((m) => m.publishedUrl || m.originalUrl);
   const currentImage = images[currentImageIndex];
   const imageUrl = currentImage?.publishedUrl ?? currentImage?.originalUrl ?? "/placeholder-vehicle.jpg";
   const hasMultipleImages = images.length > 1;
+
+  // Trigger fade animation when image index changes
+  useEffect(() => {
+    setIsImageLoaded(false);
+    setFadeKey(prev => prev + 1);
+  }, [currentImageIndex]);
 
   // Format location string
   const location = [
@@ -92,11 +102,16 @@ export function PublicVehicleCard({ vehicle }: PublicVehicleCardProps) {
         {/* Image with Navigation */}
         <div ref={swipeRef} className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
           <Image
+            key={fadeKey}
             src={imageUrl}
             alt={`${vehicle.year} ${vehicle.make.name} ${vehicle.model.name}`}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-cover transition-transform group-hover:scale-105"
+            className={cn(
+              "object-cover transition-all duration-300 group-hover:scale-105",
+              isImageLoaded ? "opacity-100" : "opacity-0"
+            )}
+            onLoad={() => setIsImageLoaded(true)}
           />
 
           {/* Image Counter - Bottom right */}

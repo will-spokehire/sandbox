@@ -3,7 +3,7 @@
 import { MoreHorizontal, Eye, MapPin, Mail, Phone, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { memo } from "react";
+import { memo, useState } from "react";
 import { type VehicleListItem } from "~/types/vehicle";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
@@ -26,6 +26,7 @@ import {
 } from "~/lib/vehicles";
 import { formatPricingRate } from "~/lib/pricing";
 import { getWhatsAppChatUrl } from "~/lib/whatsapp";
+import { cn } from "~/lib/utils";
 
 interface VehicleCardProps {
   vehicle: VehicleListItem;
@@ -55,6 +56,8 @@ export const VehicleCard = memo(function VehicleCard({
   onCopyEmail,
   onCopyPhone,
 }: VehicleCardProps) {
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  
   const imageUrl = getVehicleImageUrl(vehicle.media);
   const ownerName = formatOwnerName(
     vehicle.owner.firstName,
@@ -80,8 +83,12 @@ export const VehicleCard = memo(function VehicleCard({
               src={imageUrl}
               alt={vehicle.name}
               fill
-              className="object-cover"
+              className={cn(
+                "object-cover transition-opacity duration-500",
+                isImageLoaded ? "opacity-100" : "opacity-0"
+              )}
               sizes="(max-width: 768px) 100vw, 400px"
+              onLoad={() => setIsImageLoaded(true)}
             />
           </Link>
           
