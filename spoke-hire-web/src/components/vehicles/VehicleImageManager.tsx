@@ -36,6 +36,7 @@ export function VehicleImageManager({
       const mappedImages: VehicleImageItem[] = mediaData.map((media) => ({
         id: media.id,
         url: media.publishedUrl ?? media.originalUrl,
+        originalUrl: media.originalUrl,
         order: media.order,
         isPrimary: media.isPrimary,
       }));

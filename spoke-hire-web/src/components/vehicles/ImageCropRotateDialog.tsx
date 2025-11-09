@@ -78,6 +78,9 @@ export function ImageCropRotateDialog({
     }
   }, [open]);
 
+  // Use original image for cropping to avoid quality degradation
+  const sourceImageUrl = image.originalUrl ?? image.url;
+
   // Handle crop complete callback from react-easy-crop
   const onCropComplete = useCallback((_croppedArea: Area, croppedAreaPixels: Area) => {
     setCroppedAreaPixels(croppedAreaPixels);
@@ -103,9 +106,9 @@ export function ImageCropRotateDialog({
     setIsProcessing(true);
 
     try {
-      // Create the cropped and rotated image
+      // Create the cropped and rotated image from original source
       const croppedBlob = await createCroppedImage(
-        image.url,
+        sourceImageUrl,
         croppedAreaPixels,
         rotation
       );
@@ -141,7 +144,7 @@ export function ImageCropRotateDialog({
       );
       setIsProcessing(false);
     }
-  }, [croppedAreaPixels, rotation, image, vehicleId, updateImageMutation]);
+  }, [croppedAreaPixels, rotation, image, vehicleId, updateImageMutation, sourceImageUrl]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -158,7 +161,7 @@ export function ImageCropRotateDialog({
         {/* Crop Area */}
         <div className="relative flex-1 min-h-[400px] md:min-h-[500px] bg-black">
           <Cropper
-            image={image.url}
+            image={sourceImageUrl}
             crop={crop}
             zoom={zoom}
             rotation={rotation}

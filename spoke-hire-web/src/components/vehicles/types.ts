@@ -10,6 +10,7 @@ import type { Area } from "react-easy-crop";
 export interface VehicleImageItem {
   id: string;
   url: string;
+  originalUrl?: string;
   order: number;
   isPrimary: boolean;
 }
