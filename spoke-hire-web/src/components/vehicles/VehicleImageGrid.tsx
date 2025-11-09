@@ -110,6 +110,12 @@ function SortableImageCard({
         <div className="absolute bottom-2 right-2 z-10 flex gap-2">
           {/* Edit Button */}
           <button
+            onPointerDown={(e) => {
+              e.stopPropagation();
+            }}
+            onTouchStart={(e) => {
+              e.stopPropagation();
+            }}
             onClick={(e) => {
               e.stopPropagation();
               onEdit(image);
@@ -122,6 +128,12 @@ function SortableImageCard({
 
           {/* Delete Button */}
           <button
+            onPointerDown={(e) => {
+              e.stopPropagation();
+            }}
+            onTouchStart={(e) => {
+              e.stopPropagation();
+            }}
             onClick={(e) => {
               e.stopPropagation();
               onDelete(image.id);
