@@ -148,7 +148,7 @@ export const VehicleTableRow = memo(function VehicleTableRow({
           <span className="text-sm">
             {formatPricingRate(
               vehicle.hourlyRate 
-                ? (typeof vehicle.hourlyRate === 'number' ? vehicle.hourlyRate : vehicle.hourlyRate.toNumber())
+                ? Number(vehicle.hourlyRate)
                 : undefined
             )}
           </span>
@@ -161,7 +161,7 @@ export const VehicleTableRow = memo(function VehicleTableRow({
           <span className="text-sm">
             {formatPricingRate(
               vehicle.dailyRate 
-                ? (typeof vehicle.dailyRate === 'number' ? vehicle.dailyRate : vehicle.dailyRate.toNumber())
+                ? Number(vehicle.dailyRate)
                 : undefined
             )}
           </span>
