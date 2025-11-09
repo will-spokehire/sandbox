@@ -390,7 +390,7 @@ export function VehicleMediaSection({ vehicle, onSendDeal }: VehicleMediaSection
                 src={lightboxImages[selectedImageIndex] ?? ""}
                 alt={`${vehicle.name} - Image ${selectedImageIndex + 1}`}
                 width={1200}
-                height={800}
+                height={900}
                 className={cn(
                   "max-w-full max-h-full object-contain rounded-lg transition-opacity duration-300",
                   lightboxImageLoaded ? "opacity-100" : "opacity-0"

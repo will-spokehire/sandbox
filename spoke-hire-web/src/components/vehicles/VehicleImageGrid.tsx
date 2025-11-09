@@ -100,14 +100,14 @@ function SortableImageCard({
 
       {/* Drag Indicator - Visual hint that item is draggable */}
       {!disabled && (
-        <div className="absolute top-2 right-2 z-10 pointer-events-none rounded bg-background/80 p-1.5 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
+        <div className="absolute top-2 right-2 z-20 pointer-events-none rounded bg-background/80 backdrop-blur-sm p-1.5 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
           <GripVertical className="h-5 w-5" />
         </div>
       )}
 
-      {/* Action Buttons - Edit and Delete */}
+      {/* Action Buttons - Edit and Delete - Always visible on mobile, hover on desktop */}
       {!disabled && (
-        <div className="absolute bottom-2 right-2 z-10 flex gap-2">
+        <div className="absolute bottom-2 right-2 z-20 flex gap-2">
           {/* Edit Button */}
           <button
             onPointerDown={(e) => {
@@ -120,7 +120,7 @@ function SortableImageCard({
               e.stopPropagation();
               onEdit(image);
             }}
-            className="rounded bg-primary p-2 text-primary-foreground opacity-100 transition-opacity hover:bg-primary/90 md:opacity-0 md:group-hover:opacity-100"
+            className="rounded bg-primary p-2 text-primary-foreground shadow-lg transition-all hover:bg-primary/90 hover:shadow-xl md:opacity-0 md:shadow-md md:group-hover:opacity-100"
             aria-label="Edit image"
           >
             <Pencil className="h-4 w-4" />
@@ -138,7 +138,7 @@ function SortableImageCard({
               e.stopPropagation();
               onDelete(image.id);
             }}
-            className="rounded bg-destructive p-2 text-destructive-foreground opacity-100 transition-opacity hover:bg-destructive/90 md:opacity-0 md:group-hover:opacity-100"
+            className="rounded bg-destructive p-2 text-destructive-foreground shadow-lg transition-all hover:bg-destructive/90 hover:shadow-xl md:opacity-0 md:shadow-md md:group-hover:opacity-100"
             aria-label="Delete image"
           >
             <Trash2 className="h-4 w-4" />
