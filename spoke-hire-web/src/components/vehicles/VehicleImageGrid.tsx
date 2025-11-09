@@ -104,6 +104,12 @@ function SortableImageCard({
       {/* Delete Button - Always visible on mobile, hover on desktop */}
       {!disabled && (
         <button
+          onPointerDown={(e) => {
+            e.stopPropagation();
+          }}
+          onTouchStart={(e) => {
+            e.stopPropagation();
+          }}
           onClick={(e) => {
             e.stopPropagation();
             onDelete(image.id);
