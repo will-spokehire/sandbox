@@ -2,6 +2,8 @@
  * Shared types for vehicle image components
  */
 
+import type { Area } from "react-easy-crop";
+
 /**
  * Image item for internal state
  */
@@ -50,4 +52,29 @@ export interface VehicleImageManagerProps {
   onSuccess?: () => void;
   className?: string;
 }
+
+/**
+ * Props for ImageCropRotateDialog component
+ */
+export interface ImageCropRotateDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  image: VehicleImageItem;
+  vehicleId: string;
+  onSuccess?: () => void;
+}
+
+/**
+ * Result from image editing operation
+ */
+export interface EditedImageResult {
+  blob: Blob;
+  width: number;
+  height: number;
+}
+
+/**
+ * Crop area export (re-export from react-easy-crop for convenience)
+ */
+export type { Area as CropArea };
 
