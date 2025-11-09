@@ -32,6 +32,8 @@ import { api } from "~/trpc/react";
 import type { ImageCropRotateDialogProps } from "./types";
 
 const ASPECT_RATIO = 4 / 3; // Fixed aspect ratio for vehicle images
+const MIN_OUTPUT_WIDTH = 1920; // Desired minimum output width for quality
+const MIN_OUTPUT_HEIGHT = MIN_OUTPUT_WIDTH / ASPECT_RATIO; // 1440px
 
 /**
  * Main ImageCropRotateDialog Component
@@ -48,6 +50,9 @@ export function ImageCropRotateDialog({
   const [rotation, setRotation] = useState(0);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [maxZoom, setMaxZoom] = useState(3);
+  const [minZoom, setMinZoom] = useState(1);
+  const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number } | null>(null);
 
   const utils = api.useUtils();
 
@@ -68,18 +73,54 @@ export function ImageCropRotateDialog({
     },
   });
 
+  // Use original image for cropping to avoid quality degradation
+  const sourceImageUrl = image.originalUrl ?? image.url;
+
+  // Load image and calculate smart zoom limits
+  useEffect(() => {
+    if (!open) return;
+
+    const img = new Image();
+    img.onload = () => {
+      const imgWidth = img.width;
+      const imgHeight = img.height;
+      setImageDimensions({ width: imgWidth, height: imgHeight });
+
+      // Calculate the minimum zoom needed to fill the crop area
+      const widthRatio = MIN_OUTPUT_WIDTH / imgWidth;
+      const heightRatio = MIN_OUTPUT_HEIGHT / imgHeight;
+      const minZoomNeeded = Math.max(widthRatio, heightRatio, 1);
+
+      // Calculate max zoom to prevent excessive pixelation
+      // Allow zoom up to 2x of the desired output size, but not beyond 3x
+      const maxQualityZoom = Math.min((imgWidth / MIN_OUTPUT_WIDTH) * 2, 3);
+      const calculatedMaxZoom = Math.max(maxQualityZoom, minZoomNeeded, 1.5);
+
+      setMinZoom(minZoomNeeded);
+      setMaxZoom(calculatedMaxZoom);
+      
+      // Set initial zoom to minimum needed or 1, whichever is greater
+      setZoom(minZoomNeeded);
+    };
+    
+    img.onerror = () => {
+      // Fallback to defaults if image fails to load
+      setMinZoom(1);
+      setMaxZoom(3);
+      setZoom(1);
+    };
+    
+    img.src = sourceImageUrl;
+  }, [open, sourceImageUrl]);
+
   // Reset state when dialog opens
   useEffect(() => {
     if (open) {
       setCrop({ x: 0, y: 0 });
-      setZoom(1);
       setRotation(0);
       setCroppedAreaPixels(null);
     }
   }, [open]);
-
-  // Use original image for cropping to avoid quality degradation
-  const sourceImageUrl = image.originalUrl ?? image.url;
 
   // Handle crop complete callback from react-easy-crop
   const onCropComplete = useCallback((_croppedArea: Area, croppedAreaPixels: Area) => {
@@ -154,6 +195,11 @@ export function ImageCropRotateDialog({
             <DialogTitle>Edit Image</DialogTitle>
             <DialogDescription>
               Crop and rotate your image. The aspect ratio is fixed at 4:3 for consistency.
+              {imageDimensions && (
+                <span className="block text-xs mt-1 text-muted-foreground">
+                  Original: {imageDimensions.width}×{imageDimensions.height}px
+                </span>
+              )}
             </DialogDescription>
           </DialogHeader>
         </div>
@@ -172,6 +218,8 @@ export function ImageCropRotateDialog({
             onRotationChange={setRotation}
             objectFit="contain"
             showGrid={true}
+            minZoom={minZoom}
+            maxZoom={maxZoom}
             classes={{
               containerClassName: "cropper-container",
               cropAreaClassName: "crop-area",
@@ -191,14 +239,17 @@ export function ImageCropRotateDialog({
               </label>
               <span className="text-sm text-muted-foreground">
                 {Math.round(zoom * 100)}%
+                {maxZoom < 3 && (
+                  <span className="text-xs ml-1">(limited by image size)</span>
+                )}
               </span>
             </div>
             <Slider
               value={[zoom]}
               onValueChange={handleZoomChange}
-              min={1}
-              max={3}
-              step={0.1}
+              min={minZoom}
+              max={maxZoom}
+              step={0.05}
               className="w-full"
               disabled={isProcessing}
             />
