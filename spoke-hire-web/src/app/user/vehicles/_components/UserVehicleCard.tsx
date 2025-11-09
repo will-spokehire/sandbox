@@ -102,7 +102,7 @@ export function UserVehicleCard({ vehicle, href }: UserVehicleCardProps) {
   return (
     <Link href={linkHref}>
       <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer p-0 gap-0">
-        <div ref={swipeRef} className="relative aspect-[3/2] bg-slate-100 dark:bg-slate-800 group">
+        <div ref={swipeRef} className="relative aspect-[4/3] bg-slate-100 dark:bg-slate-800 group">
           {imageUrl ? (
             <Image
               key={fadeKey}

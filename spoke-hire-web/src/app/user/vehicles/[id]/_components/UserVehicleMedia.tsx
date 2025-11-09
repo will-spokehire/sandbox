@@ -92,9 +92,9 @@ export function UserVehicleMedia({ vehicle }: UserVehicleMediaProps) {
     <div className="space-y-4">
       {/* Always stacked vertically: Hero image on top, thumbnails below */}
       <div className="flex flex-col gap-4">
-        {/* Main/Hero Image - 3:2 aspect ratio */}
+        {/* Main/Hero Image - 4:3 aspect ratio */}
         <Card className="relative overflow-hidden p-0 group">
-          <div ref={swipeRef} className="relative aspect-[3/2] bg-muted">
+          <div ref={swipeRef} className="relative aspect-[4/3] bg-muted">
             {hasImages && mainImage ? (
               <Image
                 key={fadeKey}
@@ -213,7 +213,7 @@ export function UserVehicleMedia({ vehicle }: UserVehicleMediaProps) {
                     key={media.id}
                     onClick={() => isLastThumb ? openLightbox(index) : setSelectedImageIndex(index)}
                     className={cn(
-                      "relative aspect-[3/2] rounded-md overflow-hidden border-2 transition-all hover:scale-105 hover:shadow-md",
+                      "relative aspect-[4/3] rounded-md overflow-hidden border-2 transition-all hover:scale-105 hover:shadow-md",
                       selectedImageIndex === index
                         ? "border-primary ring-2 ring-primary/20"
                         : "border-border hover:border-primary/50"

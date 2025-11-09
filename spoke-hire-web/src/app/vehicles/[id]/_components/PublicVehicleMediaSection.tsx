@@ -81,7 +81,7 @@ export function PublicVehicleMediaSection({ vehicle }: PublicVehicleMediaSection
     <article className="space-y-4">
       {/* Main Image with Navigation */}
       <Card className="relative overflow-hidden p-0">
-        <div ref={swipeRef} className="relative aspect-[3/2] bg-muted">
+        <div ref={swipeRef} className="relative aspect-[4/3] bg-muted">
           <Image
             key={fadeKey}
             src={

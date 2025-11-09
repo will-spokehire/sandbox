@@ -76,8 +76,8 @@ export const VehicleCard = memo(function VehicleCard({
   return (
     <Card className={`hover:shadow-md transition-shadow overflow-hidden py-0 relative ${selected ? 'ring-2 ring-primary' : ''}`}>
       <CardContent className="p-0">
-        {/* Image - Full width for better impact - 3:2 aspect ratio */}
-        <div className="relative aspect-[3/2] w-full bg-muted">
+        {/* Image - Full width for better impact - 4:3 aspect ratio */}
+        <div className="relative aspect-[4/3] w-full bg-muted">
           <Link href={`/admin/vehicles/${vehicle.id}`} className="block w-full h-full">
             <Image
               src={imageUrl}

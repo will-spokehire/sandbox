@@ -28,7 +28,7 @@ export default function Loading() {
           <div className="lg:col-span-2 space-y-6">
             {/* Main Image */}
             <Card className="overflow-hidden">
-              <Skeleton className="aspect-[3/2] w-full" />
+              <Skeleton className="aspect-[4/3] w-full" />
             </Card>
             
             {/* Thumbnails */}

@@ -78,11 +78,11 @@ export default function UserVehicleDetailPage({
             {/* Left Column - Media Skeleton */}
             <div className="lg:col-span-2 space-y-4">
               <Card className="overflow-hidden">
-                <Skeleton className="aspect-[3/2] w-full" />
+                <Skeleton className="aspect-[4/3] w-full" />
               </Card>
               <div className="grid grid-cols-6 gap-2">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <Skeleton key={i} className="aspect-[3/2]" />
+                  <Skeleton key={i} className="aspect-[4/3]" />
                 ))}
               </div>
               <div className="space-y-2">
