@@ -116,7 +116,7 @@ export function ImageModal({
               src={currentImage}
               alt={`${vehicleName} - Image ${currentIndex + 1}`}
               width={1200}
-              height={800}
+              height={900}
               className="max-w-full max-h-full object-contain rounded-lg"
               onError={() => setImageError(true)}
             />

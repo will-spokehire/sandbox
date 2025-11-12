@@ -84,7 +84,7 @@ export const VehicleTableRow = memo(function VehicleTableRow({
       {/* Image */}
       <TableCell>
         <Link href={`/admin/vehicles/${vehicle.id}`} className="block">
-          <div className="relative aspect-[3/2] w-28 overflow-hidden rounded-md border bg-muted">
+          <div className="relative aspect-[4/3] w-28 overflow-hidden rounded-md border bg-muted">
             <Image
               src={imageUrl}
               alt={vehicle.name}

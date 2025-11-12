@@ -510,3 +510,189 @@ export async function uploadMultipleImages(
   return results;
 }
 
+/**
+ * Upload an edited image (Blob) to Supabase Storage
+ * Used after cropping/rotating an existing image
+ * 
+ * @param blob - The processed image blob
+ * @param vehicleId - Vehicle ID for storage path
+ * @param originalFilename - Base filename (without extension)
+ * @param onProgress - Optional progress callback
+ * @returns Upload result with new URL
+ */
+export async function uploadEditedImage(
+  blob: Blob,
+  vehicleId: string,
+  originalFilename: string,
+  onProgress?: UploadProgressCallback
+): Promise<UploadResult> {
+  try {
+    // Get dimensions from the blob
+    const dimensions = await getImageDimensions(blob);
+
+    // Generate unique filename with timestamp for cache busting
+    const timestamp = Date.now();
+    const uniqueFilename = `${originalFilename}_v${timestamp}.jpg`;
+    const storagePath = `vehicles/${vehicleId}/${uniqueFilename}`;
+
+    // Get Supabase session for auth token
+    const supabase = createClient();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      return {
+        success: false,
+        publicUrl: null,
+        storagePath: null,
+        filename: uniqueFilename,
+        fileSize: blob.size,
+        error: "Not authenticated",
+      };
+    }
+
+    // Get Supabase URL and determine if we're in local development
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    
+    if (!supabaseUrl) {
+      return {
+        success: false,
+        publicUrl: null,
+        storagePath: null,
+        filename: uniqueFilename,
+        fileSize: blob.size,
+        error: "Invalid Supabase configuration - URL missing",
+      };
+    }
+
+    // Determine the upload endpoint based on environment
+    const isLocalDev = supabaseUrl.includes('127.0.0.1') || supabaseUrl.includes('localhost');
+    let uploadEndpoint: string;
+
+    if (isLocalDev) {
+      uploadEndpoint = `${supabaseUrl}/storage/v1/upload/resumable`;
+    } else {
+      const projectId = supabaseUrl.split("//")[1]?.split(".")[0];
+      if (!projectId) {
+        return {
+          success: false,
+          publicUrl: null,
+          storagePath: null,
+          filename: uniqueFilename,
+          fileSize: blob.size,
+          error: "Invalid Supabase configuration - cannot extract project ID",
+        };
+      }
+      uploadEndpoint = `https://${projectId}.storage.supabase.co/storage/v1/upload/resumable`;
+    }
+
+    // Upload using TUS protocol
+    const uploadResult = await new Promise<{
+      success: boolean;
+      url?: string;
+      error?: string;
+    }>((resolve, reject) => {
+      const upload = new tus.Upload(blob, {
+        endpoint: uploadEndpoint,
+        retryDelays: RETRY_DELAYS,
+        headers: {
+          authorization: `Bearer ${session.access_token}`,
+          "x-upsert": "true",
+        },
+        uploadDataDuringCreation: true,
+        removeFingerprintOnSuccess: true,
+        metadata: {
+          bucketName: BUCKET_NAME,
+          objectName: storagePath,
+          contentType: "image/jpeg",
+          cacheControl: "3600",
+        },
+        chunkSize: CHUNK_SIZE,
+        onError: (error) => {
+          // Handle file already exists (409 Conflict)
+          if (error.message?.includes("409") || error.message?.includes("Conflict")) {
+            const { data: urlData } = supabase.storage
+              .from(BUCKET_NAME)
+              .getPublicUrl(storagePath);
+            
+            if (urlData?.publicUrl) {
+              resolve({
+                success: true,
+                url: urlData.publicUrl,
+              });
+              return;
+            }
+          }
+          
+          resolve({
+            success: false,
+            error: error.message,
+          });
+        },
+        onProgress: (bytesUploaded, bytesTotal) => {
+          const percentage = Number(
+            ((bytesUploaded / bytesTotal) * 100).toFixed(2)
+          );
+          onProgress?.(bytesUploaded, bytesTotal, percentage);
+        },
+        onSuccess: () => {
+          resolve({
+            success: true,
+            url: upload.url ?? undefined,
+          });
+        },
+      });
+
+      // Check for previous uploads and resume if found
+      upload
+        .findPreviousUploads()
+        .then((previousUploads) => {
+          if (previousUploads.length > 0) {
+            upload.resumeFromPreviousUpload(previousUploads[0]!);
+          }
+          upload.start();
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    });
+
+    if (!uploadResult.success) {
+      return {
+        success: false,
+        publicUrl: null,
+        storagePath: null,
+        filename: uniqueFilename,
+        fileSize: blob.size,
+        error: uploadResult.error ?? "Upload failed",
+      };
+    }
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(storagePath);
+
+    return {
+      success: true,
+      publicUrl: urlData.publicUrl ?? null,
+      storagePath,
+      filename: uniqueFilename,
+      fileSize: blob.size,
+      width: dimensions.width,
+      height: dimensions.height,
+      error: null,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      publicUrl: null,
+      storagePath: null,
+      filename: originalFilename,
+      fileSize: blob.size,
+      error: error instanceof Error ? error.message : "Unknown error occurred",
+    };
+  }
+}
+

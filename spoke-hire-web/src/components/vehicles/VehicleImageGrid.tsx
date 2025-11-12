@@ -7,11 +7,12 @@
  * - Drag-and-drop reordering (auto-saved)
  * - Touch support for mobile (long-press to drag)
  * - Delete functionality with confirmation
+ * - Edit functionality (crop/rotate)
  * - Primary badge on first image
  * - Order indicators
  */
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
 import {
@@ -32,10 +33,11 @@ import {
   rectSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Trash2 } from "lucide-react";
+import { GripVertical, Trash2, Pencil } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import { api } from "~/trpc/react";
 import { cn } from "~/lib/utils";
+import { ImageCropRotateDialog } from "./ImageCropRotateDialog";
 import type { VehicleImageItem, VehicleImageGridProps } from "./types";
 
 /**
@@ -44,10 +46,12 @@ import type { VehicleImageItem, VehicleImageGridProps } from "./types";
 function SortableImageCard({
   image,
   onDelete,
+  onEdit,
   disabled,
 }: {
   image: VehicleImageItem;
   onDelete: (id: string) => void;
+  onEdit: (image: VehicleImageItem) => void;
   disabled?: boolean;
 }) {
   const {
@@ -96,23 +100,50 @@ function SortableImageCard({
 
       {/* Drag Indicator - Visual hint that item is draggable */}
       {!disabled && (
-        <div className="absolute top-2 right-2 z-10 pointer-events-none rounded bg-background/80 p-1.5 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
+        <div className="absolute top-2 right-2 z-20 pointer-events-none rounded bg-background/80 backdrop-blur-sm p-1.5 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
           <GripVertical className="h-5 w-5" />
         </div>
       )}
 
-      {/* Delete Button - Always visible on mobile, hover on desktop */}
+      {/* Action Buttons - Edit and Delete - Always visible on mobile, hover on desktop */}
       {!disabled && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete(image.id);
-          }}
-          className="absolute bottom-2 right-2 z-10 rounded bg-destructive p-2 text-destructive-foreground opacity-100 transition-opacity hover:bg-destructive/90 md:opacity-0 md:group-hover:opacity-100"
-          aria-label="Delete image"
-        >
-          <Trash2 className="h-4 w-4" />
-        </button>
+        <div className="absolute bottom-2 right-2 z-20 flex gap-2">
+          {/* Edit Button */}
+          <button
+            onPointerDown={(e) => {
+              e.stopPropagation();
+            }}
+            onTouchStart={(e) => {
+              e.stopPropagation();
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(image);
+            }}
+            className="rounded bg-primary p-2 text-primary-foreground shadow-lg transition-all hover:bg-primary/90 hover:shadow-xl md:opacity-0 md:shadow-md md:group-hover:opacity-100"
+            aria-label="Edit image"
+          >
+            <Pencil className="h-4 w-4" />
+          </button>
+
+          {/* Delete Button */}
+          <button
+            onPointerDown={(e) => {
+              e.stopPropagation();
+            }}
+            onTouchStart={(e) => {
+              e.stopPropagation();
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(image.id);
+            }}
+            className="rounded bg-destructive p-2 text-destructive-foreground shadow-lg transition-all hover:bg-destructive/90 hover:shadow-xl md:opacity-0 md:shadow-md md:group-hover:opacity-100"
+            aria-label="Delete image"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
       )}
 
       {/* Order Badge */}
@@ -133,6 +164,8 @@ export function VehicleImageGrid({
   disabled = false,
 }: VehicleImageGridProps) {
   const utils = api.useUtils();
+  const [editingImage, setEditingImage] = useState<VehicleImageItem | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const reorderMutation = api.media.reorderImages.useMutation({
     onSuccess: async () => {
@@ -238,6 +271,18 @@ export function VehicleImageGrid({
     [deleteMutation, vehicleId, images, onImagesChange]
   );
 
+  // Handle edit
+  const handleEdit = useCallback((image: VehicleImageItem) => {
+    setEditingImage(image);
+    setIsEditDialogOpen(true);
+  }, []);
+
+  // Handle edit success - refresh images
+  const handleEditSuccess = useCallback(() => {
+    setIsEditDialogOpen(false);
+    setEditingImage(null);
+  }, []);
+
   if (images.length === 0) {
     return null;
   }
@@ -260,12 +305,24 @@ export function VehicleImageGrid({
                 key={image.id}
                 image={image}
                 onDelete={handleDelete}
+                onEdit={handleEdit}
                 disabled={disabled}
               />
             ))}
           </div>
         </SortableContext>
       </DndContext>
+
+      {/* Edit Dialog */}
+      {editingImage && (
+        <ImageCropRotateDialog
+          open={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          image={editingImage}
+          vehicleId={vehicleId}
+          onSuccess={handleEditSuccess}
+        />
+      )}
     </div>
   );
 }

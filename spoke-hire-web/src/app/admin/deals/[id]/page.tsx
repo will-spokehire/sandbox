@@ -633,7 +633,7 @@ export default function DealDetailPage({
                         <div className="md:hidden">
                           {/* Image */}
                           {dv.vehicle.media[0]?.publishedUrl && (
-                            <div className="relative aspect-[3/2] w-full bg-muted">
+                            <div className="relative aspect-[4/3] w-full bg-muted">
                               <Image
                                 src={dv.vehicle.media[0].publishedUrl}
                                 alt={dv.vehicle.name}

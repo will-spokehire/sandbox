@@ -264,5 +264,67 @@ export class MediaService {
 
     return await this.repository.getVehicleImages(vehicleId);
   }
+
+  /**
+   * Update an image with an edited version (after crop/rotate)
+   * Preserves the original URL and updates the published URL
+   */
+  async updateImageWithEditedVersion(
+    params: {
+      imageId: string;
+      vehicleId: string;
+      filename: string;
+      publishedUrl: string;
+      fileSize: bigint;
+      width: number;
+      height: number;
+    },
+    user: User
+  ): Promise<Media> {
+    const { imageId, vehicleId, filename, publishedUrl, fileSize, width, height } = params;
+
+    // Validate ownership
+    await this.validateVehicleOwnership(vehicleId, user);
+
+    // Get the existing image
+    const existingImage = await this.repository.getMediaById(imageId);
+
+    if (!existingImage) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Image not found",
+      });
+    }
+
+    if (existingImage.vehicleId !== vehicleId) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Image does not belong to the specified vehicle",
+      });
+    }
+
+    // Store original URL if not already set
+    const originalUrl = existingImage.originalUrl ?? existingImage.publishedUrl;
+
+    // Update the image with new edited version
+    const updatedImage = await this.db.media.update({
+      where: { id: imageId },
+      data: {
+        filename,
+        publishedUrl,
+        originalUrl, // Preserve original
+        fileSize,
+        width,
+        height,
+        updatedAt: new Date(),
+      },
+    });
+
+    // Invalidate vehicle cache to ensure fresh data on next fetch
+    this.cache.delete(CacheKeys.vehicleDetail(vehicleId));
+    this.cache.invalidateByPattern("vehicle:list:");
+
+    return updatedImage;
+  }
 }
 

@@ -46,6 +46,16 @@ const getVehicleImagesInputSchema = z.object({
   vehicleId: z.string().cuid(),
 });
 
+const updateEditedImageInputSchema = z.object({
+  imageId: z.string().cuid(),
+  vehicleId: z.string().cuid(),
+  filename: z.string().min(1),
+  publishedUrl: z.string().url(),
+  fileSize: z.bigint(),
+  width: z.number().int().positive(),
+  height: z.number().int().positive(),
+});
+
 /**
  * Media Router
  */
@@ -89,6 +99,17 @@ export const mediaRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const service = ServiceFactory.createMediaService(ctx.db);
       return await service.getVehicleImages(input.vehicleId, ctx.user);
+    }),
+
+  /**
+   * Update an image with an edited version (after crop/rotate)
+   * Preserves the original URL and updates the published URL
+   */
+  updateEditedImage: protectedProcedure
+    .input(updateEditedImageInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const service = ServiceFactory.createMediaService(ctx.db);
+      return await service.updateImageWithEditedVersion(input, ctx.user);
     }),
 });
 
