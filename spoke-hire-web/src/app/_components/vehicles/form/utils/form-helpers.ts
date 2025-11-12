@@ -7,10 +7,9 @@ import type { VehicleFormData, RegistrationError } from "~/types/vehicle-form";
 function toNumber(value: unknown): number | null {
   if (value == null) return null;
   if (typeof value === 'number') return value;
-  if (typeof value === 'object' && value !== null && 'toNumber' in value && typeof value.toNumber === 'function') {
-    return (value as { toNumber: () => number }).toNumber();
-  }
-  return null;
+  // Use Number() constructor which works with Prisma Decimal in browser
+  const num = Number(value);
+  return isNaN(num) ? null : num;
 }
 
 /**

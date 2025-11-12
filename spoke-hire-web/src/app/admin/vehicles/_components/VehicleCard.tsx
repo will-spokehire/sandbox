@@ -215,7 +215,9 @@ export const VehicleCard = memo(function VehicleCard({
               <span className="text-muted-foreground text-xs">Hourly Rate</span>
               <p className="font-medium text-xs mt-0.5">
                 {formatPricingRate(
-                  vehicle.hourlyRate ? Number(vehicle.hourlyRate) : undefined
+                  vehicle.hourlyRate 
+                    ? Number(vehicle.hourlyRate)
+                    : undefined
                 )}
               </p>
             </div>
@@ -223,7 +225,9 @@ export const VehicleCard = memo(function VehicleCard({
               <span className="text-muted-foreground text-xs">Daily Rate</span>
               <p className="font-medium text-xs mt-0.5">
                 {formatPricingRate(
-                  vehicle.dailyRate ? Number(vehicle.dailyRate) : undefined
+                  vehicle.dailyRate 
+                    ? Number(vehicle.dailyRate)
+                    : undefined
                 )}
               </p>
             </div>
