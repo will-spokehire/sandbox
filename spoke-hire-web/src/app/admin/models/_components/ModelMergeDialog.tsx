@@ -50,6 +50,7 @@ export function ModelMergeDialog({
       onSuccess();
       onOpenChange(false);
       setPrimaryModelId("");
+      setIsSubmitting(false);
     },
     onError: (error) => {
       toast.error(`Failed to merge models: ${error.message}`);

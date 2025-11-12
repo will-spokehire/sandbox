@@ -49,6 +49,7 @@ export function MakeMergeDialog({
       onSuccess();
       onOpenChange(false);
       setPrimaryMakeId("");
+      setIsSubmitting(false);
     },
     onError: (error) => {
       toast.error(`Failed to merge makes: ${error.message}`);

@@ -107,22 +107,43 @@ function SortableImageCard({
 
       {/* Action Buttons - Edit and Delete - Always visible on mobile, hover on desktop */}
       {!disabled && (
-        <button
-          onPointerDown={(e) => {
-            e.stopPropagation();
-          }}
-          onTouchStart={(e) => {
-            e.stopPropagation();
-          }}
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete(image.id);
-          }}
-          className="absolute bottom-2 right-2 z-10 rounded bg-destructive p-2 text-destructive-foreground opacity-100 transition-opacity hover:bg-destructive/90 md:opacity-0 md:group-hover:opacity-100"
-          aria-label="Delete image"
-        >
-          <Trash2 className="h-4 w-4" />
-        </button>
+        <div className="absolute bottom-2 right-2 z-20 flex gap-2">
+          {/* Edit Button */}
+          <button
+            onPointerDown={(e) => {
+              e.stopPropagation();
+            }}
+            onTouchStart={(e) => {
+              e.stopPropagation();
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(image);
+            }}
+            className="rounded bg-primary p-2 text-primary-foreground shadow-lg transition-all hover:bg-primary/90 hover:shadow-xl md:opacity-0 md:shadow-md md:group-hover:opacity-100"
+            aria-label="Edit image"
+          >
+            <Pencil className="h-4 w-4" />
+          </button>
+
+          {/* Delete Button */}
+          <button
+            onPointerDown={(e) => {
+              e.stopPropagation();
+            }}
+            onTouchStart={(e) => {
+              e.stopPropagation();
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(image.id);
+            }}
+            className="rounded bg-destructive p-2 text-destructive-foreground shadow-lg transition-all hover:bg-destructive/90 hover:shadow-xl md:opacity-0 md:shadow-md md:group-hover:opacity-100"
+            aria-label="Delete image"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
       )}
 
       {/* Order Badge */}

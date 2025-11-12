@@ -293,7 +293,7 @@ export class MakeService {
                 },
               });
             } else {
-              // Just update the make, keep the model (it will be orphaned)
+              // No matching model found - update the vehicle's make
               await tx.vehicle.update({
                 where: { id: vehicle.id },
                 data: {
@@ -305,15 +305,18 @@ export class MakeService {
             vehiclesUpdated++;
           }
 
-          // Delete models of this secondary make (if they have no vehicles)
-          await tx.model.deleteMany({
+          // Update all models from secondary make to primary make
+          // This handles models that vehicles are still using
+          await tx.model.updateMany({
             where: {
               makeId: secondaryMake.id,
-              vehicles: { none: {} },
+            },
+            data: {
+              makeId: primaryMakeId,
             },
           });
 
-          // Delete the secondary make
+          // Delete the secondary make (now safe since all models have been moved)
           await tx.make.delete({
             where: { id: secondaryMake.id },
           });
