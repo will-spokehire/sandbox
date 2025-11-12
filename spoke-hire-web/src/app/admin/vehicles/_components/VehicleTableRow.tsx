@@ -147,9 +147,7 @@ export const VehicleTableRow = memo(function VehicleTableRow({
         <Link href={`/admin/vehicles/${vehicle.id}`} className="block">
           <span className="text-sm">
             {formatPricingRate(
-              vehicle.hourlyRate 
-                ? (typeof vehicle.hourlyRate === 'number' ? vehicle.hourlyRate : vehicle.hourlyRate.toNumber())
-                : undefined
+              vehicle.hourlyRate ? Number(vehicle.hourlyRate) : undefined
             )}
           </span>
         </Link>
@@ -160,9 +158,7 @@ export const VehicleTableRow = memo(function VehicleTableRow({
         <Link href={`/admin/vehicles/${vehicle.id}`} className="block">
           <span className="text-sm">
             {formatPricingRate(
-              vehicle.dailyRate 
-                ? (typeof vehicle.dailyRate === 'number' ? vehicle.dailyRate : vehicle.dailyRate.toNumber())
-                : undefined
+              vehicle.dailyRate ? Number(vehicle.dailyRate) : undefined
             )}
           </span>
         </Link>
