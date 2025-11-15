@@ -12,6 +12,7 @@
  */
 
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { RecipientStatus,  type Prisma } from "@prisma/client";
 import { createTRPCRouter, adminProcedure, protectedProcedure } from "~/server/api/trpc";
 import { ServiceFactory } from "~/server/api/services/service-factory";
@@ -201,6 +202,32 @@ export const dealRouter = createTRPCRouter({
 
       // Get deal details
       const deal = await dealService.getDealById(input.dealId);
+
+      // Validate email fields before sending
+      const missingFields: string[] = [];
+      
+      if (!deal.fee || deal.fee.trim().length === 0) {
+        missingFields.push("Fee");
+      }
+      if (!deal.date || deal.date.trim().length === 0) {
+        missingFields.push("Date");
+      }
+      if (!deal.time || deal.time.trim().length === 0) {
+        missingFields.push("Time");
+      }
+      if (!deal.location || deal.location.trim().length === 0) {
+        missingFields.push("Location");
+      }
+      if (!deal.brief || deal.brief.trim().length === 0) {
+        missingFields.push("Brief");
+      }
+      
+      if (missingFields.length > 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Cannot send emails. Please fill in the following fields: ${missingFields.join(", ")}`,
+        });
+      }
 
       // Get vehicles for the deal
       const vehicles = await dealService.getDealVehicles(input.dealId);

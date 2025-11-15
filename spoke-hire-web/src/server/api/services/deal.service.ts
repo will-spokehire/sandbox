@@ -173,12 +173,20 @@ export class DealService {
     // After transaction completes, send emails to all recipients (only if there are recipients)
     // Note: Emails are sent AFTER the transaction to avoid holding locks
     if (recipientIds.length > 0) {
-      try {
-        await this.sendDealEmails(deal.id, recipientIds);
-      } catch (error) {
-        // Log error but don't fail the deal creation
-        // The deal is created successfully, email sending can be retried
-        console.error(`Failed to send emails for deal ${deal.id}:`, error);
+      // Validate email fields before sending
+      const missingFields = this.validateDealEmailFields(deal);
+      
+      if (missingFields.length > 0) {
+        // Log warning but don't fail deal creation - emails can be sent later
+        console.warn(`Cannot send emails for deal ${deal.id}. Missing fields: ${missingFields.join(", ")}`);
+      } else {
+        try {
+          await this.sendDealEmails(deal.id, recipientIds);
+        } catch (error) {
+          // Log error but don't fail the deal creation
+          // The deal is created successfully, email sending can be retried
+          console.error(`Failed to send emails for deal ${deal.id}:`, error);
+        }
       }
     }
     
@@ -210,6 +218,39 @@ export class DealService {
         message: DEAL_VALIDATION_MESSAGES.NAME_TOO_LONG,
       });
     }
+  }
+
+  /**
+   * Validate deal email fields
+   * Returns array of missing field names (empty if all fields are present)
+   * @private
+   */
+  private validateDealEmailFields(deal: {
+    fee?: string | null;
+    date?: string | null;
+    time?: string | null;
+    location?: string | null;
+    brief?: string | null;
+  }): string[] {
+    const missingFields: string[] = [];
+    
+    if (!deal.fee || deal.fee.trim().length === 0) {
+      missingFields.push("Fee");
+    }
+    if (!deal.date || deal.date.trim().length === 0) {
+      missingFields.push("Date");
+    }
+    if (!deal.time || deal.time.trim().length === 0) {
+      missingFields.push("Time");
+    }
+    if (!deal.location || deal.location.trim().length === 0) {
+      missingFields.push("Location");
+    }
+    if (!deal.brief || deal.brief.trim().length === 0) {
+      missingFields.push("Brief");
+    }
+    
+    return missingFields;
   }
   
   /**
@@ -489,6 +530,16 @@ export class DealService {
     
     // Get deal details
     const deal = await this.getDealById(dealId);
+    
+    // Validate email fields before sending
+    const missingFields = this.validateDealEmailFields(deal);
+    
+    if (missingFields.length > 0) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: `Cannot send emails. Please fill in the following fields: ${missingFields.join(", ")}`,
+      });
+    }
     
     // Get vehicles for the deal
     const vehicles = await this.getDealVehicles(dealId);
