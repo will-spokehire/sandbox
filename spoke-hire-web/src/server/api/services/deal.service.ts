@@ -737,7 +737,7 @@ export class DealService {
         fullQuote: undefined,
         spokeFee: undefined,
         baselineFee: undefined,
-        notes: `User Enquiry - ${firstName} ${lastName}\nEmail: ${email}\nPhone: ${phone}${company ? `\nCompany: ${company}` : ''}`,
+        notes: undefined,
         status: "OPTIONS" as DealStatus,
         createdById: userId,
         vehicleIds: vehicleId ? [vehicleId] : [],
