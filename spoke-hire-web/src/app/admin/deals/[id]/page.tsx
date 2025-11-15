@@ -548,19 +548,6 @@ export default function DealDetailPage({
                           </p>
                         </div>
                       )}
-                      {deal.baselineFee && (
-                        <div>
-                          <p className="text-muted-foreground mb-1">Baseline Fee</p>
-                          <p className="text-2xl font-bold">
-                            {new Intl.NumberFormat("en-GB", {
-                              style: "currency",
-                              currency: "GBP",
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            }).format(Number(deal.baselineFee))}
-                          </p>
-                        </div>
-                      )}
                     </div>
                     {/* Margin Calculation */}
                     {deal.fullQuote && deal.spokeFee && (

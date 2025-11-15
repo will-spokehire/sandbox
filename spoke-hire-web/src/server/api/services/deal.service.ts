@@ -86,13 +86,13 @@ export class DealService {
    * Create a new deal
    */
   async createDeal(params: CreateDealParams) {
-    const { name, dealType, date, time, location, brief, fee, clientContactId, fullQuote, spokeFee, baselineFee, notes, vehicleIds, recipientIds, createdById } = params;
+    const { name, dealType, date, time, location, brief, fee, clientContactId, fullQuote, spokeFee, notes, vehicleIds, recipientIds, createdById } = params;
 
     // Validate deal name
     this.validateDealName(name);
     
     // Validate financial fields if provided
-    this.validateFinancialFields({ fullQuote, spokeFee, baselineFee });
+    this.validateFinancialFields({ fullQuote, spokeFee });
     
     // Validate client contact if provided
     if (clientContactId) {
@@ -161,7 +161,6 @@ export class DealService {
         clientContactId,
         fullQuote,
         spokeFee,
-        baselineFee,
         notes,
         status: "OPTIONS" as DealStatus,
         createdById,
@@ -260,9 +259,8 @@ export class DealService {
   private validateFinancialFields(fields: { 
     fullQuote?: number; 
     spokeFee?: number; 
-    baselineFee?: number;
   }) {
-    const { fullQuote, spokeFee, baselineFee } = fields;
+    const { fullQuote, spokeFee } = fields;
     
     if (fullQuote !== undefined) {
       if (fullQuote < MIN_FINANCIAL_AMOUNT || fullQuote > MAX_FINANCIAL_AMOUNT) {
@@ -280,17 +278,6 @@ export class DealService {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: spokeFee < MIN_FINANCIAL_AMOUNT 
-            ? FINANCIAL_VALIDATION_MESSAGES.NEGATIVE_AMOUNT 
-            : FINANCIAL_VALIDATION_MESSAGES.AMOUNT_TOO_LARGE,
-        });
-      }
-    }
-    
-    if (baselineFee !== undefined) {
-      if (baselineFee < MIN_FINANCIAL_AMOUNT || baselineFee > MAX_FINANCIAL_AMOUNT) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: baselineFee < MIN_FINANCIAL_AMOUNT 
             ? FINANCIAL_VALIDATION_MESSAGES.NEGATIVE_AMOUNT 
             : FINANCIAL_VALIDATION_MESSAGES.AMOUNT_TOO_LARGE,
         });
@@ -406,7 +393,7 @@ export class DealService {
    * Update deal details
    */
   async updateDeal(dealId: string, params: UpdateDealParams) {
-    const { name, dealType, date, time, location, brief, fee, clientContactId, fullQuote, spokeFee, baselineFee, notes, status } = params;
+    const { name, dealType, date, time, location, brief, fee, clientContactId, fullQuote, spokeFee, notes, status } = params;
 
     // Validate deal exists
     const deal = await this.repository.findById(dealId);
@@ -421,7 +408,7 @@ export class DealService {
     }
     
     // Validate financial fields if provided
-    this.validateFinancialFields({ fullQuote, spokeFee, baselineFee });
+    this.validateFinancialFields({ fullQuote, spokeFee });
     
     // Validate client contact if provided
     if (clientContactId !== undefined) {
@@ -450,7 +437,6 @@ export class DealService {
       clientContactId,
       fullQuote,
       spokeFee,
-      baselineFee,
       notes,
       status,
     });
@@ -787,7 +773,6 @@ export class DealService {
         clientContactId: userId, // Set the enquirer as the client contact
         fullQuote: undefined,
         spokeFee: undefined,
-        baselineFee: undefined,
         notes: undefined,
         status: "OPTIONS" as DealStatus,
         createdById: userId,

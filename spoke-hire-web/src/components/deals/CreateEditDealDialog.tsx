@@ -44,7 +44,6 @@ const createDealSchema = z.object({
   clientContactId: z.string().optional(),
   fullQuote: z.union([z.number().min(0).max(999999.99), z.nan()]).nullable().optional().transform((val) => (isNaN(val as number) || val === null || val === undefined) ? undefined : val),
   spokeFee: z.union([z.number().min(0).max(999999.99), z.nan()]).nullable().optional().transform((val) => (isNaN(val as number) || val === null || val === undefined) ? undefined : val),
-  baselineFee: z.union([z.number().min(0).max(999999.99), z.nan()]).nullable().optional().transform((val) => (isNaN(val as number) || val === null || val === undefined) ? undefined : val),
   notes: z.string().max(2000).optional(),
   status: z.enum(["OPTIONS", "CONTRACTS_INVOICE", "COMPLETE", "POSTPONED", "ABANDONED", "ARCHIVED"]).optional(),
 });
@@ -80,7 +79,6 @@ export function CreateEditDealDialog({
       clientContactId: "",
       fullQuote: undefined,
       spokeFee: undefined,
-      baselineFee: undefined,
       notes: "",
       status: "OPTIONS",
     },
@@ -111,7 +109,6 @@ export function CreateEditDealDialog({
         clientContactId: existingDeal.clientContactId ?? "",
         fullQuote: existingDeal.fullQuote ? Number(existingDeal.fullQuote) : undefined,
         spokeFee: existingDeal.spokeFee ? Number(existingDeal.spokeFee) : undefined,
-        baselineFee: existingDeal.baselineFee ? Number(existingDeal.baselineFee) : undefined,
         notes: existingDeal.notes ?? "",
         status: existingDeal.status,
       });
@@ -128,7 +125,6 @@ export function CreateEditDealDialog({
         clientContactId: "",
         fullQuote: undefined,
         spokeFee: undefined,
-        baselineFee: undefined,
         notes: "",
         status: "OPTIONS",
       });
@@ -311,16 +307,6 @@ export function CreateEditDealDialog({
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="fee">Fee</Label>
-            <Input
-              id="fee"
-              placeholder="e.g., £500/day"
-              {...form.register("fee")}
-              disabled={isSubmitting}
-            />
-          </div>
-
           <Separator className="my-4" />
 
           {/* Client Information */}
@@ -389,13 +375,11 @@ export function CreateEditDealDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="baselineFee">Baseline Fee (£)</Label>
+                <Label htmlFor="fee">Proposed fee (£)</Label>
                 <Input
-                  id="baselineFee"
-                  type="number"
-                  step="0.01"
-                  placeholder="e.g., 300"
-                  {...form.register("baselineFee", { valueAsNumber: true })}
+                  id="fee"
+                  placeholder="e.g., £500/day"
+                  {...form.register("fee")}
                   disabled={isSubmitting}
                 />
               </div>

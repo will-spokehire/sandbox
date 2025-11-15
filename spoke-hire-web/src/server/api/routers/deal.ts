@@ -54,7 +54,6 @@ const createDealInputSchema = z.object({
   clientContactId: z.string().cuid().optional(),
   fullQuote: z.number().min(MIN_FINANCIAL_AMOUNT).max(MAX_FINANCIAL_AMOUNT).optional(),
   spokeFee: z.number().min(MIN_FINANCIAL_AMOUNT).max(MAX_FINANCIAL_AMOUNT).optional(),
-  baselineFee: z.number().min(MIN_FINANCIAL_AMOUNT).max(MAX_FINANCIAL_AMOUNT).optional(),
   notes: z.string().max(MAX_NOTES_LENGTH).optional(),
   vehicleIds: z.array(z.string().cuid()).max(MAX_VEHICLES_PER_DEAL).optional().default([]),
   recipientIds: z.array(z.string().cuid()).max(MAX_RECIPIENTS_PER_DEAL).optional().default([]),
@@ -84,7 +83,6 @@ const updateDealInputSchema = z.object({
   clientContactId: z.string().cuid().nullable().optional(),
   fullQuote: z.number().min(MIN_FINANCIAL_AMOUNT).max(MAX_FINANCIAL_AMOUNT).nullable().optional(),
   spokeFee: z.number().min(MIN_FINANCIAL_AMOUNT).max(MAX_FINANCIAL_AMOUNT).nullable().optional(),
-  baselineFee: z.number().min(MIN_FINANCIAL_AMOUNT).max(MAX_FINANCIAL_AMOUNT).nullable().optional(),
   notes: z.string().max(MAX_NOTES_LENGTH).nullable().optional(),
   status: z.enum(["OPTIONS", "CONTRACTS_INVOICE", "COMPLETE", "POSTPONED", "ABANDONED", "ARCHIVED"]).optional(),
 });
@@ -337,13 +335,12 @@ export const dealRouter = createTRPCRouter({
     .input(updateDealInputSchema)
     .mutation(async ({ ctx, input }) => {
       const service = ServiceFactory.createDealService(ctx.db);
-      const { id, clientContactId, fullQuote, spokeFee, baselineFee, notes, status, ...restParams } = input;
+      const { id, clientContactId, fullQuote, spokeFee, notes, status, ...restParams } = input;
       return await service.updateDeal(id, {
         ...restParams,
         clientContactId: clientContactId ?? undefined,
         fullQuote: fullQuote ?? undefined,
         spokeFee: spokeFee ?? undefined,
-        baselineFee: baselineFee ?? undefined,
         notes: notes ?? undefined,
         status: status as any,
       });

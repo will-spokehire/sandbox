@@ -21,7 +21,6 @@ export interface CreateDealParams {
   clientContactId?: string;
   fullQuote?: number;
   spokeFee?: number;
-  baselineFee?: number;
   notes?: string;
   vehicleIds: string[];
   recipientIds: string[];
@@ -42,7 +41,6 @@ export interface UpdateDealParams {
   clientContactId?: string;
   fullQuote?: number;
   spokeFee?: number;
-  baselineFee?: number;
   notes?: string;
   status?: DealStatus;
 }
@@ -166,7 +164,6 @@ export interface DealWithDetails {
   } | null;
   fullQuote: string | number | null;
   spokeFee: string | number | null;
-  baselineFee: string | number | null;
   notes: string | null;
   status: DealStatus;
   createdAt: Date;
