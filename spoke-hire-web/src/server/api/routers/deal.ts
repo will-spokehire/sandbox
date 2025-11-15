@@ -125,10 +125,10 @@ const createUserEnquiryInputSchema = z.object({
   company: z.string().max(200).optional(),
   // Enquiry details
   dealType: z.enum(["PERSONAL_HIRE", "PRODUCTION"]),
-  date: z.string().optional(),
-  time: z.string().optional(),
-  location: z.string().optional(),
-  brief: z.string().optional(),
+  date: z.string().min(1, "Date is required"),
+  time: z.string().min(1, "Time is required"),
+  location: z.string().min(1, "Location is required"),
+  brief: z.string().min(1, "Brief is required"),
   // Optional vehicle association
   vehicleId: z.string().cuid().optional(),
 });

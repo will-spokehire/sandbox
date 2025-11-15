@@ -700,7 +700,7 @@ export class DealService {
   /**
    * Create a user enquiry (public-facing enquiry form)
    * Creates a deal, optionally associates a vehicle, and sends notifications
-   * Also updates user profile with enquiry data if profile fields are empty
+   * Also updates user profile with enquiry data
    */
   async createUserEnquiry(params: CreateUserEnquiryInput & { userId: string }): Promise<UserEnquiryResult> {
     const { 
@@ -726,8 +726,8 @@ export class DealService {
       const dealRepo = new DealRepository(tx);
       const userRepo = new UserRepository(tx);
       
-      // Update user profile with enquiry data (only if fields are empty)
-      const { updatedFields } = await userRepo.updateEmptyProfileFields(userId, {
+      // Update user profile with enquiry data (always updates to reflect changes)
+      const { updatedFields } = await userRepo.updateProfileFields(userId, {
         firstName,
         lastName,
         phone,

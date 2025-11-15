@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Loader2, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Loader2, CheckCircle2, Edit2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -31,6 +31,7 @@ function EnquiryFormContent() {
   const searchParams = useSearchParams();
   const { user, isLoading: isAuthLoading } = useRequireAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEditingPersonalInfo, setIsEditingPersonalInfo] = useState(false);
   const utils = api.useUtils();
   
   // Track if enquiry started event has been fired (prevent duplicates in Strict Mode)
@@ -66,13 +67,35 @@ function EnquiryFormContent() {
   // Pre-fill form with user data when available
   useEffect(() => {
     if (user) {
-      form.setValue("firstName", user.firstName ?? "");
-      form.setValue("lastName", user.lastName ?? "");
-      form.setValue("email", user.email ?? "");
-      form.setValue("phone", user.phone ?? "");
-      form.setValue("company", user.company ?? "");
+      // Check if ALL required fields are filled
+      const hasAllRequiredFields = user.firstName && user.lastName && user.email && user.phone;
+      
+      // Use reset instead of setValue to properly update all fields including phone
+      form.reset({
+        firstName: user.firstName ?? "",
+        lastName: user.lastName ?? "",
+        email: user.email ?? "",
+        phone: user.phone ?? "",
+        company: user.company ?? "",
+        dealType: form.getValues("dealType") || "PRODUCTION",
+        date: form.getValues("date") || "",
+        time: form.getValues("time") || "",
+        location: form.getValues("location") || "",
+        brief: form.getValues("brief") || "",
+        vehicleId: vehicleIdFromUrl ?? undefined,
+      });
+      
+      // If all required user data is pre-filled, start in preview mode
+      if (hasAllRequiredFields) {
+        setIsEditingPersonalInfo(false);
+      } else {
+        setIsEditingPersonalInfo(true);
+      }
+    } else {
+      // No user data, start in edit mode
+      setIsEditingPersonalInfo(true);
     }
-  }, [user, form]);
+  }, [user, form, vehicleIdFromUrl]);
   
   // Track enquiry started on mount (only once to prevent duplicates in Strict Mode)
   useEffect(() => {
@@ -169,111 +192,6 @@ function EnquiryFormContent() {
         )}
 
         <form onSubmit={onSubmit} className="space-y-6">
-          {/* Personal Information Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Personal Information</CardTitle>
-              <CardDescription>
-                Your contact details (pre-filled from your profile)
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">
-                    First Name <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="firstName"
-                    {...form.register("firstName")}
-                    disabled={isSubmitting}
-                  />
-                  {form.formState.errors.firstName && (
-                    <p className="text-sm text-red-500">
-                      {form.formState.errors.firstName.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">
-                    Last Name <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="lastName"
-                    {...form.register("lastName")}
-                    disabled={isSubmitting}
-                  />
-                  {form.formState.errors.lastName && (
-                    <p className="text-sm text-red-500">
-                      {form.formState.errors.lastName.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">
-                  Email <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  {...form.register("email")}
-                  disabled={isSubmitting}
-                />
-                {form.formState.errors.email && (
-                  <p className="text-sm text-red-500">
-                    {form.formState.errors.email.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="phone">
-                    Phone <span className="text-red-500">*</span>
-                  </Label>
-                  <Controller
-                    name="phone"
-                    control={form.control}
-                    render={({ field }) => (
-                      <PhoneInput
-                        value={field.value}
-                        onChange={field.onChange}
-                        placeholder="7123 456789"
-                        disabled={isSubmitting}
-                      />
-                    )}
-                  />
-                  {form.formState.errors.phone && (
-                    <p className="text-sm text-red-500">
-                      {form.formState.errors.phone.message}
-                    </p>
-                  )}
-                  <p className="text-sm text-muted-foreground">
-                    For UK numbers, enter without the leading 0 (e.g., 7123 456789)
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="company">Company</Label>
-                  <Input
-                    id="company"
-                    {...form.register("company")}
-                    disabled={isSubmitting}
-                    placeholder="Optional"
-                  />
-                  {form.formState.errors.company && (
-                    <p className="text-sm text-red-500">
-                      {form.formState.errors.company.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
           {/* Enquiry Details Section */}
           <Card>
             <CardHeader>
@@ -309,38 +227,61 @@ function EnquiryFormContent() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="date">Date</Label>
+                  <Label htmlFor="date">
+                    Date <span className="text-red-500">*</span>
+                  </Label>
                   <Input
                     id="date"
                     {...form.register("date")}
                     disabled={isSubmitting}
                     placeholder="e.g., Jan 15, 2025"
                   />
+                  {form.formState.errors.date && (
+                    <p className="text-sm text-red-500">
+                      {form.formState.errors.date.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="time">Time</Label>
+                  <Label htmlFor="time">
+                    Time <span className="text-red-500">*</span>
+                  </Label>
                   <Input
                     id="time"
                     {...form.register("time")}
                     disabled={isSubmitting}
                     placeholder="e.g., 9:00 AM"
                   />
+                  {form.formState.errors.time && (
+                    <p className="text-sm text-red-500">
+                      {form.formState.errors.time.message}
+                    </p>
+                  )}
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="location">Location</Label>
+                <Label htmlFor="location">
+                  Location <span className="text-red-500">*</span>
+                </Label>
                 <Input
                   id="location"
                   {...form.register("location")}
                   disabled={isSubmitting}
                   placeholder="e.g., Studio 51, London"
                 />
+                {form.formState.errors.location && (
+                  <p className="text-sm text-red-500">
+                    {form.formState.errors.location.message}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="brief">Brief</Label>
+                <Label htmlFor="brief">
+                  Brief <span className="text-red-500">*</span>
+                </Label>
                 <Textarea
                   id="brief"
                   {...form.register("brief")}
@@ -348,10 +289,181 @@ function EnquiryFormContent() {
                   placeholder="Describe your requirements..."
                   rows={5}
                 />
+                {form.formState.errors.brief && (
+                  <p className="text-sm text-red-500">
+                    {form.formState.errors.brief.message}
+                  </p>
+                )}
                 <p className="text-xs text-muted-foreground">
                   Provide as much detail as possible about your requirements
                 </p>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Personal Information Section */}
+          <Card>
+            <CardHeader className={cn(!isEditingPersonalInfo && "pb-4")}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className={cn(!isEditingPersonalInfo && "text-base")}>Personal Information</CardTitle>
+                  {isEditingPersonalInfo && (
+                    <CardDescription>
+                      Your contact details
+                    </CardDescription>
+                  )}
+                </div>
+                {!isEditingPersonalInfo && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsEditingPersonalInfo(true)}
+                    disabled={isSubmitting}
+                  >
+                    <Edit2 className="h-4 w-4 mr-2" />
+                    Edit
+                  </Button>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className={cn(!isEditingPersonalInfo ? "pt-0" : "space-y-4")}>
+              {!isEditingPersonalInfo ? (
+                // Compact Preview Mode
+                <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground">Name:</span>
+                    <span className="font-medium">
+                      {form.watch("firstName")} {form.watch("lastName")}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground">Email:</span>
+                    <span className="font-medium">{form.watch("email")}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground">Phone:</span>
+                    <span className="font-medium">
+                      {(() => {
+                        const phone = form.watch("phone");
+                        // Handle empty or just country code cases
+                        if (!phone || phone.trim() === "" || phone === "+44") {
+                          return "—";
+                        }
+                        // Display phone as-is if it already starts with +
+                        if (phone.startsWith("+")) {
+                          return phone;
+                        }
+                        // Add +44 prefix if it doesn't have it
+                        return `+44 ${phone}`;
+                      })()}
+                    </span>
+                  </div>
+                  {form.watch("company") && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-muted-foreground">Company:</span>
+                      <span className="font-medium">{form.watch("company")}</span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                // Edit Mode
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="firstName">
+                        First Name <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id="firstName"
+                        {...form.register("firstName")}
+                        disabled={isSubmitting}
+                      />
+                      {form.formState.errors.firstName && (
+                        <p className="text-sm text-red-500">
+                          {form.formState.errors.firstName.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="lastName">
+                        Last Name <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id="lastName"
+                        {...form.register("lastName")}
+                        disabled={isSubmitting}
+                      />
+                      {form.formState.errors.lastName && (
+                        <p className="text-sm text-red-500">
+                          {form.formState.errors.lastName.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email">
+                      Email <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      {...form.register("email")}
+                      disabled={isSubmitting}
+                    />
+                    {form.formState.errors.email && (
+                      <p className="text-sm text-red-500">
+                        {form.formState.errors.email.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">
+                        Phone <span className="text-red-500">*</span>
+                      </Label>
+                      <Controller
+                        name="phone"
+                        control={form.control}
+                        render={({ field }) => (
+                          <PhoneInput
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="7123 456789"
+                            disabled={isSubmitting}
+                          />
+                        )}
+                      />
+                      {form.formState.errors.phone && (
+                        <p className="text-sm text-red-500">
+                          {form.formState.errors.phone.message}
+                        </p>
+                      )}
+                      <p className="text-sm text-muted-foreground">
+                        For UK numbers, enter without the leading 0 (e.g., 7123 456789)
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="company">Company</Label>
+                      <Input
+                        id="company"
+                        {...form.register("company")}
+                        disabled={isSubmitting}
+                        placeholder="Optional"
+                      />
+                      {form.formState.errors.company && (
+                        <p className="text-sm text-red-500">
+                          {form.formState.errors.company.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
 

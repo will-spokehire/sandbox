@@ -127,6 +127,7 @@ export const authRouter = createTRPCRouter({
         firstName: ctx.user.firstName,
         lastName: ctx.user.lastName,
         phone: ctx.user.phone,
+        company: ctx.user.company,
         street: ctx.user.street,
         city: ctx.user.city,
         county: ctx.user.county,

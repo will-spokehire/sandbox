@@ -150,6 +150,8 @@ export class UserRepository extends BaseRepository {
           email: true,
           firstName: true,
           lastName: true,
+          phone: true,
+          company: true,
           userType: true,
           status: true,
           supabaseId: true,
@@ -233,6 +235,56 @@ export class UserRepository extends BaseRepository {
         updatedFields.push("phone");
       }
       if (!currentUser.company && data.company) {
+        updates.company = data.company;
+        updatedFields.push("company");
+      }
+
+      // Only update if there are fields to update
+      if (Object.keys(updates).length > 0) {
+        await this.db.user.update({
+          where: { id: userId },
+          data: updates,
+        });
+      }
+
+      return { updatedFields };
+    } catch (error) {
+      throw new DatabaseError("Failed to update profile fields", error);
+    }
+  }
+
+  /**
+   * Update user profile fields (always updates, regardless of current values)
+   * This allows users to edit their profile through the enquiry form
+   * @returns Object with updated fields
+   */
+  async updateProfileFields(
+    userId: string,
+    data: {
+      firstName?: string;
+      lastName?: string;
+      phone?: string;
+      company?: string;
+    }
+  ): Promise<{ updatedFields: string[] }> {
+    try {
+      // Build update object for provided fields
+      const updates: Record<string, string> = {};
+      const updatedFields: string[] = [];
+
+      if (data.firstName) {
+        updates.firstName = data.firstName;
+        updatedFields.push("firstName");
+      }
+      if (data.lastName) {
+        updates.lastName = data.lastName;
+        updatedFields.push("lastName");
+      }
+      if (data.phone) {
+        updates.phone = data.phone;
+        updatedFields.push("phone");
+      }
+      if (data.company !== undefined) {
         updates.company = data.company;
         updatedFields.push("company");
       }
