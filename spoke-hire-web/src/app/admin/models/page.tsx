@@ -39,7 +39,7 @@ export default function ModelsPage() {
   const [editingModel, setEditingModel] = useState<ModelWithDetails | null>(null);
   const [isMergeDialogOpen, setIsMergeDialogOpen] = useState(false);
 
-  // Utils for cache invalidation
+  // Utils for query invalidation
   const utils = api.useUtils();
 
   // URL state
@@ -170,7 +170,13 @@ export default function ModelsPage() {
 
   // Delete mutation
   const deleteModelMutation = api.model.delete.useMutation({
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      // Remove deleted model from selection
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(variables.id);
+        return next;
+      });
       toast.success("Model deleted successfully");
       void utils.model.list.invalidate();
     },

@@ -39,7 +39,7 @@ export default function MakesPage() {
   const [editingMake, setEditingMake] = useState<MakeWithCount | null>(null);
   const [isMergeDialogOpen, setIsMergeDialogOpen] = useState(false);
 
-  // Utils for cache invalidation
+  // Utils for query invalidation
   const utils = api.useUtils();
 
   // URL state
@@ -153,7 +153,13 @@ export default function MakesPage() {
 
   // Delete mutation
   const deleteMakeMutation = api.make.delete.useMutation({
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      // Remove deleted make from selection
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(variables.id);
+        return next;
+      });
       toast.success("Make deleted successfully");
       void utils.make.list.invalidate();
     },
