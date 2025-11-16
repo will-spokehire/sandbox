@@ -36,7 +36,7 @@ export function VehicleBasicInfo({ vehicle, onEditClick }: VehicleBasicInfoProps
       mono: true,
     },
     {
-      label: "Price",
+      label: "Agreed Value",
       value: formatPrice(vehicle.price),
       highlight: true,
     },

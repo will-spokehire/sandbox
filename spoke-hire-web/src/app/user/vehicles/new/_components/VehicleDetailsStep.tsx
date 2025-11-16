@@ -138,10 +138,10 @@ export function VehicleDetailsStep({
         // Convert pricing rates from strings to numbers
         const submitData: VehicleDetailsSubmitData = {
           ...data,
-          hourlyRate: data.hourlyRate ? Number(data.hourlyRate) : null,
-          dailyRate: data.dailyRate ? Number(data.dailyRate) : null,
+          hourlyRate: data.hourlyRate ? Number(data.hourlyRate) : 0,
+          dailyRate: data.dailyRate ? Number(data.dailyRate) : 0,
         };
-        onComplete(submitData);
+        onComplete(submitData); 
       })();
     };
     return () => {
@@ -268,9 +268,6 @@ export function VehicleDetailsStep({
                                 />
                               )}
                               <span>{collection.name}</span>
-                              {isSelected && (
-                                <Check className="h-4 w-4" />
-                              )}
                             </div>
                           </button>
                         );

@@ -48,7 +48,7 @@ export function UserVehicleDetails({ vehicle, onEditClick }: UserVehicleDetailsP
       mono: true,
     },
     {
-      label: "Price",
+      label: "Agreed Value",
       value: formatPrice(vehicle.price),
       highlight: true,
     },

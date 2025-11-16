@@ -135,7 +135,7 @@ export const VehicleTableRow = memo(function VehicleTableRow({
         </Link>
       </TableCell>
 
-      {/* Price */}
+      {/* Agreed Value */}
       <TableCell>
         <Link href={`/admin/vehicles/${vehicle.id}`} className="block">
           <span className="font-medium">{formatPrice(vehicle.price)}</span>
