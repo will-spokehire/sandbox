@@ -39,6 +39,9 @@ export default function ModelsPage() {
   const [editingModel, setEditingModel] = useState<ModelWithDetails | null>(null);
   const [isMergeDialogOpen, setIsMergeDialogOpen] = useState(false);
 
+  // Utils for cache invalidation
+  const utils = api.useUtils();
+
   // URL state
   const page = Number(searchParams.get("page") ?? "1");
   const search = searchParams.get("search") ?? "";
@@ -313,11 +316,10 @@ export default function ModelsPage() {
       {/* Pagination */}
       {totalPages > 1 && (
         <Pagination
-          currentPage={page - 1}
+          currentPage={page}
           totalPages={totalPages}
-          itemsPerPage={itemsPerPage}
-          totalItems={totalCount}
-          onPageChange={(newPage) => updateUrl({ page: String(newPage + 1) })}
+          onPageChange={(newPage) => updateUrl({ page: String(newPage) })}
+          isLoading={isFetching}
         />
       )}
 
