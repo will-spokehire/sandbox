@@ -64,8 +64,11 @@ export function VehiclePricingFields({ form, isEditMode = false }: FormFieldComp
               <Input
                 type="number"
                 placeholder="25000"
-                value={field.value}
-                onChange={(e) => field.onChange(Number(e.target.value))}
+                value={field.value === 0 ? "" : field.value}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  field.onChange(val === "" ? 0 : Number(val));
+                }}
               />
             </FormControl>
             <FormMessage />
@@ -107,7 +110,7 @@ export function VehiclePricingFields({ form, isEditMode = false }: FormFieldComp
                       type="number"
                       placeholder={defaultPricing?.hourlyRate.toString() ?? "60"}
                       className="pl-7"
-                      value={field.value ?? ""}
+                      value={field.value === 0 || field.value === null ? "" : field.value}
                       onChange={(e) => {
                         const val = e.target.value;
                         field.onChange(val === "" ? null : Number(val));
@@ -137,7 +140,7 @@ export function VehiclePricingFields({ form, isEditMode = false }: FormFieldComp
                       type="number"
                       placeholder={defaultPricing?.dailyRate.toString() ?? "300"}
                       className="pl-7"
-                      value={field.value ?? ""}
+                      value={field.value === 0 || field.value === null ? "" : field.value}
                       onChange={(e) => {
                         const val = e.target.value;
                         field.onChange(val === "" ? null : Number(val));
