@@ -76,6 +76,11 @@ export default function AddVehiclePage() {
   // Track if wizard started event has been fired (prevent duplicates in Strict Mode)
   const hasTrackedWizardStartRef = useRef(false);
 
+  // Scroll to top when step changes (for mobile UX)
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentStep]);
+
   // Fetch filter options for labels
   const { data: filterOptions } = api.userVehicle.getFilterOptions.useQuery();
   
