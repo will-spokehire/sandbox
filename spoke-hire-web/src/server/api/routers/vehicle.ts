@@ -229,7 +229,7 @@ export const vehicleRouter = createTRPCRouter({
   declineVehicle: adminProcedure
     .input(z.object({
       vehicleId: z.string(),
-      declinedReason: z.string().min(10, "Decline reason must be at least 10 characters"),
+      declinedReason: z.string().min(1, "Decline reason is required"),
     }))
     .mutation(async ({ ctx, input }) => {
       const statusService = ServiceFactory.createVehicleStatusService(ctx.db);
