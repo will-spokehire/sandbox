@@ -105,7 +105,7 @@ export function VehiclePricingFields({ form, isEditMode = false }: FormFieldComp
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">£</span>
                     <Input
                       type="number"
-                      placeholder="60"
+                      placeholder={defaultPricing?.hourlyRate.toString() ?? "60"}
                       className="pl-7"
                       value={field.value ?? ""}
                       onChange={(e) => {
@@ -135,7 +135,7 @@ export function VehiclePricingFields({ form, isEditMode = false }: FormFieldComp
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">£</span>
                     <Input
                       type="number"
-                      placeholder="300"
+                      placeholder={defaultPricing?.dailyRate.toString() ?? "300"}
                       className="pl-7"
                       value={field.value ?? ""}
                       onChange={(e) => {
