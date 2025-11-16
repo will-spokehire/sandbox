@@ -195,6 +195,35 @@ export default function UserVehicleDetailPage({
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 md:py-8">
+        {/* Show draft message if vehicle hasn't been submitted yet */}
+        {vehicle.status === "DRAFT" && (
+          <Alert className="mb-6 border-amber-500 bg-amber-50 dark:bg-amber-950/20">
+            <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+            <AlertTitle className="text-amber-900 dark:text-amber-100">
+              Draft Vehicle
+            </AlertTitle>
+            <AlertDescription className="text-amber-800 dark:text-amber-200">
+              This vehicle is currently in draft mode and hasn&apos;t been published yet. 
+              Click the &quot;Publish&quot; button above to submit it for admin review.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Show in-review message if vehicle is awaiting approval */}
+        {vehicle.status === "IN_REVIEW" && (
+          <Alert className="mb-6 border-blue-500 bg-blue-50 dark:bg-blue-950/20">
+            <AlertCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            <AlertTitle className="text-blue-900 dark:text-blue-100">
+              Awaiting Review
+            </AlertTitle>
+            <AlertDescription className="text-blue-800 dark:text-blue-200">
+              Your vehicle has been submitted and is awaiting admin approval. 
+              You&apos;ll receive an email notification once it&apos;s been reviewed. 
+              No further action is needed at this time.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Show declined reason if vehicle is declined */}
         {vehicle.status === "DECLINED" && vehicle.declinedReason && (
           <Alert variant="destructive" className="mb-6">
