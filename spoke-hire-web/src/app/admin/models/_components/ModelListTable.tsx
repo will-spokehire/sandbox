@@ -68,7 +68,6 @@ export function ModelListTable({
             <TableHead>Model Name</TableHead>
             <TableHead>Slug</TableHead>
             <TableHead className="text-right">Vehicles</TableHead>
-            <TableHead>Status</TableHead>
             <TableHead>Published</TableHead>
             <TableHead className="w-12"></TableHead>
           </TableRow>
@@ -76,7 +75,7 @@ export function ModelListTable({
         <TableBody>
           {models.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
+              <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
                 No models found
               </TableCell>
             </TableRow>
@@ -104,15 +103,6 @@ export function ModelListTable({
                 <TableCell className="font-medium">{model.name}</TableCell>
                 <TableCell className="text-muted-foreground">{model.slug}</TableCell>
                 <TableCell className="text-right">{model._count.vehicles}</TableCell>
-                <TableCell>
-                  {model.isActive ? (
-                    <Badge variant="default" className="bg-green-500">
-                      Active
-                    </Badge>
-                  ) : (
-                    <Badge variant="secondary">Inactive</Badge>
-                  )}
-                </TableCell>
                 <TableCell>
                   {model.isPublished ? (
                     <Check className="h-4 w-4 text-green-500" />

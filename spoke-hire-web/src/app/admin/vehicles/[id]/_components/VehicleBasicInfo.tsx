@@ -81,6 +81,10 @@ export function VehicleBasicInfo({ vehicle, onEditClick }: VehicleBasicInfoProps
       value: vehicle.interiorColour ?? "N/A",
     },
     {
+      label: "Condition",
+      value: vehicle.condition ?? "N/A",
+    },
+    {
       label: "Road Legal",
       value: vehicle.isRoadLegal ? "Yes" : "No",
       badge: true,

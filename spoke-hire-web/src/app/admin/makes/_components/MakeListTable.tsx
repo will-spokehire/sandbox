@@ -68,7 +68,6 @@ export function MakeListTable({
             <TableHead>Slug</TableHead>
             <TableHead className="text-right">Models</TableHead>
             <TableHead className="text-right">Vehicles</TableHead>
-            <TableHead>Status</TableHead>
             <TableHead>Published</TableHead>
             <TableHead className="w-12"></TableHead>
           </TableRow>
@@ -76,7 +75,7 @@ export function MakeListTable({
         <TableBody>
           {makes.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
+              <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
                 No makes found
               </TableCell>
             </TableRow>
@@ -97,15 +96,6 @@ export function MakeListTable({
                 <TableCell className="text-muted-foreground">{make.slug}</TableCell>
                 <TableCell className="text-right">{make._count.models}</TableCell>
                 <TableCell className="text-right">{make._count.vehicles}</TableCell>
-                <TableCell>
-                  {make.isActive ? (
-                    <Badge variant="default" className="bg-green-500">
-                      Active
-                    </Badge>
-                  ) : (
-                    <Badge variant="secondary">Inactive</Badge>
-                  )}
-                </TableCell>
                 <TableCell>
                   {make.isPublished ? (
                     <Check className="h-4 w-4 text-green-500" />
