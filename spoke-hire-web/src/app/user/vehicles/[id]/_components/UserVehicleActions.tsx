@@ -12,12 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "~/components/ui/alert";
-import { Power, Send, AlertCircle } from "lucide-react";
+import { Power, Send } from "lucide-react";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
 
@@ -177,22 +172,6 @@ export function UserVehicleActions({
           </Button>
         )}
       </div>
-
-      {/* Show validation errors if can't publish */}
-      {canSubmitForReview && !canPublish && validationErrors.length > 0 && (
-        <Alert variant="default" className="mt-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Cannot submit for review</AlertTitle>
-          <AlertDescription>
-            <p className="mb-2">Please complete the following:</p>
-            <ul className="list-disc list-inside space-y-1">
-              {validationErrors.map((error, index) => (
-                <li key={index} className="text-sm">{error}</li>
-              ))}
-            </ul>
-          </AlertDescription>
-        </Alert>
-      )}
 
       {/* Publish Confirmation Dialog */}
       <Dialog open={isPublishDialogOpen} onOpenChange={setIsPublishDialogOpen}>

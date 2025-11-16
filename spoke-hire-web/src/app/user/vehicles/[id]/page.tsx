@@ -53,6 +53,15 @@ export default function UserVehicleDetailPage({
   
   const vehicle: VehicleDetail | undefined = vehicleData;
 
+  // Get validation errors for DRAFT/DECLINED vehicles
+  const { data: validationData } = api.userVehicle.getValidationErrors.useQuery(
+    { vehicleId: id },
+    { enabled: !!vehicle && (vehicle.status === "DRAFT" || vehicle.status === "DECLINED") }
+  );
+
+  const validationErrors = validationData?.errors ?? [];
+  const hasValidationErrors = validationErrors.length > 0;
+
   const isLoading = isAuthLoading || isVehicleLoading;
 
   // Handle loading state with skeleton
@@ -193,6 +202,22 @@ export default function UserVehicleDetailPage({
             <AlertTitle>Vehicle Declined</AlertTitle>
             <AlertDescription>
               <p><span className="font-medium">Reason: </span>{vehicle.declinedReason}</p>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Show validation errors if can't submit for review */}
+        {(vehicle.status === "DRAFT" || vehicle.status === "DECLINED") && hasValidationErrors && (
+          <Alert className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Cannot submit for review</AlertTitle>
+            <AlertDescription>
+              <p className="mb-2">Please complete the following:</p>
+              <ul className="list-disc list-inside space-y-1">
+                {validationErrors.map((error, index) => (
+                  <li key={index} className="text-sm">{error}</li>
+                ))}
+              </ul>
             </AlertDescription>
           </Alert>
         )}
