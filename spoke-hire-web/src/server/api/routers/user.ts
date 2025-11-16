@@ -7,6 +7,7 @@
 import { z } from "zod";
 import { createTRPCRouter, adminProcedure } from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
+import { isValidPhoneNumber } from "~/lib/whatsapp";
 
 /**
  * User Router
@@ -98,7 +99,12 @@ export const userRouter = createTRPCRouter({
         firstName: z.string().min(1, "First name is required"),
         lastName: z.string().min(1, "Last name is required"),
         company: z.string().optional(),
-        phone: z.string().optional(),
+        phone: z.string()
+          .optional()
+          .refine(
+            (val) => !val || isValidPhoneNumber(val),
+            "Please enter a valid phone number"
+          ),
       })
     )
     .mutation(async ({ ctx, input }) => {

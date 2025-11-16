@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Loader2 } from "lucide-react";
@@ -16,15 +16,22 @@ import {
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { PhoneInput } from "~/components/ui/phone-input";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
+import { isValidPhoneNumber } from "~/lib/whatsapp";
 
 const createContactSchema = z.object({
   email: z.string().email("Invalid email address"),
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   company: z.string().optional(),
-  phone: z.string().optional(),
+  phone: z.string()
+    .optional()
+    .refine(
+      (val) => !val || isValidPhoneNumber(val),
+      "Please enter a valid phone number"
+    ),
 });
 
 type CreateContactForm = z.infer<typeof createContactSchema>;
@@ -173,13 +180,26 @@ export function CreateContactDialog({
           {/* Phone */}
           <div className="space-y-2">
             <Label htmlFor="phone">Phone</Label>
-            <Input
-              id="phone"
-              type="tel"
-              placeholder="+44 7XXX XXXXXX"
-              {...form.register("phone")}
-              disabled={isSubmitting}
+            <Controller
+              name="phone"
+              control={form.control}
+              render={({ field }) => (
+                <PhoneInput
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="7123 456789"
+                  disabled={isSubmitting}
+                />
+              )}
             />
+            {form.formState.errors.phone && (
+              <p className="text-sm text-destructive">
+                {form.formState.errors.phone.message}
+              </p>
+            )}
+            <p className="text-sm text-muted-foreground">
+              For UK numbers, enter without the leading 0 (e.g., 7123 456789)
+            </p>
           </div>
 
           <DialogFooter>
