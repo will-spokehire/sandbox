@@ -8,7 +8,7 @@ interface PublicVehicleBreadcrumbsProps {
 }
 
 /**
- * Public Vehicle Catalog Breadcrumbs
+ * Public Vehicle Catalogue Breadcrumbs
  * 
  * Displays active filters as a cumulative breadcrumb path:
  * Home > Vehicles > Country > County > Make > Model > Decade > Collections

@@ -79,7 +79,7 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
 }
 
 /**
- * Public Vehicles Catalog Page (Server-Side Rendered)
+ * Public Vehicles Catalogue Page (Server-Side Rendered)
  * 
  * Server Component that fetches initial data server-side for SEO.
  * Accessible without authentication.
@@ -152,7 +152,7 @@ export default async function PublicVehiclesPage({ searchParams }: PageProps) {
     counties,
   }, filterOptions);
 
-  // Generate JSON-LD structured data for catalog page with ItemList
+  // Generate JSON-LD structured data for catalogue page with ItemList
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",

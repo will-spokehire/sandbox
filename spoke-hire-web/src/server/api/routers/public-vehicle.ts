@@ -3,7 +3,7 @@
  * 
  * Handles all public vehicle operations (no authentication required).
  * Only exposes PUBLISHED vehicles and hides sensitive information.
- * Used for the public vehicle catalog at /vehicles
+ * Used for the public vehicle catalogue at /vehicles
  */
 
 import { z } from "zod";
@@ -155,7 +155,7 @@ export const publicVehicleRouter = createTRPCRouter({
     }),
 
   /**
-   * Get filter options for public vehicle catalog
+   * Get filter options for public vehicle catalogue
    * Returns only makes, models, collections, etc. that have published vehicles
    * Accepts current filters to provide cascading/dependent filter options
    */

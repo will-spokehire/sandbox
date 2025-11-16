@@ -3,7 +3,7 @@
  * 
  * Uses Google Gemini 2.5 Flash via Vercel AI SDK to generate:
  * - Creative, marketing-friendly vehicle names
- * - SEO-optimized descriptions for classic car hire
+ * - SEO-optimised descriptions for classic car hire
  */
 
 import { generateText } from "ai";
@@ -50,16 +50,16 @@ export class AIVehicleGeneratorService {
   }
 
   /**
-   * Generate SEO-optimized vehicle description
+   * Generate SEO-optimised vehicle description
    */
   async generateVehicleDescription(data: VehicleGenerationData): Promise<string> {
-    const prompt = `Role: You are an expert copywriter specializing in creating compelling, user-friendly, and SEO-optimized descriptions for a classic car hire company. The vehicles are hired for various purposes including film and TV productions, weddings, special events, photography shoots, and personal driving experiences.
+    const prompt = `Role: You are an expert copywriter specialising in creating compelling, user-friendly, and SEO-optimised descriptions for a classic car hire company. The vehicles are hired for various purposes including film and TV productions, weddings, special events, photography shoots, and personal driving experiences.
 
 Objective: Your goal is to write a description that inspires potential hirers to choose this specific vehicle. The description should be evocative and focus on the car's character, visual appeal, and the experience of driving or being seen in it.
 
 Instructions: Based on the vehicle details provided below, generate a complete web page description using the following simplified structure:
 
-SEO-Optimized Title: Create a concise and keyword-rich title. Use the format: [Year] [Make] [Model] | [Location]
+SEO-Optimised Title: Create a concise and keyword-rich title. Use the format: [Year] [Make] [Model] | [Location]
 
 Evocative Opening Paragraph: Write a short, captivating introduction (2-3 sentences) that immediately establishes the car's character, era, and appeal.
 
@@ -75,12 +75,12 @@ Engine Capacity: ${data.engineCapacity}cc
 Number of Seats: ${data.numberOfSeats}
 Steering: ${data.steering}
 Gearbox: ${data.gearbox}
-Exterior Color: ${data.exteriorColour}
-Interior Color: ${data.interiorColour}
+Exterior Colour: ${data.exteriorColour}
+Interior Colour: ${data.interiorColour}
 Road Legal: ${data.isRoadLegal ? "Yes" : "No"}
 Location: ${data.location}
 
-Return ONLY the description content (starting with the SEO-Optimized Title), nothing else. Do not include any explanations or meta-commentary.`;
+Return ONLY the description content (starting with the SEO-Optimised Title), nothing else. Do not include any explanations or meta-commentary.`;
 
     try {
       const { text } = await generateText({

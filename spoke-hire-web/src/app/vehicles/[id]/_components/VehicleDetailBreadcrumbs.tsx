@@ -27,7 +27,7 @@ interface VehicleDetailBreadcrumbsProps {
  * Vehicle Detail Breadcrumbs
  * 
  * Displays breadcrumb navigation: Vehicles > Location > Make > Model
- * Each segment is clickable and links back to the catalog with appropriate filters
+ * Each segment is clickable and links back to the catalogue with appropriate filters
  */
 export function VehicleDetailBreadcrumbs({ vehicle }: VehicleDetailBreadcrumbsProps) {
   // Build URL params for filters
@@ -63,7 +63,7 @@ export function VehicleDetailBreadcrumbs({ vehicle }: VehicleDetailBreadcrumbsPr
     }),
   });
 
-  // Add model (clickable - links to catalog with all filters)
+  // Add model (clickable - links to catalogue with all filters)
   segments.push({
     label: vehicle.model.name,
     href: buildFilterUrl({

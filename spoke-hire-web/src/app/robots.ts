@@ -16,7 +16,7 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: "*",
         allow: [
           "/", // Home page
-          "/vehicles", // Public vehicle catalog
+          "/vehicles", // Public vehicle catalogue
           "/vehicles/", // All vehicle detail pages
         ],
         disallow: [

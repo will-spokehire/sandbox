@@ -21,7 +21,7 @@ import { cn } from "~/lib/utils";
 /**
  * Public Vehicle Filters
  * 
- * Filter controls for the public vehicle catalog.
+ * Filter controls for the public vehicle catalogue.
  * Includes: make, model, decade (year range), location, collections.
  * NO price filter or search.
  */

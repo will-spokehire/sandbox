@@ -159,7 +159,7 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
     item: appUrl,
   });
   
-  // Add vehicles catalog
+  // Add vehicles catalogue
   breadcrumbItems.push({
     "@type": "ListItem",
     position: 2,
@@ -283,7 +283,7 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
             <Link href="/vehicles">
               <Button variant="ghost" size="sm" className="gap-2">
                 <ArrowLeft className="h-4 w-4" />
-                Back to Catalog
+                Back to Catalogue
               </Button>
             </Link>
           }

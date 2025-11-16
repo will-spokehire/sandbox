@@ -7,7 +7,7 @@ import { getAppUrl } from "~/lib/app-url";
  * 
  * Generates XML sitemap for search engines with:
  * - All published vehicle pages
- * - Vehicle catalog page
+ * - Vehicle catalogue page
  * - Popular filter combinations
  * 
  * Auto-updates as vehicles are published/unpublished
@@ -31,7 +31,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 1.0,
   });
 
-  // 2. Vehicle catalog page (main listing)
+  // 2. Vehicle catalogue page (main listing)
   sitemapEntries.push({
     url: `${baseUrl}/vehicles`,
     lastModified: currentDate,
@@ -92,7 +92,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }),
     ]);
 
-    // Add catalog pages filtered by make (top makes)
+    // Add catalogue pages filtered by make (top makes)
     for (const make of makes) {
       sitemapEntries.push({
         url: `${baseUrl}/vehicles?makeIds=${make.id}`,
@@ -102,7 +102,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       });
     }
 
-    // Add catalog pages filtered by collection
+    // Add catalogue pages filtered by collection
     for (const collection of collections) {
       sitemapEntries.push({
         url: `${baseUrl}/vehicles?collectionIds=${collection.id}`,
@@ -112,7 +112,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       });
     }
 
-    // Add catalog pages filtered by country (top countries)
+    // Add catalogue pages filtered by country (top countries)
     for (const country of countries) {
       sitemapEntries.push({
         url: `${baseUrl}/vehicles?countryIds=${country.id}`,

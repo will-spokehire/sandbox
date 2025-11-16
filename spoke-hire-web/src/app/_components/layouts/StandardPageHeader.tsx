@@ -17,14 +17,14 @@ interface StandardPageHeaderProps {
  * Reusable page header component with consistent styling based on page type.
  * 
  * Variants:
- * - hero: Large centered header with muted background (for public catalog/marketing pages)
+ * - hero: Large centered header with muted background (for public catalogue/marketing pages)
  * - app: Medium left-aligned header with muted background (for dashboard/management pages)
  * - form: Simple inline header with no background (for forms/auth pages)
  * - detail: Compact header with back button and optional muted background
  * 
  * Usage:
  * ```tsx
- * // Marketing/Catalog pages
+ * // Marketing/Catalogue pages
  * <StandardPageHeader variant="hero" title="Browse Vehicles" subtitle="..." />
  * 
  * // Dashboard/Management pages
@@ -45,7 +45,7 @@ export function StandardPageHeader({
   variant = "app",
   backButton,
 }: StandardPageHeaderProps) {
-  // Hero variant: Large centered header with background (marketing/catalog pages)
+  // Hero variant: Large centered header with background (marketing/catalogue pages)
   if (variant === "hero") {
     return (
       <div className="bg-slate-50 dark:bg-slate-900 border-b">

@@ -21,7 +21,7 @@ export default function Home() {
       if (isAuthenticated && user?.userType === 'ADMIN') {
         router.push('/admin');
       } else {
-        // Everyone else goes to vehicles (public catalog)
+        // Everyone else goes to vehicles (public catalogue)
         router.push('/vehicles');
       }
     }

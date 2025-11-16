@@ -43,7 +43,7 @@ export function Header({ title, subtitle, breadcrumbs }: HeaderProps) {
               href="/vehicles"
               className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
             >
-              Vehicle Catalog
+              Vehicle Catalogue
             </Link>
           </nav>
         </div>

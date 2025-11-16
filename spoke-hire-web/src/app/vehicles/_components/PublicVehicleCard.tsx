@@ -41,7 +41,7 @@ interface PublicVehicleCardProps {
 /**
  * Public Vehicle Card
  * 
- * Display card for a single vehicle in the public catalog.
+ * Display card for a single vehicle in the public catalogue.
  * Shows image carousel with navigation arrows, make/model, year, location, and collections.
  * NO price displayed.
  */

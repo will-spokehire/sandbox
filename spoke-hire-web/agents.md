@@ -12,6 +12,12 @@
 
 ## 🚀 Quick Dev Rules
 
+### **Spelling & Language**
+- ✅ Use **UK English** spelling (not American English)
+- ✅ Examples: catalogue (not catalog), colour (not color), optimise (not optimize), analyse (not analyze), organise (not organize)
+- ✅ Applies to: user-facing text, comments in public-facing code, documentation
+- ❌ Does NOT apply to: code identifiers, variable names, database fields, CSS classes
+
 ### **TypeScript & ESLint**
 - ❌ Never use `any` → Use `unknown`, `Record<string, unknown>`, specific types
 - ❌ Never use `||` → Use `??` (nullish coalescing)
