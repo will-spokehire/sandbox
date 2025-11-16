@@ -163,7 +163,7 @@ function VehiclesPageContent() {
   const handleDealCreated = useCallback(() => {
     clearSelection();
     setIsCreateDealDialogOpen(false);
-    toast.success("Deal sent successfully!");
+    toast.success("Added to deal successfully!");
   }, [clearSelection]);
 
 
