@@ -753,6 +753,7 @@ export const userVehicleRouter = createTRPCRouter({
               name: makeName,
               slug: generateSlug(makeName),
               isActive: true,
+              isPublished: false, // User-created makes need admin approval
             },
           });
         }
@@ -798,6 +799,7 @@ export const userVehicleRouter = createTRPCRouter({
               slug: generateSlug(modelName),
               makeId: finalMakeId,
               isActive: true,
+              isPublished: false, // User-created models need admin approval
             },
           });
         }

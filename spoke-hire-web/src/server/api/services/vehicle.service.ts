@@ -335,6 +335,7 @@ export class VehicleService {
             name: makeName,
             slug: generateSlug(makeName),
             isActive: true,
+            isPublished: false, // User-created makes need admin approval
           },
         });
         
@@ -371,6 +372,7 @@ export class VehicleService {
             slug: generateSlug(modelName),
             makeId: finalMakeId,
             isActive: true,
+            isPublished: false, // User-created models need admin approval
           },
         });
         
