@@ -322,6 +322,7 @@ model Media {
     height            Int?       // Height in pixels
     duration          Int?       // Duration in seconds (for videos)
     format            String?    // jpg, png, mp4, webm, etc.
+    editMetadata      Json?      // Stores crop/zoom/rotation state for image editor
     
     // Status
     status            MediaStatus @default(READY)

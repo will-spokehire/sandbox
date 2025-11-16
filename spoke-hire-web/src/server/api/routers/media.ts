@@ -54,6 +54,20 @@ const updateEditedImageInputSchema = z.object({
   fileSize: z.bigint(),
   width: z.number().int().positive(),
   height: z.number().int().positive(),
+  editMetadata: z.object({
+    crop: z.object({
+      x: z.number(),
+      y: z.number(),
+    }),
+    zoom: z.number(),
+    rotation: z.number(),
+    croppedAreaPixels: z.object({
+      x: z.number(),
+      y: z.number(),
+      width: z.number(),
+      height: z.number(),
+    }).optional(),
+  }).optional(),
 });
 
 /**

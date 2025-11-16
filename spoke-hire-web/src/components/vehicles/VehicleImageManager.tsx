@@ -39,6 +39,7 @@ export function VehicleImageManager({
         originalUrl: media.originalUrl,
         order: media.order,
         isPrimary: media.isPrimary,
+        editMetadata: media.editMetadata as any,
       }));
       setImages(mappedImages);
     }

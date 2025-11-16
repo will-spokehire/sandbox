@@ -278,10 +278,21 @@ export class MediaService {
       fileSize: bigint;
       width: number;
       height: number;
+      editMetadata?: {
+        crop: { x: number; y: number };
+        zoom: number;
+        rotation: number;
+        croppedAreaPixels?: {
+          x: number;
+          y: number;
+          width: number;
+          height: number;
+        };
+      };
     },
     user: User
   ): Promise<Media> {
-    const { imageId, vehicleId, filename, publishedUrl, fileSize, width, height } = params;
+    const { imageId, vehicleId, filename, publishedUrl, fileSize, width, height, editMetadata } = params;
 
     // Validate ownership
     await this.validateVehicleOwnership(vehicleId, user);
@@ -316,6 +327,7 @@ export class MediaService {
         fileSize,
         width,
         height,
+        editMetadata: editMetadata ? (editMetadata as any) : undefined,
         updatedAt: new Date(),
       },
     });
