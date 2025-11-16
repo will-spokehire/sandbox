@@ -44,9 +44,10 @@ export function ModelMergeDialog({
   const utils = api.useUtils();
 
   const mergeModelsMutation = api.model.merge.useMutation({
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       toast.success(result.message);
-      void utils.model.list.invalidate();
+      // Force immediate refetch to ensure UI shows updated data
+      await utils.model.list.refetch();
       onSuccess();
       onOpenChange(false);
       setPrimaryModelId("");

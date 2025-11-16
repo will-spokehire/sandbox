@@ -359,15 +359,30 @@ export class ModelService {
    * Delete a model (only if it has no vehicles)
    */
   async deleteModel(id: string): Promise<void> {
-    // Check if model has vehicles
-    const vehicleCount = await this.db.vehicle.count({
-      where: { modelId: id },
+    // First, verify the model exists
+    const model = await this.db.model.findUnique({
+      where: { id },
+      include: {
+        _count: {
+          select: {
+            vehicles: true,
+          },
+        },
+      },
     });
 
-    if (vehicleCount > 0) {
+    if (!model) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Model not found. It may have been already deleted.",
+      });
+    }
+
+    // Check if model has vehicles
+    if (model._count.vehicles > 0) {
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: `Cannot delete model: ${vehicleCount} vehicle(s) are using this model`,
+        message: `Cannot delete model: ${model._count.vehicles} vehicle(s) are using this model`,
       });
     }
 

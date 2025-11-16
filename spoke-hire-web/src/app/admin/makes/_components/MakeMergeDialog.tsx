@@ -43,9 +43,10 @@ export function MakeMergeDialog({
   const utils = api.useUtils();
 
   const mergeMakesMutation = api.make.merge.useMutation({
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       toast.success(result.message);
-      void utils.make.list.invalidate();
+      // Force immediate refetch to ensure UI shows updated data
+      await utils.make.list.refetch();
       onSuccess();
       onOpenChange(false);
       setPrimaryMakeId("");

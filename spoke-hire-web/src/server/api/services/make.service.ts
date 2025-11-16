@@ -361,15 +361,30 @@ export class MakeService {
    * Delete a make (only if it has no vehicles)
    */
   async deleteMake(id: string): Promise<void> {
-    // Check if make has vehicles
-    const vehicleCount = await this.db.vehicle.count({
-      where: { makeId: id },
+    // First, verify the make exists
+    const make = await this.db.make.findUnique({
+      where: { id },
+      include: {
+        _count: {
+          select: {
+            vehicles: true,
+          },
+        },
+      },
     });
 
-    if (vehicleCount > 0) {
+    if (!make) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Make not found. It may have been already deleted.",
+      });
+    }
+
+    // Check if make has vehicles
+    if (make._count.vehicles > 0) {
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: `Cannot delete make: ${vehicleCount} vehicle(s) are using this make`,
+        message: `Cannot delete make: ${make._count.vehicles} vehicle(s) are using this make`,
       });
     }
 

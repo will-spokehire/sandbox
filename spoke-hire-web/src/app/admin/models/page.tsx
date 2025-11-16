@@ -181,7 +181,13 @@ export default function ModelsPage() {
       void utils.model.list.invalidate();
     },
     onError: (error) => {
-      toast.error(`Failed to delete model: ${error.message}`);
+      // Handle specific error cases for better UX
+      if (error.data?.code === "NOT_FOUND") {
+        toast.error("This model has already been deleted. Refreshing the list...");
+        void utils.model.list.refetch();
+      } else {
+        toast.error(`Failed to delete model: ${error.message}`);
+      }
     },
   });
 

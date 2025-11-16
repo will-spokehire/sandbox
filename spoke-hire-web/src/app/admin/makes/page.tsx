@@ -164,7 +164,13 @@ export default function MakesPage() {
       void utils.make.list.invalidate();
     },
     onError: (error) => {
-      toast.error(`Failed to delete make: ${error.message}`);
+      // Handle specific error cases for better UX
+      if (error.data?.code === "NOT_FOUND") {
+        toast.error("This make has already been deleted. Refreshing the list...");
+        void utils.make.list.refetch();
+      } else {
+        toast.error(`Failed to delete make: ${error.message}`);
+      }
     },
   });
 
