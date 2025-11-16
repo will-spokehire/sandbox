@@ -304,6 +304,7 @@ export function CreateEditDealDialog({
               {...form.register("brief")}
               disabled={isSubmitting}
               rows={4}
+              className="break-all"
             />
           </div>
 
@@ -425,6 +426,7 @@ export function CreateEditDealDialog({
               {...form.register("notes")}
               disabled={isSubmitting}
               rows={3}
+              className="break-all"
             />
             <p className="text-xs text-muted-foreground">
               For internal use only (not sent to clients)

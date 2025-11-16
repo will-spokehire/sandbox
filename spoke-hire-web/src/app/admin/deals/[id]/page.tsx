@@ -430,7 +430,7 @@ export default function DealDetailPage({
                       {deal.brief && (
                         <div className="md:col-span-2">
                           <p className="text-muted-foreground">🎬 Brief</p>
-                          <p className="font-medium whitespace-pre-wrap">{deal.brief}</p>
+                          <p className="font-medium whitespace-pre-wrap break-all">{deal.brief}</p>
                         </div>
                       )}
                     </div>
@@ -579,7 +579,7 @@ export default function DealDetailPage({
                 </CardHeader>
                 <CardContent>
                   <div className="rounded-lg border p-4 bg-muted/30">
-                    <p className="text-sm whitespace-pre-wrap">{deal.notes}</p>
+                    <p className="text-sm whitespace-pre-wrap break-all">{deal.notes}</p>
                   </div>
                 </CardContent>
               </Card>
