@@ -15,6 +15,7 @@ import type {
   MergeResult,
 } from "~/server/types";
 import { TRPCError } from "@trpc/server";
+import { generateVehicleName } from "~/lib/vehicle-name-generator";
 
 /**
  * Service for managing vehicle makes
@@ -285,19 +286,35 @@ export class MakeService {
 
             if (matchingModel) {
               // Update to primary make and matching model
+              // Also regenerate the vehicle name to reflect the new make/model
+              const newName = generateVehicleName(
+                vehicle.year,
+                primaryMake.name,
+                matchingModel.name
+              );
+              
               await tx.vehicle.update({
                 where: { id: vehicle.id },
                 data: {
                   makeId: primaryMakeId,
                   modelId: matchingModel.id,
+                  name: newName,
                 },
               });
             } else {
               // No matching model found - update the vehicle's make
+              // Also regenerate the vehicle name to reflect the new make
+              const newName = generateVehicleName(
+                vehicle.year,
+                primaryMake.name,
+                vehicle.model.name
+              );
+              
               await tx.vehicle.update({
                 where: { id: vehicle.id },
                 data: {
                   makeId: primaryMakeId,
+                  name: newName,
                 },
               });
             }

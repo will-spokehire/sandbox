@@ -15,6 +15,7 @@ import type {
   MergeResult,
 } from "~/server/types";
 import { TRPCError } from "@trpc/server";
+import { generateVehicleName } from "~/lib/vehicle-name-generator";
 
 /**
  * Service for managing vehicle models
@@ -303,16 +304,30 @@ export class ModelService {
 
         // For each secondary model
         for (const secondaryModel of secondaryModels) {
-          // Count vehicles with this model
-          const vehicleCount = await tx.vehicle.count({
+          // Get all vehicles with this model before updating
+          const vehiclesToUpdate = await tx.vehicle.findMany({
             where: { modelId: secondaryModel.id },
+            include: { make: true },
           });
 
-          // Update all vehicles to use the primary model
-          await tx.vehicle.updateMany({
-            where: { modelId: secondaryModel.id },
-            data: { modelId: primaryModelId },
-          });
+          const vehicleCount = vehiclesToUpdate.length;
+
+          // Update all vehicles to use the primary model and regenerate their names
+          for (const vehicle of vehiclesToUpdate) {
+            const newName = generateVehicleName(
+              vehicle.year,
+              vehicle.make.name,
+              primaryModel.name
+            );
+
+            await tx.vehicle.update({
+              where: { id: vehicle.id },
+              data: {
+                modelId: primaryModelId,
+                name: newName,
+              },
+            });
+          }
 
           vehiclesUpdated += vehicleCount;
 
