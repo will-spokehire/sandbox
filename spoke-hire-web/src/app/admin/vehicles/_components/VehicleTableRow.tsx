@@ -100,15 +100,10 @@ export const VehicleTableRow = memo(function VehicleTableRow({
         </Link>
       </TableCell>
 
-      {/* Name & Make/Model */}
+      {/* Name */}
       <TableCell>
         <Link href={`/admin/vehicles/${vehicle.id}`} className="block hover:underline">
-          <div className="flex flex-col">
-            <span className="font-medium text-foreground">{vehicle.name}</span>
-            <span className="text-sm text-muted-foreground">
-              {vehicle.make.name} {vehicle.model.name}
-            </span>
-          </div>
+          <span className="font-medium text-foreground">{vehicle.name}</span>
         </Link>
       </TableCell>
 

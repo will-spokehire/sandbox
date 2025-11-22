@@ -10,7 +10,6 @@ import { useVehicleForm } from "~/app/_components/vehicles/form/hooks/useVehicle
 import { useVehicleFormData } from "~/app/_components/vehicles/form/hooks/useVehicleFormData";
 import { useVehicleMutations } from "~/app/_components/vehicles/form/hooks/useVehicleMutations";
 import { transformFormData } from "~/app/_components/vehicles/form/utils/form-helpers";
-import { generateVehicleName as generateStandardVehicleName } from "~/lib/vehicle-name-generator";
 import type { VehicleFormData } from "~/types/vehicle-form";
 import type { FilterOptions, ModelsByMake } from "~/types/vehicle";
 

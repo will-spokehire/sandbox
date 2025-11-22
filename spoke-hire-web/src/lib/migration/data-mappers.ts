@@ -306,7 +306,7 @@ export function extractVehicleData(record: SourceRecord, sourceType: string): Ma
     
     case 'cleansed':
       return {
-        name: `${record.vehicle?.make} ${record.vehicle?.model}`,
+        name: `${record.vehicle?.yearOfManufacture} ${record.vehicle?.make} ${record.vehicle?.model}`,
         make: record.vehicle?.make ?? '',
         model: record.vehicle?.model ?? '',
         year: record.vehicle?.yearOfManufacture ?? '',
@@ -326,7 +326,7 @@ export function extractVehicleData(record: SourceRecord, sourceType: string): Ma
     
     case 'submission':
       return {
-        name: `${record.make_1} ${record.location_1}`,
+        name: `${record.year_of_manufacture_1} ${record.make_1} ${record.location_1}`,
         make: record.make_1 ?? '',
         model: record.location_1 ?? '',
         year: record.year_of_manufacture_1 ?? '',

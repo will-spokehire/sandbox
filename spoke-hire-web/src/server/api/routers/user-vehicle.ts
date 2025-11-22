@@ -14,7 +14,6 @@ import { ServiceFactory } from "../services/service-factory";
 import { geocodePostcode } from "~/lib/services/geocoding";
 import { generateVehicleName } from "~/lib/vehicle-name-generator";
 import { UK_CITIES, UK_COUNTIES } from "~/lib/constants/uk-locations";
-import { UK_CITIES, UK_COUNTIES } from "~/lib/constants/uk-locations";
 
 // ============================================================================
 // Input Validation Schemas

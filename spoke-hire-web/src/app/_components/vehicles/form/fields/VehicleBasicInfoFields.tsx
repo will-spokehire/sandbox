@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { Input } from "~/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
@@ -38,6 +39,38 @@ export function VehicleBasicInfoFields({
   hideNameField = false,
 }: VehicleBasicInfoFieldsProps) {
   const router = useRouter();
+
+  // Auto-update vehicle name when make, model, or year changes (admin only)
+  useEffect(() => {
+    if (!isAdmin || hideNameField) return;
+
+    const subscription = form.watch((value, { name: fieldName }) => {
+      // Only auto-update if make, model, or year changed
+      if (!fieldName || !['makeId', 'modelId', 'year'].includes(fieldName)) return;
+
+      const { makeId, modelId, year } = value;
+      
+      // Get the make and model labels from options
+      const makeLabel = makeOptions.find(opt => opt.value === makeId)?.label;
+      const modelLabel = modelOptions.find(opt => opt.value === modelId)?.label;
+
+      // Only update if we have all three values
+      if (year && makeLabel && modelLabel) {
+        const newName = `${year} ${makeLabel} ${modelLabel}`;
+        const currentName = form.getValues('name');
+        
+        // Only update if the name has actually changed
+        if (currentName !== newName) {
+          form.setValue('name', newName, { 
+            shouldValidate: false,
+            shouldDirty: true 
+          });
+        }
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [form, isAdmin, hideNameField, makeOptions, modelOptions]);
 
   return (
     <div className="space-y-4">
