@@ -18,7 +18,7 @@ export const profileSchema = z.object({
       "Please enter a valid phone number"
     ),
   street: z.string().min(1, "Street address is required"),
-  city: z.string().min(1, "City is required"),
+  city: z.string().optional(),
   county: z.string().min(1, "County is required"),
   postcode: z
     .string()
@@ -156,7 +156,6 @@ export function isProfileComplete(user: {
     user.firstName && 
     user.lastName && 
     user.phone && 
-    user.city && 
     user.postcode
   );
 }
