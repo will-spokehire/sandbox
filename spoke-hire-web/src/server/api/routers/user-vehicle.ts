@@ -13,6 +13,7 @@ import { VehicleStatus } from "@prisma/client";
 import { ServiceFactory } from "../services/service-factory";
 import { geocodePostcode } from "~/lib/services/geocoding";
 import { generateVehicleName } from "~/lib/vehicle-name-generator";
+import { UK_CITIES, UK_COUNTIES } from "~/lib/constants/uk-locations";
 
 // ============================================================================
 // Input Validation Schemas
@@ -84,7 +85,7 @@ const updateMyProfileInputSchema = z.object({
   lastName: z.string().min(1, "Last name is required").optional(),
   phone: z.string().min(1, "Phone is required").optional(),
   street: z.string().min(1, "Street address is required").optional(),
-  city: z.string().min(1, "City is required").optional(),
+  city: z.string().optional(),
   county: z.string().min(1, "County is required").optional(),
   postcode: z.string().min(1, "Postcode is required").optional(),
   countryId: z.string().min(1, "Country is required").optional(),
@@ -753,6 +754,7 @@ export const userVehicleRouter = createTRPCRouter({
               name: makeName,
               slug: generateSlug(makeName),
               isActive: true,
+              isPublished: false, // User-created makes need admin approval
             },
           });
         }
@@ -798,6 +800,7 @@ export const userVehicleRouter = createTRPCRouter({
               slug: generateSlug(modelName),
               makeId: finalMakeId,
               isActive: true,
+              isPublished: false, // User-created models need admin approval
             },
           });
         }
@@ -1029,14 +1032,25 @@ export const userVehicleRouter = createTRPCRouter({
         
         // For London postcodes, use region as city (e.g., "London")
         // For other postcodes, use admin_district as city (e.g., "Sevenoaks")
-        const city = result.region === "London" 
+        const cityFromApi = result.region === "London" 
           ? "London" 
           : (result.adminDistrict ?? "");
         
-        // For London, use region as county; otherwise use admin_county
-        const county = result.region === "London" 
-          ? "London" 
+        // For London, use "Greater London" as county to match UK_COUNTIES list
+        // For other postcodes, use admin_county
+        const countyFromApi = result.region === "London" 
+          ? "Greater London" 
           : (result.adminCounty ?? "");
+        
+        // Only populate city if it exists in our UK_CITIES list
+        const city = UK_CITIES.includes(cityFromApi as typeof UK_CITIES[number]) 
+          ? cityFromApi 
+          : "";
+        
+        // Only populate county if it exists in our UK_COUNTIES list
+        const county = UK_COUNTIES.includes(countyFromApi as typeof UK_COUNTIES[number])
+          ? countyFromApi
+          : "";
         
         // Look up country ID from the database
         const country = await ctx.db.country.findFirst({

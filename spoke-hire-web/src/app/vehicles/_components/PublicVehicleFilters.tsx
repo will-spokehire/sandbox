@@ -21,7 +21,7 @@ import { cn } from "~/lib/utils";
 /**
  * Public Vehicle Filters
  * 
- * Filter controls for the public vehicle catalog.
+ * Filter controls for the public vehicle catalogue.
  * Includes: make, model, decade (year range), location, collections.
  * NO price filter or search.
  */
@@ -42,7 +42,6 @@ export function PublicVehicleFilters() {
     },
     {
       staleTime: 30000, // 30 seconds - shorter than default for dynamic options
-      keepPreviousData: true, // Prevent UI flicker while refetching
     }
   );
 
@@ -129,7 +128,6 @@ export function PublicVehicleFilters() {
   // Render collection option with color badge
   const renderCollectionOption = (option: { id: string; name: string; color?: string }, selected: boolean) => (
     <>
-      <Check className={cn("mr-2 h-4 w-4", selected ? "opacity-100" : "opacity-0")} />
       {option.color && (
         <div
           className="mr-2 h-3 w-3 rounded-full"

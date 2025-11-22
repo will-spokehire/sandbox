@@ -20,7 +20,7 @@ interface PublicVehicleFiltersProviderProps {
 /**
  * Public Vehicle Filters Context Provider
  * 
- * Provides filter state and actions for the public vehicle catalog.
+ * Provides filter state and actions for the public vehicle catalogue.
  * URL-based state management for shareable links and SEO.
  * 
  * @example

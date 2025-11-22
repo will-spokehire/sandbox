@@ -243,10 +243,10 @@ export function SendDealToVehiclesDialog({
                         }`}
                       >
                         <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1 min-w-0">
+                          <div className="flex-1 min-w-0 overflow-hidden">
                             <h4 className="font-semibold truncate">{deal.name}</h4>
                             {deal.brief && (
-                              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                              <p className="text-sm text-muted-foreground mt-1 line-clamp-2 break-all">
                                 {deal.brief}
                               </p>
                             )}

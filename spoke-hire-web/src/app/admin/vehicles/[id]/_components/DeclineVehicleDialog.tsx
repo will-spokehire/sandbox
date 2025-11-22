@@ -40,7 +40,7 @@ export function DeclineVehicleDialog({
   const [reason, setReason] = useState("");
 
   const handleConfirm = () => {
-    if (reason.trim().length >= 10) {
+    if (reason.trim().length > 0) {
       onConfirm(reason.trim());
       setReason(""); // Reset for next time
     }
@@ -51,7 +51,7 @@ export function DeclineVehicleDialog({
     onOpenChange(false);
   };
 
-  const isValidReason = reason.trim().length >= 10;
+  const isValidReason = reason.trim().length > 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -90,9 +90,6 @@ export function DeclineVehicleDialog({
               className="resize-none"
               disabled={isPending}
             />
-            <p className="text-sm text-muted-foreground">
-              Minimum 10 characters ({reason.trim().length}/10)
-            </p>
           </div>
         </div>
 

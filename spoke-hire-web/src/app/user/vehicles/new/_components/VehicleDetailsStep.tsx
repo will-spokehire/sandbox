@@ -138,10 +138,10 @@ export function VehicleDetailsStep({
         // Convert pricing rates from strings to numbers
         const submitData: VehicleDetailsSubmitData = {
           ...data,
-          hourlyRate: data.hourlyRate ? Number(data.hourlyRate) : null,
-          dailyRate: data.dailyRate ? Number(data.dailyRate) : null,
+          hourlyRate: data.hourlyRate ? Number(data.hourlyRate) : 0,
+          dailyRate: data.dailyRate ? Number(data.dailyRate) : 0,
         };
-        onComplete(submitData);
+        onComplete(submitData); 
       })();
     };
     return () => {
@@ -268,9 +268,6 @@ export function VehicleDetailsStep({
                                 />
                               )}
                               <span>{collection.name}</span>
-                              {isSelected && (
-                                <Check className="h-4 w-4" />
-                              )}
                             </div>
                           </button>
                         );
@@ -319,7 +316,7 @@ export function VehicleDetailsStep({
                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">£</span>
                           <Input
                             type="number"
-                            placeholder="60"
+                            placeholder={defaultPricing?.hourlyRate.toString() ?? "60"}
                             className="pl-7 text-base md:text-sm"
                             disabled={isGenerating}
                             {...field}
@@ -347,7 +344,7 @@ export function VehicleDetailsStep({
                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">£</span>
                           <Input
                             type="number"
-                            placeholder="300"
+                            placeholder={defaultPricing?.dailyRate.toString() ?? "300"}
                             className="pl-7 text-base md:text-sm"
                             disabled={isGenerating}
                             {...field}

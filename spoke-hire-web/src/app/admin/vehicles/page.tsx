@@ -10,7 +10,7 @@ import { api } from "~/trpc/react";
 import { useDebounce } from "~/hooks/useDebounce";
 import { useVehicleSelection } from "~/hooks/useVehicleSelection";
 import { useVehiclePagination } from "~/hooks/useVehiclePagination";
-import { PageHeader } from "~/app/_components/ui";
+import { PageHeader, Pagination } from "~/app/_components/ui";
 import { PageLoading } from "~/components/loading";
 import { VehicleFiltersProvider, useVehicleFiltersContext } from "~/contexts";
 import {
@@ -163,7 +163,7 @@ function VehiclesPageContent() {
   const handleDealCreated = useCallback(() => {
     clearSelection();
     setIsCreateDealDialogOpen(false);
-    toast.success("Deal sent successfully!");
+    toast.success("Added to deal successfully!");
   }, [clearSelection]);
 
 
@@ -261,91 +261,13 @@ function VehiclesPageContent() {
       />
 
       {/* Pagination */}
-      {totalPages > 1 && !isVehiclesLoading && (
-        <div className="flex items-center justify-center gap-2 pt-6">
-          {/* Previous Button */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handlePageChange((filters.page ?? 1) - 1)}
-            disabled={(filters.page ?? 1) === 1 || isFetching}
-          >
-            Previous
-          </Button>
-
-          {/* Page Numbers - Desktop only */}
-          <div className="hidden md:flex items-center gap-1">
-            {/* First page */}
-            {(filters.page ?? 1) > 3 && (
-              <>
-                <Button
-                  variant={1 === (filters.page ?? 1) ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => handlePageChange(1)}
-                  disabled={isFetching}
-                  className="w-10"
-                >
-                  1
-                </Button>
-                {(filters.page ?? 1) > 4 && (
-                  <span className="px-2 text-muted-foreground">...</span>
-                )}
-              </>
-            )}
-
-            {/* Pages around current */}
-            {Array.from({ length: totalPages }, (_, i) => i + 1)
-              .filter((page) => {
-                // Show current page and 2 pages on each side
-                return page >= (filters.page ?? 1) - 2 && page <= (filters.page ?? 1) + 2;
-              })
-              .map((page) => (
-                <Button
-                  key={page}
-                  variant={page === (filters.page ?? 1) ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => handlePageChange(page)}
-                  disabled={isFetching}
-                  className="w-10"
-                >
-                  {page}
-                </Button>
-              ))}
-
-            {/* Last page */}
-            {(filters.page ?? 1) < totalPages - 2 && (
-              <>
-                {(filters.page ?? 1) < totalPages - 3 && (
-                  <span className="px-2 text-muted-foreground">...</span>
-                )}
-                <Button
-                  variant={totalPages === (filters.page ?? 1) ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => handlePageChange(totalPages)}
-                  disabled={isFetching}
-                  className="w-10"
-                >
-                  {totalPages}
-                </Button>
-              </>
-            )}
-          </div>
-
-          {/* Page Indicator - Mobile only */}
-          <div className="md:hidden px-3 py-1.5 text-sm font-medium text-muted-foreground">
-            {filters.page ?? 1} / {totalPages}
-          </div>
-
-          {/* Next Button */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handlePageChange((filters.page ?? 1) + 1)}
-            disabled={(filters.page ?? 1) === totalPages || isFetching}
-          >
-            Next
-          </Button>
-        </div>
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={filters.page ?? 1}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          isLoading={isFetching}
+        />
       )}
 
       {/* Create Deal Dialog - Only mount when needed */}

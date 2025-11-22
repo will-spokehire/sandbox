@@ -12,6 +12,12 @@
 
 ## 🚀 Quick Dev Rules
 
+### **Spelling & Language**
+- ✅ Use **UK English** spelling (not American English)
+- ✅ Examples: catalogue (not catalog), colour (not color), optimise (not optimize), analyse (not analyze), organise (not organize)
+- ✅ Applies to: user-facing text, comments in public-facing code, documentation
+- ❌ Does NOT apply to: code identifiers, variable names, database fields, CSS classes
+
 ### **TypeScript & ESLint**
 - ❌ Never use `any` → Use `unknown`, `Record<string, unknown>`, specific types
 - ❌ Never use `||` → Use `??` (nullish coalescing)
@@ -534,12 +540,45 @@ npm run build
 - **Optimize queries** - Use parallel execution for independent queries (see `docs/architecture/database-optimization.md`)
 
 ### Database Migrations
+
+**Critical Rule: Always Create Migration Files for Schema Changes**
+
+When you modify `prisma/schema.prisma`, you MUST create a migration file:
+
 ```bash
-npm run db:push      # Quick sync for development
-npm run db:migrate   # Create migration for production
+# ✅ CORRECT: Create migration file (required for deployment)
+npx prisma migrate dev --name describe_your_change
+
+# ❌ WRONG: Don't use db:push for schema changes you want to deploy
+npm run db:push  # This skips migration file creation!
 ```
 
-Always use `DIRECT_URL` for migrations, `DATABASE_URL` for app queries.
+**Why this matters:**
+- `prisma migrate dev` → Creates migration files + applies to local DB
+- `prisma db push` → Applies to local DB only, NO migration files
+- `prisma migrate deploy` → Deploys migration files to preview/production
+
+**Without migration files, your changes won't deploy to preview/production!**
+
+**Commands:**
+```bash
+# Create migration for schema change
+npx prisma migrate dev --name your_change_name
+
+# Deploy to preview
+./scripts/migrate-preview.sh
+
+# Deploy to production  
+npm run db:migrate  # (with production env vars)
+```
+
+**Always use `DIRECT_URL` for migrations, `DATABASE_URL` for app queries.**
+
+**Rule Summary:**
+- ✅ Modify schema → Run `prisma migrate dev` → Commit migration files
+- ✅ Migration files must be in git for deployment
+- ❌ Never use `db:push` for changes that need to go to preview/production
+- ❌ Never modify schema without creating migration
 
 ### Environment Variables
 - Keep secrets in `.env.local` (never commit)

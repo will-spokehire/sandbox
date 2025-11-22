@@ -86,13 +86,13 @@ export class DealService {
    * Create a new deal
    */
   async createDeal(params: CreateDealParams) {
-    const { name, dealType, date, time, location, brief, fee, clientContactId, fullQuote, spokeFee, baselineFee, notes, vehicleIds, recipientIds, createdById } = params;
+    const { name, dealType, date, time, location, brief, fee, clientContactId, fullQuote, spokeFee, notes, vehicleIds, recipientIds, createdById } = params;
 
     // Validate deal name
     this.validateDealName(name);
     
     // Validate financial fields if provided
-    this.validateFinancialFields({ fullQuote, spokeFee, baselineFee });
+    this.validateFinancialFields({ fullQuote, spokeFee });
     
     // Validate client contact if provided
     if (clientContactId) {
@@ -161,7 +161,6 @@ export class DealService {
         clientContactId,
         fullQuote,
         spokeFee,
-        baselineFee,
         notes,
         status: "OPTIONS" as DealStatus,
         createdById,
@@ -173,12 +172,20 @@ export class DealService {
     // After transaction completes, send emails to all recipients (only if there are recipients)
     // Note: Emails are sent AFTER the transaction to avoid holding locks
     if (recipientIds.length > 0) {
-      try {
-        await this.sendDealEmails(deal.id, recipientIds);
-      } catch (error) {
-        // Log error but don't fail the deal creation
-        // The deal is created successfully, email sending can be retried
-        console.error(`Failed to send emails for deal ${deal.id}:`, error);
+      // Validate email fields before sending
+      const missingFields = this.validateDealEmailFields(deal);
+      
+      if (missingFields.length > 0) {
+        // Log warning but don't fail deal creation - emails can be sent later
+        console.warn(`Cannot send emails for deal ${deal.id}. Missing fields: ${missingFields.join(", ")}`);
+      } else {
+        try {
+          await this.sendDealEmails(deal.id, recipientIds);
+        } catch (error) {
+          // Log error but don't fail the deal creation
+          // The deal is created successfully, email sending can be retried
+          console.error(`Failed to send emails for deal ${deal.id}:`, error);
+        }
       }
     }
     
@@ -211,6 +218,39 @@ export class DealService {
       });
     }
   }
+
+  /**
+   * Validate deal email fields
+   * Returns array of missing field names (empty if all fields are present)
+   * @private
+   */
+  private validateDealEmailFields(deal: {
+    fee?: string | null;
+    date?: string | null;
+    time?: string | null;
+    location?: string | null;
+    brief?: string | null;
+  }): string[] {
+    const missingFields: string[] = [];
+    
+    if (!deal.fee || deal.fee.trim().length === 0) {
+      missingFields.push("Fee");
+    }
+    if (!deal.date || deal.date.trim().length === 0) {
+      missingFields.push("Date");
+    }
+    if (!deal.time || deal.time.trim().length === 0) {
+      missingFields.push("Time");
+    }
+    if (!deal.location || deal.location.trim().length === 0) {
+      missingFields.push("Location");
+    }
+    if (!deal.brief || deal.brief.trim().length === 0) {
+      missingFields.push("Brief");
+    }
+    
+    return missingFields;
+  }
   
   /**
    * Validate financial fields
@@ -219,9 +259,8 @@ export class DealService {
   private validateFinancialFields(fields: { 
     fullQuote?: number; 
     spokeFee?: number; 
-    baselineFee?: number;
   }) {
-    const { fullQuote, spokeFee, baselineFee } = fields;
+    const { fullQuote, spokeFee } = fields;
     
     if (fullQuote !== undefined) {
       if (fullQuote < MIN_FINANCIAL_AMOUNT || fullQuote > MAX_FINANCIAL_AMOUNT) {
@@ -239,17 +278,6 @@ export class DealService {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: spokeFee < MIN_FINANCIAL_AMOUNT 
-            ? FINANCIAL_VALIDATION_MESSAGES.NEGATIVE_AMOUNT 
-            : FINANCIAL_VALIDATION_MESSAGES.AMOUNT_TOO_LARGE,
-        });
-      }
-    }
-    
-    if (baselineFee !== undefined) {
-      if (baselineFee < MIN_FINANCIAL_AMOUNT || baselineFee > MAX_FINANCIAL_AMOUNT) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: baselineFee < MIN_FINANCIAL_AMOUNT 
             ? FINANCIAL_VALIDATION_MESSAGES.NEGATIVE_AMOUNT 
             : FINANCIAL_VALIDATION_MESSAGES.AMOUNT_TOO_LARGE,
         });
@@ -365,7 +393,7 @@ export class DealService {
    * Update deal details
    */
   async updateDeal(dealId: string, params: UpdateDealParams) {
-    const { name, dealType, date, time, location, brief, fee, clientContactId, fullQuote, spokeFee, baselineFee, notes, status } = params;
+    const { name, dealType, date, time, location, brief, fee, clientContactId, fullQuote, spokeFee, notes, status } = params;
 
     // Validate deal exists
     const deal = await this.repository.findById(dealId);
@@ -380,7 +408,7 @@ export class DealService {
     }
     
     // Validate financial fields if provided
-    this.validateFinancialFields({ fullQuote, spokeFee, baselineFee });
+    this.validateFinancialFields({ fullQuote, spokeFee });
     
     // Validate client contact if provided
     if (clientContactId !== undefined) {
@@ -409,7 +437,6 @@ export class DealService {
       clientContactId,
       fullQuote,
       spokeFee,
-      baselineFee,
       notes,
       status,
     });
@@ -489,6 +516,16 @@ export class DealService {
     
     // Get deal details
     const deal = await this.getDealById(dealId);
+    
+    // Validate email fields before sending
+    const missingFields = this.validateDealEmailFields(deal);
+    
+    if (missingFields.length > 0) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: `Cannot send emails. Please fill in the following fields: ${missingFields.join(", ")}`,
+      });
+    }
     
     // Get vehicles for the deal
     const vehicles = await this.getDealVehicles(dealId);
@@ -663,7 +700,7 @@ export class DealService {
   /**
    * Create a user enquiry (public-facing enquiry form)
    * Creates a deal, optionally associates a vehicle, and sends notifications
-   * Also updates user profile with enquiry data if profile fields are empty
+   * Also updates user profile with enquiry data
    */
   async createUserEnquiry(params: CreateUserEnquiryInput & { userId: string }): Promise<UserEnquiryResult> {
     const { 
@@ -689,8 +726,8 @@ export class DealService {
       const dealRepo = new DealRepository(tx);
       const userRepo = new UserRepository(tx);
       
-      // Update user profile with enquiry data (only if fields are empty)
-      const { updatedFields } = await userRepo.updateEmptyProfileFields(userId, {
+      // Update user profile with enquiry data (always updates to reflect changes)
+      const { updatedFields } = await userRepo.updateProfileFields(userId, {
         firstName,
         lastName,
         phone,
@@ -736,8 +773,7 @@ export class DealService {
         clientContactId: userId, // Set the enquirer as the client contact
         fullQuote: undefined,
         spokeFee: undefined,
-        baselineFee: undefined,
-        notes: `User Enquiry - ${firstName} ${lastName}\nEmail: ${email}\nPhone: ${phone}${company ? `\nCompany: ${company}` : ''}`,
+        notes: undefined,
         status: "OPTIONS" as DealStatus,
         createdById: userId,
         vehicleIds: vehicleId ? [vehicleId] : [],

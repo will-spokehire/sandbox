@@ -193,7 +193,7 @@ export function TechnicalDetailsStep({
                       onValueChange={field.onChange}
                       value={field.value}
                       disabled={isLoadingFilters}
-                      className="flex flex-wrap gap-2"
+                      className="flex flex-wrap gap-2 md:gap-3"
                     >
                       {steeringOptions.map((steering) => (
                         <label
@@ -204,7 +204,7 @@ export function TechnicalDetailsStep({
                             value={steering.id}
                             className="sr-only peer"
                           />
-                          <div className="px-3 md:px-4 py-2 rounded-md border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground transition-colors text-sm md:text-base">
+                          <div className="px-3 md:px-4 py-2 md:py-2.5 rounded-md border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground transition-colors text-xs md:text-sm">
                             {steering.name}
                           </div>
                         </label>
@@ -218,44 +218,44 @@ export function TechnicalDetailsStep({
                 </FormItem>
               )}
             />
-
-            {/* Gearbox */}
-            <FormField
-              control={form.control}
-              name="gearbox"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm md:text-base">Gearbox *</FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      value={field.value}
-                      className="flex flex-wrap gap-2"
-                    >
-                      {GEARBOX_TYPES.map((gearbox) => (
-                        <label
-                          key={gearbox}
-                          className="cursor-pointer"
-                        >
-                          <RadioGroupItem
-                            value={gearbox}
-                            className="sr-only peer"
-                          />
-                          <div className="px-3 md:px-4 py-2 rounded-md border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground transition-colors text-sm md:text-base">
-                            {gearbox}
-                          </div>
-                        </label>
-                      ))}
-                    </RadioGroup>
-                  </FormControl>
-                  <FormDescription className="min-h-[20px] text-xs md:text-sm">
-                    Transmission type
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
           </div>
+
+          {/* Gearbox - Full Width */}
+          <FormField
+            control={form.control}
+            name="gearbox"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm md:text-base">Gearbox *</FormLabel>
+                <FormControl>
+                  <RadioGroup
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    className="flex flex-wrap gap-2 md:gap-3"
+                  >
+                    {GEARBOX_TYPES.map((gearbox) => (
+                      <label
+                        key={gearbox}
+                        className="cursor-pointer"
+                      >
+                        <RadioGroupItem
+                          value={gearbox}
+                          className="sr-only peer"
+                        />
+                        <div className="px-3 md:px-4 py-2 md:py-2.5 rounded-md border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground transition-colors text-xs md:text-sm">
+                          {gearbox}
+                        </div>
+                      </label>
+                    ))}
+                  </RadioGroup>
+                </FormControl>
+                <FormDescription className="min-h-[20px] text-xs md:text-sm">
+                  Transmission type
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           {/* Exterior Colour */}
           <FormField
@@ -268,7 +268,7 @@ export function TechnicalDetailsStep({
                   <RadioGroup
                     onValueChange={field.onChange}
                     value={field.value}
-                    className="flex flex-wrap gap-1.5 md:gap-2"
+                    className="flex flex-wrap gap-2 md:gap-3"
                   >
                     {VEHICLE_COLORS.map((color) => (
                       <label
@@ -279,7 +279,7 @@ export function TechnicalDetailsStep({
                           value={color}
                           className="sr-only peer"
                         />
-                        <div className="flex items-center gap-1.5 px-2 md:px-3 py-1.5 md:py-2 rounded-md border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground transition-colors text-xs md:text-sm">
+                        <div className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 rounded-md border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground transition-colors text-xs md:text-sm">
                           <span 
                             className="inline-block w-3 h-3 md:w-3.5 md:h-3.5 rounded-full border border-gray-300"
                             style={{ backgroundColor: COLOR_HEX_MAP[color] }}
@@ -309,7 +309,7 @@ export function TechnicalDetailsStep({
                   <RadioGroup
                     onValueChange={field.onChange}
                     value={field.value}
-                    className="flex flex-wrap gap-1.5 md:gap-2"
+                    className="flex flex-wrap gap-2 md:gap-3"
                   >
                     {VEHICLE_COLORS.map((color) => (
                       <label
@@ -320,7 +320,7 @@ export function TechnicalDetailsStep({
                           value={color}
                           className="sr-only peer"
                         />
-                        <div className="flex items-center gap-1.5 px-2 md:px-3 py-1.5 md:py-2 rounded-md border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground transition-colors text-xs md:text-sm">
+                        <div className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 rounded-md border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground transition-colors text-xs md:text-sm">
                           <span 
                             className="inline-block w-3 h-3 md:w-3.5 md:h-3.5 rounded-full border border-gray-300"
                             style={{ backgroundColor: COLOR_HEX_MAP[color] }}

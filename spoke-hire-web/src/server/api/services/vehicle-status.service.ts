@@ -118,7 +118,7 @@ export class VehicleStatusService {
     if (!vehicle.makeId) missingFields.push("Make");
     if (!vehicle.modelId) missingFields.push("Model");
     if (!vehicle.year) missingFields.push("Year");
-    if (!vehicle.price) missingFields.push("Price");
+    if (!vehicle.price) missingFields.push("Agreed Value");
 
     // Check technical details
     if (!vehicle.engineCapacity) missingFields.push("Engine capacity");

@@ -2,7 +2,7 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { Card, CardContent } from "~/components/ui/card";
 
 /**
- * Loading skeleton for vehicles catalog page
+ * Loading skeleton for vehicles catalogue page
  */
 export default function Loading() {
   return (

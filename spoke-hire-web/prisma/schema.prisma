@@ -322,6 +322,7 @@ model Media {
     height            Int?       // Height in pixels
     duration          Int?       // Duration in seconds (for videos)
     format            String?    // jpg, png, mp4, webm, etc.
+    editMetadata      Json?      // Stores crop/zoom/rotation state for image editor
     
     // Status
     status            MediaStatus @default(READY)
@@ -416,7 +417,6 @@ model Deal {
     // Financial Information
     fullQuote       Decimal? @db.Decimal(10,2) // Total quote amount in GBP
     spokeFee        Decimal? @db.Decimal(10,2) // Spoke Hire's commission/fee in GBP
-    baselineFee     Decimal? @db.Decimal(10,2) // Base fee for vehicle owner in GBP
     
     // Internal Notes
     notes       String?     @db.Text // Internal notes for tracking updates

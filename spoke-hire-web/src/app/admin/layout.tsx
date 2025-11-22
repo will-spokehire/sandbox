@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Car, Mail, LayoutDashboard, Menu } from "lucide-react";
+import { Car, Mail, LayoutDashboard, Menu, Factory, CarFront } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "~/components/ui/sheet";
 import { UserMenu } from "~/components/auth/UserMenu";
@@ -33,6 +33,16 @@ const navItems: NavItem[] = [
     name: "Deals",
     href: "/admin/deals",
     icon: Mail,
+  },
+  {
+    name: "Makes",
+    href: "/admin/makes",
+    icon: Factory,
+  },
+  {
+    name: "Models",
+    href: "/admin/models",
+    icon: CarFront,
   },
 ];
 

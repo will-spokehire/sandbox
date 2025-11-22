@@ -97,6 +97,7 @@ data-analytics/catalog_images/
 data-analytics/data/car-images/
 data-analytics/data/images-by-coverage/
 data-analytics/data/detections/
+data-analytics/car-images/
 # Pipeline runs
 data-analytics/pipeline/runs/
 

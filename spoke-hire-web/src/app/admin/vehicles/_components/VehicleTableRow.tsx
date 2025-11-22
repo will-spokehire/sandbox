@@ -100,15 +100,10 @@ export const VehicleTableRow = memo(function VehicleTableRow({
         </Link>
       </TableCell>
 
-      {/* Name & Make/Model */}
+      {/* Name */}
       <TableCell>
         <Link href={`/admin/vehicles/${vehicle.id}`} className="block hover:underline">
-          <div className="flex flex-col">
-            <span className="font-medium text-foreground">{vehicle.name}</span>
-            <span className="text-sm text-muted-foreground">
-              {vehicle.make.name} {vehicle.model.name}
-            </span>
-          </div>
+          <span className="font-medium text-foreground">{vehicle.name}</span>
         </Link>
       </TableCell>
 
@@ -135,7 +130,7 @@ export const VehicleTableRow = memo(function VehicleTableRow({
         </Link>
       </TableCell>
 
-      {/* Price */}
+      {/* Agreed Value */}
       <TableCell>
         <Link href={`/admin/vehicles/${vehicle.id}`} className="block">
           <span className="font-medium">{formatPrice(vehicle.price)}</span>
@@ -148,7 +143,7 @@ export const VehicleTableRow = memo(function VehicleTableRow({
           <span className="text-sm">
             {formatPricingRate(
               vehicle.hourlyRate 
-                ? (typeof vehicle.hourlyRate === 'number' ? vehicle.hourlyRate : vehicle.hourlyRate.toNumber())
+                ? Number(vehicle.hourlyRate)
                 : undefined
             )}
           </span>
@@ -161,7 +156,7 @@ export const VehicleTableRow = memo(function VehicleTableRow({
           <span className="text-sm">
             {formatPricingRate(
               vehicle.dailyRate 
-                ? (typeof vehicle.dailyRate === 'number' ? vehicle.dailyRate : vehicle.dailyRate.toNumber())
+                ? Number(vehicle.dailyRate)
                 : undefined
             )}
           </span>

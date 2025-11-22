@@ -5,6 +5,16 @@
 import type { Area } from "react-easy-crop";
 
 /**
+ * Image edit metadata stored in database
+ */
+export interface ImageEditMetadata {
+  crop: { x: number; y: number };
+  zoom: number;
+  rotation: number;
+  croppedAreaPixels?: Area;
+}
+
+/**
  * Image item for internal state
  */
 export interface VehicleImageItem {
@@ -13,6 +23,7 @@ export interface VehicleImageItem {
   originalUrl?: string;
   order: number;
   isPrimary: boolean;
+  editMetadata?: ImageEditMetadata | null;
 }
 
 /**

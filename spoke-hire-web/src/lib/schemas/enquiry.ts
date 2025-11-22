@@ -21,10 +21,10 @@ export const enquiryFormSchema = z.object({
   dealType: z.enum(["PERSONAL_HIRE", "PRODUCTION"], {
     required_error: "Please select an enquiry type",
   }),
-  date: z.string().optional(),
-  time: z.string().optional(),
-  location: z.string().optional(),
-  brief: z.string().optional(),
+  date: z.string().min(1, "Date is required"),
+  time: z.string().min(1, "Time is required"),
+  location: z.string().min(1, "Location is required"),
+  brief: z.string().min(1, "Brief is required"),
   
   // Optional vehicle association (populated from URL params)
   vehicleId: z.string().optional(),

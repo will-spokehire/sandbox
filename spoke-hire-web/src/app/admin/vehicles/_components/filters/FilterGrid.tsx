@@ -115,9 +115,6 @@ export function FilterGrid() {
   // Custom render for collection options (with color indicator)
   const renderCollectionOption = (option: FilterOption, selected: boolean) => (
     <>
-      <Check
-        className={cn("mr-2 h-4 w-4", selected ? "opacity-100" : "opacity-0")}
-      />
       {option.color && (
         <div
           className="w-3 h-3 rounded-full mr-2"

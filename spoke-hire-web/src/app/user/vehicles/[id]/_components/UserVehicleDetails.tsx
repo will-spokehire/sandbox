@@ -20,25 +20,9 @@ interface UserVehicleDetailsProps {
 function toNumber(value: unknown): number | undefined {
   if (value == null) return undefined;
   if (typeof value === 'number') return value;
-  // Check if it's a Prisma Decimal object
-  if (typeof value === 'object' && value !== null) {
-    // Prisma Decimal objects have a toNumber method
-    if ('toNumber' in value && typeof (value as any).toNumber === 'function') {
-      return (value as any).toNumber();
-    }
-    // Sometimes Prisma Decimals are serialized as strings
-    if ('toString' in value && typeof (value as any).toString === 'function') {
-      const strVal = (value as any).toString();
-      const numVal = parseFloat(strVal);
-      if (!isNaN(numVal)) return numVal;
-    }
-  }
-  // Try to parse as number if it's a string
-  if (typeof value === 'string') {
-    const parsed = parseFloat(value);
-    if (!isNaN(parsed)) return parsed;
-  }
-  return undefined;
+  // Use Number() constructor which works with Prisma Decimal in browser
+  const num = Number(value);
+  return isNaN(num) ? undefined : num;
 }
 
 /**
@@ -64,7 +48,7 @@ export function UserVehicleDetails({ vehicle, onEditClick }: UserVehicleDetailsP
       mono: true,
     },
     {
-      label: "Price",
+      label: "Agreed Value",
       value: formatPrice(vehicle.price),
       highlight: true,
     },

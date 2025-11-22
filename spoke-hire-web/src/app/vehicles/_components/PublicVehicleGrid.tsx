@@ -41,7 +41,7 @@ interface PublicVehicleGridProps {
 /**
  * Public Vehicle Grid
  * 
- * Responsive grid layout for displaying vehicles in the public catalog.
+ * Responsive grid layout for displaying vehicles in the public catalogue.
  * Shows 1 column on mobile, 2 on tablet, 3 on desktop, 4 on wide screens.
  */
 export function PublicVehicleGrid({

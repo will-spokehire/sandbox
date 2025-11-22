@@ -175,9 +175,6 @@ export function EditVehicleCollectionsDialog({
                         />
                       )}
                       <span>{collection.name}</span>
-                      {isSelected && (
-                        <Check className="h-4 w-4" />
-                      )}
                     </div>
                   </button>
                 );

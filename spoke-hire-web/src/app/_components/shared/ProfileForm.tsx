@@ -24,8 +24,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { Combobox } from "~/components/ui/combobox";
 import { api } from "~/trpc/react";
 import { profileSchema, type ProfileFormData } from "~/app/user/vehicles/new/_components/validation";
+import { UK_CITIES, UK_COUNTIES } from "~/lib/constants/uk-locations";
 
 interface ProfileFormProps {
   defaultValues?: Partial<ProfileFormData>;
@@ -340,9 +342,21 @@ export function ProfileForm({
               name="city"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>City *</FormLabel>
+                  <FormLabel>City</FormLabel>
                   <FormControl>
-                    <Input placeholder="London" {...field} />
+                    <Combobox
+                      options={UK_CITIES.map((city) => ({
+                        value: city,
+                        label: city,
+                      }))}
+                      value={field.value ?? ""}
+                      onValueChange={field.onChange}
+                      placeholder="Select city..."
+                      searchPlaceholder="Search cities..."
+                      emptyText="No city found."
+                      allowCustomValue={false}
+                      disabled={isLookingUp}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -356,10 +370,18 @@ export function ProfileForm({
                 <FormItem>
                   <FormLabel>County *</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Greater London"
-                      {...field}
+                    <Combobox
+                      options={UK_COUNTIES.map((county) => ({
+                        value: county,
+                        label: county,
+                      }))}
                       value={field.value ?? ""}
+                      onValueChange={field.onChange}
+                      placeholder="Select county..."
+                      searchPlaceholder="Search counties..."
+                      emptyText="No county found."
+                      allowCustomValue={false}
+                      disabled={isLookingUp}
                     />
                   </FormControl>
                   <FormMessage />

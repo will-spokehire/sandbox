@@ -245,10 +245,17 @@ async function migrateMedia(
   let count = 0;
 
   for (const item of media) {
+    const { editMetadata, ...restItem } = item;
     await prodPrisma.media.upsert({
       where: { id: item.id },
-      create: item,
-      update: item,
+      create: {
+        ...restItem,
+        editMetadata: editMetadata as any,
+      },
+      update: {
+        ...restItem,
+        editMetadata: editMetadata as any,
+      },
     });
     
     count++;
@@ -285,10 +292,17 @@ async function migrateRelationships(
   console.log('2️⃣  Migrating vehicle sources...');
   const sources = await localPrisma.vehicleSource.findMany();
   for (const source of sources) {
+    const { rawData, ...restSource } = source;
     await prodPrisma.vehicleSource.upsert({
       where: { id: source.id },
-      create: source,
-      update: source,
+      create: {
+        ...restSource,
+        rawData: rawData as any,
+      },
+      update: {
+        ...restSource,
+        rawData: rawData as any,
+      },
     });
   }
   stats.sources = sources.length;

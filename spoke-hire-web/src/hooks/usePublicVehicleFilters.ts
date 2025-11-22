@@ -7,7 +7,7 @@ import { trackEvent } from "~/lib/analytics";
 /**
  * Public Vehicle Filters
  * 
- * Simplified filters for public vehicle catalog
+ * Simplified filters for public vehicle catalogue
  * No price, status, search, or admin-specific filters
  */
 export interface PublicVehicleFilters {

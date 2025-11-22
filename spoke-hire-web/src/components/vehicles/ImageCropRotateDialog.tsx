@@ -86,41 +86,83 @@ export function ImageCropRotateDialog({
       const imgHeight = img.height;
       setImageDimensions({ width: imgWidth, height: imgHeight });
 
-      // Calculate the minimum zoom needed to fill the crop area
-      const widthRatio = MIN_OUTPUT_WIDTH / imgWidth;
-      const heightRatio = MIN_OUTPUT_HEIGHT / imgHeight;
-      const minZoomNeeded = Math.max(widthRatio, heightRatio, 1);
+      // For react-easy-crop, zoom controls how much of the image is cropped
+      // Lower zoom = crop area shows more of the image = larger visible crop box
+      // Higher zoom = crop area shows less of the image = smaller visible crop box
+      
+      // For smaller images (< target size), we want a LOWER initial zoom
+      // so the crop area is larger and more visible/usable
+      const isSmallImage = imgWidth < MIN_OUTPUT_WIDTH || imgHeight < MIN_OUTPUT_HEIGHT;
+      
+      // Calculate minimum zoom
+      // For small images, use 1 (shows entire image in crop)
+      // For large images, calculate based on desired output
+      let minZoomNeeded;
+      if (isSmallImage) {
+        minZoomNeeded = 1;
+      } else {
+        const widthRatio = MIN_OUTPUT_WIDTH / imgWidth;
+        const heightRatio = MIN_OUTPUT_HEIGHT / imgHeight;
+        minZoomNeeded = Math.max(widthRatio, heightRatio, 1);
+      }
 
-      // Calculate max zoom to prevent excessive pixelation
-      // Allow zoom up to 2x of the desired output size, but not beyond 3x
-      const maxQualityZoom = Math.min((imgWidth / MIN_OUTPUT_WIDTH) * 2, 3);
-      const calculatedMaxZoom = Math.max(maxQualityZoom, minZoomNeeded, 1.5);
+      // Calculate max zoom
+      // Small images: allow up to 3x zoom for fine control
+      // Large images: limit to prevent excessive pixelation
+      const calculatedMaxZoom = isSmallImage ? 3 : Math.min((imgWidth / MIN_OUTPUT_WIDTH) * 2, 3);
+      
+      // Ensure there's always a usable range (at least 0.5 difference)
+      const finalMaxZoom = Math.max(calculatedMaxZoom, minZoomNeeded + 0.5);
 
       setMinZoom(minZoomNeeded);
-      setMaxZoom(calculatedMaxZoom);
+      setMaxZoom(finalMaxZoom);
       
-      // Set initial zoom to minimum needed or 1, whichever is greater
-      setZoom(minZoomNeeded);
+      // Set initial zoom based on whether there's saved state
+      if (!image.editMetadata) {
+        // For small images, start at min zoom (1) so crop area is large and visible
+        // For large images, start at calculated minimum
+        setZoom(minZoomNeeded);
+      } else {
+        // Restore saved zoom, but clamp to valid range
+        const clampedZoom = Math.max(minZoomNeeded, Math.min(image.editMetadata.zoom, finalMaxZoom));
+        setZoom(clampedZoom);
+      }
     };
     
     img.onerror = () => {
       // Fallback to defaults if image fails to load
       setMinZoom(1);
       setMaxZoom(3);
-      setZoom(1);
+      if (!image.editMetadata) {
+        setZoom(1);
+      } else {
+        const clampedZoom = Math.max(1, Math.min(image.editMetadata.zoom, 3));
+        setZoom(clampedZoom);
+      }
     };
     
     img.src = sourceImageUrl;
-  }, [open, sourceImageUrl]);
+  }, [open, sourceImageUrl, image.editMetadata]);
 
-  // Reset state when dialog opens
+  // Load saved edit state when dialog opens
   useEffect(() => {
     if (open) {
-      setCrop({ x: 0, y: 0 });
-      setRotation(0);
-      setCroppedAreaPixels(null);
+      // Load saved edit state if available, otherwise use defaults
+      if (image.editMetadata) {
+        setCrop(image.editMetadata.crop);
+        setRotation(image.editMetadata.rotation);
+        if (image.editMetadata.croppedAreaPixels) {
+          setCroppedAreaPixels(image.editMetadata.croppedAreaPixels);
+        }
+      } else {
+        // Reset to defaults only if no saved state
+        setCrop({ x: 0, y: 0 });
+        setRotation(0);
+        setCroppedAreaPixels(null);
+        // Note: zoom is set by the image loading effect
+      }
     }
-  }, [open]);
+  }, [open, image.editMetadata]);
 
   // Handle crop complete callback from react-easy-crop
   const onCropComplete = useCallback((_croppedArea: Area, croppedAreaPixels: Area) => {
@@ -168,7 +210,7 @@ export function ImageCropRotateDialog({
         throw new Error(uploadResult.error ?? "Upload failed");
       }
 
-      // Update the database record with the new image URL
+      // Update the database record with the new image URL and edit metadata
       await updateImageMutation.mutateAsync({
         imageId: image.id,
         vehicleId,
@@ -177,6 +219,12 @@ export function ImageCropRotateDialog({
         fileSize: BigInt(uploadResult.fileSize),
         width: dimensions.width,
         height: dimensions.height,
+        editMetadata: {
+          crop,
+          zoom,
+          rotation,
+          croppedAreaPixels,
+        },
       });
 
     } catch (error) {
@@ -185,7 +233,7 @@ export function ImageCropRotateDialog({
       );
       setIsProcessing(false);
     }
-  }, [croppedAreaPixels, rotation, image, vehicleId, updateImageMutation, sourceImageUrl]);
+  }, [croppedAreaPixels, rotation, crop, zoom, image, vehicleId, updateImageMutation, sourceImageUrl]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -220,6 +268,7 @@ export function ImageCropRotateDialog({
             showGrid={true}
             minZoom={minZoom}
             maxZoom={maxZoom}
+            restrictPosition={true}
             classes={{
               containerClassName: "cropper-container",
               cropAreaClassName: "crop-area",
@@ -228,19 +277,19 @@ export function ImageCropRotateDialog({
         </div>
 
         {/* Controls */}
-        <div className="px-4 py-4 md:px-6 border-t bg-background space-y-4">
+        <div className="px-4 py-4 md:px-6 border-t bg-background space-y-5">
           {/* Zoom Control */}
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium flex items-center gap-2">
-                <ZoomOut className="h-4 w-4" />
+                <ZoomOut className="h-4 w-4 md:h-4 md:w-4" />
                 Zoom
-                <ZoomIn className="h-4 w-4" />
+                <ZoomIn className="h-4 w-4 md:h-4 md:w-4" />
               </label>
               <span className="text-sm text-muted-foreground">
                 {Math.round(zoom * 100)}%
-                {maxZoom < 3 && (
-                  <span className="text-xs ml-1">(limited by image size)</span>
+                {imageDimensions && (imageDimensions.width < MIN_OUTPUT_WIDTH || imageDimensions.height < MIN_OUTPUT_HEIGHT) && (
+                  <span className="text-xs ml-1 hidden sm:inline">(small image)</span>
                 )}
               </span>
             </div>
@@ -256,14 +305,14 @@ export function ImageCropRotateDialog({
           </div>
 
           {/* Rotation Control */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <label className="text-sm font-medium">Rotation</label>
             <Button
               variant="outline"
-              size="sm"
+              size="default"
               onClick={handleRotate}
               disabled={isProcessing}
-              className="gap-2"
+              className="gap-2 min-h-[44px] px-4 sm:size-sm sm:min-h-0"
             >
               <RotateCw className="h-4 w-4" />
               Rotate 90°
@@ -273,19 +322,19 @@ export function ImageCropRotateDialog({
 
         {/* Footer Actions */}
         <div className="px-4 py-4 md:px-6 border-t bg-background">
-          <DialogFooter className="flex-row gap-2">
+          <DialogFooter className="flex-row gap-3">
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isProcessing}
-              className="flex-1 sm:flex-none"
+              className="flex-1 sm:flex-none min-h-[44px]"
             >
               Cancel
             </Button>
             <Button
               onClick={handleSave}
               disabled={isProcessing || !croppedAreaPixels}
-              className="flex-1 sm:flex-none gap-2"
+              className="flex-1 sm:flex-none gap-2 min-h-[44px]"
             >
               {isProcessing && <Loader2 className="h-4 w-4 animate-spin" />}
               {isProcessing ? "Saving..." : "Save Changes"}

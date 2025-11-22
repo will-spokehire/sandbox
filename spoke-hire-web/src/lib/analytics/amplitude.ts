@@ -22,6 +22,7 @@ export function initAmplitude(): void {
   
   try {
     amplitude.init(AMPLITUDE_API_KEY, undefined, {
+      serverZone: "EU", // EU data residency for GDPR compliance
       defaultTracking: {
         sessions: true,
         pageViews: false, // We'll track manually for better control

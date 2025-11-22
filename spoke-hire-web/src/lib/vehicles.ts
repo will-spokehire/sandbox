@@ -23,9 +23,12 @@ export function formatPrice(price: number | string | { toNumber: () => number } 
     if (isNaN(numericPrice)) {
       return "N/A";
     }
-  } else if (typeof price === "object" && "toNumber" in price && typeof price.toNumber === "function") {
-    // Handle Prisma Decimal type
-    numericPrice = price.toNumber();
+  } else if (price != null) {
+    // Handle Prisma Decimal type - use Number() constructor
+    numericPrice = Number(price);
+    if (isNaN(numericPrice)) {
+      return "N/A";
+    }
   } else {
     return "N/A";
   }

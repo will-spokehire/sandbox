@@ -23,7 +23,6 @@ export interface CreateDealData {
   clientContactId?: string;
   fullQuote?: number;
   spokeFee?: number;
-  baselineFee?: number;
   notes?: string;
   status: DealStatus;
   createdById: string;
@@ -136,7 +135,6 @@ export class DealRepository extends BaseRepository {
         ...dealWithRelations,
         fullQuote: dealWithRelations.fullQuote?.toString() ?? null,
         spokeFee: dealWithRelations.spokeFee?.toString() ?? null,
-        baselineFee: dealWithRelations.baselineFee?.toString() ?? null,
         vehicles: dealWithRelations.vehicles.map((dealVehicle: any) => ({
           ...dealVehicle,
           vehicle: {
@@ -216,7 +214,6 @@ export class DealRepository extends BaseRepository {
           clientContactId: data.clientContactId,
           fullQuote: data.fullQuote,
           spokeFee: data.spokeFee,
-          baselineFee: data.baselineFee,
           notes: data.notes,
           status: data.status,
           createdById: data.createdById,
@@ -287,7 +284,6 @@ export class DealRepository extends BaseRepository {
       clientContactId?: string;
       fullQuote?: number;
       spokeFee?: number;
-      baselineFee?: number;
       notes?: string;
       status?: DealStatus;
     }

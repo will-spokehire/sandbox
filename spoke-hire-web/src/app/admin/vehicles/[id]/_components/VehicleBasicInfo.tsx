@@ -36,7 +36,7 @@ export function VehicleBasicInfo({ vehicle, onEditClick }: VehicleBasicInfoProps
       mono: true,
     },
     {
-      label: "Price",
+      label: "Agreed Value",
       value: formatPrice(vehicle.price),
       highlight: true,
     },
@@ -44,7 +44,7 @@ export function VehicleBasicInfo({ vehicle, onEditClick }: VehicleBasicInfoProps
       label: "Hourly Rate",
       value: formatPricingRate(
         vehicle.hourlyRate 
-          ? (typeof vehicle.hourlyRate === 'number' ? vehicle.hourlyRate : vehicle.hourlyRate.toNumber())
+          ? Number(vehicle.hourlyRate)
           : undefined
       ),
     },
@@ -52,7 +52,7 @@ export function VehicleBasicInfo({ vehicle, onEditClick }: VehicleBasicInfoProps
       label: "Daily Rate",
       value: formatPricingRate(
         vehicle.dailyRate 
-          ? (typeof vehicle.dailyRate === 'number' ? vehicle.dailyRate : vehicle.dailyRate.toNumber())
+          ? Number(vehicle.dailyRate)
           : undefined
       ),
     },
@@ -79,6 +79,10 @@ export function VehicleBasicInfo({ vehicle, onEditClick }: VehicleBasicInfoProps
     {
       label: "Interior Colour",
       value: vehicle.interiorColour ?? "N/A",
+    },
+    {
+      label: "Condition",
+      value: vehicle.condition ?? "N/A",
     },
     {
       label: "Road Legal",

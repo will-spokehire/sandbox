@@ -79,7 +79,7 @@ export function CookieBanner() {
       overlay={false}
     >
       <span>
-        We use cookies and similar technologies to analyze site traffic and
+        We use cookies and similar technologies to analyse site traffic and
         improve your experience.{" "}
         <a
           href="/privacy-policy"

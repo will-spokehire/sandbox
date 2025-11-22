@@ -29,7 +29,7 @@ interface PublicVehiclesCatalogContentProps {
 }
 
 /**
- * Public Vehicles Catalog Content
+ * Public Vehicles Catalogue Content
  * 
  * Displays published vehicles with filters.
  * Client component for interactivity with SSR initial data.
@@ -227,9 +227,9 @@ function PublicVehiclesCatalogContent({ initialData, serverTitles, serverFilterO
 }
 
 /**
- * Public Vehicles Catalog Page
+ * Public Vehicles Catalogue Page
  * 
- * Public-facing vehicle catalog with SSR and SEO optimization.
+ * Public-facing vehicle catalogue with SSR and SEO optimisation.
  * No authentication required.
  */
 export default function PublicVehiclesPageContent({ initialData, serverTitles, serverFilterOptions }: PublicVehiclesCatalogContentProps) {

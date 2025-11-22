@@ -29,8 +29,8 @@ export function SortFilter({
     { value: "updatedAt-desc", label: "Recently Updated" },
     { value: "name-asc", label: "Name (A-Z)" },
     { value: "name-desc", label: "Name (Z-A)" },
-    { value: "price-desc", label: "Price (High-Low)" },
-    { value: "price-asc", label: "Price (Low-High)" },
+    { value: "price-desc", label: "Agreed Value (High-Low)" },
+    { value: "price-asc", label: "Agreed Value (Low-High)" },
     ...(hasDistanceFilter ? [{ value: "distance", label: "Distance (Nearest)" }] : []),
   ];
 

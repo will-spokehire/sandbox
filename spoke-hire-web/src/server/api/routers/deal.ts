@@ -12,6 +12,7 @@
  */
 
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { RecipientStatus,  type Prisma } from "@prisma/client";
 import { createTRPCRouter, adminProcedure, protectedProcedure } from "~/server/api/trpc";
 import { ServiceFactory } from "~/server/api/services/service-factory";
@@ -53,7 +54,6 @@ const createDealInputSchema = z.object({
   clientContactId: z.string().cuid().optional(),
   fullQuote: z.number().min(MIN_FINANCIAL_AMOUNT).max(MAX_FINANCIAL_AMOUNT).optional(),
   spokeFee: z.number().min(MIN_FINANCIAL_AMOUNT).max(MAX_FINANCIAL_AMOUNT).optional(),
-  baselineFee: z.number().min(MIN_FINANCIAL_AMOUNT).max(MAX_FINANCIAL_AMOUNT).optional(),
   notes: z.string().max(MAX_NOTES_LENGTH).optional(),
   vehicleIds: z.array(z.string().cuid()).max(MAX_VEHICLES_PER_DEAL).optional().default([]),
   recipientIds: z.array(z.string().cuid()).max(MAX_RECIPIENTS_PER_DEAL).optional().default([]),
@@ -83,7 +83,6 @@ const updateDealInputSchema = z.object({
   clientContactId: z.string().cuid().nullable().optional(),
   fullQuote: z.number().min(MIN_FINANCIAL_AMOUNT).max(MAX_FINANCIAL_AMOUNT).nullable().optional(),
   spokeFee: z.number().min(MIN_FINANCIAL_AMOUNT).max(MAX_FINANCIAL_AMOUNT).nullable().optional(),
-  baselineFee: z.number().min(MIN_FINANCIAL_AMOUNT).max(MAX_FINANCIAL_AMOUNT).nullable().optional(),
   notes: z.string().max(MAX_NOTES_LENGTH).nullable().optional(),
   status: z.enum(["OPTIONS", "CONTRACTS_INVOICE", "COMPLETE", "POSTPONED", "ABANDONED", "ARCHIVED"]).optional(),
 });
@@ -126,10 +125,10 @@ const createUserEnquiryInputSchema = z.object({
   company: z.string().max(200).optional(),
   // Enquiry details
   dealType: z.enum(["PERSONAL_HIRE", "PRODUCTION"]),
-  date: z.string().optional(),
-  time: z.string().optional(),
-  location: z.string().optional(),
-  brief: z.string().optional(),
+  date: z.string().min(1, "Date is required"),
+  time: z.string().min(1, "Time is required"),
+  location: z.string().min(1, "Location is required"),
+  brief: z.string().min(1, "Brief is required"),
   // Optional vehicle association
   vehicleId: z.string().cuid().optional(),
 });
@@ -201,6 +200,32 @@ export const dealRouter = createTRPCRouter({
 
       // Get deal details
       const deal = await dealService.getDealById(input.dealId);
+
+      // Validate email fields before sending
+      const missingFields: string[] = [];
+      
+      if (!deal.fee || deal.fee.trim().length === 0) {
+        missingFields.push("Fee");
+      }
+      if (!deal.date || deal.date.trim().length === 0) {
+        missingFields.push("Date");
+      }
+      if (!deal.time || deal.time.trim().length === 0) {
+        missingFields.push("Time");
+      }
+      if (!deal.location || deal.location.trim().length === 0) {
+        missingFields.push("Location");
+      }
+      if (!deal.brief || deal.brief.trim().length === 0) {
+        missingFields.push("Brief");
+      }
+      
+      if (missingFields.length > 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Cannot send emails. Please fill in the following fields: ${missingFields.join(", ")}`,
+        });
+      }
 
       // Get vehicles for the deal
       const vehicles = await dealService.getDealVehicles(input.dealId);
@@ -310,13 +335,12 @@ export const dealRouter = createTRPCRouter({
     .input(updateDealInputSchema)
     .mutation(async ({ ctx, input }) => {
       const service = ServiceFactory.createDealService(ctx.db);
-      const { id, clientContactId, fullQuote, spokeFee, baselineFee, notes, status, ...restParams } = input;
+      const { id, clientContactId, fullQuote, spokeFee, notes, status, ...restParams } = input;
       return await service.updateDeal(id, {
         ...restParams,
         clientContactId: clientContactId ?? undefined,
         fullQuote: fullQuote ?? undefined,
         spokeFee: spokeFee ?? undefined,
-        baselineFee: baselineFee ?? undefined,
         notes: notes ?? undefined,
         status: status as any,
       });

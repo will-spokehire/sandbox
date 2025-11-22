@@ -99,3 +99,18 @@ export type {
   UploadResult,
 } from "./media";
 
+// Make and Model types
+export type {
+  MakeWithCount,
+  ModelWithDetails,
+  ListMakesParams,
+  ListModelsParams,
+  ListMakesResult,
+  ListModelsResult,
+  UpdateMakeParams,
+  UpdateModelParams,
+  MergeMakesParams,
+  MergeModelsParams,
+  MergeResult,
+} from "./make-model";
+

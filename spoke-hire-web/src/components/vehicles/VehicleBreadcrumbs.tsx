@@ -31,7 +31,7 @@ interface VehicleBreadcrumbsProps {
  * ]} />
  * 
  * @example
- * // With click handlers (catalog page)
+ * // With click handlers (catalogue page)
  * <VehicleBreadcrumbs segments={[
  *   { label: "England", onClick: () => updateFilters(...) },
  *   { label: "BMW", onClick: () => updateFilters(...) },
