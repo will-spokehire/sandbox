@@ -9,6 +9,7 @@ import { TRPCError } from "@trpc/server";
 import { type DbClient } from "~/server/types";
 import { EmailService } from "./email.service";
 import { getAppUrl } from "~/lib/app-url";
+import { env } from "~/env";
 
 /**
  * Status transition validation result
@@ -262,7 +263,7 @@ export class VehicleStatusService {
 
       // Send email to admin when vehicle goes to IN_REVIEW
       if (newStatus === "IN_REVIEW") {
-        const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL;
+        const adminEmail = env.ADMIN_NOTIFICATION_EMAIL;
         if (adminEmail) {
           await this.emailService.sendVehicleInReviewEmail({
             to: adminEmail,

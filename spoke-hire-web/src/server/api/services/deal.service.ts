@@ -27,6 +27,7 @@ import { EmailService } from "./email.service";
 import { DealRepository } from "../repositories/deal.repository";
 import { UserRepository } from "../repositories/user.repository";
 import { getDealTypeLabel } from "~/lib/deals";
+import { env } from "~/env";
 import type {
   CreateDealParams,
   UpdateDealParams,
@@ -375,12 +376,8 @@ export class DealService {
     // After transaction completes, send emails ONLY to new recipients (if sendEmails is true)
     // Note: Emails are sent AFTER the transaction to avoid holding locks
     if (sendEmails && result.newRecipientIds.length > 0) {
-      try {
-        await this.sendDealEmails(result.dealId, result.newRecipientIds);
-      } catch (error) {
-        // Log error but don't fail the operation
-        console.error(`Failed to send emails for deal ${result.dealId}:`, error);
-      }
+      // Validate and send emails - throw validation errors to UI
+      await this.sendDealEmails(result.dealId, result.newRecipientIds);
     } else if (!sendEmails) {
       console.log(`Skipping email notifications for deal ${result.dealId} as requested`);
     }
@@ -794,7 +791,7 @@ export class DealService {
       const emailService = new EmailService();
       
       // Get admin email from environment
-      const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL;
+      const adminEmail = env.ADMIN_NOTIFICATION_EMAIL;
       
       // Send admin notification
       if (adminEmail) {
@@ -811,7 +808,7 @@ export class DealService {
           location: location ?? null,
           brief: brief ?? null,
           vehicleName: vehicleId ? "Vehicle attached" : null, // We could fetch vehicle name if needed
-          dealUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'}/admin/deals/${deal.id}`,
+          dealUrl: `${env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'}/admin/deals/${deal.id}`,
         });
       } else {
         console.warn("ADMIN_NOTIFICATION_EMAIL not configured - skipping admin notification");
