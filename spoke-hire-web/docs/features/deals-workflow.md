@@ -433,7 +433,7 @@ Auth: Admin only
 WhatsApp messages are generated client-side using the `generateDealMessage()` function in `/src/lib/whatsapp.ts`. The template format is:
 
 ```
-Hey {ownerName}, we've got an exciting production coming up that we think your {vehicleName} would be great for.
+Hey {firstName}, we've got an exciting production coming up that we think your {vehicleName} would be great for.
 
 Details:
 - Date: {date}
@@ -441,11 +441,13 @@ Details:
 - Location: {location}
 - Brief: {brief}
 
-If you're interested, please let us know your availability and fee. Other vehicles are being put forward at around {fee}, but we'll take your lead.
+If you're interested, please let us know your availability and fee. Other vehicles are being put forward at around £{fee}, but we'll take your lead.
 
 Cheers,
 George
 ```
+
+**Note:** The function automatically extracts the first name from the `ownerName` parameter. The fee is displayed with the £ currency symbol.
 
 **Note:** Emojis are not used in WhatsApp messages as they don't encode properly in deep links.
 

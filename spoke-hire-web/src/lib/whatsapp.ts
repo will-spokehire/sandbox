@@ -65,7 +65,10 @@ export function generateDealMessage(params: {
 }): string {
   const { vehicleName, ownerName, date, time, location, brief, fee } = params;
   
-  let message = `Hey ${ownerName}, we've got an exciting production coming up that we think your ${vehicleName} would be great for.\n\n`;
+  // Extract first name only from ownerName
+  const firstName = ownerName.split(' ')[0];
+  
+  let message = `Hey ${firstName}, we've got an exciting production coming up that we think your ${vehicleName} would be great for.\n\n`;
   message += `Details:\n`;
   
   if (date) {
@@ -87,7 +90,7 @@ export function generateDealMessage(params: {
   message += `\n`;
   
   if (fee) {
-    message += `If you're interested, please let us know your availability and fee. Other vehicles are being put forward at around ${fee}, but we'll take your lead.\n\n`;
+    message += `If you're interested, please let us know your availability and fee. Other vehicles are being put forward at around £${fee}, but we'll take your lead.\n\n`;
   } else {
     message += `If you're interested, please let us know your availability and fee.\n\n`;
   }
