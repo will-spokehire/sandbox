@@ -184,7 +184,6 @@ export function CreateEditDealDialog({
         clientContactId: data.clientContactId && data.clientContactId.trim() !== "" ? data.clientContactId : null,
         fullQuote: data.fullQuote ?? null,
         spokeFee: data.spokeFee ?? null,
-        baselineFee: data.baselineFee ?? null,
         notes: data.notes,
         status: data.status,
       });
@@ -201,7 +200,6 @@ export function CreateEditDealDialog({
         clientContactId: data.clientContactId && data.clientContactId.trim() !== "" ? data.clientContactId : undefined,
         fullQuote: data.fullQuote,
         spokeFee: data.spokeFee,
-        baselineFee: data.baselineFee,
         notes: data.notes,
         vehicleIds: [], // Empty array - vehicles will be added later
         recipientIds: [], // Empty array - recipients will be added with vehicles
@@ -350,7 +348,7 @@ export function CreateEditDealDialog({
               <p className="text-xs text-muted-foreground mt-1">Optional - you can add this later</p>
             </div>
             
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="fullQuote">Full Quote (£)</Label>
                 <Input
