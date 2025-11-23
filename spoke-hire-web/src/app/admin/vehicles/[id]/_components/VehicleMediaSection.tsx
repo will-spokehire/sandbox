@@ -19,7 +19,7 @@ import { getVehicleImageUrl } from "~/lib/vehicles";
 import { cn } from "~/lib/utils";
 import { type VehicleDetail } from "~/types/vehicle";
 import { toast } from "sonner";
-import { getWhatsAppChatUrl } from "~/lib/whatsapp";
+import { openWhatsAppChat } from "~/lib/whatsapp";
 import { useSwipeGesture } from "~/hooks/useSwipeGesture";
 
 interface VehicleMediaSectionProps {
@@ -228,7 +228,7 @@ export function VehicleMediaSection({ vehicle, onSendDeal }: VehicleMediaSection
                     <DropdownMenuItem
                       onClick={(e) => {
                         e.stopPropagation();
-                        window.open(getWhatsAppChatUrl(vehicle.owner.phone!), '_blank');
+                        openWhatsAppChat(vehicle.owner.phone!);
                       }}
                     >
                       <MessageCircle className="mr-2 h-4 w-4" />

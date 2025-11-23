@@ -52,6 +52,51 @@ export function getWhatsAppMessageUrl(phone: string, message: string): string {
 }
 
 /**
+ * Open WhatsApp chat (no message), trying app first then web
+ */
+export function openWhatsAppChat(phone: string): void {
+  const formattedPhone = formatPhoneForWhatsApp(phone);
+  
+  // Try app protocol first
+  const appUrl = `whatsapp://send?phone=${formattedPhone}`;
+  const webUrl = `https://wa.me/${formattedPhone}`;
+  
+  // Attempt to open app
+  const start = Date.now();
+  window.location.href = appUrl;
+  
+  // If app doesn't open within 1 second, fall back to web
+  setTimeout(() => {
+    if (Date.now() - start < 1500) {
+      window.open(webUrl, '_blank');
+    }
+  }, 1000);
+}
+
+/**
+ * Open WhatsApp with message, trying app first then web
+ */
+export function openWhatsAppWithMessage(phone: string, message: string): void {
+  const formattedPhone = formatPhoneForWhatsApp(phone);
+  const encodedMessage = encodeURIComponent(message);
+  
+  // Try app protocol first
+  const appUrl = `whatsapp://send?phone=${formattedPhone}&text=${encodedMessage}`;
+  const webUrl = `https://api.whatsapp.com/send?phone=${formattedPhone}&text=${encodedMessage}`;
+  
+  // Attempt to open app
+  const start = Date.now();
+  window.location.href = appUrl;
+  
+  // If app doesn't open within 1 second, fall back to web
+  setTimeout(() => {
+    if (Date.now() - start < 1500) {
+      window.open(webUrl, '_blank');
+    }
+  }, 1000);
+}
+
+/**
  * Generate templated deal message for WhatsApp
  */
 export function generateDealMessage(params: {

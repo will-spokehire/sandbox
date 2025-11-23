@@ -13,7 +13,7 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { Button } from "~/components/ui/button";
 import { useClipboard } from "~/hooks/useClipboard";
-import { getWhatsAppChatUrl } from "~/lib/whatsapp";
+import { openWhatsAppChat } from "~/lib/whatsapp";
 
 interface OwnerContactInfo {
   email: string;
@@ -79,7 +79,7 @@ export function OwnerContactDropdownItems({
           <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation();
-              window.open(getWhatsAppChatUrl(owner.phone!), '_blank');
+              openWhatsAppChat(owner.phone!);
             }}
           >
             <MessageCircle className="mr-2 h-4 w-4" />
@@ -133,7 +133,7 @@ export function OwnerContactButtons({
         <Button
           variant="default"
           size="sm"
-          onClick={() => window.open(getWhatsAppChatUrl(owner.phone!), '_blank')}
+          onClick={() => openWhatsAppChat(owner.phone!)}
           className={buttonClass}
         >
           <MessageCircle className="h-4 w-4" />
