@@ -16,12 +16,16 @@ import type {
 } from "~/server/types";
 import { TRPCError } from "@trpc/server";
 import { generateVehicleName } from "~/lib/vehicle-name-generator";
+import { CacheService, CacheKeys } from "./cache.service";
 
 /**
  * Service for managing vehicle makes
  */
 export class MakeService {
-  constructor(private db: DbClient) {}
+  constructor(
+    private db: DbClient,
+    private cache: CacheService
+  ) {}
 
   /**
    * List makes with optional filters, search, pagination
@@ -169,6 +173,18 @@ export class MakeService {
   async updateMake(params: UpdateMakeParams): Promise<Make> {
     const { id, ...data } = params;
 
+    // Get existing make to compare name changes
+    const existingMake = await this.db.make.findUnique({
+      where: { id },
+    });
+
+    if (!existingMake) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Make not found",
+      });
+    }
+
     // If name is being updated, check for uniqueness and regenerate slug
     if (data.name) {
       const existing = await this.db.make.findFirst({
@@ -199,6 +215,43 @@ export class MakeService {
           slug: newSlug,
         },
       });
+
+      // If make name changed, regenerate all vehicle names
+      if (data.name !== existingMake.name) {
+        console.log(`📝 Make name changed from "${existingMake.name}" to "${data.name}" - regenerating vehicle names...`);
+        
+        // Fetch all vehicles using this make
+        const vehiclesToUpdate = await this.db.vehicle.findMany({
+          where: { makeId: id },
+          include: { model: true },
+        });
+        
+        console.log(`🔄 Found ${vehiclesToUpdate.length} vehicle(s) to update`);
+        
+        // Regenerate name for each vehicle
+        for (const vehicle of vehiclesToUpdate) {
+          const newName = generateVehicleName(
+            vehicle.year,
+            data.name, // Use the new make name
+            vehicle.model.name
+          );
+          
+          await this.db.vehicle.update({
+            where: { id: vehicle.id },
+            data: { name: newName },
+          });
+          
+          console.log(`✅ Updated vehicle ${vehicle.id}: "${vehicle.name}" → "${newName}"`);
+          
+          // Invalidate individual vehicle cache
+          this.cache.delete(CacheKeys.vehicleDetail(vehicle.id));
+        }
+        
+        console.log(`✨ Successfully updated ${vehiclesToUpdate.length} vehicle name(s)`);
+        
+        // Invalidate vehicle list caches
+        this.cache.invalidateByPattern("vehicle:list:");
+      }
 
       return updated;
     }
@@ -301,6 +354,9 @@ export class MakeService {
                   name: newName,
                 },
               });
+              
+              // Invalidate vehicle cache
+              this.cache.delete(CacheKeys.vehicleDetail(vehicle.id));
             } else {
               // No matching model found - update the vehicle's make
               // Also regenerate the vehicle name to reflect the new make
@@ -317,6 +373,9 @@ export class MakeService {
                   name: newName,
                 },
               });
+              
+              // Invalidate vehicle cache
+              this.cache.delete(CacheKeys.vehicleDetail(vehicle.id));
             }
 
             vehiclesUpdated++;
@@ -346,6 +405,9 @@ export class MakeService {
           message: `Successfully merged ${secondaryMakes.length} make(s) into ${primaryMake.name}. Updated ${vehiclesUpdated} vehicle(s).`,
         };
       });
+
+      // Invalidate vehicle list caches after successful merge
+      this.cache.invalidateByPattern("vehicle:list:");
 
       return result;
     } catch (error) {
