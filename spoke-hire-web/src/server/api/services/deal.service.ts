@@ -56,6 +56,9 @@ export class DealService {
     
     if (status) {
       where.status = status;
+    } else {
+      // Default to showing non-archived deals
+      where.status = { not: "ARCHIVED" };
     }
     
     if (createdById) {
