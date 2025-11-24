@@ -230,7 +230,7 @@ export class VehicleStatusService {
     declinedReason?: string
   ): Promise<void> {
     const ownerName = vehicle.owner.firstName ?? "Vehicle Owner";
-    const vehicleName = `${vehicle.make.name} ${vehicle.model.name} - ${vehicle.name}`;
+    const vehicleName = vehicle.name;
     
     // Get base URL (auto-detects Vercel preview URLs)
     const baseUrl = getAppUrl();
