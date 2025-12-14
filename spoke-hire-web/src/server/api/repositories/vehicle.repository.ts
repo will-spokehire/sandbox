@@ -30,6 +30,7 @@ export interface VehicleWithRelations {
     phone: string | null;
     postcode: string | null;
     city: string | null;
+    county: string | null;
     latitude: number | null;
     longitude: number | null;
     country: { id: string; name: string } | null;
@@ -89,6 +90,7 @@ export class VehicleRepository extends BaseRepository {
               phone: true,
               postcode: true,
               city: true,
+              county: true,
               latitude: true,
               longitude: true,
               country: {

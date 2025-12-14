@@ -7,6 +7,8 @@
  * REFACTORED: Now uses shared types where applicable.
  */
 
+import { env } from "~/env";
+
 /**
  * Loops-specific deal email parameters
  * (Different from shared SendDealEmailParams which is more comprehensive)
@@ -96,12 +98,12 @@ export class EmailService {
   private testEmailOverride: string | undefined;
 
   constructor() {
-    this.apiKey = process.env.LOOPS_API_KEY ?? "";
-    this.transactionalId = process.env.LOOPS_TRANSACTIONAL_ID ?? "deal-notification";
+    this.apiKey = env.LOOPS_API_KEY ?? "";
+    this.transactionalId = env.LOOPS_TRANSACTIONAL_ID ?? "deal-notification";
     // Only enable debug mode if explicitly set to "true", not in all development
-    this.isDebugMode = process.env.EMAIL_DEBUG === "true";
+    this.isDebugMode = env.EMAIL_DEBUG === "true";
     // Test email override - if set, all emails will be sent to this address
-    this.testEmailOverride = process.env.TEST_EMAIL_OVERRIDE?.trim() ?? undefined;
+    this.testEmailOverride = env.TEST_EMAIL_OVERRIDE?.trim() ?? undefined;
     
     if (!this.apiKey) {
       console.warn("⚠️ LOOPS_API_KEY not configured. Email sending will be simulated.");
@@ -153,8 +155,7 @@ export class EmailService {
       console.log("Deal URL:", dealUrl ?? "(none)");
       console.log("=".repeat(80) + "\n");
       
-      // Simulate delay
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // No artificial delay needed - sendBulkEmails handles rate limiting
       
       return {
         success: true,
@@ -226,43 +227,58 @@ export class EmailService {
   }
 
   /**
-   * Send bulk emails with Promise.allSettled for better performance
+   * Send bulk emails with rate limiting to avoid 429 errors
+   * Sends emails sequentially with a configurable delay between each request
    */
   async sendBulkEmails(
     emails: LoopsDealEmailParams[]
   ): Promise<Array<{ email: string; success: boolean; error?: string; messageId?: string }>> {
-    // Use Promise.allSettled for concurrent sending
-    const promises = emails.map(async (emailParams) => {
+    // Get delay from environment variable (default: 200ms for 5 emails/second)
+    // In debug mode, use shorter delay since no actual API calls are made
+    const delayMs = parseInt(env.LOOPS_EMAIL_SEND_DELAY_MS ?? "200", 10);
+    
+    // Log rate limiting info for monitoring
+    console.log(`📨 Sending ${emails.length} emails sequentially with ${delayMs}ms delay between requests${this.isDebugMode ? " (debug mode)" : ""}`);
+    
+    const results: Array<{ email: string; success: boolean; error?: string; messageId?: string }> = [];
+    const startTime = Date.now();
+    
+    // Send emails sequentially with delay
+    for (let i = 0; i < emails.length; i++) {
+      const emailParams = emails[i]!;
+      
       try {
         const result = await this.sendDealEmail(emailParams);
-        return {
+        results.push({
           email: emailParams.to,
           success: result.success,
           error: result.error,
           messageId: result.messageId,
-        };
+        });
+        
+        // Log progress
+        console.log(`📧 Email ${i + 1}/${emails.length} to ${emailParams.to}: ${result.success ? "✓ Sent" : `✗ Failed: ${result.error ?? "Unknown error"}`}`);
       } catch (error) {
-        return {
+        results.push({
           email: emailParams.to,
           success: false,
           error: error instanceof Error ? error.message : "Unknown error",
-        };
+        });
+        
+        console.log(`📧 Email ${i + 1}/${emails.length} to ${emailParams.to}: ✗ Failed: ${error instanceof Error ? error.message : "Unknown error"}`);
       }
-    });
-
-    const results = await Promise.allSettled(promises);
+      
+      // Add delay between emails (except after the last one)
+      if (i < emails.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+      }
+    }
     
-    return results.map((result, index) => {
-      if (result.status === "fulfilled") {
-        return result.value;
-      } else {
-        return {
-          email: emails[index]!.to,
-          success: false,
-          error: result.reason instanceof Error ? result.reason.message : "Unknown error",
-        };
-      }
-    });
+    const totalTime = Date.now() - startTime;
+    const successCount = results.filter(r => r.success).length;
+    console.log(`✅ Bulk email send complete: ${successCount}/${emails.length} successful in ${totalTime}ms`);
+    
+    return results;
   }
 
   /**
@@ -271,7 +287,7 @@ export class EmailService {
   async sendVehiclePublishedEmail(params: VehiclePublishedEmailParams): Promise<{ success: boolean; messageId?: string; error?: string }> {
     const { to, ownerName, vehicleName, vehicleUrl, dashboardUrl } = params;
     
-    const transactionalId = process.env.LOOPS_VEHICLE_PUBLISHED_ID ?? "vehicle-published";
+    const transactionalId = env.LOOPS_VEHICLE_PUBLISHED_ID ?? "vehicle-published";
     
     // Determine actual recipient email (use override if set)
     const originalRecipient = to;
@@ -293,8 +309,6 @@ export class EmailService {
       console.log("Vehicle URL:", vehicleUrl);
       console.log("Dashboard URL:", dashboardUrl);
       console.log("=".repeat(80) + "\n");
-      
-      await new Promise(resolve => setTimeout(resolve, 100));
       
       return {
         success: true,
@@ -352,7 +366,7 @@ export class EmailService {
   async sendVehicleDeclinedEmail(params: VehicleDeclinedEmailParams): Promise<{ success: boolean; messageId?: string; error?: string }> {
     const { to, ownerName, vehicleName, declinedReason, dashboardUrl } = params;
     
-    const transactionalId = process.env.LOOPS_VEHICLE_DECLINED_ID ?? "vehicle-declined";
+    const transactionalId = env.LOOPS_VEHICLE_DECLINED_ID ?? "vehicle-declined";
     
     // Determine actual recipient email (use override if set)
     const originalRecipient = to;
@@ -374,8 +388,6 @@ export class EmailService {
       console.log("Declined Reason:", declinedReason);
       console.log("Dashboard URL:", dashboardUrl);
       console.log("=".repeat(80) + "\n");
-      
-      await new Promise(resolve => setTimeout(resolve, 100));
       
       return {
         success: true,
@@ -433,7 +445,7 @@ export class EmailService {
   async sendVehicleInReviewEmail(params: VehicleInReviewEmailParams): Promise<{ success: boolean; messageId?: string; error?: string }> {
     const { to, vehicleName, ownerName, vehicleUrl } = params;
     
-    const transactionalId = process.env.LOOPS_VEHICLE_IN_REVIEW_ID ?? "vehicle-in-review";
+    const transactionalId = env.LOOPS_VEHICLE_IN_REVIEW_ID ?? "vehicle-in-review";
     
     // Determine actual recipient email (use override if set)
     const originalRecipient = to;
@@ -454,8 +466,6 @@ export class EmailService {
       console.log("Owner Name:", ownerName);
       console.log("Vehicle URL (Admin):", vehicleUrl);
       console.log("=".repeat(80) + "\n");
-      
-      await new Promise(resolve => setTimeout(resolve, 100));
       
       return {
         success: true,
@@ -512,7 +522,7 @@ export class EmailService {
   async sendAdminEnquiryNotification(params: AdminEnquiryEmailParams): Promise<{ success: boolean; messageId?: string; error?: string }> {
     const { to, userName, userEmail, userPhone, userCompany, dealName, dealType, date, time, location, brief, vehicleName, dealUrl } = params;
     
-    const transactionalId = process.env.LOOPS_ENQUIRY_ADMIN_ID ?? "enquiry-admin-notification";
+    const transactionalId = env.LOOPS_ENQUIRY_ADMIN_ID ?? "enquiry-admin-notification";
     
     // Determine actual recipient email (use override if set)
     const originalRecipient = to;
@@ -542,8 +552,6 @@ export class EmailService {
       console.log("Vehicle:", vehicleName ?? "(none)");
       console.log("Deal URL:", dealUrl);
       console.log("=".repeat(80) + "\n");
-      
-      await new Promise(resolve => setTimeout(resolve, 100));
       
       return {
         success: true,
@@ -608,7 +616,7 @@ export class EmailService {
   async sendUserEnquiryConfirmation(params: UserEnquiryConfirmationParams): Promise<{ success: boolean; messageId?: string; error?: string }> {
     const { to, userName, dealType } = params;
     
-    const transactionalId = process.env.LOOPS_ENQUIRY_USER_ID ?? "enquiry-user-confirmation";
+    const transactionalId = env.LOOPS_ENQUIRY_USER_ID ?? "enquiry-user-confirmation";
     
     // Determine actual recipient email (use override if set)
     const originalRecipient = to;
@@ -628,8 +636,6 @@ export class EmailService {
       console.log("User Name:", userName);
       console.log("Deal Type:", dealType);
       console.log("=".repeat(80) + "\n");
-      
-      await new Promise(resolve => setTimeout(resolve, 100));
       
       return {
         success: true,

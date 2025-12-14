@@ -25,7 +25,7 @@ import {
   getVehicleImageUrl,
 } from "~/lib/vehicles";
 import { formatPricingRate } from "~/lib/pricing";
-import { getWhatsAppChatUrl } from "~/lib/whatsapp";
+import { openWhatsAppChat } from "~/lib/whatsapp";
 import { cn } from "~/lib/utils";
 
 interface VehicleCardProps {
@@ -171,7 +171,7 @@ export const VehicleCard = memo(function VehicleCard({
                     <DropdownMenuItem
                       onClick={(e) => {
                         e.stopPropagation();
-                        window.open(getWhatsAppChatUrl(vehicle.owner.phone!), '_blank');
+                        openWhatsAppChat(vehicle.owner.phone!);
                       }}
                     >
                       <MessageCircle className="mr-2 h-4 w-4" />

@@ -14,6 +14,7 @@
 import { type DbClient } from "../repositories/base.repository";
 import { VehicleService } from "./vehicle.service";
 import { VehicleStatusService } from "./vehicle-status.service";
+import { VehicleNameUpdaterService } from "./vehicle-name-updater.service";
 import { DealService } from "./deal.service";
 import { LookupService } from "./lookup.service";
 import { AuthService } from "./auth.service";
@@ -109,14 +110,21 @@ export class ServiceFactory {
    * Create MakeService
    */
   static createMakeService(db: DbClient): MakeService {
-    return new MakeService(db);
+    return new MakeService(db, cacheService);
   }
 
   /**
    * Create ModelService
    */
   static createModelService(db: DbClient): ModelService {
-    return new ModelService(db);
+    return new ModelService(db, cacheService);
+  }
+
+  /**
+   * Create VehicleNameUpdaterService
+   */
+  static createVehicleNameUpdaterService(db: DbClient): VehicleNameUpdaterService {
+    return new VehicleNameUpdaterService(db, cacheService);
   }
 
   /**

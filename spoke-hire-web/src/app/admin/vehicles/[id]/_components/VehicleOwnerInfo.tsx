@@ -12,7 +12,7 @@ import { formatPhoneForDisplay } from "~/lib/whatsapp";
 import { type VehicleDetail } from "~/types/vehicle";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
-import { getWhatsAppChatUrl } from "~/lib/whatsapp";
+import { openWhatsAppChat } from "~/lib/whatsapp";
 
 interface VehicleOwnerInfoProps {
   owner: VehicleDetail["owner"];
@@ -283,7 +283,7 @@ export function VehicleOwnerInfo({ owner, vehicleId }: VehicleOwnerInfoProps) {
               <Button
                 variant="default"
                 size="sm"
-                onClick={() => window.open(getWhatsAppChatUrl(owner.phone!), '_blank')}
+                onClick={() => openWhatsAppChat(owner.phone!)}
                 className="w-full justify-start gap-2"
               >
                 <MessageCircle className="h-4 w-4" />

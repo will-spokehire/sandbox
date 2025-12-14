@@ -104,27 +104,6 @@ function PublicVehiclesCatalogContent({ initialData, serverTitles, serverFilterO
           {/* Filters */}
           <PublicVehicleFilters />
 
-          {/* Results Count */}
-          {!isLoading && (
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                {totalCount === 0 ? (
-                  "No vehicles found"
-                ) : (
-                  <>
-                    Found <span className="font-semibold text-foreground">{totalCount}</span> vehicle{totalCount !== 1 ? "s" : ""}
-                    {hasActiveFilters && " matching your criteria"}
-                    {totalPages > 1 && (
-                      <span className="ml-2">
-                        (Page <span className="font-semibold">{filters.page ?? 1}</span> of <span className="font-semibold">{totalPages}</span>)
-                      </span>
-                    )}
-                  </>
-                )}
-              </p>
-            </div>
-          )}
-
           {/* Vehicle Grid */}
           <PublicVehicleGrid
             vehicles={vehicles}

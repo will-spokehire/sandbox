@@ -21,9 +21,9 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { api } from "~/trpc/react";
 import { 
-  getWhatsAppMessageUrl, 
   generateDealMessage,
-  getWhatsAppChatUrl
+  openWhatsAppChat,
+  openWhatsAppWithMessage
 } from "~/lib/whatsapp";
 import { formatOwnerName } from "~/lib/vehicles";
 import { useClipboard } from "~/hooks/useClipboard";
@@ -731,7 +731,7 @@ export default function DealDetailPage({
                                         <DropdownMenuItem
                                           onClick={(e) => {
                                             e.stopPropagation();
-                                            window.open(getWhatsAppChatUrl(dv.vehicle.owner.phone!), '_blank');
+                                            openWhatsAppChat(dv.vehicle.owner.phone!);
                                           }}
                                         >
                                           <MessageCircle className="mr-2 h-4 w-4" />
@@ -749,7 +749,7 @@ export default function DealDetailPage({
                                               brief: deal.brief,
                                               fee: deal.fee,
                                             });
-                                            window.open(getWhatsAppMessageUrl(dv.vehicle.owner.phone!, message), '_blank');
+                                            openWhatsAppWithMessage(dv.vehicle.owner.phone!, message);
                                           }}
                                         >
                                           <MessageCircle className="mr-2 h-4 w-4" />
@@ -998,7 +998,7 @@ export default function DealDetailPage({
                                     <DropdownMenuItem
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        window.open(getWhatsAppChatUrl(dv.vehicle.owner.phone!), '_blank');
+                                        openWhatsAppChat(dv.vehicle.owner.phone!);
                                       }}
                                     >
                                       <MessageCircle className="mr-2 h-4 w-4" />
@@ -1016,7 +1016,7 @@ export default function DealDetailPage({
                                           brief: deal.brief,
                                           fee: deal.fee,
                                         });
-                                        window.open(getWhatsAppMessageUrl(dv.vehicle.owner.phone!, message), '_blank');
+                                        openWhatsAppWithMessage(dv.vehicle.owner.phone!, message);
                                       }}
                                     >
                                       <MessageCircle className="mr-2 h-4 w-4" />

@@ -9,6 +9,7 @@ import { TRPCError } from "@trpc/server";
 import { type DbClient } from "~/server/types";
 import { EmailService } from "./email.service";
 import { getAppUrl } from "~/lib/app-url";
+import { env } from "~/env";
 
 /**
  * Status transition validation result
@@ -229,7 +230,7 @@ export class VehicleStatusService {
     declinedReason?: string
   ): Promise<void> {
     const ownerName = vehicle.owner.firstName ?? "Vehicle Owner";
-    const vehicleName = `${vehicle.make.name} ${vehicle.model.name} - ${vehicle.name}`;
+    const vehicleName = vehicle.name;
     
     // Get base URL (auto-detects Vercel preview URLs)
     const baseUrl = getAppUrl();
@@ -262,7 +263,7 @@ export class VehicleStatusService {
 
       // Send email to admin when vehicle goes to IN_REVIEW
       if (newStatus === "IN_REVIEW") {
-        const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL;
+        const adminEmail = env.ADMIN_NOTIFICATION_EMAIL;
         if (adminEmail) {
           await this.emailService.sendVehicleInReviewEmail({
             to: adminEmail,

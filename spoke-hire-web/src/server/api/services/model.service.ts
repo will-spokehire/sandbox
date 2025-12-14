@@ -16,12 +16,16 @@ import type {
 } from "~/server/types";
 import { TRPCError } from "@trpc/server";
 import { generateVehicleName } from "~/lib/vehicle-name-generator";
+import { CacheService, CacheKeys } from "./cache.service";
 
 /**
  * Service for managing vehicle models
  */
 export class ModelService {
-  constructor(private db: DbClient) {}
+  constructor(
+    private db: DbClient,
+    private cache: CacheService
+  ) {}
 
   /**
    * List models with optional filters, search, pagination
@@ -237,6 +241,43 @@ export class ModelService {
         data,
       });
 
+      // If model name changed, regenerate all vehicle names
+      if (data.name && data.name !== existingModel.name) {
+        console.log(`📝 Model name changed from "${existingModel.name}" to "${data.name}" - regenerating vehicle names...`);
+        
+        // Fetch all vehicles using this model
+        const vehiclesToUpdate = await this.db.vehicle.findMany({
+          where: { modelId: id },
+          include: { make: true },
+        });
+        
+        console.log(`🔄 Found ${vehiclesToUpdate.length} vehicle(s) to update`);
+        
+        // Regenerate name for each vehicle
+        for (const vehicle of vehiclesToUpdate) {
+          const newName = generateVehicleName(
+            vehicle.year,
+            vehicle.make.name,
+            data.name // Use the new model name
+          );
+          
+          await this.db.vehicle.update({
+            where: { id: vehicle.id },
+            data: { name: newName },
+          });
+          
+          console.log(`✅ Updated vehicle ${vehicle.id}: "${vehicle.name}" → "${newName}"`);
+          
+          // Invalidate individual vehicle cache
+          this.cache.delete(CacheKeys.vehicleDetail(vehicle.id));
+        }
+        
+        console.log(`✨ Successfully updated ${vehiclesToUpdate.length} vehicle name(s)`);
+        
+        // Invalidate vehicle list caches (affects search results, admin lists, etc.)
+        this.cache.invalidateByPattern("vehicle:list:");
+      }
+
       return updated;
     } catch (error) {
       throw new TRPCError({
@@ -327,6 +368,9 @@ export class ModelService {
                 name: newName,
               },
             });
+            
+            // Invalidate individual vehicle cache
+            this.cache.delete(CacheKeys.vehicleDetail(vehicle.id));
           }
 
           vehiclesUpdated += vehicleCount;
@@ -344,6 +388,9 @@ export class ModelService {
           message: `Successfully merged ${secondaryModels.length} model(s) into ${primaryModel.name}. Updated ${vehiclesUpdated} vehicle(s).`,
         };
       });
+
+      // Invalidate vehicle list caches after successful merge
+      this.cache.invalidateByPattern("vehicle:list:");
 
       return result;
     } catch (error) {

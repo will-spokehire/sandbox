@@ -19,6 +19,18 @@ export const env = createEnv({
     GOOGLE_OAUTH_CLIENT_SECRET: z.string().optional(),
     // Analytics - Server-side tracking
     AMPLITUDE_SERVER_API_KEY: z.string().optional(),
+    // Email Service (Loops) - Optional configurations
+    LOOPS_API_KEY: z.string().optional(),
+    LOOPS_TRANSACTIONAL_ID: z.string().optional(),
+    LOOPS_VEHICLE_PUBLISHED_ID: z.string().optional(),
+    LOOPS_VEHICLE_DECLINED_ID: z.string().optional(),
+    LOOPS_VEHICLE_IN_REVIEW_ID: z.string().optional(),
+    LOOPS_ENQUIRY_ADMIN_ID: z.string().optional(),
+    LOOPS_ENQUIRY_USER_ID: z.string().optional(),
+    LOOPS_EMAIL_SEND_DELAY_MS: z.string().regex(/^\d+$/).optional().default("200"),
+    EMAIL_DEBUG: z.string().optional(),
+    TEST_EMAIL_OVERRIDE: z.string().email().optional(),
+    ADMIN_NOTIFICATION_EMAIL: z.string().email().optional(),
   },
 
   /**
@@ -54,6 +66,18 @@ export const env = createEnv({
     AMPLITUDE_SERVER_API_KEY: process.env.AMPLITUDE_SERVER_API_KEY,
     NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
     NEXT_PUBLIC_AMPLITUDE_API_KEY: process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY,
+    // Email Service (Loops)
+    LOOPS_API_KEY: process.env.LOOPS_API_KEY,
+    LOOPS_TRANSACTIONAL_ID: process.env.LOOPS_TRANSACTIONAL_ID,
+    LOOPS_VEHICLE_PUBLISHED_ID: process.env.LOOPS_VEHICLE_PUBLISHED_ID,
+    LOOPS_VEHICLE_DECLINED_ID: process.env.LOOPS_VEHICLE_DECLINED_ID,
+    LOOPS_VEHICLE_IN_REVIEW_ID: process.env.LOOPS_VEHICLE_IN_REVIEW_ID,
+    LOOPS_ENQUIRY_ADMIN_ID: process.env.LOOPS_ENQUIRY_ADMIN_ID,
+    LOOPS_ENQUIRY_USER_ID: process.env.LOOPS_ENQUIRY_USER_ID,
+    LOOPS_EMAIL_SEND_DELAY_MS: process.env.LOOPS_EMAIL_SEND_DELAY_MS,
+    EMAIL_DEBUG: process.env.EMAIL_DEBUG,
+    TEST_EMAIL_OVERRIDE: process.env.TEST_EMAIL_OVERRIDE,
+    ADMIN_NOTIFICATION_EMAIL: process.env.ADMIN_NOTIFICATION_EMAIL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

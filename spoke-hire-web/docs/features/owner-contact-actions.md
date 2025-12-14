@@ -161,25 +161,41 @@ export function getWhatsAppMessageUrl(phone: string, message: string): string {
 
 // Generate deal message template
 export function generateDealMessage(params: {
-  dealName: string;
-  dealDescription?: string | null | undefined;
   vehicleName: string;
   ownerName: string;
+  date?: string | null;
+  time?: string | null;
+  location?: string | null;
+  brief?: string | null;
+  fee?: string | null;
 }): string {
-  const { dealName, dealDescription, vehicleName, ownerName } = params;
-
-  let message = `Hi ${ownerName},\n\n`;
-  message += `I'm reaching out regarding the deal: *${dealName}*\n\n`;
-
-  if (dealDescription) {
-    message += `${dealDescription}\n\n`;
+  const { vehicleName, ownerName, date, time, location, brief, fee } = params;
+  
+  // Extract first name only from ownerName
+  const firstName = ownerName.split(' ')[0];
+  
+  let message = `Hey ${firstName}, we've got an exciting production coming up that we think your ${vehicleName} would be great for.\n\n`;
+  message += `Details:\n`;
+  
+  if (date) message += `- Date: ${date}\n`;
+  if (time) message += `- Time: ${time}\n`;
+  if (location) message += `- Location: ${location}\n`;
+  if (brief) message += `- Brief: ${brief}\n`;
+  
+  message += `\n`;
+  
+  if (fee) {
+    message += `If you're interested, please let us know your availability and fee. Other vehicles are being put forward at around £${fee}, but we'll take your lead.\n\n`;
+  } else {
+    message += `If you're interested, please let us know your availability and fee.\n\n`;
   }
-
-  message += `This includes your vehicle: ${vehicleName}\n\n`;
-  message += `Please let me know if you have any questions.\n\nBest regards`;
+  
+  message += `Cheers,\nGeorge`;
   return message;
 }
 ```
+
+**Note:** The function automatically extracts the first name from `ownerName` for a more personal greeting. The fee is displayed with the £ currency symbol.
 
 ### Deal-Specific WhatsApp Action
 
@@ -198,10 +214,13 @@ const ownerName = formatOwnerName(
 );
 
 const message = generateDealMessage({
-  dealName: deal.name,
-  dealDescription: deal.description,
   vehicleName: vehicle.name,
   ownerName,
+  date: deal.date,
+  time: deal.time,
+  location: deal.location,
+  brief: deal.brief,
+  fee: deal.fee,
 });
 
 window.open(getWhatsAppMessageUrl(vehicle.owner.phone!, message), '_blank');
@@ -231,14 +250,17 @@ import { formatOwnerName } from "~/lib/vehicles";
       <DropdownMenuItem
         onClick={() => {
           const message = generateDealMessage({
-            dealName: deal.name,
-            dealDescription: deal.description,
             vehicleName: vehicle.name,
             ownerName: formatOwnerName(
               vehicle.owner.firstName,
               vehicle.owner.lastName,
               vehicle.owner.email
             ),
+            date: deal.date,
+            time: deal.time,
+            location: deal.location,
+            brief: deal.brief,
+            fee: deal.fee,
           });
           window.open(getWhatsAppMessageUrl(vehicle.owner.phone!, message), '_blank');
         }}
