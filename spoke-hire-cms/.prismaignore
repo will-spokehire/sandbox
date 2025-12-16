@@ -1,0 +1,5 @@
+# Ignore Prisma schemas from workspace root
+../spoke-hire-web/prisma/
+../**/prisma/
+**/node_modules/
+

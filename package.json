@@ -1,0 +1,17 @@
+{
+  "name": "spoke-hire-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "spoke-hire-web",
+    "spoke-hire-cms"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --workspace=spoke-hire-web",
+    "dev:cms": "npm run dev --workspace=spoke-hire-cms",
+    "build:web": "npm run build --workspace=spoke-hire-web",
+    "build:cms": "npm run build --workspace=spoke-hire-cms",
+    "install:all": "npm install"
+  },
+  "packageManager": "npm@10.9.2"
+}
