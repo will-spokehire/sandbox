@@ -13,6 +13,10 @@ import { Stats } from './collections/Stats'
 import { ValueProps } from './collections/ValueProps'
 import { FeaturedVehiclesConfig } from './collections/FeaturedVehiclesConfig'
 import { CTABlocks } from './collections/CTABlocks'
+import { Testimonials } from './collections/Testimonials'
+import { FAQs } from './collections/FAQs'
+import { Navigation } from './globals/Navigation'
+import { SiteSettings } from './globals/SiteSettings'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -35,6 +39,12 @@ export default buildConfig({
     ValueProps,
     FeaturedVehiclesConfig,
     CTABlocks,
+    Testimonials,
+    FAQs,
+  ],
+  globals: [
+    Navigation,
+    SiteSettings,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
