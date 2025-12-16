@@ -1,17 +1,15 @@
-"use client";
-
 import { PublicUserNavigation } from "~/components/navigation/PublicUserNavigation";
-import { FooterClient } from "~/components/footer/FooterClient";
+import { FooterWrapper } from "~/components/footer/FooterWrapper";
 import { LAYOUT_CONSTANTS } from "~/lib/design-tokens";
 import { cn } from "~/lib/utils";
 
 /**
- * Enquiry Layout
+ * Layout for CMS Static Pages
  * 
- * Shared layout for all /enquiry/* routes.
- * Provides consistent navigation and footer using unified components.
+ * Provides consistent navigation and footer for all pages
+ * created via PayloadCMS static pages collection.
  */
-export default function EnquiryLayout({
+export default async function StaticPageLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -19,10 +17,9 @@ export default function EnquiryLayout({
   return (
     <div className={cn(LAYOUT_CONSTANTS.pageWrapper, LAYOUT_CONSTANTS.bgDefault)}>
       <PublicUserNavigation />
-      <main className={LAYOUT_CONSTANTS.mainContent}>{children}</main>
-      <FooterClient />
+      {children}
+      <FooterWrapper />
     </div>
   );
 }
-
 

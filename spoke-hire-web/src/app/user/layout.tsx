@@ -1,7 +1,7 @@
 "use client";
 
 import { PublicUserNavigation } from "~/components/navigation/PublicUserNavigation";
-import { PublicFooter } from "~/app/vehicles/_components/PublicFooter";
+import { FooterClient } from "~/components/footer/FooterClient";
 import { LAYOUT_CONSTANTS } from "~/lib/design-tokens";
 import { cn } from "~/lib/utils";
 
@@ -20,7 +20,7 @@ export default function UserLayout({
     <div className={cn(LAYOUT_CONSTANTS.pageWrapper, LAYOUT_CONSTANTS.bgMuted)}>
       <PublicUserNavigation />
       <main className={LAYOUT_CONSTANTS.mainContent}>{children}</main>
-      <PublicFooter />
+      <FooterClient />
     </div>
   );
 }

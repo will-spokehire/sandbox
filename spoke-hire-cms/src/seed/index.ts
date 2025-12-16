@@ -12,6 +12,7 @@ import 'dotenv/config'
 import { getPayload } from 'payload'
 import config from '../payload.config'
 import { heroSlides, stats, valueProps, ctaBlocks, homepageLayout } from './homepage-data'
+import { footerData } from './footer-data'
 
 async function seed() {
   console.log('🌱 Starting seed process...')
@@ -161,6 +162,33 @@ async function seed() {
       console.log('  ○ Homepage already exists')
     }
 
+    // ============================================
+    // 6. SEED NAVIGATION GLOBAL (Footer)
+    // ============================================
+    console.log('\n🔗 Seeding Navigation global (footer)...')
+
+    try {
+      // Get existing navigation global
+      const existingNav = await payload.findGlobal({
+        slug: 'navigation',
+      })
+
+      // Update with footer data
+      await payload.updateGlobal({
+        slug: 'navigation',
+        data: {
+          footerColumns: footerData.footerColumns,
+          socialLinks: footerData.socialLinks,
+          footerSettings: footerData.footerSettings,
+        },
+      })
+
+      console.log('  ✓ Updated Navigation global with footer data')
+    } catch (error) {
+      console.error('  ❌ Error seeding Navigation global:', error)
+      // Continue even if footer seeding fails
+    }
+
     console.log('\n✅ Seed completed successfully!')
     console.log('\nSummary:')
     console.log(`  - Hero Slides: ${createdHeroSlides.length}`)
@@ -168,6 +196,7 @@ async function seed() {
     console.log(`  - Value Props: ${createdValueProps.length}`)
     console.log(`  - CTA Blocks: ${createdCTABlocks.length}`)
     console.log(`  - Homepage: 1`)
+    console.log(`  - Navigation (Footer): Updated`)
   } catch (error) {
     console.error('❌ Seed failed:', error)
     throw error

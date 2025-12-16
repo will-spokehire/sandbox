@@ -7,7 +7,7 @@ import { PublicFooter } from "./_components/PublicFooter";
  * Layout for public vehicle pages (/vehicles)
  * Includes unified navigation and footer
  */
-export default function PublicVehiclesLayout({
+export default async function PublicVehiclesLayout({
   children,
 }: {
   children: React.ReactNode;

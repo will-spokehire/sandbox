@@ -302,15 +302,49 @@ export const NAVBAR_STYLES = {
 
 // ============================================
 // FOOTER STYLES
+// Based on Figma design (node-id: 505-11735)
 // ============================================
 
+// Footer-specific spacing constants matching Figma design
+export const FOOTER_SPACING = {
+  logoGap: "gap-[80px]", // Gap between logo and content
+  columnGap: "gap-16", // 64px gap between columns (matches SPACING_CLASSES["3xl"])
+  linkGap: "gap-[10px]", // Gap between link items
+  contactGap: "gap-6", // 24px gap in contact section (matches SPACING_CLASSES.lg)
+  padding: "pt-[60px] pb-[30px] px-[30px]", // Top 60px, bottom 30px, horizontal 30px
+} as const;
+
+// Footer-specific typography constants matching Figma design
+export const FOOTER_TYPOGRAPHY = {
+  // Footer heading: Degular Regular, 16px, tracking -0.16px, line-height 1.4
+  heading: "footer-heading",
+  // Footer body: Degular Light, 16px, line-height 1.4
+  body: "footer-body",
+  // Footer link: Degular Medium, 14px, line-height 1.5, underline
+  link: "footer-link",
+} as const;
+
 export const FOOTER_STYLES = {
-  container: "w-full py-16 md:py-24 bg-spoke-black text-spoke-white",
-  grid: "grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-16",
-  column: "flex flex-col gap-4",
-  heading: "heading-5 mb-4",
-  link: "body-small hover:opacity-70 transition-opacity",
-  copyright: "body-xs opacity-60 mt-8 md:mt-16",
+  // Updated to match Figma: white background, black text
+  container: "w-full bg-white text-black",
+  padding: FOOTER_SPACING.padding,
+  logoGap: FOOTER_SPACING.logoGap,
+  columnGap: FOOTER_SPACING.columnGap,
+  linkGap: FOOTER_SPACING.linkGap,
+  contactGap: FOOTER_SPACING.contactGap,
+  // Typography
+  heading: FOOTER_TYPOGRAPHY.heading,
+  body: FOOTER_TYPOGRAPHY.body,
+  link: FOOTER_TYPOGRAPHY.link,
+  // Layout
+  contentGrid: "flex gap-16 items-start",
+  column: "flex flex-col",
+  linkColumn: "flex flex-col gap-[10px]",
+  contactColumn: "flex flex-col gap-6",
+  // Bottom bar
+  bottomBar: "flex items-start justify-between w-full",
+  copyright: FOOTER_TYPOGRAPHY.heading,
+  bottomLinks: `${FOOTER_TYPOGRAPHY.link} gap-6`,
 } as const;
 
 // ============================================

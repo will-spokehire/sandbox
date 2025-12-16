@@ -429,6 +429,32 @@
     line-height: var(--leading-body-loose);
     letter-spacing: var(--tracking-normal);
   }
+
+  /* Footer typography */
+  .footer-heading {
+    font-family: var(--font-degular);
+    font-size: var(--text-body-base);
+    font-weight: var(--font-weight-regular);
+    line-height: 1.4;
+    letter-spacing: -0.16px;
+  }
+
+  .footer-body {
+    font-family: var(--font-degular);
+    font-size: var(--text-body-base);
+    font-weight: var(--font-weight-light);
+    line-height: 1.4;
+    letter-spacing: var(--tracking-normal);
+  }
+
+  .footer-link {
+    font-family: var(--font-degular);
+    font-size: var(--text-body-small);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+    letter-spacing: var(--tracking-normal);
+    text-decoration: underline;
+  }
 }
 
 /* ============================================

@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { getPageBySlug, getPageSlugs } from '~/lib/payload-api'
 import { BlockRenderer } from '~/components/blocks'
+import { LAYOUT_CONSTANTS } from '~/lib/design-tokens'
 
 interface PageProps {
   params: Promise<{
@@ -136,7 +137,7 @@ export default async function StaticPage({ params }: PageProps) {
   }
 
   return (
-    <main className="min-h-screen">
+    <main className={LAYOUT_CONSTANTS.mainContent}>
       {/* Page Title (optional - can be removed if hero includes title) */}
       {/* <header className="bg-muted py-12">
         <div className="container mx-auto px-4">

@@ -493,3 +493,74 @@ export async function getValuePropsByIds(ids: string[]): Promise<ValueProp[]> {
   }
 }
 
+// ============================================
+// NAVIGATION GLOBAL API
+// ============================================
+
+export interface NavigationFooterColumn {
+  id?: string | null
+  title?: string | null
+  type?: 'links' | 'contact' | null
+  links?: {
+    id?: string | null
+    label: string
+    url: string
+  }[] | null
+  contactInfo?: {
+    addressLabel?: string | null
+    addressValue?: string | null
+    emailLabel?: string | null
+    emailValue?: string | null
+  } | null
+}
+
+export interface NavigationSocialLink {
+  id?: string | null
+  platform: 'facebook' | 'instagram' | 'twitter' | 'linkedin'
+  url: string
+  icon?: string | null
+}
+
+export interface NavigationFooterSettings {
+  copyrightText?: string | null
+  privacyPolicyUrl?: string | null
+  termsOfServiceUrl?: string | null
+  showLargeLogo?: boolean | null
+}
+
+export interface Navigation {
+  id: number
+  mainMenu?: {
+    id?: string | null
+    label: string
+    link: string
+    children?: {
+      id?: string | null
+      label: string
+      link: string
+    }[] | null
+    icon?: string | null
+  }[] | null
+  footerColumns?: NavigationFooterColumn[] | null
+  socialLinks?: NavigationSocialLink[] | null
+  footerSettings?: NavigationFooterSettings | null
+  updatedAt?: string | null
+  createdAt?: string | null
+}
+
+/**
+ * Get Navigation global settings
+ * Includes main menu, footer columns, social links, and footer settings
+ */
+export async function getNavigation(): Promise<Navigation | null> {
+  try {
+    const response = await payloadFetch<Navigation>(
+      '/globals/navigation?depth=2'
+    )
+    return response
+  } catch (error) {
+    console.error('[PayloadAPI] Error fetching Navigation global:', error)
+    return null
+  }
+}
+
