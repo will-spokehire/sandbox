@@ -20,6 +20,8 @@ export interface SpotlightCardProps {
   onClick?: () => void
   /** Optional subtitle or description */
   subtitle?: string
+  /** Title size variant - 'h4' for 32px (Figma design), 'h5' for 24px (default) */
+  titleSize?: 'h4' | 'h5'
 }
 
 /**
@@ -48,8 +50,10 @@ export function SpotlightCard({
   className,
   onClick,
   subtitle,
+  titleSize = 'h5',
 }: SpotlightCardProps) {
   const defaultAlt = imageAlt ?? title
+  const titleClass = titleSize === 'h4' ? 'heading-4' : 'heading-5'
 
   const CardContent = (
     <>
@@ -66,7 +70,7 @@ export function SpotlightCard({
 
       {/* Content */}
       <div className="flex flex-col gap-1 pt-3">
-        <h3 className="heading-5 text-spoke-black">{title}</h3>
+        <h3 className={cn(titleClass, "text-spoke-black")}>{title}</h3>
         {subtitle && (
           <p className="body-medium text-spoke-black/70">{subtitle}</p>
         )}

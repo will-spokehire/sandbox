@@ -76,6 +76,7 @@ export interface Config {
     'cta-blocks': CtaBlock;
     testimonials: Testimonial;
     faqs: Faq;
+    'static-pages': StaticPage;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -92,6 +93,7 @@ export interface Config {
     'cta-blocks': CtaBlocksSelect<false> | CtaBlocksSelect<true>;
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
     faqs: FaqsSelect<false> | FaqsSelect<true>;
+    'static-pages': StaticPagesSelect<false> | StaticPagesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -385,6 +387,316 @@ export interface Faq {
   createdAt: string;
 }
 /**
+ * Create and manage static pages using the page builder
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "static-pages".
+ */
+export interface StaticPage {
+  id: number;
+  title: string;
+  /**
+   * URL path for this page (e.g., "about" becomes /about)
+   */
+  slug: string;
+  status: 'draft' | 'published';
+  /**
+   * Auto-set when status changes to published
+   */
+  publishedAt?: string | null;
+  /**
+   * Build your page by adding and arranging content blocks
+   */
+  layout: (
+    | {
+        /**
+         * Optional title for admin reference
+         */
+        title?: string | null;
+        /**
+         * Select which hero slides to display
+         */
+        slides: (number | HeroSlide)[];
+        autoplay?: boolean | null;
+        autoplayDelay?: number | null;
+        showArrows?: boolean | null;
+        showDots?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'hero-carousel';
+      }
+    | {
+        /**
+         * Optional title for the section
+         */
+        title?: string | null;
+        displayStyle?: ('badges' | 'cards' | 'minimal' | 'large') | null;
+        /**
+         * Select stats to display (order matters)
+         */
+        selectedStats: (number | Stat)[];
+        /**
+         * Number of columns on desktop
+         */
+        columns?: ('2' | '3' | '4') | null;
+        backgroundColor?: ('default' | 'muted' | 'accent' | 'primary') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'stats-bar';
+      }
+    | {
+        title: string;
+        /**
+         * Supporting text below the title
+         */
+        subtitle?: string | null;
+        selectedProps: (number | ValueProp)[];
+        displayStyle?: ('grid' | 'list' | 'carousel') | null;
+        columns?: ('2' | '3' | '4') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'value-props-section';
+      }
+    | {
+        title?: string | null;
+        subtitle?: string | null;
+        selectedTestimonials: (number | Testimonial)[];
+        displayStyle?: ('carousel' | 'grid' | 'masonry') | null;
+        showRatings?: boolean | null;
+        showImages?: boolean | null;
+        /**
+         * Number of testimonials visible at once (for carousel)
+         */
+        itemsPerView?: number | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'testimonials-section';
+      }
+    | {
+        title?: string | null;
+        subtitle?: string | null;
+        filterBy?: ('manual' | 'category' | 'featured') | null;
+        /**
+         * Select specific FAQs to display
+         */
+        selectedFAQs?: (number | Faq)[] | null;
+        category?: ('general' | 'vehicle-owners' | 'renters' | 'pricing' | 'technical') | null;
+        /**
+         * Maximum number of featured FAQs to display
+         */
+        limit?: number | null;
+        displayStyle?: ('accordion' | 'two-column' | 'list') | null;
+        /**
+         * Expand all FAQ items by default
+         */
+        defaultExpanded?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'faq-section';
+      }
+    | {
+        content: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        };
+        /**
+         * Content width constraint
+         */
+        maxWidth?: ('narrow' | 'default' | 'wide' | 'full') | null;
+        backgroundColor?: ('white' | 'muted' | 'accent') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'rich-text-content';
+      }
+    | {
+        selectedCTA: number | CtaBlock;
+        /**
+         * Optional: Override the CTA content for this page
+         */
+        customOverride?: {
+          heading?: string | null;
+          description?: string | null;
+          buttonText?: string | null;
+          buttonLink?: string | null;
+        };
+        displayStyle?: ('full-width' | 'contained' | 'split') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'cta-block';
+      }
+    | {
+        title?: string | null;
+        subtitle?: string | null;
+        selectionType?: ('config' | 'manual' | 'latest' | 'random') | null;
+        /**
+         * Select a featured vehicles configuration
+         */
+        config?: (number | null) | FeaturedVehiclesConfig;
+        /**
+         * Enter vehicle IDs manually
+         */
+        vehicleIds?:
+          | {
+              vehicleId: string;
+              id?: string | null;
+            }[]
+          | null;
+        limit?: number | null;
+        displayStyle?: ('grid' | 'carousel' | 'masonry') | null;
+        columns?: ('2' | '3' | '4' | '6') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'featured-vehicles';
+      }
+    | {
+        title?: string | null;
+        images: {
+          image: number | Media;
+          caption?: string | null;
+          /**
+           * Optional URL when image is clicked
+           */
+          link?: string | null;
+          id?: string | null;
+        }[];
+        displayStyle?: ('grid' | 'masonry' | 'carousel' | 'lightbox-grid') | null;
+        columns?: ('2' | '3' | '4' | '5') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'image-gallery';
+      }
+    | {
+        leftColumn: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        };
+        rightColumn: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        };
+        columnRatio?: ('50-50' | '60-40' | '40-60' | '70-30' | '30-70') | null;
+        /**
+         * Stack columns in reverse order on mobile
+         */
+        reverseOnMobile?: boolean | null;
+        verticalAlignment?: ('top' | 'center' | 'bottom') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'two-column-content';
+      }
+    | {
+        /**
+         * Title displayed above the spotlight items
+         */
+        title?: string | null;
+        images: {
+          /**
+           * Portrait orientation image (3:4 aspect ratio recommended)
+           */
+          image: number | Media;
+          /**
+           * Project title displayed below the image
+           */
+          caption: string;
+          /**
+           * Optional link to project detail page
+           */
+          link?: string | null;
+          id?: string | null;
+        }[];
+        /**
+         * Display left/right arrow buttons for navigation
+         */
+        showArrows?: boolean | null;
+        /**
+         * Number of items visible at once (default: 4)
+         */
+        itemsPerView?: number | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'project-spotlight';
+      }
+    | {
+        /**
+         * Vertical spacing between sections
+         */
+        height?: ('small' | 'medium' | 'large' | 'extra-large') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'spacer';
+      }
+  )[];
+  /**
+   * Search engine optimization settings
+   */
+  seo?: {
+    /**
+     * Defaults to page title if not set (max 60 characters)
+     */
+    metaTitle?: string | null;
+    /**
+     * Brief description for search results (max 160 characters)
+     */
+    metaDescription?: string | null;
+    /**
+     * Title for social media sharing (defaults to Meta Title)
+     */
+    ogTitle?: string | null;
+    /**
+     * Description for social media sharing (defaults to Meta Description)
+     */
+    ogDescription?: string | null;
+    /**
+     * Image for social media sharing (1200x630 recommended)
+     */
+    ogImage?: (number | null) | Media;
+    /**
+     * Keywords for SEO (optional)
+     */
+    keywords?:
+      | {
+          keyword: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -443,6 +755,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'faqs';
         value: number | Faq;
+      } | null)
+    | ({
+        relationTo: 'static-pages';
+        value: number | StaticPage;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -622,6 +938,194 @@ export interface FaqsSelect<T extends boolean = true> {
   order?: T;
   featured?: T;
   status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "static-pages_select".
+ */
+export interface StaticPagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  status?: T;
+  publishedAt?: T;
+  layout?:
+    | T
+    | {
+        'hero-carousel'?:
+          | T
+          | {
+              title?: T;
+              slides?: T;
+              autoplay?: T;
+              autoplayDelay?: T;
+              showArrows?: T;
+              showDots?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'stats-bar'?:
+          | T
+          | {
+              title?: T;
+              displayStyle?: T;
+              selectedStats?: T;
+              columns?: T;
+              backgroundColor?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'value-props-section'?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              selectedProps?: T;
+              displayStyle?: T;
+              columns?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'testimonials-section'?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              selectedTestimonials?: T;
+              displayStyle?: T;
+              showRatings?: T;
+              showImages?: T;
+              itemsPerView?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'faq-section'?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              filterBy?: T;
+              selectedFAQs?: T;
+              category?: T;
+              limit?: T;
+              displayStyle?: T;
+              defaultExpanded?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'rich-text-content'?:
+          | T
+          | {
+              content?: T;
+              maxWidth?: T;
+              backgroundColor?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'cta-block'?:
+          | T
+          | {
+              selectedCTA?: T;
+              customOverride?:
+                | T
+                | {
+                    heading?: T;
+                    description?: T;
+                    buttonText?: T;
+                    buttonLink?: T;
+                  };
+              displayStyle?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'featured-vehicles'?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              selectionType?: T;
+              config?: T;
+              vehicleIds?:
+                | T
+                | {
+                    vehicleId?: T;
+                    id?: T;
+                  };
+              limit?: T;
+              displayStyle?: T;
+              columns?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'image-gallery'?:
+          | T
+          | {
+              title?: T;
+              images?:
+                | T
+                | {
+                    image?: T;
+                    caption?: T;
+                    link?: T;
+                    id?: T;
+                  };
+              displayStyle?: T;
+              columns?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'two-column-content'?:
+          | T
+          | {
+              leftColumn?: T;
+              rightColumn?: T;
+              columnRatio?: T;
+              reverseOnMobile?: T;
+              verticalAlignment?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'project-spotlight'?:
+          | T
+          | {
+              title?: T;
+              images?:
+                | T
+                | {
+                    image?: T;
+                    caption?: T;
+                    link?: T;
+                    id?: T;
+                  };
+              showArrows?: T;
+              itemsPerView?: T;
+              id?: T;
+              blockName?: T;
+            };
+        spacer?:
+          | T
+          | {
+              height?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        ogTitle?: T;
+        ogDescription?: T;
+        ogImage?: T;
+        keywords?:
+          | T
+          | {
+              keyword?: T;
+              id?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }

@@ -15,6 +15,7 @@ import { FeaturedVehiclesConfig } from './collections/FeaturedVehiclesConfig'
 import { CTABlocks } from './collections/CTABlocks'
 import { Testimonials } from './collections/Testimonials'
 import { FAQs } from './collections/FAQs'
+import { StaticPages } from './collections/StaticPages'
 import { Navigation } from './globals/Navigation'
 import { SiteSettings } from './globals/SiteSettings'
 
@@ -41,6 +42,7 @@ export default buildConfig({
     CTABlocks,
     Testimonials,
     FAQs,
+    StaticPages,
   ],
   globals: [
     Navigation,
