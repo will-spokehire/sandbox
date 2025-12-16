@@ -13,6 +13,7 @@ import { getPayload } from 'payload'
 import config from '../payload.config'
 import { heroSlides, stats, valueProps, ctaBlocks, homepageLayout } from './homepage-data'
 import { footerData } from './footer-data'
+import { headerData } from './header-data'
 
 async function seed() {
   console.log('🌱 Starting seed process...')
@@ -163,9 +164,9 @@ async function seed() {
     }
 
     // ============================================
-    // 6. SEED NAVIGATION GLOBAL (Footer)
+    // 6. SEED NAVIGATION GLOBAL (Header & Footer)
     // ============================================
-    console.log('\n🔗 Seeding Navigation global (footer)...')
+    console.log('\n🔗 Seeding Navigation global (header & footer)...')
 
     try {
       // Get existing navigation global
@@ -173,20 +174,22 @@ async function seed() {
         slug: 'navigation',
       })
 
-      // Update with footer data
+      // Update with header and footer data
       await payload.updateGlobal({
         slug: 'navigation',
         data: {
+          mainMenu: headerData.mainMenu,
           footerColumns: footerData.footerColumns,
           socialLinks: footerData.socialLinks,
           footerSettings: footerData.footerSettings,
         },
       })
 
+      console.log('  ✓ Updated Navigation global with header data')
       console.log('  ✓ Updated Navigation global with footer data')
     } catch (error) {
       console.error('  ❌ Error seeding Navigation global:', error)
-      // Continue even if footer seeding fails
+      // Continue even if navigation seeding fails
     }
 
     console.log('\n✅ Seed completed successfully!')
@@ -196,6 +199,7 @@ async function seed() {
     console.log(`  - Value Props: ${createdValueProps.length}`)
     console.log(`  - CTA Blocks: ${createdCTABlocks.length}`)
     console.log(`  - Homepage: 1`)
+    console.log(`  - Navigation (Header): ${headerData.mainMenu.length} links`)
     console.log(`  - Navigation (Footer): Updated`)
   } catch (error) {
     console.error('❌ Seed failed:', error)

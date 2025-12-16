@@ -15,6 +15,7 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "seed": "cross-env NODE_OPTIONS=--no-deprecation tsx src/seed/index.ts",
     "seed:images": "cross-env NODE_OPTIONS=--no-deprecation tsx src/seed/seed-images.ts",
+    "seed:header": "cross-env NODE_OPTIONS=--no-deprecation tsx src/seed/seed-header.ts",
     "seed:footer": "cross-env NODE_OPTIONS=--no-deprecation tsx src/seed/seed-footer.ts",
     "test": "pnpm run test:int && pnpm run test:e2e",
     "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" pnpm exec playwright test",

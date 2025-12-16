@@ -3,6 +3,7 @@ import { PublicUserNavigation } from "~/components/navigation/PublicUserNavigati
 import { FooterWrapper } from "~/components/footer/FooterWrapper";
 import { cn } from "~/lib/utils";
 import { LAYOUT_CONSTANTS } from "~/lib/design-tokens";
+import { getNavigation } from "~/lib/payload-api";
 
 interface StandardPageLayoutProps {
   children: ReactNode;
@@ -37,10 +38,11 @@ export async function StandardPageLayout({
   includeFooter = true,
 }: StandardPageLayoutProps) {
   const bgClass = background === "muted" ? LAYOUT_CONSTANTS.bgMuted : LAYOUT_CONSTANTS.bgDefault;
+  const navigation = await getNavigation();
 
   return (
     <div className={cn(LAYOUT_CONSTANTS.pageWrapper, bgClass)}>
-      {includeNavigation && <PublicUserNavigation />}
+      {includeNavigation && <PublicUserNavigation navigation={navigation} />}
       <main className={LAYOUT_CONSTANTS.mainContent}>{children}</main>
       {includeFooter && <FooterWrapper />}
     </div>
