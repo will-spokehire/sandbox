@@ -1,7 +1,6 @@
 import "~/styles/globals.css";
 
 import { type Metadata } from "next";
-import { Geist } from "next/font/google";
 import Script from "next/script";
 import { Suspense } from "react";
 
@@ -18,11 +17,6 @@ export const metadata: Metadata = {
   description: "SpokeHire connects you with meticulously maintained classic and vintage vehicles for your special occasions.",
   icons: [{ rel: "icon", url: "/spoke-hire-logo-1.png" }],
 };
-
-const geist = Geist({
-  subsets: ["latin"],
-  variable: "--font-geist-sans",
-});
 
 export default function RootLayout({
   children,
@@ -48,7 +42,7 @@ export default function RootLayout({
   };
   
   return (
-    <html lang="en" className={`${geist.variable}`}>
+    <html lang="en">
       <head>
         {/* Organization Schema */}
         <script
