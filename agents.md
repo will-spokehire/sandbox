@@ -31,7 +31,8 @@
 - Work in small, logical commits
 - Follow project coding standards
 - Write/update tests
-- Update documentation
+- **NEVER create standalone documentation markdown files** (e.g., GUIDE.md, TESTING.md, SUMMARY.md, etc.)
+- Only update existing README.md files if absolutely necessary
 
 ## Commit Standards
 
@@ -94,6 +95,7 @@ None / List changes
 4. **Security first** - Always consider security implications
 5. **Error handling** - Handle errors gracefully
 6. **Ask early** - Don't assume, ask questions
+7. **No documentation files** - NEVER create standalone .md files for documentation, guides, or summaries
 
 ---
 

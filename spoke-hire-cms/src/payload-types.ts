@@ -69,6 +69,11 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    'hero-slides': HeroSlide;
+    stats: Stat;
+    'value-props': ValueProp;
+    'featured-vehicles-config': FeaturedVehiclesConfig;
+    'cta-blocks': CtaBlock;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -78,6 +83,11 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'hero-slides': HeroSlidesSelect<false> | HeroSlidesSelect<true>;
+    stats: StatsSelect<false> | StatsSelect<true>;
+    'value-props': ValuePropsSelect<false> | ValuePropsSelect<true>;
+    'featured-vehicles-config': FeaturedVehiclesConfigSelect<false> | FeaturedVehiclesConfigSelect<true>;
+    'cta-blocks': CtaBlocksSelect<false> | CtaBlocksSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -160,6 +170,127 @@ export interface Media {
   focalY?: number | null;
 }
 /**
+ * Rotating hero section slides for homepage
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hero-slides".
+ */
+export interface HeroSlide {
+  id: number;
+  image: number | Media;
+  heading: string;
+  subheading?: string | null;
+  ctaText?: string | null;
+  ctaLink?: string | null;
+  /**
+   * Lower numbers appear first
+   */
+  order: number;
+  status: 'draft' | 'published';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Key metrics displayed as badges on homepage
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "stats".
+ */
+export interface Stat {
+  id: number;
+  label: string;
+  value: string;
+  /**
+   * Icon name or identifier (e.g., "car", "users", "check-circle")
+   */
+  icon?: string | null;
+  /**
+   * Lower numbers appear first
+   */
+  order: number;
+  status: 'draft' | 'published';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Feature grid highlighting platform benefits
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "value-props".
+ */
+export interface ValueProp {
+  id: number;
+  title: string;
+  description: string;
+  /**
+   * Icon name or identifier (e.g., "shield", "star", "check-circle")
+   */
+  icon?: string | null;
+  /**
+   * Lower numbers appear first
+   */
+  order: number;
+  status: 'draft' | 'published';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Configure which vehicles appear in the featured section
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "featured-vehicles-config".
+ */
+export interface FeaturedVehiclesConfig {
+  id: number;
+  /**
+   * How to select featured vehicles
+   */
+  selectionType: 'manual' | 'newest' | 'price-range';
+  /**
+   * How many vehicles to display (1-12)
+   */
+  count: number;
+  /**
+   * JSON criteria for automatic selection (e.g., {"minPrice": 10000, "maxPrice": 50000})
+   */
+  criteria?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Internal notes about this configuration
+   */
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Call-to-action sections with customizable placement
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cta-blocks".
+ */
+export interface CtaBlock {
+  id: number;
+  heading: string;
+  description: string;
+  buttonText: string;
+  buttonLink: string;
+  backgroundStyle: 'primary' | 'secondary' | 'accent';
+  /**
+   * Where this CTA block should appear
+   */
+  placement: 'homepage' | 'sidebar' | 'footer';
+  status: 'draft' | 'published';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -190,6 +321,26 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'hero-slides';
+        value: number | HeroSlide;
+      } | null)
+    | ({
+        relationTo: 'stats';
+        value: number | Stat;
+      } | null)
+    | ({
+        relationTo: 'value-props';
+        value: number | ValueProp;
+      } | null)
+    | ({
+        relationTo: 'featured-vehicles-config';
+        value: number | FeaturedVehiclesConfig;
+      } | null)
+    | ({
+        relationTo: 'cta-blocks';
+        value: number | CtaBlock;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -272,6 +423,74 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hero-slides_select".
+ */
+export interface HeroSlidesSelect<T extends boolean = true> {
+  image?: T;
+  heading?: T;
+  subheading?: T;
+  ctaText?: T;
+  ctaLink?: T;
+  order?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "stats_select".
+ */
+export interface StatsSelect<T extends boolean = true> {
+  label?: T;
+  value?: T;
+  icon?: T;
+  order?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "value-props_select".
+ */
+export interface ValuePropsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  icon?: T;
+  order?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "featured-vehicles-config_select".
+ */
+export interface FeaturedVehiclesConfigSelect<T extends boolean = true> {
+  selectionType?: T;
+  count?: T;
+  criteria?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cta-blocks_select".
+ */
+export interface CtaBlocksSelect<T extends boolean = true> {
+  heading?: T;
+  description?: T;
+  buttonText?: T;
+  buttonLink?: T;
+  backgroundStyle?: T;
+  placement?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

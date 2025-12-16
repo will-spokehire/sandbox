@@ -8,6 +8,11 @@ import sharp from 'sharp'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
+import { HeroSlides } from './collections/HeroSlides'
+import { Stats } from './collections/Stats'
+import { ValueProps } from './collections/ValueProps'
+import { FeaturedVehiclesConfig } from './collections/FeaturedVehiclesConfig'
+import { CTABlocks } from './collections/CTABlocks'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -22,7 +27,15 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media],
+  collections: [
+    Users,
+    Media,
+    HeroSlides,
+    Stats,
+    ValueProps,
+    FeaturedVehiclesConfig,
+    CTABlocks,
+  ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

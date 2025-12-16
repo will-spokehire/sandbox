@@ -1,0 +1,72 @@
+import type { CollectionConfig } from 'payload'
+
+export const ValueProps: CollectionConfig = {
+  slug: 'value-props',
+  admin: {
+    useAsTitle: 'title',
+    defaultColumns: ['title', 'status', 'order'],
+    description: 'Feature grid highlighting platform benefits',
+  },
+  access: {
+    read: () => true, // Public read access
+    create: ({ req: { user } }) => !!user, // Admin only
+    update: ({ req: { user } }) => !!user, // Admin only
+    delete: ({ req: { user } }) => !!user, // Admin only
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+      label: 'Title',
+      admin: {
+        placeholder: "UK's Most Trusted",
+      },
+    },
+    {
+      name: 'description',
+      type: 'textarea',
+      required: true,
+      label: 'Description',
+      admin: {
+        placeholder: 'Detailed explanation of this value proposition...',
+      },
+    },
+    {
+      name: 'icon',
+      type: 'text',
+      label: 'Icon Identifier',
+      admin: {
+        description: 'Icon name or identifier (e.g., "shield", "star", "check-circle")',
+        placeholder: 'shield',
+      },
+    },
+    {
+      name: 'order',
+      type: 'number',
+      required: true,
+      defaultValue: 0,
+      label: 'Display Order',
+      admin: {
+        description: 'Lower numbers appear first',
+      },
+    },
+    {
+      name: 'status',
+      type: 'select',
+      required: true,
+      defaultValue: 'draft',
+      options: [
+        {
+          label: 'Draft',
+          value: 'draft',
+        },
+        {
+          label: 'Published',
+          value: 'published',
+        },
+      ],
+    },
+  ],
+}
+
