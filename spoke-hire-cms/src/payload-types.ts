@@ -74,6 +74,8 @@ export interface Config {
     'value-props': ValueProp;
     'featured-vehicles-config': FeaturedVehiclesConfig;
     'cta-blocks': CtaBlock;
+    testimonials: Testimonial;
+    faqs: Faq;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -88,6 +90,8 @@ export interface Config {
     'value-props': ValuePropsSelect<false> | ValuePropsSelect<true>;
     'featured-vehicles-config': FeaturedVehiclesConfigSelect<false> | FeaturedVehiclesConfigSelect<true>;
     'cta-blocks': CtaBlocksSelect<false> | CtaBlocksSelect<true>;
+    testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
+    faqs: FaqsSelect<false> | FaqsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -97,8 +101,14 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    navigation: Navigation;
+    'site-settings': SiteSetting;
+  };
+  globalsSelect: {
+    navigation: NavigationSelect<false> | NavigationSelect<true>;
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+  };
   locale: null;
   user: User & {
     collection: 'users';
@@ -291,6 +301,90 @@ export interface CtaBlock {
   createdAt: string;
 }
 /**
+ * Customer testimonials and reviews displayed across the website
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials".
+ */
+export interface Testimonial {
+  id: number;
+  /**
+   * The testimonial text from the customer
+   */
+  quote: string;
+  author: string;
+  /**
+   * Author's role or relationship to the service
+   */
+  role?: string | null;
+  /**
+   * Rating from 1 to 5 stars
+   */
+  rating?: number | null;
+  /**
+   * Optional photo of the person giving the testimonial
+   */
+  image?: (number | null) | Media;
+  /**
+   * Category for filtering testimonials by use case
+   */
+  category?: ('vehicle-owner' | 'renter' | 'wedding' | 'film') | null;
+  /**
+   * Show this testimonial on homepage and featured sections
+   */
+  featured?: boolean | null;
+  /**
+   * Lower numbers appear first
+   */
+  order: number;
+  status: 'draft' | 'published';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Frequently asked questions displayed across the website
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "faqs".
+ */
+export interface Faq {
+  id: number;
+  question: string;
+  /**
+   * Detailed answer with formatting, links, and lists
+   */
+  answer: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Category for organizing FAQs by topic
+   */
+  category?: ('general' | 'vehicle-owners' | 'renters' | 'pricing' | 'technical') | null;
+  /**
+   * Order within category - lower numbers appear first
+   */
+  order: number;
+  /**
+   * Show this FAQ on homepage and featured sections
+   */
+  featured?: boolean | null;
+  status: 'draft' | 'published';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -341,6 +435,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'cta-blocks';
         value: number | CtaBlock;
+      } | null)
+    | ({
+        relationTo: 'testimonials';
+        value: number | Testimonial;
+      } | null)
+    | ({
+        relationTo: 'faqs';
+        value: number | Faq;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -494,6 +596,37 @@ export interface CtaBlocksSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials_select".
+ */
+export interface TestimonialsSelect<T extends boolean = true> {
+  quote?: T;
+  author?: T;
+  role?: T;
+  rating?: T;
+  image?: T;
+  category?: T;
+  featured?: T;
+  order?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "faqs_select".
+ */
+export interface FaqsSelect<T extends boolean = true> {
+  question?: T;
+  answer?: T;
+  category?: T;
+  order?: T;
+  featured?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -531,6 +664,245 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * Site-wide navigation menus, footer columns, and social links
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "navigation".
+ */
+export interface Navigation {
+  id: number;
+  /**
+   * Primary navigation links displayed in header
+   */
+  mainMenu?:
+    | {
+        label: string;
+        link: string;
+        /**
+         * Optional dropdown menu items
+         */
+        children?:
+          | {
+              label: string;
+              link: string;
+              id?: string | null;
+            }[]
+          | null;
+        /**
+         * Optional icon name or identifier
+         */
+        icon?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Footer content organized in columns (5 columns from design)
+   */
+  footerColumns?:
+    | {
+        /**
+         * Optional title for the column (most columns have no title)
+         */
+        title?: string | null;
+        /**
+         * Type determines how the column is rendered
+         */
+        type?: ('links' | 'contact') | null;
+        /**
+         * For "links" type columns
+         */
+        links?:
+          | {
+              label: string;
+              url: string;
+              id?: string | null;
+            }[]
+          | null;
+        /**
+         * For "contact" type columns
+         */
+        contactInfo?: {
+          addressLabel?: string | null;
+          addressValue?: string | null;
+          emailLabel?: string | null;
+          emailValue?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Social media profiles displayed in footer
+   */
+  socialLinks?:
+    | {
+        platform: 'facebook' | 'instagram' | 'twitter' | 'linkedin';
+        url: string;
+        /**
+         * Icon name or path (e.g., "instagram-24px")
+         */
+        icon?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  footerSettings?: {
+    copyrightText?: string | null;
+    privacyPolicyUrl?: string | null;
+    termsOfServiceUrl?: string | null;
+    /**
+     * Display large SPOKE wordmark in footer
+     */
+    showLargeLogo?: boolean | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Global site settings including branding, SEO defaults, and contact information
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: number;
+  siteName: string;
+  /**
+   * Short tagline or slogan for the site
+   */
+  tagline?: string | null;
+  /**
+   * Main logo used in header and throughout the site
+   */
+  logo?: (number | null) | Media;
+  /**
+   * Browser favicon (16x16 or 32x32 px)
+   */
+  favicon?: (number | null) | Media;
+  /**
+   * Default SEO values used when pages don't specify their own
+   */
+  seoDefaults?: {
+    defaultMetaDescription?: string | null;
+    /**
+     * Default image for social media sharing (1200x630 px recommended)
+     */
+    defaultOgImage?: (number | null) | Media;
+  };
+  analytics?: {
+    /**
+     * Google Analytics 4 measurement ID
+     */
+    googleAnalyticsId?: string | null;
+  };
+  /**
+   * Copyright text displayed in footer
+   */
+  copyrightText?: string | null;
+  /**
+   * General contact details used in footer and contact pages
+   */
+  contactInfo?: {
+    email?: string | null;
+    phone?: string | null;
+    address?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "navigation_select".
+ */
+export interface NavigationSelect<T extends boolean = true> {
+  mainMenu?:
+    | T
+    | {
+        label?: T;
+        link?: T;
+        children?:
+          | T
+          | {
+              label?: T;
+              link?: T;
+              id?: T;
+            };
+        icon?: T;
+        id?: T;
+      };
+  footerColumns?:
+    | T
+    | {
+        title?: T;
+        type?: T;
+        links?:
+          | T
+          | {
+              label?: T;
+              url?: T;
+              id?: T;
+            };
+        contactInfo?:
+          | T
+          | {
+              addressLabel?: T;
+              addressValue?: T;
+              emailLabel?: T;
+              emailValue?: T;
+            };
+        id?: T;
+      };
+  socialLinks?:
+    | T
+    | {
+        platform?: T;
+        url?: T;
+        icon?: T;
+        id?: T;
+      };
+  footerSettings?:
+    | T
+    | {
+        copyrightText?: T;
+        privacyPolicyUrl?: T;
+        termsOfServiceUrl?: T;
+        showLargeLogo?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  siteName?: T;
+  tagline?: T;
+  logo?: T;
+  favicon?: T;
+  seoDefaults?:
+    | T
+    | {
+        defaultMetaDescription?: T;
+        defaultOgImage?: T;
+      };
+  analytics?:
+    | T
+    | {
+        googleAnalyticsId?: T;
+      };
+  copyrightText?: T;
+  contactInfo?:
+    | T
+    | {
+        email?: T;
+        phone?: T;
+        address?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
