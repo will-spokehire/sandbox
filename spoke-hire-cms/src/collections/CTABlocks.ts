@@ -114,3 +114,4 @@ export const CTABlocks: CollectionConfig = {
   ],
 }
 
+

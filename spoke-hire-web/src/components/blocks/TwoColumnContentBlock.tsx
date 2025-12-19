@@ -156,3 +156,4 @@ export function TwoColumnContentBlock({ data }: TwoColumnContentBlockProps) {
 
 export default TwoColumnContentBlock
 
+

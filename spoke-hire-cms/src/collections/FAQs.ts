@@ -100,3 +100,4 @@ export const FAQs: CollectionConfig = {
   ],
 }
 
+
