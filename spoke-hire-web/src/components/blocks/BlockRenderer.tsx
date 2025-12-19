@@ -5,7 +5,7 @@ import { ValuePropsBlock } from './ValuePropsBlock'
 import { TestimonialsBlock } from './TestimonialsBlock'
 import { FAQSectionBlock } from './FAQSectionBlock'
 import { RichTextContentBlock } from './RichTextContentBlock'
-import { CTABlock } from './CTABlock'
+import { CallToActionBlock } from './CallToActionBlock'
 import { FeaturedVehiclesBlock } from './FeaturedVehiclesBlock'
 import { ImageGalleryBlock } from './ImageGalleryBlock'
 import { TwoColumnContentBlock } from './TwoColumnContentBlock'
@@ -43,8 +43,8 @@ export function BlockRenderer({ block, index }: BlockRendererProps) {
     case 'rich-text-content':
       return <RichTextContentBlock key={index} data={block} />
 
-    case 'cta-block':
-      return <CTABlock key={index} data={block} />
+    case 'call-to-action-block':
+      return <CallToActionBlock key={index} data={block} />
 
     case 'featured-vehicles':
       return <FeaturedVehiclesBlock key={index} data={block} />

@@ -4,8 +4,8 @@ export const CTABlocks: CollectionConfig = {
   slug: 'cta-blocks',
   admin: {
     useAsTitle: 'heading',
-    defaultColumns: ['heading', 'placement', 'status'],
-    description: 'Call-to-action sections with customizable placement',
+    defaultColumns: ['heading', 'status'],
+    description: 'Call-to-action sections',
   },
   access: {
     read: () => true, // Public read access
@@ -33,22 +33,55 @@ export const CTABlocks: CollectionConfig = {
       },
     },
     {
-      name: 'buttonText',
-      type: 'text',
+      name: 'actions',
+      type: 'array',
       required: true,
-      label: 'Button Text',
+      minRows: 1,
+      label: 'Actions',
       admin: {
-        placeholder: 'Get Started',
+        description: 'Add one or more action buttons',
       },
-    },
-    {
-      name: 'buttonLink',
-      type: 'text',
-      required: true,
-      label: 'Button Link',
-      admin: {
-        placeholder: '/register',
-      },
+      fields: [
+        {
+          name: 'label',
+          type: 'text',
+          required: true,
+          label: 'Button Label',
+          admin: {
+            placeholder: 'Get Started',
+          },
+        },
+        {
+          name: 'link',
+          type: 'text',
+          required: true,
+          label: 'Button Link',
+          admin: {
+            placeholder: '/register',
+          },
+        },
+        {
+          name: 'style',
+          type: 'select',
+          required: true,
+          defaultValue: 'primary',
+          label: 'Button Style',
+          options: [
+            {
+              label: 'Primary',
+              value: 'primary',
+            },
+            {
+              label: 'Secondary',
+              value: 'secondary',
+            },
+            {
+              label: 'Outline',
+              value: 'outline',
+            },
+          ],
+        },
+      ],
     },
     {
       name: 'backgroundStyle',
@@ -70,30 +103,6 @@ export const CTABlocks: CollectionConfig = {
           value: 'accent',
         },
       ],
-    },
-    {
-      name: 'placement',
-      type: 'select',
-      required: true,
-      defaultValue: 'homepage',
-      label: 'Placement',
-      options: [
-        {
-          label: 'Homepage',
-          value: 'homepage',
-        },
-        {
-          label: 'Sidebar',
-          value: 'sidebar',
-        },
-        {
-          label: 'Footer',
-          value: 'footer',
-        },
-      ],
-      admin: {
-        description: 'Where this CTA block should appear',
-      },
     },
     {
       name: 'status',

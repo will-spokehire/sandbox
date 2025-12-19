@@ -107,19 +107,13 @@ export interface CTABlockContent {
   id: string
   heading: string
   description: string
-  buttonText: string
-  buttonLink: string
+  actions: Array<{
+    label: string
+    link: string
+    style: 'primary' | 'secondary' | 'outline'
+  }>
   backgroundStyle: 'primary' | 'secondary' | 'accent'
-  placement: string
   status: 'draft' | 'published'
-}
-
-export interface FeaturedVehiclesConfigContent {
-  id: string
-  selectionType: 'manual' | 'newest' | 'price-range'
-  count: number
-  criteria?: Record<string, unknown>
-  notes?: string
 }
 
 // Block Types
@@ -181,24 +175,16 @@ export interface RichTextContentBlockData {
   backgroundColor: 'white' | 'muted' | 'accent'
 }
 
-export interface CTABlockData {
-  blockType: 'cta-block'
+export interface CallToActionBlockData {
+  blockType: 'call-to-action-block'
   selectedCTA: CTABlockContent
-  customOverride?: {
-    heading?: string
-    description?: string
-    buttonText?: string
-    buttonLink?: string
-  }
-  displayStyle: 'full-width' | 'contained' | 'split'
 }
 
 export interface FeaturedVehiclesBlockData {
   blockType: 'featured-vehicles'
   title?: string
   subtitle?: string
-  selectionType: 'config' | 'manual' | 'latest' | 'random'
-  config?: FeaturedVehiclesConfigContent
+  selectionType: 'manual' | 'latest'
   vehicleIds?: { vehicleId: string }[]
   limit?: number
   displayStyle: 'grid' | 'carousel' | 'masonry'
@@ -250,7 +236,7 @@ export type PageBlock =
   | TestimonialsSectionBlockData
   | FAQSectionBlockData
   | RichTextContentBlockData
-  | CTABlockData
+  | CallToActionBlockData
   | FeaturedVehiclesBlockData
   | ImageGalleryBlockData
   | TwoColumnContentBlockData

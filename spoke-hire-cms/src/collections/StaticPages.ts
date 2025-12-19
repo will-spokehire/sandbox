@@ -416,14 +416,14 @@ const RichTextContentBlock: Block = {
 }
 
 /**
- * CTA Block
- * Call-to-action section
+ * Call-to-Action Block
+ * Call-to-action section with 2-column responsive layout
  */
-const CTABlock: Block = {
-  slug: 'cta-block',
+const CallToActionBlock: Block = {
+  slug: 'call-to-action-block',
   labels: {
-    singular: 'CTA Block',
-    plural: 'CTA Blocks',
+    singular: 'Call-to-Action Block',
+    plural: 'Call-to-Action Blocks',
   },
   fields: [
     {
@@ -432,47 +432,6 @@ const CTABlock: Block = {
       relationTo: 'cta-blocks',
       hasMany: false,
       required: true,
-    },
-    {
-      name: 'customOverride',
-      type: 'group',
-      label: 'Custom Override',
-      admin: {
-        description: 'Optional: Override the CTA content for this page',
-      },
-      fields: [
-        {
-          name: 'heading',
-          type: 'text',
-          label: 'Custom Heading',
-        },
-        {
-          name: 'description',
-          type: 'textarea',
-          label: 'Custom Description',
-        },
-        {
-          name: 'buttonText',
-          type: 'text',
-          label: 'Custom Button Text',
-        },
-        {
-          name: 'buttonLink',
-          type: 'text',
-          label: 'Custom Button Link',
-        },
-      ],
-    },
-    {
-      name: 'displayStyle',
-      type: 'select',
-      label: 'Display Style',
-      defaultValue: 'full-width',
-      options: [
-        { label: 'Full Width', value: 'full-width' },
-        { label: 'Contained', value: 'contained' },
-        { label: 'Split', value: 'split' },
-      ],
     },
   ],
 }
@@ -505,23 +464,11 @@ const FeaturedVehiclesBlock: Block = {
       name: 'selectionType',
       type: 'select',
       label: 'Selection Type',
-      defaultValue: 'config',
+      defaultValue: 'latest',
       options: [
-        { label: 'From Config', value: 'config' },
         { label: 'Manual IDs', value: 'manual' },
         { label: 'Latest', value: 'latest' },
-        { label: 'Random', value: 'random' },
       ],
-    },
-    {
-      name: 'config',
-      type: 'relationship',
-      relationTo: 'featured-vehicles-config',
-      hasMany: false,
-      admin: {
-        condition: (data, siblingData) => siblingData?.selectionType === 'config',
-        description: 'Select a featured vehicles configuration',
-      },
     },
     {
       name: 'vehicleIds',
@@ -529,7 +476,7 @@ const FeaturedVehiclesBlock: Block = {
       label: 'Vehicle IDs',
       admin: {
         condition: (data, siblingData) => siblingData?.selectionType === 'manual',
-        description: 'Enter vehicle IDs manually',
+        description: 'Enter vehicle IDs manually (one per line)',
       },
       fields: [
         {
@@ -546,8 +493,8 @@ const FeaturedVehiclesBlock: Block = {
       label: 'Limit',
       defaultValue: 6,
       admin: {
-        condition: (data, siblingData) =>
-          siblingData?.selectionType === 'latest' || siblingData?.selectionType === 'random',
+        condition: (data, siblingData) => siblingData?.selectionType === 'latest',
+        description: 'Number of latest vehicles to display',
       },
     },
     {
@@ -921,7 +868,7 @@ export const StaticPages: CollectionConfig = {
         TestimonialsSectionBlock,
         FAQSectionBlock,
         RichTextContentBlock,
-        CTABlock,
+        CallToActionBlock,
         FeaturedVehiclesBlock,
         ImageGalleryBlock,
         TwoColumnContentBlock,

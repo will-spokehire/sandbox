@@ -101,10 +101,19 @@ export const ctaBlocks = [
     heading: 'LIST YOUR CAR TODAY',
     description:
       "Do you own a classic car? Join the UK's fastest growing platform for classic car hire and start earning today with Spoke Hire.",
-    buttonText: 'List your car',
-    buttonLink: '/register',
+    actions: [
+      {
+        label: 'List your car',
+        link: '/register',
+        style: 'primary' as const,
+      },
+      {
+        label: 'Contact us',
+        link: '/contact',
+        style: 'outline' as const,
+      },
+    ],
     backgroundStyle: 'primary' as const,
-    placement: 'homepage' as const,
     status: 'published' as const,
   },
 ]
@@ -170,10 +179,9 @@ export const homepageLayout = {
     },
     // Block 6: Image Gallery (Project Spotlight) - SKIPPED: requires images to be uploaded first
     // Add this block manually via CMS admin after uploading project spotlight images
-    // Block 7: CTA Block
+    // Block 7: Call-to-Action Block
     {
-      blockType: 'cta-block',
-      displayStyle: 'full-width',
+      blockType: 'call-to-action-block',
       // selectedCTA will be linked by relationship
     },
   ],

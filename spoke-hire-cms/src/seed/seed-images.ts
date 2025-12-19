@@ -231,8 +231,8 @@ async function seedImages() {
         const hasImageGallery = layout.some((block) => block.blockType === 'image-gallery' && block.title === 'PROJECT SPOTLIGHT')
 
         if (!hasSpotlightBlock) {
-          // Find the position after value-props-section (before cta-block)
-          const ctaIndex = layout.findIndex((block) => block.blockType === 'cta-block')
+          // Find the position after value-props-section (before call-to-action-block)
+          const ctaIndex = layout.findIndex((block) => block.blockType === 'call-to-action-block')
           const insertIndex = ctaIndex > 0 ? ctaIndex : layout.length
 
           // Create the project spotlight block

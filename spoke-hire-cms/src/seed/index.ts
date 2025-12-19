@@ -141,7 +141,7 @@ async function seed() {
               ...block,
               selectedProps: createdValueProps.map((p) => p.id),
             }
-          case 'cta-block':
+          case 'call-to-action-block':
             return {
               ...block,
               selectedCTA: createdCTABlocks[0]?.id,
