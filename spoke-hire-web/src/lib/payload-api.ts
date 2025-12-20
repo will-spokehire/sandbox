@@ -19,6 +19,12 @@ export interface PayloadMedia {
   mimeType?: string
 }
 
+export interface PayloadIcon {
+  id: string
+  name: string
+  svg: PayloadMedia
+}
+
 // ============================================
 // MEDIA URL HELPER
 // ============================================
@@ -65,8 +71,7 @@ export interface HeroSlide {
 export interface Stat {
   id: string
   label: string
-  value: string
-  icon?: string
+  icon?: string | PayloadIcon
   order: number
   status: 'draft' | 'published'
 }
@@ -75,7 +80,7 @@ export interface ValueProp {
   id: string
   title: string
   description: string
-  icon?: string
+  icon?: string | PayloadIcon
   order: number
   status: 'draft' | 'published'
 }
@@ -363,7 +368,7 @@ async function payloadFetch<T>(endpoint: string, options?: RequestInit): Promise
 export async function getPageBySlug(slug: string): Promise<StaticPage | null> {
   try {
     const response = await payloadFetch<PayloadResponse<StaticPage>>(
-      `/static-pages?where[slug][equals]=${encodeURIComponent(slug)}&where[status][equals]=published&depth=2`
+      `/static-pages?where[slug][equals]=${encodeURIComponent(slug)}&where[status][equals]=published&depth=3`
     )
 
     if (response.docs.length === 0) {
@@ -463,7 +468,7 @@ export async function getStatsByIds(ids: string[]): Promise<Stat[]> {
   try {
     const idsParam = ids.map((id) => `where[id][in]=${id}`).join('&')
     const response = await payloadFetch<PayloadResponse<Stat>>(
-      `/stats?${idsParam}&where[status][equals]=published&depth=0`
+      `/stats?${idsParam}&where[status][equals]=published&depth=2`
     )
     return response.docs
   } catch (error) {
@@ -495,7 +500,7 @@ export async function getValuePropsByIds(ids: string[]): Promise<ValueProp[]> {
   try {
     const idsParam = ids.map((id) => `where[id][in]=${id}`).join('&')
     const response = await payloadFetch<PayloadResponse<ValueProp>>(
-      `/value-props?${idsParam}&where[status][equals]=published&depth=0`
+      `/value-props?${idsParam}&where[status][equals]=published&depth=2`
     )
     return response.docs
   } catch (error) {

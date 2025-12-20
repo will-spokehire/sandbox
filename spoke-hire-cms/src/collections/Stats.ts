@@ -4,7 +4,7 @@ export const Stats: CollectionConfig = {
   slug: 'stats',
   admin: {
     useAsTitle: 'label',
-    defaultColumns: ['label', 'value', 'status', 'order'],
+    defaultColumns: ['label', 'status', 'order'],
     description: 'Key metrics displayed as badges on homepage',
   },
   access: {
@@ -24,21 +24,12 @@ export const Stats: CollectionConfig = {
       },
     },
     {
-      name: 'value',
-      type: 'text',
-      required: true,
-      label: 'Value',
-      admin: {
-        placeholder: '20000+',
-      },
-    },
-    {
       name: 'icon',
-      type: 'text',
-      label: 'Icon Identifier',
+      type: 'upload',
+      relationTo: 'icons',
+      label: 'Icon',
       admin: {
-        description: 'Icon name or identifier (e.g., "car", "users", "check-circle")',
-        placeholder: 'car',
+        description: 'Select an icon from the Icons collection',
       },
     },
     {

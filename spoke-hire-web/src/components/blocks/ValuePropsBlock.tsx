@@ -2,48 +2,11 @@ import Link from 'next/link'
 import { cn } from '~/lib/utils'
 import { Button } from '~/components/ui/button'
 import type { ValuePropsBlockData } from '~/lib/payload-api'
-import {
-  Shield,
-  ShieldCheck,
-  Star,
-  CheckCircle,
-  Heart,
-  Award,
-  Clock,
-  Users,
-  Zap,
-  Car,
-  Headset,
-  Network,
-  Globe,
-  type LucideIcon,
-} from 'lucide-react'
+import { renderIcon, getIconComponent } from '~/lib/icon-renderer'
+import { CheckCircle } from 'lucide-react'
 
 interface ValuePropsBlockProps {
   data: ValuePropsBlockData
-}
-
-// Icon mapping for value props - includes all icons used in seed data
-const iconMap: Record<string, LucideIcon> = {
-  shield: Shield,
-  'shield-check': ShieldCheck,
-  star: Star,
-  'check-circle': CheckCircle,
-  heart: Heart,
-  award: Award,
-  clock: Clock,
-  users: Users,
-  zap: Zap,
-  car: Car,
-  headset: Headset,
-  network: Network,
-  globe: Globe,
-}
-
-// Get icon component with fallback
-function getIcon(iconName?: string): LucideIcon {
-  if (!iconName) return CheckCircle
-  return iconMap[iconName] ?? CheckCircle
 }
 
 /**
@@ -116,7 +79,9 @@ export function ValuePropsBlock({ data }: ValuePropsBlockProps) {
             <div className="flex-1 w-full">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-[32px]">
                 {selectedProps.map((prop) => {
-                  const IconComponent = getIcon(prop.icon)
+                  const IconComponent = typeof prop.icon === 'string' 
+                    ? getIconComponent(prop.icon) 
+                    : CheckCircle
                   return (
                     <div
                       key={prop.id}
@@ -124,7 +89,11 @@ export function ValuePropsBlock({ data }: ValuePropsBlockProps) {
                     >
                       {/* Icon */}
                       <div className="w-[30px] h-[30px] shrink-0">
-                        <IconComponent className="w-full h-full text-black" />
+                        {typeof prop.icon === 'string' ? (
+                          <IconComponent className="w-full h-full text-black" />
+                        ) : (
+                          renderIcon(prop.icon, 'w-full h-full text-black')
+                        )}
                       </div>
 
                       {/* Content */}
@@ -174,14 +143,20 @@ export function ValuePropsBlock({ data }: ValuePropsBlockProps) {
         {displayStyle === 'grid' && (
           <div className={cn('grid gap-8', getColumnClass(columns))}>
             {selectedProps.map((prop) => {
-              const IconComponent = getIcon(prop.icon)
+              const IconComponent = typeof prop.icon === 'string' 
+                ? getIconComponent(prop.icon) 
+                : CheckCircle
               return (
                 <div
                   key={prop.id}
                   className="bg-card rounded-xl p-6 text-center hover:shadow-lg transition-shadow"
                 >
                   <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-                    <IconComponent className="w-7 h-7 text-primary" />
+                    {typeof prop.icon === 'string' ? (
+                      <IconComponent className="w-7 h-7 text-primary" />
+                    ) : (
+                      renderIcon(prop.icon, 'w-7 h-7 text-primary')
+                    )}
                   </div>
                   <h3 className="text-xl font-semibold mb-2">{prop.title}</h3>
                   <p className="text-muted-foreground">{prop.description}</p>
@@ -195,11 +170,17 @@ export function ValuePropsBlock({ data }: ValuePropsBlockProps) {
         {displayStyle === 'list' && (
           <div className="max-w-3xl mx-auto space-y-6">
             {selectedProps.map((prop) => {
-              const IconComponent = getIcon(prop.icon)
+              const IconComponent = typeof prop.icon === 'string' 
+                ? getIconComponent(prop.icon) 
+                : CheckCircle
               return (
                 <div key={prop.id} className="flex gap-4 items-start">
                   <div className="w-12 h-12 shrink-0 rounded-full bg-primary/10 flex items-center justify-center">
-                    <IconComponent className="w-6 h-6 text-primary" />
+                    {typeof prop.icon === 'string' ? (
+                      <IconComponent className="w-6 h-6 text-primary" />
+                    ) : (
+                      renderIcon(prop.icon, 'w-6 h-6 text-primary')
+                    )}
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold mb-1">{prop.title}</h3>
@@ -215,14 +196,20 @@ export function ValuePropsBlock({ data }: ValuePropsBlockProps) {
         {displayStyle === 'carousel' && (
           <div className="flex overflow-x-auto gap-6 pb-4 snap-x snap-mandatory">
             {selectedProps.map((prop) => {
-              const IconComponent = getIcon(prop.icon)
+              const IconComponent = typeof prop.icon === 'string' 
+                ? getIconComponent(prop.icon) 
+                : CheckCircle
               return (
                 <div
                   key={prop.id}
                   className="min-w-[280px] md:min-w-[320px] bg-card rounded-xl p-6 text-center snap-center shrink-0"
                 >
                   <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-                    <IconComponent className="w-7 h-7 text-primary" />
+                    {typeof prop.icon === 'string' ? (
+                      <IconComponent className="w-7 h-7 text-primary" />
+                    ) : (
+                      renderIcon(prop.icon, 'w-7 h-7 text-primary')
+                    )}
                   </div>
                   <h3 className="text-xl font-semibold mb-2">{prop.title}</h3>
                   <p className="text-muted-foreground">{prop.description}</p>

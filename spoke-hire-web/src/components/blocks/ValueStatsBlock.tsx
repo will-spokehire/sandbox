@@ -1,40 +1,11 @@
 import * as React from 'react'
 import { cn } from '~/lib/utils'
 import type { ValueStatsBlockData } from '~/lib/payload-api'
-import {
-  Car,
-  Users,
-  CheckCircle,
-  Star,
-  Shield,
-  ShieldCheck,
-  Clock,
-  Award,
-  Heart,
-  Headset,
-  Network,
-  Globe,
-  type LucideIcon,
-} from 'lucide-react'
+import { renderIcon, getIconComponent } from '~/lib/icon-renderer'
+import { CheckCircle } from 'lucide-react'
 
 interface ValueStatsBlockProps {
   data: ValueStatsBlockData
-}
-
-// Icon mapping for stats - matches StatsBarBlock
-const iconMap: Record<string, LucideIcon> = {
-  car: Car,
-  users: Users,
-  'check-circle': CheckCircle,
-  star: Star,
-  shield: Shield,
-  'shield-check': ShieldCheck,
-  clock: Clock,
-  award: Award,
-  heart: Heart,
-  headset: Headset,
-  network: Network,
-  globe: Globe,
 }
 
 /**
@@ -62,21 +33,25 @@ export function ValueStatsBlock({ data }: ValueStatsBlockProps) {
       <div className="container mx-auto px-4">
         <div className="flex flex-wrap gap-4 md:gap-6 items-center justify-center">
           {selectedStats.map((stat) => {
-            const IconComponent = stat.icon ? (iconMap[stat.icon] ?? CheckCircle) : CheckCircle
-            // Format label: combine value and label if value exists, otherwise just label
-            const displayLabel = stat.value ? `${stat.value} ${stat.label}` : stat.label
+            const IconComponent = typeof stat.icon === 'string' 
+              ? getIconComponent(stat.icon) 
+              : CheckCircle
 
             return (
               <div
                 key={stat.id}
                 className="flex items-center gap-2 h-[30px]"
               >
-                <IconComponent
-                  className="w-4 h-4 md:w-5 md:h-5 text-spoke-black"
-                  strokeWidth={1.5}
-                />
+                {typeof stat.icon === 'string' ? (
+                  <IconComponent
+                    className="w-4 h-4 md:w-5 md:h-5 text-spoke-black"
+                    strokeWidth={1.5}
+                  />
+                ) : (
+                  renderIcon(stat.icon, 'w-4 h-4 md:w-5 md:h-5 text-spoke-black')
+                )}
                 <span className="font-degular text-sm md:text-[20px] leading-[1.5] uppercase text-spoke-black whitespace-nowrap">
-                  {displayLabel}
+                  {stat.label}
                 </span>
               </div>
             )

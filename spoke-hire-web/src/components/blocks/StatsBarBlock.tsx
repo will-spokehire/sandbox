@@ -2,46 +2,11 @@ import * as React from 'react'
 import { cn } from '~/lib/utils'
 import type { StatsBarBlockData } from '~/lib/payload-api'
 import { StatsBadge } from '~/components/ui/stats-badge'
-import {
-  Car,
-  Users,
-  CheckCircle,
-  Star,
-  Shield,
-  ShieldCheck,
-  Clock,
-  Award,
-  Heart,
-  Headset,
-  Network,
-  Globe,
-  type LucideIcon,
-} from 'lucide-react'
+import { renderIcon, getIconComponent } from '~/lib/icon-renderer'
+import { CheckCircle } from 'lucide-react'
 
 interface StatsBarBlockProps {
   data: StatsBarBlockData
-}
-
-// Icon mapping for stats - includes all icons used in seed data
-const iconMap: Record<string, LucideIcon> = {
-  car: Car,
-  users: Users,
-  'check-circle': CheckCircle,
-  star: Star,
-  shield: Shield,
-  'shield-check': ShieldCheck,
-  clock: Clock,
-  award: Award,
-  heart: Heart,
-  headset: Headset,
-  network: Network,
-  globe: Globe,
-}
-
-// Get icon component for a stat with fallback
-function getIconElement(iconName?: string): React.ReactNode {
-  const IconComponent = iconName ? (iconMap[iconName] ?? CheckCircle) : CheckCircle
-  return <IconComponent className="size-3.5" />
 }
 
 /**
@@ -86,8 +51,8 @@ export function StatsBarBlock({ data }: StatsBarBlockProps) {
             {selectedStats.map((stat) => (
               <StatsBadge
                 key={stat.id}
-                icon={getIconElement(stat.icon)}
-                label={`${stat.value} ${stat.label}`}
+                icon={renderIcon(stat.icon, 'size-3.5')}
+                label={stat.label}
               />
             ))}
           </div>
@@ -96,14 +61,19 @@ export function StatsBarBlock({ data }: StatsBarBlockProps) {
         {displayStyle === 'cards' && (
           <div className={cn('grid gap-6', getColumnClass(columns))}>
             {selectedStats.map((stat) => {
-              const IconComponent = stat.icon ? (iconMap[stat.icon] ?? CheckCircle) : CheckCircle
+              const IconComponent = typeof stat.icon === 'string' 
+                ? getIconComponent(stat.icon) 
+                : CheckCircle
               return (
                 <div
                   key={stat.id}
                   className="bg-card rounded-lg p-6 text-center shadow-sm border"
                 >
-                  <IconComponent className="w-8 h-8 mx-auto mb-3 text-primary" />
-                  <div className="text-3xl md:text-4xl font-bold mb-2">{stat.value}</div>
+                  {typeof stat.icon === 'string' ? (
+                    <IconComponent className="w-8 h-8 mx-auto mb-3 text-primary" />
+                  ) : (
+                    renderIcon(stat.icon, 'w-8 h-8 mx-auto mb-3 text-primary')
+                  )}
                   <div className="text-muted-foreground">{stat.label}</div>
                 </div>
               )
@@ -115,8 +85,7 @@ export function StatsBarBlock({ data }: StatsBarBlockProps) {
           <div className={cn('grid gap-8', getColumnClass(columns))}>
             {selectedStats.map((stat) => (
               <div key={stat.id} className="text-center">
-                <div className="text-2xl md:text-3xl font-bold">{stat.value}</div>
-                <div className="text-sm text-muted-foreground mt-1">{stat.label}</div>
+                <div className="text-sm text-muted-foreground">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -125,13 +94,16 @@ export function StatsBarBlock({ data }: StatsBarBlockProps) {
         {displayStyle === 'large' && (
           <div className={cn('grid gap-8', getColumnClass(columns))}>
             {selectedStats.map((stat) => {
-              const IconComponent = stat.icon ? (iconMap[stat.icon] ?? CheckCircle) : CheckCircle
+              const IconComponent = typeof stat.icon === 'string' 
+                ? getIconComponent(stat.icon) 
+                : CheckCircle
               return (
                 <div key={stat.id} className="text-center">
-                  <IconComponent className="w-12 h-12 mx-auto mb-4 text-primary" />
-                  <div className="text-4xl md:text-5xl lg:text-6xl font-bold mb-2">
-                    {stat.value}
-                  </div>
+                  {typeof stat.icon === 'string' ? (
+                    <IconComponent className="w-12 h-12 mx-auto mb-4 text-primary" />
+                  ) : (
+                    renderIcon(stat.icon, 'w-12 h-12 mx-auto mb-4 text-primary')
+                  )}
                   <div className="text-lg text-muted-foreground">{stat.label}</div>
                 </div>
               )

@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    icons: Icon;
     'hero-slides': HeroSlide;
     stats: Stat;
     'value-props': ValueProp;
@@ -86,6 +87,7 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    icons: IconsSelect<false> | IconsSelect<true>;
     'hero-slides': HeroSlidesSelect<false> | HeroSlidesSelect<true>;
     stats: StatsSelect<false> | StatsSelect<true>;
     'value-props': ValuePropsSelect<false> | ValuePropsSelect<true>;
@@ -182,6 +184,25 @@ export interface Media {
   focalY?: number | null;
 }
 /**
+ * Custom SVG icons for use across the website
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "icons".
+ */
+export interface Icon {
+  id: number;
+  /**
+   * Unique identifier for the icon (e.g., "car", "shield")
+   */
+  name: string;
+  /**
+   * Upload the SVG icon file from Figma
+   */
+  svg: number | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Rotating hero section slides for homepage
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -211,11 +232,10 @@ export interface HeroSlide {
 export interface Stat {
   id: number;
   label: string;
-  value: string;
   /**
-   * Icon name or identifier (e.g., "car", "users", "check-circle")
+   * Select an icon from the Icons collection
    */
-  icon?: string | null;
+  icon?: (number | null) | Icon;
   /**
    * Lower numbers appear first
    */
@@ -235,9 +255,9 @@ export interface ValueProp {
   title: string;
   description: string;
   /**
-   * Icon name or identifier (e.g., "shield", "star", "check-circle")
+   * Select an icon from the Icons collection
    */
-  icon?: string | null;
+  icon?: (number | null) | Icon;
   /**
    * Lower numbers appear first
    */
@@ -745,6 +765,10 @@ export interface PayloadLockedDocument {
         value: number | Media;
       } | null)
     | ({
+        relationTo: 'icons';
+        value: number | Icon;
+      } | null)
+    | ({
         relationTo: 'hero-slides';
         value: number | HeroSlide;
       } | null)
@@ -860,6 +884,16 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "icons_select".
+ */
+export interface IconsSelect<T extends boolean = true> {
+  name?: T;
+  svg?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "hero-slides_select".
  */
 export interface HeroSlidesSelect<T extends boolean = true> {
@@ -879,7 +913,6 @@ export interface HeroSlidesSelect<T extends boolean = true> {
  */
 export interface StatsSelect<T extends boolean = true> {
   label?: T;
-  value?: T;
   icon?: T;
   order?: T;
   status?: T;

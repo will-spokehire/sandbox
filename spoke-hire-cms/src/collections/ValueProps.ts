@@ -34,11 +34,11 @@ export const ValueProps: CollectionConfig = {
     },
     {
       name: 'icon',
-      type: 'text',
-      label: 'Icon Identifier',
+      type: 'upload',
+      relationTo: 'icons',
+      label: 'Icon',
       admin: {
-        description: 'Icon name or identifier (e.g., "shield", "star", "check-circle")',
-        placeholder: 'shield',
+        description: 'Select an icon from the Icons collection',
       },
     },
     {
