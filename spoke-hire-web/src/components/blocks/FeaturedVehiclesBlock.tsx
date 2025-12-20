@@ -60,6 +60,7 @@ export function FeaturedVehiclesBlock({ data }: FeaturedVehiclesBlockProps) {
     limit = 6,
     displayStyle,
     columns,
+    showMobileButton = true,
   } = data
 
   const utils = api.useUtils()
@@ -257,6 +258,15 @@ export function FeaturedVehiclesBlock({ data }: FeaturedVehiclesBlockProps) {
                 <PublicVehicleCard vehicle={vehicle} />
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Mobile Show All Button */}
+        {showMobileButton && (
+          <div className="md:hidden w-full flex justify-center pt-[32px] pb-[19px]">
+            <Button asChild variant="default">
+              <Link href="/vehicles">See all vehicles</Link>
+            </Button>
           </div>
         )}
       </div>

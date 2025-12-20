@@ -201,6 +201,7 @@ export interface FeaturedVehiclesBlockData {
   limit?: number
   displayStyle: 'grid' | 'carousel' | 'masonry'
   columns: '2' | '3' | '4' | '6' | 2 | 3 | 4 | 6
+  showMobileButton?: boolean
 }
 
 export interface ImageGalleryBlockData {

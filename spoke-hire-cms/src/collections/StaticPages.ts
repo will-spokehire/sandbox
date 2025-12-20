@@ -559,6 +559,15 @@ const FeaturedVehiclesBlock: Block = {
         { label: '6 Columns', value: '6' },
       ],
     },
+    {
+      name: 'showMobileButton',
+      type: 'checkbox',
+      label: "Show 'Show all' button on mobile",
+      defaultValue: true,
+      admin: {
+        description: "Display the 'Show all vehicles' button on mobile devices",
+      },
+    },
   ],
 }
 
