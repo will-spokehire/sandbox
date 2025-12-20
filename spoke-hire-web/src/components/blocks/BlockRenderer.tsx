@@ -1,3 +1,4 @@
+import * as React from 'react'
 import type { PageBlock } from '~/lib/payload-api'
 import { HeroSectionBlock } from './HeroSectionBlock'
 import { StatsBarBlock } from './StatsBarBlock'
@@ -24,50 +25,69 @@ interface BlockRendererProps {
  *
  * Renders the appropriate block component based on the block type.
  * This is the main switch component that maps block data to React components.
+ * Handles mobile visibility using CSS (hideOnMobile field).
+ * Uses Tailwind's `hidden sm:block` to hide on mobile (< 640px) and show on desktop (>= 640px).
  */
 export function BlockRenderer({ block, index }: BlockRendererProps) {
+  // Render the block content based on type
+  let blockContent: React.ReactNode
+
   switch (block.blockType) {
     case 'hero-carousel':
-      return <HeroSectionBlock key={index} data={block} />
+      blockContent = <HeroSectionBlock key={index} data={block} />
+      break
 
     case 'stats-bar':
-      return <StatsBarBlock key={index} data={block} />
+      blockContent = <StatsBarBlock key={index} data={block} />
+      break
 
     case 'value-stats':
-      return <ValueStatsBlock key={index} data={block} />
+      blockContent = <ValueStatsBlock key={index} data={block} />
+      break
 
     case 'value-props-section':
-      return <ValuePropsBlock key={index} data={block} />
+      blockContent = <ValuePropsBlock key={index} data={block} />
+      break
 
     case 'testimonials-section':
-      return <TestimonialsBlock key={index} data={block} />
+      blockContent = <TestimonialsBlock key={index} data={block} />
+      break
 
     case 'faq-section':
-      return <FAQSectionBlock key={index} data={block} />
+      blockContent = <FAQSectionBlock key={index} data={block} />
+      break
 
     case 'rich-text-content':
-      return <RichTextContentBlock key={index} data={block} />
+      blockContent = <RichTextContentBlock key={index} data={block} />
+      break
 
     case 'call-to-action-block':
-      return <CallToActionBlock key={index} data={block} />
+      blockContent = <CallToActionBlock key={index} data={block} />
+      break
 
     case 'featured-vehicles':
-      return <FeaturedVehiclesBlock key={index} data={block} />
+      blockContent = <FeaturedVehiclesBlock key={index} data={block} />
+      break
 
     case 'image-gallery':
-      return <ImageGalleryBlock key={index} data={block} />
+      blockContent = <ImageGalleryBlock key={index} data={block} />
+      break
 
     case 'image-carousel':
-      return <ImageCarouselBlock key={index} data={block} />
+      blockContent = <ImageCarouselBlock key={index} data={block} />
+      break
 
     case 'two-column-content':
-      return <TwoColumnContentBlock key={index} data={block} />
+      blockContent = <TwoColumnContentBlock key={index} data={block} />
+      break
 
     case 'spacer':
-      return <SpacerBlock key={index} data={block} />
+      blockContent = <SpacerBlock key={index} data={block} />
+      break
 
     case 'project-spotlight':
-      return <SpotlightBlock key={index} data={block} />
+      blockContent = <SpotlightBlock key={index} data={block} />
+      break
 
     default:
       // TypeScript exhaustive check
@@ -75,6 +95,15 @@ export function BlockRenderer({ block, index }: BlockRendererProps) {
       console.warn(`Unknown block type: ${(_exhaustiveCheck as PageBlock).blockType}`)
       return null
   }
+
+  // If hideOnMobile is true, wrap in a div with CSS classes to hide on mobile
+  // hidden = hide by default (mobile < 640px)
+  // sm:block = show as block on sm breakpoint and up (>= 640px)
+  if (block.hideOnMobile) {
+    return <div className="hidden sm:block">{blockContent}</div>
+  }
+
+  return blockContent
 }
 
 export default BlockRenderer

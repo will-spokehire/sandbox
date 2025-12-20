@@ -441,6 +441,10 @@ export interface StaticPage {
         autoplayDelay?: number | null;
         showArrows?: boolean | null;
         showDots?: boolean | null;
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'hero-carousel';
@@ -460,6 +464,10 @@ export interface StaticPage {
          */
         columns?: ('2' | '3' | '4') | null;
         backgroundColor?: ('default' | 'muted' | 'accent' | 'primary') | null;
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'stats-bar';
@@ -470,6 +478,10 @@ export interface StaticPage {
          */
         selectedStats: (number | Stat)[];
         backgroundColor?: ('default' | 'muted' | 'accent' | 'primary') | null;
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'value-stats';
@@ -483,6 +495,10 @@ export interface StaticPage {
         selectedProps: (number | ValueProp)[];
         displayStyle?: ('grid' | 'list' | 'carousel') | null;
         columns?: ('2' | '3' | '4') | null;
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'value-props-section';
@@ -498,6 +514,10 @@ export interface StaticPage {
          * Number of testimonials visible at once (for carousel)
          */
         itemsPerView?: number | null;
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'testimonials-section';
@@ -520,6 +540,10 @@ export interface StaticPage {
          * Expand all FAQ items by default
          */
         defaultExpanded?: boolean | null;
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'faq-section';
@@ -545,12 +569,20 @@ export interface StaticPage {
          */
         maxWidth?: ('narrow' | 'default' | 'wide' | 'full') | null;
         backgroundColor?: ('white' | 'muted' | 'accent') | null;
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'rich-text-content';
       }
     | {
         selectedCTA: number | CtaBlock;
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'call-to-action-block';
@@ -574,6 +606,14 @@ export interface StaticPage {
         limit?: number | null;
         displayStyle?: ('grid' | 'carousel' | 'masonry') | null;
         columns?: ('2' | '3' | '4' | '6') | null;
+        /**
+         * Display the 'Show all vehicles' button on mobile devices
+         */
+        showMobileButton?: boolean | null;
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'featured-vehicles';
@@ -591,6 +631,10 @@ export interface StaticPage {
         }[];
         displayStyle?: ('grid' | 'masonry' | 'carousel' | 'lightbox-grid') | null;
         columns?: ('2' | '3' | '4' | '5') | null;
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'image-gallery';
@@ -608,6 +652,10 @@ export interface StaticPage {
          * Seconds between automatic slide transitions
          */
         autoplayDelay?: number | null;
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'image-carousel';
@@ -649,6 +697,10 @@ export interface StaticPage {
          */
         reverseOnMobile?: boolean | null;
         verticalAlignment?: ('top' | 'center' | 'bottom') | null;
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'two-column-content';
@@ -681,6 +733,10 @@ export interface StaticPage {
          * Number of items visible at once (default: 4)
          */
         itemsPerView?: number | null;
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'project-spotlight';
@@ -690,6 +746,10 @@ export interface StaticPage {
          * Vertical spacing between sections
          */
         height?: ('small' | 'medium' | 'large' | 'extra-large') | null;
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'spacer';
@@ -1018,6 +1078,7 @@ export interface StaticPagesSelect<T extends boolean = true> {
               autoplayDelay?: T;
               showArrows?: T;
               showDots?: T;
+              hideOnMobile?: T;
               id?: T;
               blockName?: T;
             };
@@ -1029,6 +1090,7 @@ export interface StaticPagesSelect<T extends boolean = true> {
               selectedStats?: T;
               columns?: T;
               backgroundColor?: T;
+              hideOnMobile?: T;
               id?: T;
               blockName?: T;
             };
@@ -1037,6 +1099,7 @@ export interface StaticPagesSelect<T extends boolean = true> {
           | {
               selectedStats?: T;
               backgroundColor?: T;
+              hideOnMobile?: T;
               id?: T;
               blockName?: T;
             };
@@ -1048,6 +1111,7 @@ export interface StaticPagesSelect<T extends boolean = true> {
               selectedProps?: T;
               displayStyle?: T;
               columns?: T;
+              hideOnMobile?: T;
               id?: T;
               blockName?: T;
             };
@@ -1061,6 +1125,7 @@ export interface StaticPagesSelect<T extends boolean = true> {
               showRatings?: T;
               showImages?: T;
               itemsPerView?: T;
+              hideOnMobile?: T;
               id?: T;
               blockName?: T;
             };
@@ -1075,6 +1140,7 @@ export interface StaticPagesSelect<T extends boolean = true> {
               limit?: T;
               displayStyle?: T;
               defaultExpanded?: T;
+              hideOnMobile?: T;
               id?: T;
               blockName?: T;
             };
@@ -1084,6 +1150,7 @@ export interface StaticPagesSelect<T extends boolean = true> {
               content?: T;
               maxWidth?: T;
               backgroundColor?: T;
+              hideOnMobile?: T;
               id?: T;
               blockName?: T;
             };
@@ -1091,6 +1158,7 @@ export interface StaticPagesSelect<T extends boolean = true> {
           | T
           | {
               selectedCTA?: T;
+              hideOnMobile?: T;
               id?: T;
               blockName?: T;
             };
@@ -1109,6 +1177,8 @@ export interface StaticPagesSelect<T extends boolean = true> {
               limit?: T;
               displayStyle?: T;
               columns?: T;
+              showMobileButton?: T;
+              hideOnMobile?: T;
               id?: T;
               blockName?: T;
             };
@@ -1126,6 +1196,7 @@ export interface StaticPagesSelect<T extends boolean = true> {
                   };
               displayStyle?: T;
               columns?: T;
+              hideOnMobile?: T;
               id?: T;
               blockName?: T;
             };
@@ -1135,6 +1206,7 @@ export interface StaticPagesSelect<T extends boolean = true> {
               images?: T;
               autoplay?: T;
               autoplayDelay?: T;
+              hideOnMobile?: T;
               id?: T;
               blockName?: T;
             };
@@ -1146,6 +1218,7 @@ export interface StaticPagesSelect<T extends boolean = true> {
               columnRatio?: T;
               reverseOnMobile?: T;
               verticalAlignment?: T;
+              hideOnMobile?: T;
               id?: T;
               blockName?: T;
             };
@@ -1163,6 +1236,7 @@ export interface StaticPagesSelect<T extends boolean = true> {
                   };
               showArrows?: T;
               itemsPerView?: T;
+              hideOnMobile?: T;
               id?: T;
               blockName?: T;
             };
@@ -1170,6 +1244,7 @@ export interface StaticPagesSelect<T extends boolean = true> {
           | T
           | {
               height?: T;
+              hideOnMobile?: T;
               id?: T;
               blockName?: T;
             };

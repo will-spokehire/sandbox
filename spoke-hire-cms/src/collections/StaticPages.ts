@@ -1,4 +1,5 @@
 import type { Block, CollectionConfig } from 'payload'
+import { commonBlockFields } from '@/fields/commonBlockFields'
 
 // ============================================
 // BLOCK DEFINITIONS
@@ -63,6 +64,7 @@ const HeroCarouselBlock: Block = {
       label: 'Show Navigation Dots',
       defaultValue: true,
     },
+    ...commonBlockFields,
   ],
 }
 
@@ -136,6 +138,7 @@ const StatsBarBlock: Block = {
         { label: 'Primary', value: 'primary' },
       ],
     },
+    ...commonBlockFields,
   ],
 }
 
@@ -175,6 +178,7 @@ const ValueStatsBlock: Block = {
         { label: 'Primary', value: 'primary' },
       ],
     },
+    ...commonBlockFields,
   ],
 }
 
@@ -238,6 +242,7 @@ const ValuePropsBlock: Block = {
         { label: '4 Columns', value: '4' },
       ],
     },
+    ...commonBlockFields,
   ],
 }
 
@@ -309,6 +314,7 @@ const TestimonialsSectionBlock: Block = {
         description: 'Number of testimonials visible at once (for carousel)',
       },
     },
+    ...commonBlockFields,
   ],
 }
 
@@ -405,6 +411,7 @@ const FAQSectionBlock: Block = {
         description: 'Expand all FAQ items by default',
       },
     },
+    ...commonBlockFields,
   ],
 }
 
@@ -451,6 +458,7 @@ const RichTextContentBlock: Block = {
         { label: 'Accent', value: 'accent' },
       ],
     },
+    ...commonBlockFields,
   ],
 }
 
@@ -472,6 +480,7 @@ const CallToActionBlock: Block = {
       hasMany: false,
       required: true,
     },
+    ...commonBlockFields,
   ],
 }
 
@@ -568,6 +577,7 @@ const FeaturedVehiclesBlock: Block = {
         description: "Display the 'Show all vehicles' button on mobile devices",
       },
     },
+    ...commonBlockFields,
   ],
 }
 
@@ -639,6 +649,7 @@ const ImageGalleryBlock: Block = {
         { label: '5 Columns', value: '5' },
       ],
     },
+    ...commonBlockFields,
   ],
 }
 
@@ -687,6 +698,7 @@ const ImageCarouselBlock: Block = {
         condition: (data, siblingData) => siblingData?.autoplay,
       },
     },
+    ...commonBlockFields,
   ],
 }
 
@@ -746,6 +758,7 @@ const TwoColumnContentBlock: Block = {
         { label: 'Bottom', value: 'bottom' },
       ],
     },
+    ...commonBlockFields,
   ],
 }
 
@@ -826,6 +839,7 @@ const SpotlightBlock: Block = {
         description: 'Number of items visible at once (default: 4)',
       },
     },
+    ...commonBlockFields,
   ],
 }
 
@@ -855,6 +869,7 @@ const SpacerBlock: Block = {
         description: 'Vertical spacing between sections',
       },
     },
+    ...commonBlockFields,
   ],
 }
 

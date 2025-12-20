@@ -131,6 +131,7 @@ export interface HeroCarouselBlockData {
   autoplayDelay: number
   showArrows: boolean
   showDots: boolean
+  hideOnMobile?: boolean
 }
 
 export interface StatsBarBlockData {
@@ -140,12 +141,14 @@ export interface StatsBarBlockData {
   selectedStats: Stat[]
   columns: '2' | '3' | '4' | 2 | 3 | 4
   backgroundColor: 'default' | 'muted' | 'accent' | 'primary'
+  hideOnMobile?: boolean
 }
 
 export interface ValueStatsBlockData {
   blockType: 'value-stats'
   selectedStats: Stat[]
   backgroundColor?: 'default' | 'muted' | 'accent' | 'primary'
+  hideOnMobile?: boolean
 }
 
 export interface ValuePropsBlockData {
@@ -155,6 +158,7 @@ export interface ValuePropsBlockData {
   selectedProps: ValueProp[]
   displayStyle: 'grid' | 'list' | 'carousel'
   columns: '2' | '3' | '4' | 2 | 3 | 4
+  hideOnMobile?: boolean
 }
 
 export interface TestimonialsSectionBlockData {
@@ -166,6 +170,7 @@ export interface TestimonialsSectionBlockData {
   showRatings: boolean
   showImages: boolean
   itemsPerView: number
+  hideOnMobile?: boolean
 }
 
 export interface FAQSectionBlockData {
@@ -178,6 +183,7 @@ export interface FAQSectionBlockData {
   limit?: number
   displayStyle: 'accordion' | 'two-column' | 'list'
   defaultExpanded: boolean
+  hideOnMobile?: boolean
 }
 
 export interface RichTextContentBlockData {
@@ -185,11 +191,13 @@ export interface RichTextContentBlockData {
   content: unknown // Lexical rich text
   maxWidth: 'narrow' | 'default' | 'wide' | 'full'
   backgroundColor: 'white' | 'muted' | 'accent'
+  hideOnMobile?: boolean
 }
 
 export interface CallToActionBlockData {
   blockType: 'call-to-action-block'
   selectedCTA: CTABlockContent
+  hideOnMobile?: boolean
 }
 
 export interface FeaturedVehiclesBlockData {
@@ -202,6 +210,7 @@ export interface FeaturedVehiclesBlockData {
   displayStyle: 'grid' | 'carousel' | 'masonry'
   columns: '2' | '3' | '4' | '6' | 2 | 3 | 4 | 6
   showMobileButton?: boolean
+  hideOnMobile?: boolean
 }
 
 export interface ImageGalleryBlockData {
@@ -214,6 +223,7 @@ export interface ImageGalleryBlockData {
   }[]
   displayStyle: 'grid' | 'masonry' | 'carousel' | 'lightbox-grid'
   columns: '2' | '3' | '4' | '5' | 2 | 3 | 4 | 5
+  hideOnMobile?: boolean
 }
 
 export interface CarouselImage {
@@ -230,6 +240,7 @@ export interface ImageCarouselBlockData {
   images: CarouselImage[]
   autoplay: boolean
   autoplayDelay: number
+  hideOnMobile?: boolean
 }
 
 export interface TwoColumnContentBlockData {
@@ -239,11 +250,13 @@ export interface TwoColumnContentBlockData {
   columnRatio: '50-50' | '60-40' | '40-60' | '70-30' | '30-70'
   reverseOnMobile: boolean
   verticalAlignment: 'top' | 'center' | 'bottom'
+  hideOnMobile?: boolean
 }
 
 export interface SpacerBlockData {
   blockType: 'spacer'
   height: 'small' | 'medium' | 'large' | 'extra-large'
+  hideOnMobile?: boolean
 }
 
 export interface SpotlightBlockData {
@@ -256,6 +269,7 @@ export interface SpotlightBlockData {
   }[]
   showArrows: boolean
   itemsPerView?: number
+  hideOnMobile?: boolean
 }
 
 export type PageBlock =
