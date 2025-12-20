@@ -42,6 +42,8 @@ export function CallToActionBlock({ data }: CallToActionBlockProps) {
     }
   }
 
+  const buttonCount = actions.length
+
   return (
     <section className={cn('py-16 md:py-24', bgClasses[backgroundStyle])}>
       <div className="container mx-auto px-4">
@@ -54,14 +56,17 @@ export function CallToActionBlock({ data }: CallToActionBlockProps) {
           {/* Right Column: Description + Actions (1/3 width) */}
           <div className="flex flex-col gap-6 md:pt-16">
             <p className="body-large">{description}</p>
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-row flex-nowrap gap-[22px] md:gap-4">
               {actions.map((action, index) => (
                 <Button
                   key={index}
                   asChild
                   size="lg"
                   variant={getButtonVariant(action.style)}
-                  className="text-lg px-8"
+                  className={cn(
+                    'text-lg px-6 md:px-8 shrink',
+                    buttonCount === 1 ? 'w-full' : 'flex-1 min-w-0'
+                  )}
                 >
                   <Link href={action.link}>{action.label}</Link>
                 </Button>

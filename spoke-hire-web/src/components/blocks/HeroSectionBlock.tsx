@@ -3,6 +3,7 @@
 import * as React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { cn } from '~/lib/utils'
 import { Button } from '~/components/ui/button'
 import type { HeroCarouselBlockData } from '~/lib/payload-api'
 import { getMediaUrl } from '~/lib/payload-api'
@@ -73,22 +74,36 @@ export function HeroSectionBlock({ data }: HeroSectionBlockProps) {
               </p>
 
               {/* Button Group */}
-              <div className="flex gap-4 md:gap-[17px] items-center flex-wrap">
-                <Button asChild className="w-full sm:w-[196px]">
-                  <Link href={slide.ctaLink || '/vehicles'}>
-                    {slide.ctaText || 'FIND A CAR'}
-                  </Link>
-                </Button>
-                <Button variant="outline" asChild className="w-full sm:w-auto">
-                  <Link href="/list-your-car">LIST YOUR CAR</Link>
-                </Button>
-              </div>
+              {(() => {
+                // Both buttons always exist (first has fallback, second is hardcoded)
+                const buttonCount = 2
+                
+                return (
+                  <div className="flex gap-[22px] md:gap-[17px] items-center">
+                    <Button
+                      asChild
+                      className={cn(buttonCount === 1 ? 'w-full' : 'flex-1')}
+                    >
+                      <Link href={slide.ctaLink || '/vehicles'}>
+                        {slide.ctaText || 'FIND A CAR'}
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      asChild
+                      className={cn(buttonCount === 1 ? 'w-full' : 'flex-1')}
+                    >
+                      <Link href="/list-your-car">LIST YOUR CAR</Link>
+                    </Button>
+                  </div>
+                )
+              })()}
             </div>
           </div>
         </div>
 
         {/* Stats Bar */}
-        <div className="flex flex-wrap gap-4 md:gap-6 items-center justify-center py-6 border-t border-spoke-grey-light">
+        <div className="flex flex-wrap gap-4 md:gap-6 items-center justify-center py-6">
           {heroStats.map((stat, index) => (
             <div
               key={index}

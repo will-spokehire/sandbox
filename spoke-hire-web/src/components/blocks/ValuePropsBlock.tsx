@@ -100,11 +100,11 @@ export function ValuePropsBlock({ data }: ValuePropsBlockProps) {
                   <p className="body-large text-black w-full">{subtitle}</p>
 
                   {/* Button Group */}
-                  <div className="flex flex-col sm:flex-row gap-[24px] items-start sm:items-center">
-                    <Button asChild variant="default" className="w-full sm:w-auto">
+                  <div className="flex flex-row flex-nowrap gap-[22px] md:gap-[24px] items-center">
+                    <Button asChild variant="default" className="flex-1 min-w-0 shrink">
                       <Link href="/vehicles">ALL VEHICLES</Link>
                     </Button>
-                    <Button asChild variant="outline" className="w-full sm:w-auto">
+                    <Button asChild variant="outline" className="flex-1 min-w-0 shrink">
                       <Link href="/contact">GET IN TOUCH</Link>
                     </Button>
                   </div>
