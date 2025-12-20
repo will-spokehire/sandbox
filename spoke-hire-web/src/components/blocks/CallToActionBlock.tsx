@@ -42,6 +42,18 @@ export function CallToActionBlock({ data }: CallToActionBlockProps) {
     }
   }
 
+  const getDescriptionPadding = (level: string) => {
+    const paddingMap: Record<string, string> = {
+      h1: 'pt-[72px] md:pt-[144px]',
+      h2: 'pt-[63px] md:pt-[96px]',
+      h3: 'pt-[48px] md:pt-[54px]',
+      h4: 'pt-[36px] md:pt-[48px]',
+      h5: 'pt-[27px] md:pt-[36px]',
+      h6: 'pt-[24px] md:pt-[27px]',
+    }
+    return paddingMap[level] ?? 'pt-6 md:pt-16' // fallback
+  }
+
   const buttonCount = actions.length
 
   // Conditional padding based on heading level
@@ -51,7 +63,7 @@ export function CallToActionBlock({ data }: CallToActionBlockProps) {
 
   return (
     <section className={cn(paddingClasses, bgClasses[backgroundStyle])}>
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 md:px-[30px]">
         <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-8 md:gap-12 items-start">
           {/* Left Column: Heading (2/3 width) */}
           <div>
@@ -64,7 +76,7 @@ export function CallToActionBlock({ data }: CallToActionBlockProps) {
           </div>
 
           {/* Right Column: Description + Actions (1/3 width) */}
-          <div className="flex flex-col gap-6 md:pt-16">
+          <div className={cn('flex flex-col gap-6', getDescriptionPadding(headingLevel))}>
             <p className="body-large">{description}</p>
             <div className="flex flex-row flex-nowrap gap-[22px] md:gap-4">
               {actions.map((action, index) => (
