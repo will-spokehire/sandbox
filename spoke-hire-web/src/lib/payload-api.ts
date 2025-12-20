@@ -123,17 +123,6 @@ export interface CTABlockContent {
 }
 
 // Block Types
-export interface HeroCarouselBlockData {
-  blockType: 'hero-carousel'
-  title?: string
-  slides: HeroSlide[]
-  autoplay: boolean
-  autoplayDelay: number
-  showArrows: boolean
-  showDots: boolean
-  hideOnMobile?: boolean
-}
-
 export interface StatsBarBlockData {
   blockType: 'stats-bar'
   title?: string
@@ -271,7 +260,6 @@ export interface SpotlightBlockData {
 }
 
 export type PageBlock =
-  | HeroCarouselBlockData
   | StatsBarBlockData
   | ValueStatsBlockData
   | ValuePropsBlockData

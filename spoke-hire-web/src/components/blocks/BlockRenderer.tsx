@@ -1,6 +1,5 @@
 import * as React from 'react'
 import type { PageBlock } from '~/lib/payload-api'
-import { HeroSectionBlock } from './HeroSectionBlock'
 import { StatsBarBlock } from './StatsBarBlock'
 import { ValueStatsBlock } from './ValueStatsBlock'
 import { ValuePropsBlock } from './ValuePropsBlock'
@@ -33,10 +32,6 @@ export function BlockRenderer({ block, index }: BlockRendererProps) {
   let blockContent: React.ReactNode
 
   switch (block.blockType) {
-    case 'hero-carousel':
-      blockContent = <HeroSectionBlock key={index} data={block} />
-      break
-
     case 'stats-bar':
       blockContent = <StatsBarBlock key={index} data={block} />
       break

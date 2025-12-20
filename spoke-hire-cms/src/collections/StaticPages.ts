@@ -6,69 +6,6 @@ import { commonBlockFields } from '@/fields/commonBlockFields'
 // ============================================
 
 /**
- * Hero Carousel Block
- * Display rotating hero section with slides from hero-slides collection
- */
-const HeroCarouselBlock: Block = {
-  slug: 'hero-carousel',
-  labels: {
-    singular: 'Hero Carousel',
-    plural: 'Hero Carousels',
-  },
-  fields: [
-    {
-      name: 'title',
-      type: 'text',
-      label: 'Section Title',
-      admin: {
-        description: 'Optional title for admin reference',
-      },
-    },
-    {
-      name: 'slides',
-      type: 'relationship',
-      relationTo: 'hero-slides',
-      hasMany: true,
-      required: true,
-      filterOptions: {
-        status: { equals: 'published' },
-      },
-      admin: {
-        description: 'Select which hero slides to display',
-      },
-    },
-    {
-      name: 'autoplay',
-      type: 'checkbox',
-      label: 'Autoplay',
-      defaultValue: true,
-    },
-    {
-      name: 'autoplayDelay',
-      type: 'number',
-      label: 'Autoplay Delay (ms)',
-      defaultValue: 5000,
-      admin: {
-        condition: (data, siblingData) => siblingData?.autoplay,
-      },
-    },
-    {
-      name: 'showArrows',
-      type: 'checkbox',
-      label: 'Show Navigation Arrows',
-      defaultValue: true,
-    },
-    {
-      name: 'showDots',
-      type: 'checkbox',
-      label: 'Show Navigation Dots',
-      defaultValue: true,
-    },
-    ...commonBlockFields,
-  ],
-}
-
-/**
  * Stats Bar Block
  * Display key metrics/stats
  */
@@ -950,7 +887,6 @@ export const StaticPages: CollectionConfig = {
       required: true,
       minRows: 1,
       blocks: [
-        HeroCarouselBlock,
         StatsBarBlock,
         ValueStatsBlock,
         ValuePropsBlock,

@@ -122,17 +122,7 @@ export const homepageLayout = {
   metaDescription:
     "Access the UK's largest classic car hire platform with thousands of vehicles available. Classic car hire for film, photoshoots, weddings, and events.",
   layout: [
-    // Block 1: Hero Carousel
-    {
-      blockType: 'hero-carousel',
-      title: 'Hero Section',
-      autoplay: true,
-      autoplayDelay: 5000,
-      showArrows: true,
-      showDots: true,
-      // slides will be linked by relationship
-    },
-    // Block 2: Stats Bar
+    // Block 1: Stats Bar
     {
       blockType: 'stats-bar',
       title: 'Stats Bar',

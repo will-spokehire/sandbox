@@ -321,23 +321,8 @@ async function seedImages() {
       })
 
       if (homepage.docs.length > 0) {
-        const page = homepage.docs[0]
-        const layout = page.layout as any[]
-
-        // Find hero carousel block and update it
-        const heroBlockIndex = layout.findIndex((block) => block.blockType === 'hero-carousel')
-
-        if (heroBlockIndex >= 0) {
-          layout[heroBlockIndex].slides = heroSlides.docs.map((s) => s.id)
-
-          await payload.update({
-            collection: 'static-pages',
-            id: page.id,
-            data: { layout },
-          })
-
-          console.log('  ✓ Linked hero slides to homepage')
-        }
+        // Hero carousel block has been removed - no longer linking hero slides
+        console.log('  ○ Hero carousel block removed - skipping hero slide linking')
       }
     }
 

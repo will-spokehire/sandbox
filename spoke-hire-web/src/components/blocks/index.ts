@@ -6,8 +6,6 @@
  */
 
 export { BlockRenderer } from './BlockRenderer'
-export { HeroCarouselBlock } from './HeroCarouselBlock'
-export { HeroSectionBlock } from './HeroSectionBlock'
 export { StatsBarBlock } from './StatsBarBlock'
 export { ValueStatsBlock } from './ValueStatsBlock'
 export { ValuePropsBlock } from './ValuePropsBlock'

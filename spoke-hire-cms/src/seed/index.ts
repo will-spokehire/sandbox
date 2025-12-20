@@ -127,11 +127,6 @@ async function seed() {
       // Build the layout with relationships
       const layoutWithRelationships = homepageLayout.layout.map((block) => {
         switch (block.blockType) {
-          case 'hero-carousel':
-            return {
-              ...block,
-              slides: createdHeroSlides.map((s) => s.id),
-            }
           case 'stats-bar':
             return {
               ...block,
