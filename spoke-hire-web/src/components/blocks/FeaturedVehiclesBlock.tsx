@@ -317,7 +317,9 @@ function CarouselDisplay({ vehicles }: { vehicles: Vehicle[] }) {
       if (mobileScrollWidth > 0 && vehicles.length > 0) {
         const cardWidth = mobileScrollWidth / vehicles.length
         const newIndex = Math.round(mobileScrollLeft / cardWidth)
-        setCurrentIndex(newIndex)
+        // Clamp index to valid range [0, totalItems - 1]
+        const clampedIndex = Math.max(0, Math.min(newIndex, vehicles.length - 1))
+        setCurrentIndex(clampedIndex)
       }
     }
   }, [vehicles.length])
