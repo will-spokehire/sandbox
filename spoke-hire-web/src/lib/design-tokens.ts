@@ -318,7 +318,7 @@ export const FOOTER_SPACING = {
   columnGap: "gap-16", // 64px gap between columns (matches SPACING_CLASSES["3xl"])
   linkGap: "gap-[10px]", // Gap between link items
   contactGap: "gap-6", // 24px gap in contact section (matches SPACING_CLASSES.lg)
-  padding: "pt-[60px] pb-[30px] px-[30px]", // Top 60px, bottom 30px, horizontal 30px
+  padding: "pt-[60px] md:pt-[100px] pb-[30px] px-[30px]", // Top 60px mobile, 100px desktop, bottom 30px, horizontal 30px
 } as const;
 
 // Footer-specific typography constants matching Figma design
