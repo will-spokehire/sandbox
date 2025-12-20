@@ -1,12 +1,12 @@
 'use client'
 
 import * as React from 'react'
+import Image from 'next/image'
 import { cn } from '~/lib/utils'
 import type { SpotlightBlockData } from '~/lib/payload-api'
 import { getMediaUrl } from '~/lib/payload-api'
 import { SpotlightCard } from '~/components/cards/SpotlightCard'
 import { MobileScrollDots } from './MobileScrollDots'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface SpotlightBlockProps {
   data: SpotlightBlockData
@@ -103,30 +103,42 @@ export function SpotlightBlock({ data }: SpotlightBlockProps) {
 
         {/* Navigation Arrows - Desktop only, positioned between title and cards */}
         {showArrows && totalItems > itemsPerView && (
-          <div className="hidden md:flex items-center justify-between px-0 py-[20px] w-full">
+          <div className="hidden md:flex items-center justify-between px-0 py-[10px] w-full">
             <button
               onClick={goToPrevious}
               disabled={currentIndex === 0}
               className={cn(
-                'h-[40px] w-[100px] relative shrink-0 flex items-center justify-center',
-                'disabled:opacity-50 disabled:cursor-not-allowed',
-                'transition-opacity hover:opacity-80'
+                'h-[15px] w-[101px] flex items-center justify-center shrink-0 relative',
+                'transition-opacity',
+                currentIndex === 0 && 'opacity-30 cursor-not-allowed'
               )}
               aria-label="Previous projects"
             >
-              <ChevronLeft className="w-6 h-6 text-spoke-black" />
+              <Image
+                src="/arrow-left.svg"
+                alt="Previous"
+                width={101}
+                height={15}
+                className="w-full h-full"
+              />
             </button>
             <button
               onClick={goToNext}
               disabled={currentIndex >= maxIndex}
               className={cn(
-                'h-[40px] w-[100px] relative shrink-0 flex items-center justify-center',
-                'disabled:opacity-50 disabled:cursor-not-allowed',
-                'transition-opacity hover:opacity-80'
+                'h-[15px] w-[101px] flex items-center justify-center shrink-0 relative',
+                'transition-opacity',
+                currentIndex >= maxIndex && 'opacity-30 cursor-not-allowed'
               )}
               aria-label="Next projects"
             >
-              <ChevronRight className="w-6 h-6 text-spoke-black" />
+              <Image
+                src="/arrow-right.svg"
+                alt="Next"
+                width={101}
+                height={15}
+                className="w-full h-full"
+              />
             </button>
           </div>
         )}
@@ -135,25 +147,32 @@ export function SpotlightBlock({ data }: SpotlightBlockProps) {
         <div
           ref={desktopScrollRef}
           className={cn(
-            'hidden md:flex gap-[21px] items-center w-full overflow-x-auto snap-x snap-mandatory',
+            'hidden md:flex gap-[21px] w-full overflow-x-auto snap-x snap-mandatory',
             '[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'
           )}
         >
-          {images.map((item, index) => (
-            <div
-              key={item.image.id || index}
-              className="flex-shrink-0 snap-center"
-              style={{ minWidth: `calc((100% - ${21 * (itemsPerView - 1)}px) / ${itemsPerView})` }}
-            >
-              <SpotlightCard
-                title={item.caption || item.image.alt || ''}
-                imageUrl={getMediaUrl(item.image.url)}
-                imageAlt={item.image.alt}
-                href={item.link}
-                titleSize="h4"
-              />
-            </div>
-          ))}
+          {images.map((item, index) => {
+            const gapTotal = 21 * (itemsPerView - 1)
+            const cardWidth = `calc((100% - ${gapTotal}px) / ${itemsPerView})`
+            return (
+              <div
+                key={item.image.id || index}
+                className="flex-shrink-0 snap-center"
+                style={{ 
+                  width: cardWidth,
+                  minWidth: `min(${cardWidth}, 350px)`
+                }}
+              >
+                <SpotlightCard
+                  title={item.caption || item.image.alt || ''}
+                  imageUrl={getMediaUrl(item.image.url)}
+                  imageAlt={item.image.alt}
+                  href={item.link}
+                  titleSize="h4"
+                />
+              </div>
+            )
+          })}
         </div>
 
         {/* Mobile: Single card with scroll dots */}
