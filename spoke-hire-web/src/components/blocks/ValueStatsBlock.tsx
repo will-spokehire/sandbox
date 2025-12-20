@@ -58,7 +58,7 @@ export function ValueStatsBlock({ data }: ValueStatsBlockProps) {
   }
 
   return (
-    <section className={cn('py-6', bgClasses[backgroundColor || 'default'])}>
+    <section className={cn('pt-[40px] pb-0', bgClasses[backgroundColor || 'default'])}>
       <div className="container mx-auto px-4">
         <div className="flex flex-wrap gap-4 md:gap-6 items-center justify-center">
           {selectedStats.map((stat) => {

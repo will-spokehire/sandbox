@@ -75,7 +75,7 @@ export function ValuePropsBlock({ data }: ValuePropsBlockProps) {
   // Split Layout (matching Figma design)
   if (isSplitLayout) {
     return (
-      <section className="bg-white pt-[100px] pb-[59px] px-[30px]">
+      <section className="bg-white pt-[60px] md:pt-[100px] pb-0 px-[30px]">
         <div className="container mx-auto">
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-[206px] items-start">
             {/* Left Column */}
@@ -160,7 +160,7 @@ export function ValuePropsBlock({ data }: ValuePropsBlockProps) {
 
   // Standard Layout (existing behavior)
   return (
-    <section className="py-16 md:py-24 bg-muted/30">
+    <section className="pt-[60px] md:pt-[100px] pb-0 bg-muted/30">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">

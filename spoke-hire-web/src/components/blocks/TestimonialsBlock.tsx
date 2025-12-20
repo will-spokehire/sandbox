@@ -43,7 +43,7 @@ export function TestimonialsBlock({ data }: TestimonialsBlockProps) {
   }
 
   return (
-    <section className="py-16 md:py-24 bg-background">
+    <section className="pt-[60px] pb-0 bg-background">
       <div className="container mx-auto px-4">
         {/* Header */}
         {(title || subtitle) && (

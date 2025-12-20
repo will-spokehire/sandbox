@@ -135,7 +135,7 @@ export function FAQSectionBlock({ data }: FAQSectionBlockProps) {
 
   if (isLoading) {
     return (
-      <section className="py-16 md:py-24">
+      <section className="pt-[60px] pb-0">
         <div className="container mx-auto px-4">
           <div className="animate-pulse space-y-4">
             <div className="h-8 bg-muted rounded w-1/3 mx-auto" />
@@ -156,7 +156,7 @@ export function FAQSectionBlock({ data }: FAQSectionBlockProps) {
   }
 
   return (
-    <section className="py-16 md:py-24 bg-background">
+    <section className="pt-[60px] pb-0 bg-background">
       <div className="container mx-auto px-4">
         {/* Header */}
         {(title || subtitle) && (

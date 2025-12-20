@@ -75,7 +75,7 @@ export function StatsBarBlock({ data }: StatsBarBlockProps) {
   }
 
   return (
-    <section className={cn('py-12 md:py-16', bgClasses[backgroundColor])}>
+    <section className={cn('pt-[60px] pb-0', bgClasses[backgroundColor])}>
       <div className="container mx-auto px-4">
         {title && (
           <h2 className="text-2xl md:text-3xl font-bold text-center mb-8">{title}</h2>

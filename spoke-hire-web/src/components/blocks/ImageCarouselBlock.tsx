@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { cn } from '~/lib/utils'
 import type { ImageCarouselBlockData } from '~/lib/payload-api'
 import { getMediaUrl } from '~/lib/payload-api'
+import { LAYOUT_CONSTANTS } from '~/lib/design-tokens'
 
 interface ImageCarouselBlockProps {
   data: ImageCarouselBlockData
@@ -57,17 +58,18 @@ export function ImageCarouselBlock({ data }: ImageCarouselBlockProps) {
   const currentImage = images[currentIndex]
 
   // Determine which image to show (mobile or desktop)
-  const imageToShow = isMobile && currentImage.mobileImage
-    ? currentImage.mobileImage
-    : currentImage.desktopImage
+  const imageToShow = isMobile && currentImage?.mobileImage
+    ? currentImage?.mobileImage
+    : currentImage?.desktopImage
 
   if (!imageToShow) {
     return null
   }
 
   return (
-    <section className="relative w-full overflow-hidden bg-white">
-      <div className="relative w-full h-[50vh] md:h-[60vh] lg:h-[813px]">
+    <section className="relative w-full overflow-hidden bg-white pt-[40px] pb-0">
+      <div className={LAYOUT_CONSTANTS.maxWidthContainer}>
+        <div className="relative w-full h-[50vh] md:h-[60vh] lg:h-[813px]">
         {images.map((image, index) => {
           const displayImage = isMobile && image.mobileImage
             ? image.mobileImage
@@ -98,6 +100,7 @@ export function ImageCarouselBlock({ data }: ImageCarouselBlockProps) {
             </div>
           )
         })}
+        </div>
       </div>
     </section>
   )

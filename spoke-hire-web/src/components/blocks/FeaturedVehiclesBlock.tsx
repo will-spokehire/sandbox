@@ -8,6 +8,7 @@ import type { FeaturedVehiclesBlockData } from '~/lib/payload-api'
 import { Button } from '~/components/ui/button'
 import { PublicVehicleCard } from '~/app/vehicles/_components/PublicVehicleCard'
 import { MobileScrollDots } from './MobileScrollDots'
+import { LAYOUT_CONSTANTS } from '~/lib/design-tokens'
 import { api } from '~/trpc/react'
 
 interface FeaturedVehiclesBlockProps {
@@ -86,8 +87,8 @@ export function FeaturedVehiclesBlock({ data }: FeaturedVehiclesBlockProps) {
         )
         const results = await Promise.all(vehiclePromises)
         const validVehicles = results.filter(
-          (v): v is Vehicle => v !== null && v !== undefined
-        )
+          (v): v is NonNullable<typeof v> => v !== null && v !== undefined
+        ) as Vehicle[]
         setManualVehicles(validVehicles)
       } catch (error) {
         console.error('Error fetching manual vehicles:', error)
@@ -140,7 +141,7 @@ export function FeaturedVehiclesBlock({ data }: FeaturedVehiclesBlockProps) {
 
   if (isLoading) {
     return (
-      <section className="bg-white pt-[60px] pb-0 px-4 md:px-[30px]">
+      <section className="bg-white pt-[60px] pb-0">
         <div className="max-w-[1448px] mx-auto w-full">
           <div className="animate-pulse">
             <div className="h-16 bg-muted rounded w-1/3 mb-4" />
@@ -159,7 +160,7 @@ export function FeaturedVehiclesBlock({ data }: FeaturedVehiclesBlockProps) {
   // Show placeholder if no vehicles
   if (vehicles.length === 0) {
     return (
-      <section className="bg-white pt-[60px] pb-0 px-4 md:px-[30px]">
+      <section className="bg-white pt-[60px] pb-0">
         <div className="max-w-[1448px] mx-auto w-full flex flex-col gap-5 items-center">
           {/* Header */}
           {(title || subtitle) && (
@@ -202,7 +203,7 @@ export function FeaturedVehiclesBlock({ data }: FeaturedVehiclesBlockProps) {
   }
 
   return (
-    <section className="bg-white pt-[60px] pb-0 px-4 md:px-[30px]">
+    <section className={cn("bg-white pt-[60px] pb-0", LAYOUT_CONSTANTS.contentPadding)}>
       <div className="max-w-[1448px] mx-auto w-full flex flex-col gap-5 items-center">
         {/* Header - Left-aligned title with right-aligned button (desktop) */}
         {(title || subtitle) && (

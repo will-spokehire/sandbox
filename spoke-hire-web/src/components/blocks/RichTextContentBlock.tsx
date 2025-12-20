@@ -138,7 +138,7 @@ export function RichTextContentBlock({ data }: RichTextContentBlockProps) {
   const htmlContent = serializeLexicalToHTML(content)
 
   return (
-    <section className={cn('py-12 md:py-16', bgClasses[backgroundColor])}>
+    <section className={cn('pt-[60px] pb-0', bgClasses[backgroundColor])}>
       <div className="container mx-auto px-4">
         <div
           className={cn(

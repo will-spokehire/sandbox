@@ -111,7 +111,7 @@ export function ImageGalleryBlock({ data }: ImageGalleryBlockProps) {
   }
 
   return (
-    <section className="py-12 md:py-16">
+    <section className="pt-[40px] pb-0">
       <div className="container mx-auto px-4">
         {title && (
           <h2 className="text-2xl md:text-3xl font-bold text-center mb-8">{title}</h2>

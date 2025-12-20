@@ -120,7 +120,7 @@ export function TwoColumnContentBlock({ data }: TwoColumnContentBlockProps) {
   const rightHTML = serializeLexicalToHTML(rightColumn)
 
   return (
-    <section className="py-12 md:py-16">
+    <section className="pt-[60px] pb-0">
       <div className="container mx-auto px-4">
         <div
           className={cn(

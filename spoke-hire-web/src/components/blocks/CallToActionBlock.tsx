@@ -44,8 +44,13 @@ export function CallToActionBlock({ data }: CallToActionBlockProps) {
 
   const buttonCount = actions.length
 
+  // Conditional padding based on heading level
+  const paddingClasses = headingLevel === 'h1' 
+    ? 'pt-[14px] md:pt-[40px] pb-0'
+    : 'pt-[60px] pb-0'
+
   return (
-    <section className={cn('py-16 md:py-24', bgClasses[backgroundStyle])}>
+    <section className={cn(paddingClasses, bgClasses[backgroundStyle])}>
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-8 md:gap-12 items-start">
           {/* Left Column: Heading (2/3 width) */}

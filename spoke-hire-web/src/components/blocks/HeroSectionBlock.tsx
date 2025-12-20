@@ -52,7 +52,7 @@ export function HeroSectionBlock({ data }: HeroSectionBlockProps) {
   return (
     <section className="relative w-full bg-white">
       {/* Main Content Container */}
-      <div className="container mx-auto px-4 md:px-[30px] pt-10 md:pt-[41px] pb-0">
+      <div className="container mx-auto pt-10 md:pt-[41px] pb-0">
         {/* Hero Content Grid - Matching Figma Layout */}
         <div className="relative mb-10">
           {/* Two-column layout for desktop */}
