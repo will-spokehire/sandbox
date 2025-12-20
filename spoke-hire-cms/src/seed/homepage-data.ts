@@ -24,32 +24,26 @@ export const heroSlides = [
 // ============================================
 // STATS BAR
 // ============================================
+// Note: Icons need to be uploaded to Icons collection and assigned manually in CMS
+// Legacy icon names for reference: 'car', 'headset', 'network', 'shield-check'
 export const stats = [
   {
     label: 'Vehicles',
-    value: '10,000+',
-    icon: 'car',
     order: 1,
     status: 'published' as const,
   },
   {
     label: 'Specialist Support',
-    value: '24/7',
-    icon: 'headset',
     order: 2,
     status: 'published' as const,
   },
   {
     label: 'UK-wide Delivery',
-    value: 'Nationwide',
-    icon: 'network',
     order: 3,
     status: 'published' as const,
   },
   {
     label: 'Trusted Supplier',
-    value: '5★',
-    icon: 'shield-check',
     order: 4,
     status: 'published' as const,
   },
@@ -58,12 +52,13 @@ export const stats = [
 // ============================================
 // VALUE PROPOSITIONS (RTBs - Reasons to Believe)
 // ============================================
+// Note: Icons need to be uploaded to Icons collection and assigned manually in CMS
+// Legacy icon names for reference: 'award', 'globe', 'clock', 'shield'
 export const valueProps = [
   {
     title: 'Experts in Classic Cars',
     description:
       "We're not just a booking platform. We understand classic cars and their unique needs.",
-    icon: 'award',
     order: 1,
     status: 'published' as const,
   },
@@ -71,7 +66,6 @@ export const valueProps = [
     title: "The UK's Largest Network",
     description:
       'Every vehicle vetted, every detail understood. Real people supporting you every step of the way.',
-    icon: 'globe',
     order: 2,
     status: 'published' as const,
   },
@@ -79,7 +73,6 @@ export const valueProps = [
     title: '24 Hour Response Time',
     description:
       "Questions? Issues? We're here. Fast and clear communication whenever you need us across the UK.",
-    icon: 'clock',
     order: 3,
     status: 'published' as const,
   },
@@ -87,7 +80,6 @@ export const valueProps = [
     title: 'Trusted Vehicle Supplier',
     description:
       'Search thousands of vehicles, book with confidence, coordinate seamlessly. We handle the complexity.',
-    icon: 'shield',
     order: 4,
     status: 'published' as const,
   },
