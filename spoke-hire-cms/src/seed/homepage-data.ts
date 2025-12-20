@@ -148,8 +148,6 @@ export const homepageLayout = {
       subtitle: 'Explore our popular vehicles, available to hire today.',
       selectionType: 'latest',
       limit: 4,
-      displayStyle: 'carousel',
-      columns: 4,
     },
     // Block 4: New Arrivals (Featured Vehicles with different config)
     {
@@ -158,8 +156,6 @@ export const homepageLayout = {
       subtitle: 'Check out the latest additions to our roster.',
       selectionType: 'latest',
       limit: 4,
-      displayStyle: 'carousel',
-      columns: 4,
     },
     // Block 5: Value Props Section (RTBs)
     {

@@ -486,7 +486,7 @@ const CallToActionBlock: Block = {
 
 /**
  * Featured Vehicles Block
- * Display featured vehicles grid/carousel
+ * Display featured vehicles in carousel format
  */
 const FeaturedVehiclesBlock: Block = {
   slug: 'featured-vehicles',
@@ -544,29 +544,6 @@ const FeaturedVehiclesBlock: Block = {
         condition: (data, siblingData) => siblingData?.selectionType === 'latest',
         description: 'Number of latest vehicles to display',
       },
-    },
-    {
-      name: 'displayStyle',
-      type: 'select',
-      label: 'Display Style',
-      defaultValue: 'grid',
-      options: [
-        { label: 'Grid', value: 'grid' },
-        { label: 'Carousel', value: 'carousel' },
-        { label: 'Masonry', value: 'masonry' },
-      ],
-    },
-    {
-      name: 'columns',
-      type: 'select',
-      label: 'Columns',
-      defaultValue: '3',
-      options: [
-        { label: '2 Columns', value: '2' },
-        { label: '3 Columns', value: '3' },
-        { label: '4 Columns', value: '4' },
-        { label: '6 Columns', value: '6' },
-      ],
     },
     {
       name: 'showMobileButton',

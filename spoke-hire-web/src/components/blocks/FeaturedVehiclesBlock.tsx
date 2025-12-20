@@ -46,7 +46,7 @@ interface Vehicle {
 /**
  * FeaturedVehiclesBlock Component
  *
- * Displays featured vehicles in various layouts (grid, carousel, masonry).
+ * Displays featured vehicles in carousel format.
  * Supports two selection types:
  * - 'manual': Select specific vehicles by entering their IDs
  * - 'latest': Show the most recently added vehicles
@@ -58,8 +58,6 @@ export function FeaturedVehiclesBlock({ data }: FeaturedVehiclesBlockProps) {
     selectionType,
     vehicleIds,
     limit = 6,
-    displayStyle,
-    columns,
     showMobileButton = true,
   } = data
 
@@ -128,18 +126,6 @@ export function FeaturedVehiclesBlock({ data }: FeaturedVehiclesBlockProps) {
     (selectionType === 'manual' && isLoadingManual) ||
     (selectionType === 'latest' && latestVehiclesQuery.isLoading)
 
-  // Get column class based on columns value (handles both string and number)
-  const getColumnClass = (cols: string | number) => {
-    const colNum = String(cols)
-    switch (colNum) {
-      case '2': return 'grid-cols-1 md:grid-cols-2'
-      case '3': return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
-      case '4': return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'
-      case '6': return 'grid-cols-2 md:grid-cols-3 lg:grid-cols-6'
-      default: return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
-    }
-  }
-
   if (isLoading) {
     return (
       <section className="bg-white pt-[60px] pb-0">
@@ -147,9 +133,9 @@ export function FeaturedVehiclesBlock({ data }: FeaturedVehiclesBlockProps) {
           <div className="animate-pulse">
             <div className="h-16 bg-muted rounded w-1/3 mb-4" />
             <div className="h-6 bg-muted rounded w-1/2 mb-8" />
-            <div className={cn('grid gap-6', getColumnClass(columns))}>
-              {Array.from({ length: Number(columns) }).map((_, i) => (
-                <div key={i} className="h-[240px] bg-muted rounded" />
+            <div className="flex gap-6">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-[240px] bg-muted rounded flex-shrink-0" style={{ width: 'calc((100% - 63px) / 4)' }} />
               ))}
             </div>
           </div>
@@ -236,30 +222,8 @@ export function FeaturedVehiclesBlock({ data }: FeaturedVehiclesBlockProps) {
           </div>
         )}
 
-        {/* Grid Display */}
-        {displayStyle === 'grid' && (
-          <div className={cn('grid gap-6 w-full', getColumnClass(columns))}>
-            {vehicles.map((vehicle) => (
-              <PublicVehicleCard key={vehicle.id} vehicle={vehicle} />
-            ))}
-          </div>
-        )}
-
         {/* Carousel Display */}
-        {displayStyle === 'carousel' && (
-          <CarouselDisplay vehicles={vehicles} />
-        )}
-
-        {/* Masonry Display */}
-        {displayStyle === 'masonry' && (
-          <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6 w-full">
-            {vehicles.map((vehicle) => (
-              <div key={vehicle.id} className="break-inside-avoid">
-                <PublicVehicleCard vehicle={vehicle} />
-              </div>
-            ))}
-          </div>
-        )}
+        <CarouselDisplay vehicles={vehicles} />
 
         {/* Mobile Show All Button */}
         {showMobileButton && (

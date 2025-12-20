@@ -207,8 +207,6 @@ export interface FeaturedVehiclesBlockData {
   selectionType: 'manual' | 'latest'
   vehicleIds?: { vehicleId: string }[]
   limit?: number
-  displayStyle: 'grid' | 'carousel' | 'masonry'
-  columns: '2' | '3' | '4' | '6' | 2 | 3 | 4 | 6
   showMobileButton?: boolean
   hideOnMobile?: boolean
 }
