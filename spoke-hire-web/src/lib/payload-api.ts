@@ -106,6 +106,7 @@ export interface FAQ {
 export interface CTABlockContent {
   id: string
   heading: string
+  headingLevel?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
   description: string
   actions: Array<{
     label: string
@@ -134,6 +135,12 @@ export interface StatsBarBlockData {
   selectedStats: Stat[]
   columns: '2' | '3' | '4' | 2 | 3 | 4
   backgroundColor: 'default' | 'muted' | 'accent' | 'primary'
+}
+
+export interface ValueStatsBlockData {
+  blockType: 'value-stats'
+  selectedStats: Stat[]
+  backgroundColor?: 'default' | 'muted' | 'accent' | 'primary'
 }
 
 export interface ValuePropsBlockData {
@@ -203,6 +210,22 @@ export interface ImageGalleryBlockData {
   columns: '2' | '3' | '4' | '5' | 2 | 3 | 4 | 5
 }
 
+export interface CarouselImage {
+  id: string
+  desktopImage: PayloadMedia
+  mobileImage?: PayloadMedia
+  alt: string
+  order: number
+  status: 'draft' | 'published'
+}
+
+export interface ImageCarouselBlockData {
+  blockType: 'image-carousel'
+  images: CarouselImage[]
+  autoplay: boolean
+  autoplayDelay: number
+}
+
 export interface TwoColumnContentBlockData {
   blockType: 'two-column-content'
   leftColumn: unknown // Lexical rich text
@@ -232,6 +255,7 @@ export interface SpotlightBlockData {
 export type PageBlock =
   | HeroCarouselBlockData
   | StatsBarBlockData
+  | ValueStatsBlockData
   | ValuePropsBlockData
   | TestimonialsSectionBlockData
   | FAQSectionBlockData
@@ -239,6 +263,7 @@ export type PageBlock =
   | CallToActionBlockData
   | FeaturedVehiclesBlockData
   | ImageGalleryBlockData
+  | ImageCarouselBlockData
   | TwoColumnContentBlockData
   | SpacerBlockData
   | SpotlightBlockData

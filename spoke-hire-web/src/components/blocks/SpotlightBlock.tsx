@@ -5,6 +5,7 @@ import { cn } from '~/lib/utils'
 import type { SpotlightBlockData } from '~/lib/payload-api'
 import { getMediaUrl } from '~/lib/payload-api'
 import { SpotlightCard } from '~/components/cards/SpotlightCard'
+import { MobileScrollDots } from './MobileScrollDots'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface SpotlightBlockProps {
@@ -16,11 +17,15 @@ interface SpotlightBlockProps {
  *
  * Displays a horizontal carousel of project spotlight items with navigation arrows.
  * Matches the Figma design with arrows positioned between title and cards.
+ * Mobile: Single card view with scroll dots
+ * Desktop: Multiple cards with navigation arrows
  */
 export function SpotlightBlock({ data }: SpotlightBlockProps) {
   const { title, images, showArrows, itemsPerView = 4 } = data
   const [currentIndex, setCurrentIndex] = React.useState(0)
-  const scrollContainerRef = React.useRef<HTMLDivElement>(null)
+  const desktopScrollRef = React.useRef<HTMLDivElement>(null)
+  const mobileScrollRef = React.useRef<HTMLDivElement>(null)
+  const [mobileCurrentIndex, setMobileCurrentIndex] = React.useState(0)
 
   if (!images || images.length === 0) {
     return null
@@ -37,10 +42,26 @@ export function SpotlightBlock({ data }: SpotlightBlockProps) {
     setCurrentIndex((prev) => Math.min(maxIndex, prev + 1))
   }
 
-  // Scroll container on index change
+  // Track mobile scroll position for dots
+  const checkMobileScroll = React.useCallback(() => {
+    const mobileContainer = mobileScrollRef.current
+    if (mobileContainer) {
+      const mobileScrollLeft = mobileContainer.scrollLeft
+      const mobileScrollWidth = mobileContainer.scrollWidth
+      if (mobileScrollWidth > 0 && totalItems > 0) {
+        const cardWidth = mobileScrollWidth / totalItems
+        const newIndex = Math.round(mobileScrollLeft / cardWidth)
+        // Clamp index to valid range [0, totalItems - 1]
+        const clampedIndex = Math.max(0, Math.min(newIndex, totalItems - 1))
+        setMobileCurrentIndex(clampedIndex)
+      }
+    }
+  }, [totalItems])
+
+  // Scroll container on index change (desktop)
   React.useEffect(() => {
-    if (scrollContainerRef.current) {
-      const container = scrollContainerRef.current
+    if (desktopScrollRef.current) {
+      const container = desktopScrollRef.current
       const cardElement = container.firstElementChild as HTMLElement
       if (cardElement) {
         const cardWidth = cardElement.offsetWidth + 21 // card width + gap
@@ -53,8 +74,21 @@ export function SpotlightBlock({ data }: SpotlightBlockProps) {
     }
   }, [currentIndex])
 
+  // Track mobile scroll
+  React.useEffect(() => {
+    const mobileContainer = mobileScrollRef.current
+    if (mobileContainer) {
+      mobileContainer.addEventListener('scroll', checkMobileScroll)
+      checkMobileScroll() // Initial check
+
+      return () => {
+        mobileContainer.removeEventListener('scroll', checkMobileScroll)
+      }
+    }
+  }, [checkMobileScroll])
+
   return (
-    <section className="bg-white px-[30px] py-[41px]">
+    <section className="bg-white px-4 md:px-[30px] py-[41px]">
       <div className="w-full">
         {/* Title Layout */}
         {title && (
@@ -67,9 +101,9 @@ export function SpotlightBlock({ data }: SpotlightBlockProps) {
           </div>
         )}
 
-        {/* Navigation Arrows - Positioned between title and cards */}
+        {/* Navigation Arrows - Desktop only, positioned between title and cards */}
         {showArrows && totalItems > itemsPerView && (
-          <div className="flex items-center justify-between px-0 py-[20px] w-full">
+          <div className="hidden md:flex items-center justify-between px-0 py-[20px] w-full">
             <button
               onClick={goToPrevious}
               disabled={currentIndex === 0}
@@ -97,11 +131,11 @@ export function SpotlightBlock({ data }: SpotlightBlockProps) {
           </div>
         )}
 
-        {/* Card Row */}
+        {/* Desktop Card Row */}
         <div
-          ref={scrollContainerRef}
+          ref={desktopScrollRef}
           className={cn(
-            'flex gap-[21px] items-center w-full overflow-x-auto snap-x snap-mandatory',
+            'hidden md:flex gap-[21px] items-center w-full overflow-x-auto snap-x snap-mandatory',
             '[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'
           )}
         >
@@ -120,6 +154,36 @@ export function SpotlightBlock({ data }: SpotlightBlockProps) {
               />
             </div>
           ))}
+        </div>
+
+        {/* Mobile: Single card with scroll dots */}
+        <div className="md:hidden flex flex-col gap-[41px] w-full">
+          <div
+            ref={mobileScrollRef}
+            className="flex overflow-x-auto gap-0 snap-x snap-mandatory"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {images.map((item, index) => (
+              <div
+                key={item.image.id || index}
+                className="min-w-full snap-center shrink-0"
+              >
+                <SpotlightCard
+                  title={item.caption || item.image.alt || ''}
+                  imageUrl={getMediaUrl(item.image.url)}
+                  imageAlt={item.image.alt}
+                  href={item.link}
+                  titleSize="h4"
+                />
+              </div>
+            ))}
+          </div>
+          
+          {/* Mobile Scroll Dots */}
+          <MobileScrollDots
+            currentIndex={mobileCurrentIndex}
+            totalItems={totalItems}
+          />
         </div>
       </div>
     </section>

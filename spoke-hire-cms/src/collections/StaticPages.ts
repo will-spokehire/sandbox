@@ -140,6 +140,45 @@ const StatsBarBlock: Block = {
 }
 
 /**
+ * Value Stats Block
+ * Display stats in simple horizontal layout matching hero style
+ */
+const ValueStatsBlock: Block = {
+  slug: 'value-stats',
+  labels: {
+    singular: 'Value Stats',
+    plural: 'Value Stats',
+  },
+  fields: [
+    {
+      name: 'selectedStats',
+      type: 'relationship',
+      relationTo: 'stats',
+      hasMany: true,
+      required: true,
+      filterOptions: {
+        status: { equals: 'published' },
+      },
+      admin: {
+        description: 'Select stats to display (order matters)',
+      },
+    },
+    {
+      name: 'backgroundColor',
+      type: 'select',
+      label: 'Background Color',
+      defaultValue: 'default',
+      options: [
+        { label: 'Default', value: 'default' },
+        { label: 'Muted', value: 'muted' },
+        { label: 'Accent', value: 'accent' },
+        { label: 'Primary', value: 'primary' },
+      ],
+    },
+  ],
+}
+
+/**
  * Value Propositions Block
  * Display feature grid highlighting platform benefits
  */
@@ -595,6 +634,54 @@ const ImageGalleryBlock: Block = {
 }
 
 /**
+ * Image Carousel Block
+ * Pure image carousel with auto-play, supports mobile and desktop images
+ */
+const ImageCarouselBlock: Block = {
+  slug: 'image-carousel',
+  labels: {
+    singular: 'Image Carousel',
+    plural: 'Image Carousels',
+  },
+  fields: [
+    {
+      name: 'images',
+      type: 'relationship',
+      relationTo: 'carousel-images',
+      hasMany: true,
+      required: true,
+      filterOptions: {
+        status: { equals: 'published' },
+      },
+      admin: {
+        description: 'Select carousel images to display (order matters)',
+      },
+    },
+    {
+      name: 'autoplay',
+      type: 'checkbox',
+      label: 'Autoplay',
+      defaultValue: true,
+      admin: {
+        description: 'Automatically advance to next image',
+      },
+    },
+    {
+      name: 'autoplayDelay',
+      type: 'number',
+      label: 'Autoplay Delay (seconds)',
+      defaultValue: 5,
+      min: 1,
+      max: 60,
+      admin: {
+        description: 'Seconds between automatic slide transitions',
+        condition: (data, siblingData) => siblingData?.autoplay,
+      },
+    },
+  ],
+}
+
+/**
  * Two-Column Content Block
  * Side-by-side content layout
  */
@@ -864,6 +951,7 @@ export const StaticPages: CollectionConfig = {
       blocks: [
         HeroCarouselBlock,
         StatsBarBlock,
+        ValueStatsBlock,
         ValuePropsBlock,
         TestimonialsSectionBlock,
         FAQSectionBlock,
@@ -871,6 +959,7 @@ export const StaticPages: CollectionConfig = {
         CallToActionBlock,
         FeaturedVehiclesBlock,
         ImageGalleryBlock,
+        ImageCarouselBlock,
         TwoColumnContentBlock,
         SpotlightBlock,
         SpacerBlock,

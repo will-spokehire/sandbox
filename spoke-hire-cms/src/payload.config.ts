@@ -11,10 +11,10 @@ import { Media } from './collections/Media'
 import { HeroSlides } from './collections/HeroSlides'
 import { Stats } from './collections/Stats'
 import { ValueProps } from './collections/ValueProps'
-import { FeaturedVehiclesConfig } from './collections/FeaturedVehiclesConfig'
 import { CTABlocks } from './collections/CTABlocks'
 import { Testimonials } from './collections/Testimonials'
 import { FAQs } from './collections/FAQs'
+import { CarouselImages } from './collections/CarouselImages'
 import { StaticPages } from './collections/StaticPages'
 import { Navigation } from './globals/Navigation'
 import { SiteSettings } from './globals/SiteSettings'
@@ -38,10 +38,10 @@ export default buildConfig({
     HeroSlides,
     Stats,
     ValueProps,
-    FeaturedVehiclesConfig,
     CTABlocks,
     Testimonials,
     FAQs,
+    CarouselImages,
     StaticPages,
   ],
   globals: [

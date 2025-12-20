@@ -72,10 +72,10 @@ export interface Config {
     'hero-slides': HeroSlide;
     stats: Stat;
     'value-props': ValueProp;
-    'featured-vehicles-config': FeaturedVehiclesConfig;
     'cta-blocks': CtaBlock;
     testimonials: Testimonial;
     faqs: Faq;
+    'carousel-images': CarouselImage;
     'static-pages': StaticPage;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -89,10 +89,10 @@ export interface Config {
     'hero-slides': HeroSlidesSelect<false> | HeroSlidesSelect<true>;
     stats: StatsSelect<false> | StatsSelect<true>;
     'value-props': ValuePropsSelect<false> | ValuePropsSelect<true>;
-    'featured-vehicles-config': FeaturedVehiclesConfigSelect<false> | FeaturedVehiclesConfigSelect<true>;
     'cta-blocks': CtaBlocksSelect<false> | CtaBlocksSelect<true>;
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
     faqs: FaqsSelect<false> | FaqsSelect<true>;
+    'carousel-images': CarouselImagesSelect<false> | CarouselImagesSelect<true>;
     'static-pages': StaticPagesSelect<false> | StaticPagesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -247,42 +247,7 @@ export interface ValueProp {
   createdAt: string;
 }
 /**
- * Configure which vehicles appear in the featured section
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "featured-vehicles-config".
- */
-export interface FeaturedVehiclesConfig {
-  id: number;
-  /**
-   * How to select featured vehicles
-   */
-  selectionType: 'manual' | 'newest' | 'price-range';
-  /**
-   * How many vehicles to display (1-12)
-   */
-  count: number;
-  /**
-   * JSON criteria for automatic selection (e.g., {"minPrice": 10000, "maxPrice": 50000})
-   */
-  criteria?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  /**
-   * Internal notes about this configuration
-   */
-  notes?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Call-to-action sections with customizable placement
+ * Call-to-action sections
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "cta-blocks".
@@ -290,14 +255,21 @@ export interface FeaturedVehiclesConfig {
 export interface CtaBlock {
   id: number;
   heading: string;
-  description: string;
-  buttonText: string;
-  buttonLink: string;
-  backgroundStyle: 'primary' | 'secondary' | 'accent';
   /**
-   * Where this CTA block should appear
+   * Select the HTML heading level for semantic structure
    */
-  placement: 'homepage' | 'sidebar' | 'footer';
+  headingLevel: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+  description: string;
+  /**
+   * Add one or more action buttons
+   */
+  actions: {
+    label: string;
+    link: string;
+    style: 'primary' | 'secondary' | 'outline';
+    id?: string | null;
+  }[];
+  backgroundStyle: 'primary' | 'secondary' | 'accent';
   status: 'draft' | 'published';
   updatedAt: string;
   createdAt: string;
@@ -387,6 +359,34 @@ export interface Faq {
   createdAt: string;
 }
 /**
+ * Images for image carousel blocks (supports mobile and desktop variants)
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "carousel-images".
+ */
+export interface CarouselImage {
+  id: number;
+  /**
+   * Image displayed on desktop and tablet devices
+   */
+  desktopImage: number | Media;
+  /**
+   * Optional: Image displayed on mobile devices. Falls back to desktop image if not provided.
+   */
+  mobileImage?: (number | null) | Media;
+  /**
+   * Required for accessibility. Describe the image content.
+   */
+  alt: string;
+  /**
+   * Lower numbers appear first in the carousel
+   */
+  order: number;
+  status: 'draft' | 'published';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Create and manage static pages using the page builder
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -443,6 +443,16 @@ export interface StaticPage {
         id?: string | null;
         blockName?: string | null;
         blockType: 'stats-bar';
+      }
+    | {
+        /**
+         * Select stats to display (order matters)
+         */
+        selectedStats: (number | Stat)[];
+        backgroundColor?: ('default' | 'muted' | 'accent' | 'primary') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'value-stats';
       }
     | {
         title: string;
@@ -521,30 +531,16 @@ export interface StaticPage {
       }
     | {
         selectedCTA: number | CtaBlock;
-        /**
-         * Optional: Override the CTA content for this page
-         */
-        customOverride?: {
-          heading?: string | null;
-          description?: string | null;
-          buttonText?: string | null;
-          buttonLink?: string | null;
-        };
-        displayStyle?: ('full-width' | 'contained' | 'split') | null;
         id?: string | null;
         blockName?: string | null;
-        blockType: 'cta-block';
+        blockType: 'call-to-action-block';
       }
     | {
         title?: string | null;
         subtitle?: string | null;
-        selectionType?: ('config' | 'manual' | 'latest' | 'random') | null;
+        selectionType?: ('manual' | 'latest') | null;
         /**
-         * Select a featured vehicles configuration
-         */
-        config?: (number | null) | FeaturedVehiclesConfig;
-        /**
-         * Enter vehicle IDs manually
+         * Enter vehicle IDs manually (one per line)
          */
         vehicleIds?:
           | {
@@ -552,6 +548,9 @@ export interface StaticPage {
               id?: string | null;
             }[]
           | null;
+        /**
+         * Number of latest vehicles to display
+         */
         limit?: number | null;
         displayStyle?: ('grid' | 'carousel' | 'masonry') | null;
         columns?: ('2' | '3' | '4' | '6') | null;
@@ -575,6 +574,23 @@ export interface StaticPage {
         id?: string | null;
         blockName?: string | null;
         blockType: 'image-gallery';
+      }
+    | {
+        /**
+         * Select carousel images to display (order matters)
+         */
+        images: (number | CarouselImage)[];
+        /**
+         * Automatically advance to next image
+         */
+        autoplay?: boolean | null;
+        /**
+         * Seconds between automatic slide transitions
+         */
+        autoplayDelay?: number | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'image-carousel';
       }
     | {
         leftColumn: {
@@ -741,10 +757,6 @@ export interface PayloadLockedDocument {
         value: number | ValueProp;
       } | null)
     | ({
-        relationTo: 'featured-vehicles-config';
-        value: number | FeaturedVehiclesConfig;
-      } | null)
-    | ({
         relationTo: 'cta-blocks';
         value: number | CtaBlock;
       } | null)
@@ -755,6 +767,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'faqs';
         value: number | Faq;
+      } | null)
+    | ({
+        relationTo: 'carousel-images';
+        value: number | CarouselImage;
       } | null)
     | ({
         relationTo: 'static-pages';
@@ -885,27 +901,21 @@ export interface ValuePropsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "featured-vehicles-config_select".
- */
-export interface FeaturedVehiclesConfigSelect<T extends boolean = true> {
-  selectionType?: T;
-  count?: T;
-  criteria?: T;
-  notes?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "cta-blocks_select".
  */
 export interface CtaBlocksSelect<T extends boolean = true> {
   heading?: T;
+  headingLevel?: T;
   description?: T;
-  buttonText?: T;
-  buttonLink?: T;
+  actions?:
+    | T
+    | {
+        label?: T;
+        link?: T;
+        style?: T;
+        id?: T;
+      };
   backgroundStyle?: T;
-  placement?: T;
   status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -943,6 +953,19 @@ export interface FaqsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "carousel-images_select".
+ */
+export interface CarouselImagesSelect<T extends boolean = true> {
+  desktopImage?: T;
+  mobileImage?: T;
+  alt?: T;
+  order?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "static-pages_select".
  */
 export interface StaticPagesSelect<T extends boolean = true> {
@@ -972,6 +995,14 @@ export interface StaticPagesSelect<T extends boolean = true> {
               displayStyle?: T;
               selectedStats?: T;
               columns?: T;
+              backgroundColor?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'value-stats'?:
+          | T
+          | {
+              selectedStats?: T;
               backgroundColor?: T;
               id?: T;
               blockName?: T;
@@ -1023,19 +1054,10 @@ export interface StaticPagesSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
-        'cta-block'?:
+        'call-to-action-block'?:
           | T
           | {
               selectedCTA?: T;
-              customOverride?:
-                | T
-                | {
-                    heading?: T;
-                    description?: T;
-                    buttonText?: T;
-                    buttonLink?: T;
-                  };
-              displayStyle?: T;
               id?: T;
               blockName?: T;
             };
@@ -1045,7 +1067,6 @@ export interface StaticPagesSelect<T extends boolean = true> {
               title?: T;
               subtitle?: T;
               selectionType?: T;
-              config?: T;
               vehicleIds?:
                 | T
                 | {
@@ -1072,6 +1093,15 @@ export interface StaticPagesSelect<T extends boolean = true> {
                   };
               displayStyle?: T;
               columns?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'image-carousel'?:
+          | T
+          | {
+              images?: T;
+              autoplay?: T;
+              autoplayDelay?: T;
               id?: T;
               blockName?: T;
             };

@@ -1,6 +1,7 @@
 import type { PageBlock } from '~/lib/payload-api'
 import { HeroSectionBlock } from './HeroSectionBlock'
 import { StatsBarBlock } from './StatsBarBlock'
+import { ValueStatsBlock } from './ValueStatsBlock'
 import { ValuePropsBlock } from './ValuePropsBlock'
 import { TestimonialsBlock } from './TestimonialsBlock'
 import { FAQSectionBlock } from './FAQSectionBlock'
@@ -8,6 +9,7 @@ import { RichTextContentBlock } from './RichTextContentBlock'
 import { CallToActionBlock } from './CallToActionBlock'
 import { FeaturedVehiclesBlock } from './FeaturedVehiclesBlock'
 import { ImageGalleryBlock } from './ImageGalleryBlock'
+import { ImageCarouselBlock } from './ImageCarouselBlock'
 import { TwoColumnContentBlock } from './TwoColumnContentBlock'
 import { SpacerBlock } from './SpacerBlock'
 import { SpotlightBlock } from './SpotlightBlock'
@@ -31,6 +33,9 @@ export function BlockRenderer({ block, index }: BlockRendererProps) {
     case 'stats-bar':
       return <StatsBarBlock key={index} data={block} />
 
+    case 'value-stats':
+      return <ValueStatsBlock key={index} data={block} />
+
     case 'value-props-section':
       return <ValuePropsBlock key={index} data={block} />
 
@@ -51,6 +56,9 @@ export function BlockRenderer({ block, index }: BlockRendererProps) {
 
     case 'image-gallery':
       return <ImageGalleryBlock key={index} data={block} />
+
+    case 'image-carousel':
+      return <ImageCarouselBlock key={index} data={block} />
 
     case 'two-column-content':
       return <TwoColumnContentBlock key={index} data={block} />

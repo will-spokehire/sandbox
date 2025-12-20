@@ -21,7 +21,7 @@ export function CallToActionBlock({ data }: CallToActionBlockProps) {
     return null
   }
 
-  const { heading, description, actions, backgroundStyle } = selectedCTA
+  const { heading, description, actions, backgroundStyle, headingLevel = 'h2' } = selectedCTA
 
   const bgClasses = {
     primary: 'bg-white text-foreground',
@@ -50,7 +50,12 @@ export function CallToActionBlock({ data }: CallToActionBlockProps) {
         <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-8 md:gap-12 items-start">
           {/* Left Column: Heading (2/3 width) */}
           <div>
-            <h2 className="heading-2">{heading}</h2>
+            {headingLevel === 'h1' && <h1 className="heading-1">{heading}</h1>}
+            {headingLevel === 'h2' && <h2 className="heading-2">{heading}</h2>}
+            {headingLevel === 'h3' && <h3 className="heading-3">{heading}</h3>}
+            {headingLevel === 'h4' && <h4 className="heading-4">{heading}</h4>}
+            {headingLevel === 'h5' && <h5 className="heading-5">{heading}</h5>}
+            {headingLevel === 'h6' && <h6 className="heading-6">{heading}</h6>}
           </div>
 
           {/* Right Column: Description + Actions (1/3 width) */}
