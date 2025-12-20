@@ -3,9 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Card, CardContent } from "~/components/ui/card";
-import { Badge } from "~/components/ui/badge";
-import { MapPin, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSwipeGesture } from "~/hooks/useSwipeGesture";
 import { cn } from "~/lib/utils";
 
@@ -41,9 +39,8 @@ interface PublicVehicleCardProps {
 /**
  * Public Vehicle Card
  * 
- * Display card for a single vehicle in the public catalogue.
- * Shows image carousel with navigation arrows, make/model, year, location, and collections.
- * NO price displayed.
+ * Simplified card design matching Figma specifications.
+ * Shows image carousel, year/make/model, and location.
  */
 export function PublicVehicleCard({ vehicle }: PublicVehicleCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -69,6 +66,9 @@ export function PublicVehicleCard({ vehicle }: PublicVehicleCardProps) {
   ]
     .filter(Boolean)
     .join(", ");
+
+  // Format title: year make model (uppercase)
+  const title = `${vehicle.year} ${vehicle.make.name} ${vehicle.model.name}`.toUpperCase();
 
   const goToPrevious = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -98,42 +98,38 @@ export function PublicVehicleCard({ vehicle }: PublicVehicleCardProps) {
 
   return (
     <Link href={`/vehicles/${vehicle.id}`} className="group block">
-      <Card className="overflow-hidden transition-shadow hover:shadow-lg h-full flex flex-col gap-0 p-0">
-        {/* Image with Navigation */}
-        <div ref={swipeRef} className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+      <div className="bg-white flex flex-col gap-5 overflow-clip">
+        {/* Image Container - 4:3 aspect ratio */}
+        <div 
+          ref={swipeRef}
+          className="relative w-full overflow-hidden bg-spoke-grey aspect-[4/3]"
+        >
           <Image
             key={fadeKey}
             src={imageUrl}
-            alt={`${vehicle.year} ${vehicle.make.name} ${vehicle.model.name}`}
+            alt={title}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className={cn(
-              "object-cover transition-all duration-300 group-hover:scale-105",
+              "object-cover object-center transition-opacity duration-300",
               isImageLoaded ? "opacity-100" : "opacity-0"
             )}
             onLoad={() => setIsImageLoaded(true)}
           />
-
-          {/* Image Counter - Bottom right */}
-          {hasMultipleImages && (
-            <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-md">
-              {currentImageIndex + 1} / {images.length}
-            </div>
-          )}
 
           {/* Navigation Arrows - Hidden on mobile, show on hover on desktop */}
           {hasMultipleImages && (
             <>
               <button
                 onClick={goToPrevious}
-                className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 transition-all shadow-lg hidden md:flex opacity-0 group-hover:opacity-100"
+                className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 transition-all shadow-lg hidden md:flex items-center justify-center opacity-0 group-hover:opacity-100"
                 aria-label="Previous image"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
               <button
                 onClick={goToNext}
-                className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 transition-all shadow-lg hidden md:flex opacity-0 group-hover:opacity-100"
+                className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 transition-all shadow-lg hidden md:flex items-center justify-center opacity-0 group-hover:opacity-100"
                 aria-label="Next image"
               >
                 <ChevronRight className="h-5 w-5" />
@@ -142,38 +138,21 @@ export function PublicVehicleCard({ vehicle }: PublicVehicleCardProps) {
           )}
         </div>
 
-        {/* Content Area - Manual padding instead of CardContent */}
-        <div className="p-4 flex-1 flex flex-col">
-          {/* Vehicle Name */}
-          <h3 className="font-semibold text-lg leading-tight group-hover:text-primary transition-colors mb-2">
-            {vehicle.year} {vehicle.make.name} {vehicle.model.name}
-          </h3>
+        {/* Content - Gap of 4px between title and location */}
+        <div className="flex flex-col gap-1 text-black">
+          {/* Vehicle Title - Using vehicle-card-title class */}
+          <div className="vehicle-card-title text-spoke-black">
+            {title}
+          </div>
 
-          {/* Location */}
+          {/* Location - Using body-large class */}
           {location && (
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-3">
-              <MapPin className="h-4 w-4 flex-shrink-0" />
-              <span className="truncate">{location}</span>
-            </div>
-          )}
-
-          {/* Collections/Tags */}
-          {vehicle.collections && vehicle.collections.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mt-auto">
-              {vehicle.collections.slice(0, 3).map((collection) => (
-                <Badge key={collection.id} variant="secondary" className="text-xs">
-                  {collection.name}
-                </Badge>
-              ))}
-              {vehicle.collections.length > 3 && (
-                <Badge variant="secondary" className="text-xs">
-                  +{vehicle.collections.length - 3}
-                </Badge>
-              )}
-            </div>
+            <p className="body-large text-spoke-black">
+              {location}
+            </p>
           )}
         </div>
-      </Card>
+      </div>
     </Link>
   );
 }

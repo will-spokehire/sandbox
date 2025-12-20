@@ -2,76 +2,129 @@
 
 import * as React from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { cn } from '~/lib/utils'
 import type { FeaturedVehiclesBlockData } from '~/lib/payload-api'
 import { Button } from '~/components/ui/button'
+import { PublicVehicleCard } from '~/app/vehicles/_components/PublicVehicleCard'
+import { MobileScrollDots } from './MobileScrollDots'
+import { api } from '~/trpc/react'
 
 interface FeaturedVehiclesBlockProps {
   data: FeaturedVehiclesBlockData
 }
 
-// Placeholder vehicle type - will integrate with actual vehicle data
+// Vehicle type from API response (matches PublicVehicleCard interface)
 interface Vehicle {
   id: string
   name: string
-  make: string
-  model: string
-  year: number
-  price?: number
-  imageUrl?: string
+  year: string
+  make: {
+    name: string
+  }
+  model: {
+    name: string
+  }
+  media: Array<{
+    publishedUrl: string | null
+    originalUrl: string
+  }>
+  collections?: Array<{
+    id: string
+    name: string
+  }>
+  owner: {
+    city: string | null
+    county: string | null
+    country: {
+      name: string
+    } | null
+  }
 }
 
 /**
  * FeaturedVehiclesBlock Component
  *
- * Displays featured vehicles in various layouts.
- * Note: This component will need to be connected to the actual vehicle data source.
+ * Displays featured vehicles in various layouts (grid, carousel, masonry).
+ * Supports two selection types:
+ * - 'manual': Select specific vehicles by entering their IDs
+ * - 'latest': Show the most recently added vehicles
  */
 export function FeaturedVehiclesBlock({ data }: FeaturedVehiclesBlockProps) {
   const {
     title,
     subtitle,
     selectionType,
-    config,
     vehicleIds,
     limit = 6,
     displayStyle,
     columns,
   } = data
-  const [vehicles, setVehicles] = React.useState<Vehicle[]>([])
-  const [isLoading, setIsLoading] = React.useState(true)
 
-  // Fetch vehicles based on selection type
+  const utils = api.useUtils()
+  const [manualVehicles, setManualVehicles] = React.useState<Vehicle[]>([])
+  const [isLoadingManual, setIsLoadingManual] = React.useState(false)
+
+  // Fetch vehicles for manual selection (by IDs)
+  const manualVehicleIds = React.useMemo(
+    () => vehicleIds?.map((v) => v.vehicleId).filter(Boolean) ?? [],
+    [vehicleIds]
+  )
+
   React.useEffect(() => {
-    async function loadVehicles() {
-      setIsLoading(true)
-      try {
-        // TODO: Implement actual vehicle fetching logic based on selectionType
-        // For now, we'll show a placeholder message
-        // The actual implementation would:
-        // - 'config': Use the featured-vehicles-config settings
-        // - 'manual': Fetch vehicles by the provided IDs
-        // - 'latest': Fetch the most recent vehicles
-        // - 'random': Fetch random vehicles
+    async function fetchManualVehicles() {
+      if (selectionType !== 'manual' || manualVehicleIds.length === 0) {
+        setManualVehicles([])
+        return
+      }
 
-        // Placeholder: In production, replace with actual API calls
-        console.log('FeaturedVehiclesBlock: Would fetch vehicles with:', {
-          selectionType,
-          config,
-          vehicleIds,
-          limit,
-        })
-        
-        setVehicles([])
+      setIsLoadingManual(true)
+      try {
+        // Fetch all vehicles in parallel
+        const vehiclePromises = manualVehicleIds.map((id) =>
+          utils.publicVehicle.getById.fetch({ id }).catch(() => null)
+        )
+        const results = await Promise.all(vehiclePromises)
+        const validVehicles = results.filter(
+          (v): v is Vehicle => v !== null && v !== undefined
+        )
+        setManualVehicles(validVehicles)
       } catch (error) {
-        console.error('Error loading vehicles:', error)
+        console.error('Error fetching manual vehicles:', error)
+        setManualVehicles([])
       } finally {
-        setIsLoading(false)
+        setIsLoadingManual(false)
       }
     }
 
-    loadVehicles()
-  }, [selectionType, config, vehicleIds, limit])
+    fetchManualVehicles()
+  }, [selectionType, manualVehicleIds, utils])
+
+  // Fetch vehicles for latest selection
+  const latestVehiclesQuery = api.publicVehicle.list.useQuery(
+    {
+      limit: limit ?? 6,
+      sortBy: 'createdAt',
+      sortOrder: 'desc',
+    },
+    {
+      enabled: selectionType === 'latest',
+    }
+  )
+
+  // Determine which data to use based on selection type
+  const vehicles = React.useMemo(() => {
+    if (selectionType === 'manual') {
+      return manualVehicles
+    } else if (selectionType === 'latest') {
+      return latestVehiclesQuery.data?.vehicles ?? []
+    }
+    return []
+  }, [selectionType, manualVehicles, latestVehiclesQuery.data])
+
+  const isLoading =
+    (selectionType === 'manual' && isLoadingManual) ||
+    (selectionType === 'latest' && latestVehiclesQuery.isLoading)
 
   // Get column class based on columns value (handles both string and number)
   const getColumnClass = (cols: string | number) => {
@@ -87,14 +140,14 @@ export function FeaturedVehiclesBlock({ data }: FeaturedVehiclesBlockProps) {
 
   if (isLoading) {
     return (
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4">
+      <section className="bg-white pt-[60px] pb-0 px-4 md:px-[30px]">
+        <div className="max-w-[1448px] mx-auto w-full">
           <div className="animate-pulse">
-            <div className="h-8 bg-muted rounded w-1/3 mx-auto mb-4" />
-            <div className="h-4 bg-muted rounded w-1/2 mx-auto mb-8" />
+            <div className="h-16 bg-muted rounded w-1/3 mb-4" />
+            <div className="h-6 bg-muted rounded w-1/2 mb-8" />
             <div className={cn('grid gap-6', getColumnClass(columns))}>
               {Array.from({ length: Number(columns) }).map((_, i) => (
-                <div key={i} className="aspect-[4/3] bg-muted rounded-lg" />
+                <div key={i} className="h-[240px] bg-muted rounded" />
               ))}
             </div>
           </div>
@@ -106,21 +159,37 @@ export function FeaturedVehiclesBlock({ data }: FeaturedVehiclesBlockProps) {
   // Show placeholder if no vehicles
   if (vehicles.length === 0) {
     return (
-      <section className="py-16 md:py-24 bg-muted/30">
-        <div className="container mx-auto px-4">
+      <section className="bg-white pt-[60px] pb-0 px-4 md:px-[30px]">
+        <div className="max-w-[1448px] mx-auto w-full flex flex-col gap-5 items-center">
           {/* Header */}
           {(title || subtitle) && (
-            <div className="text-center mb-12">
-              {title && <h2 className="text-3xl md:text-4xl font-bold mb-4">{title}</h2>}
-              {subtitle && (
-                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{subtitle}</p>
-              )}
+            <div className="w-full flex flex-col md:flex-row md:items-end md:justify-between gap-3 md:gap-0">
+              <div className="flex flex-col gap-3 md:gap-[12px]">
+                {title && (
+                  <h2 className="heading-2 text-spoke-black">
+                    {title.toUpperCase()}
+                  </h2>
+                )}
+                {subtitle && (
+                  <p className="body-large text-spoke-black md:block hidden">
+                    {subtitle}
+                  </p>
+                )}
+                <p className="body-medium text-spoke-black md:hidden">
+                  Check out the latest additions to our roster.
+                </p>
+              </div>
+              <div className="hidden md:block">
+                <Button asChild variant="outline">
+                  <Link href="/vehicles">See all vehicles</Link>
+                </Button>
+              </div>
             </div>
           )}
 
           {/* Placeholder */}
-          <div className="text-center py-12 bg-card rounded-lg border">
-            <p className="text-muted-foreground mb-4">
+          <div className="text-center py-12 w-full">
+            <p className="body-medium text-spoke-black mb-4">
               Featured vehicles will be displayed here once configured.
             </p>
             <Button asChild variant="outline">
@@ -133,93 +202,324 @@ export function FeaturedVehiclesBlock({ data }: FeaturedVehiclesBlockProps) {
   }
 
   return (
-    <section className="py-16 md:py-24 bg-muted/30">
-      <div className="container mx-auto px-4">
-        {/* Header */}
+    <section className="bg-white pt-[60px] pb-0 px-4 md:px-[30px]">
+      <div className="max-w-[1448px] mx-auto w-full flex flex-col gap-5 items-center">
+        {/* Header - Left-aligned title with right-aligned button (desktop) */}
         {(title || subtitle) && (
-          <div className="text-center mb-12">
-            {title && <h2 className="text-3xl md:text-4xl font-bold mb-4">{title}</h2>}
-            {subtitle && (
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{subtitle}</p>
-            )}
+          <div className="w-full flex flex-col md:flex-row md:items-end md:justify-between gap-3 md:gap-0">
+            {/* Title Section */}
+            <div className="flex flex-col gap-3 md:gap-[12px]">
+              {title && (
+                <h2 className="heading-2 text-spoke-black">
+                  {title.toUpperCase()}
+                </h2>
+              )}
+              {subtitle && (
+                <p className="body-large text-spoke-black md:block hidden">
+                  {subtitle}
+                </p>
+              )}
+              {/* Mobile subtitle - different text */}
+              <p className="body-medium text-spoke-black md:hidden">
+                Check out the latest additions to our roster.
+              </p>
+            </div>
+
+            {/* See All Vehicles Button - Desktop only */}
+            <div className="hidden md:block">
+              <Button asChild variant="outline">
+                <Link href="/vehicles">See all vehicles</Link>
+              </Button>
+            </div>
           </div>
         )}
 
         {/* Grid Display */}
         {displayStyle === 'grid' && (
-          <div className={cn('grid gap-6', getColumnClass(columns))}>
+          <div className={cn('grid gap-6 w-full', getColumnClass(columns))}>
             {vehicles.map((vehicle) => (
-              <VehicleCard key={vehicle.id} vehicle={vehicle} />
+              <PublicVehicleCard key={vehicle.id} vehicle={vehicle} />
             ))}
           </div>
         )}
 
         {/* Carousel Display */}
         {displayStyle === 'carousel' && (
-          <div className="flex overflow-x-auto gap-6 pb-4 snap-x snap-mandatory">
-            {vehicles.map((vehicle) => (
-              <div key={vehicle.id} className="min-w-[280px] md:min-w-[320px] snap-center shrink-0">
-                <VehicleCard vehicle={vehicle} />
-              </div>
-            ))}
-          </div>
+          <CarouselDisplay vehicles={vehicles} />
         )}
 
         {/* Masonry Display */}
         {displayStyle === 'masonry' && (
-          <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+          <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6 w-full">
             {vehicles.map((vehicle) => (
               <div key={vehicle.id} className="break-inside-avoid">
-                <VehicleCard vehicle={vehicle} />
+                <PublicVehicleCard vehicle={vehicle} />
               </div>
             ))}
           </div>
         )}
-
-        {/* View All Link */}
-        <div className="text-center mt-10">
-          <Button asChild variant="outline" size="lg">
-            <Link href="/vehicles">View All Vehicles</Link>
-          </Button>
-        </div>
       </div>
     </section>
   )
 }
 
 /**
- * Simple vehicle card component
- * In production, this would use the existing PublicVehicleCard component
+ * Carousel Display Component with Navigation Arrows
+ * Updated to match Figma design with arrows above the carousel
  */
-function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
+function CarouselDisplay({ vehicles }: { vehicles: Vehicle[] }) {
+  const desktopCarouselRef = React.useRef<HTMLDivElement>(null)
+  const mobileCarouselRef = React.useRef<HTMLDivElement>(null)
+  const [canScrollLeft, setCanScrollLeft] = React.useState(false)
+  const [canScrollRight, setCanScrollRight] = React.useState(false)
+  const [needsScroll, setNeedsScroll] = React.useState(false)
+  const [currentIndex, setCurrentIndex] = React.useState(0)
+
+  const checkScrollability = React.useCallback(() => {
+    // For desktop arrows, only check desktop carousel
+    // For mobile scroll dots, check mobile carousel
+    const desktopContainer = desktopCarouselRef.current
+    const mobileContainer = mobileCarouselRef.current
+    
+    // Check desktop carousel for arrow states (desktop only)
+    if (desktopContainer) {
+      const computedStyle = window.getComputedStyle(desktopContainer)
+      const isVisible = computedStyle.display !== 'none' && computedStyle.visibility !== 'hidden'
+      
+      if (isVisible && desktopContainer.scrollWidth > 0) {
+        const desktopScrollLeft = desktopContainer.scrollLeft
+        const desktopScrollWidth = desktopContainer.scrollWidth
+        const desktopClientWidth = desktopContainer.clientWidth
+        
+        const scrollThreshold = 5
+        const canScroll = desktopScrollWidth > desktopClientWidth + scrollThreshold
+        
+        setNeedsScroll(canScroll)
+        
+        if (canScroll) {
+          const canScrollLeftValue = desktopScrollLeft > scrollThreshold
+          const maxScroll = desktopScrollWidth - desktopClientWidth
+          const canScrollRightValue = desktopScrollLeft < maxScroll - scrollThreshold
+          
+          setCanScrollLeft(canScrollLeftValue)
+          setCanScrollRight(canScrollRightValue)
+        } else {
+          setCanScrollLeft(false)
+          setCanScrollRight(false)
+        }
+      }
+    }
+    
+    // Check mobile carousel for scroll dots (mobile only)
+    if (mobileContainer) {
+      const mobileScrollLeft = mobileContainer.scrollLeft
+      const mobileScrollWidth = mobileContainer.scrollWidth
+      if (mobileScrollWidth > 0 && vehicles.length > 0) {
+        const cardWidth = mobileScrollWidth / vehicles.length
+        const newIndex = Math.round(mobileScrollLeft / cardWidth)
+        setCurrentIndex(newIndex)
+      }
+    }
+  }, [vehicles.length])
+
+  React.useEffect(() => {
+    // Observe both carousels with ResizeObserver
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        // Small delay to ensure layout is stable
+        setTimeout(() => {
+          checkScrollability()
+        }, 50)
+      }
+    })
+
+    // Observe both carousels
+    if (desktopCarouselRef.current) {
+      resizeObserver.observe(desktopCarouselRef.current)
+    }
+    if (mobileCarouselRef.current) {
+      resizeObserver.observe(mobileCarouselRef.current)
+    }
+    
+    const desktopCarousel = desktopCarouselRef.current
+    const mobileCarousel = mobileCarouselRef.current
+
+    // Also check after initial render with multiple attempts
+    const checkAfterLayout = () => {
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          checkScrollability()
+        }, 150)
+      })
+    }
+
+    checkAfterLayout()
+
+    // Add scroll listeners to both carousels
+    if (desktopCarousel) {
+      desktopCarousel.addEventListener('scroll', checkScrollability)
+    }
+    if (mobileCarousel) {
+      mobileCarousel.addEventListener('scroll', checkScrollability)
+    }
+    window.addEventListener('resize', checkAfterLayout)
+
+    // Also check when images load (they might affect card width)
+    const allImages = [
+      ...(desktopCarousel?.querySelectorAll('img') ?? []),
+      ...(mobileCarousel?.querySelectorAll('img') ?? [])
+    ]
+    allImages.forEach((img) => {
+      if (!img.complete) {
+        img.addEventListener('load', checkScrollability, { once: true })
+      }
+    })
+
+    return () => {
+      resizeObserver.disconnect()
+      if (desktopCarousel) {
+        desktopCarousel.removeEventListener('scroll', checkScrollability)
+      }
+      if (mobileCarousel) {
+        mobileCarousel.removeEventListener('scroll', checkScrollability)
+      }
+      window.removeEventListener('resize', checkAfterLayout)
+    }
+  }, [checkScrollability, vehicles])
+
+  const scrollLeft = () => {
+    const container = desktopCarouselRef.current
+    if (container) {
+      // Scroll by one card width + gap (21px)
+      const firstCard = container.querySelector('[data-vehicle-card]') as HTMLElement
+      if (firstCard) {
+        const cardWidth = firstCard.offsetWidth
+        const gap = 21
+        container.scrollBy({ left: -(cardWidth + gap), behavior: 'smooth' })
+      } else {
+        // Fallback: scroll by approximate card width
+        container.scrollBy({ left: -320, behavior: 'smooth' })
+      }
+    }
+  }
+
+  const scrollRight = () => {
+    const container = desktopCarouselRef.current
+    if (container) {
+      // Scroll by one card width + gap (21px)
+      const firstCard = container.querySelector('[data-vehicle-card]') as HTMLElement
+      if (firstCard) {
+        const cardWidth = firstCard.offsetWidth
+        const gap = 21
+        container.scrollBy({ left: cardWidth + gap, behavior: 'smooth' })
+      } else {
+        // Fallback: scroll by approximate card width
+        container.scrollBy({ left: 320, behavior: 'smooth' })
+      }
+    }
+  }
+
+  if (vehicles.length === 0) return null
+
   return (
-    <Link
-      href={`/vehicles/${vehicle.id}`}
-      className="block bg-card rounded-lg overflow-hidden border hover:shadow-lg transition-shadow"
-    >
-      <div className="aspect-[4/3] bg-muted">
-        {vehicle.imageUrl && (
-          <img
-            src={vehicle.imageUrl}
-            alt={vehicle.name}
-            className="w-full h-full object-cover"
+    <div className="w-full flex flex-col gap-[10px]">
+      {/* Desktop: Arrows above carousel */}
+      {needsScroll && (
+      <div className="hidden md:flex items-center justify-between w-full px-0 py-[10px]">
+        {/* Left Arrow */}
+        <button
+          onClick={scrollLeft}
+          disabled={!canScrollLeft}
+          className={cn(
+            "h-[15px] w-[101px] flex items-center justify-center shrink-0 relative",
+            "transition-opacity",
+            !canScrollLeft && "opacity-30 cursor-not-allowed"
+          )}
+          aria-label="Scroll left"
+        >
+          <Image
+            src="/arrow-left.svg"
+            alt="Previous"
+            width={101}
+            height={15}
+            className="w-full h-full"
           />
-        )}
+        </button>
+
+        {/* Right Arrow */}
+        <button
+          onClick={scrollRight}
+          className={cn(
+            "h-[15px] w-[101px] flex items-center justify-center shrink-0 relative",
+            "transition-opacity",
+            !canScrollRight && "opacity-30"
+          )}
+          aria-label="Scroll right"
+        >
+          <Image
+            src="/arrow-right.svg"
+            alt="Next"
+            width={101}
+            height={15}
+            className="w-full h-full"
+          />
+        </button>
       </div>
-      <div className="p-4">
-        <h3 className="font-semibold text-lg">{vehicle.name}</h3>
-        <p className="text-muted-foreground text-sm">
-          {vehicle.year} {vehicle.make} {vehicle.model}
-        </p>
-        {vehicle.price && (
-          <p className="text-primary font-medium mt-2">
-            £{vehicle.price.toLocaleString()}
-          </p>
-        )}
+      )}
+
+      {/* Carousel Container */}
+      <div className="hidden md:block w-full">
+        <div
+          ref={desktopCarouselRef}
+          className="flex overflow-x-auto gap-[21px] w-full"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {vehicles.map((vehicle) => (
+              <div
+                key={vehicle.id}
+                data-vehicle-card
+                className="flex-shrink-0"
+                style={{ 
+                  // Fixed width per card to ensure consistent scrolling
+                  // Calculate: (container width - 3 gaps of 21px) / 4 = each card width
+                  // But use minWidth to ensure cards don't shrink below a reasonable size
+                  width: 'calc((100% - 63px) / 4)',
+                  minWidth: 'min(calc((100% - 63px) / 4), 350px)', // Ensure minimum but respect container
+                }}
+              >
+                <PublicVehicleCard vehicle={vehicle} />
+              </div>
+            ))}
+        </div>
       </div>
-    </Link>
+
+      {/* Mobile: Single card with scroll dots */}
+      <div className="md:hidden flex flex-col gap-[41px] w-full">
+        <div
+          ref={mobileCarouselRef}
+          className="flex overflow-x-auto gap-0 snap-x snap-mandatory"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {vehicles.map((vehicle) => (
+            <div
+              key={vehicle.id}
+              className="min-w-full snap-center shrink-0"
+            >
+              <PublicVehicleCard vehicle={vehicle} />
+            </div>
+          ))}
+        </div>
+        
+        {/* Mobile Scroll Dots */}
+        <MobileScrollDots
+          currentIndex={currentIndex}
+          totalItems={vehicles.length}
+        />
+      </div>
+    </div>
   )
 }
+
 
 export default FeaturedVehiclesBlock
 
