@@ -15,6 +15,13 @@ export const LAYOUT_CONSTANTS = {
   containerNarrow: "container mx-auto px-4 max-w-3xl",
   containerWide: "container mx-auto px-4 max-w-7xl",
 
+  // Max-width constraint (based on Figma design)
+  maxWidth: "max-w-[1512px]",
+  maxWidthContainer: "max-w-[1512px] mx-auto px-4 md:px-[30px]",
+
+  // Common content wrapper padding (matches header and carousels)
+  contentPadding: "px-4 md:px-[30px]",
+
   // Spacing
   pageSpacing: "py-8 md:py-12",
   pageSpacingCompact: "py-6 md:py-8",

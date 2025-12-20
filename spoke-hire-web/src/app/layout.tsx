@@ -11,6 +11,7 @@ import { getAppUrl } from "~/lib/app-url";
 import { AnalyticsProvider } from "~/components/analytics/AnalyticsProvider";
 import { CookieBanner } from "~/components/analytics/CookieBanner";
 import { env } from "~/env";
+import { MaxWidthWrapper } from "~/components/layout/MaxWidthWrapper";
 
 export const metadata: Metadata = {
   title: "SpokeHire - Classic & Vintage Vehicle Hire",
@@ -78,7 +79,9 @@ export default function RootLayout({
           <AuthProvider>
             <Suspense fallback={null}>
               <AnalyticsProvider>
-                {children}
+                <MaxWidthWrapper>
+                  {children}
+                </MaxWidthWrapper>
                 <Toaster />
                 <CookieBanner />
               </AnalyticsProvider>

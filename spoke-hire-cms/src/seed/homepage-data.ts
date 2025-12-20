@@ -99,6 +99,7 @@ export const valueProps = [
 export const ctaBlocks = [
   {
     heading: 'LIST YOUR CAR TODAY',
+    headingLevel: 'h2' as const,
     description:
       "Do you own a classic car? Join the UK's fastest growing platform for classic car hire and start earning today with Spoke Hire.",
     actions: [

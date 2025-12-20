@@ -20,7 +20,7 @@ export interface SectionProps extends React.HTMLAttributes<HTMLElement> {
  * Section layout component with consistent spacing
  *
  * Features:
- * - Consistent max-width constraint (1312px)
+ * - Consistent max-width constraint (1512px)
  * - Responsive padding (64px desktop, 24px mobile)
  * - Background colour variants
  * - Semantic HTML element options
@@ -68,7 +68,7 @@ export function Section({
       <div
         className={cn(
           "px-4 md:px-6 lg:px-16",
-          !fullWidth && "mx-auto max-w-[1312px]",
+          !fullWidth && "mx-auto max-w-[1512px]",
           containerClassName
         )}
       >

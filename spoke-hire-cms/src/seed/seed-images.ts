@@ -181,7 +181,7 @@ async function seedImages() {
               "Access the UK's largest classic car hire platform with thousands of vehicles available to hire today. Can't see it on the site? We'll find it.",
             ctaText: 'Find a car',
             ctaLink: '/vehicles',
-            image: heroImage.id,
+            image: typeof heroImage.id === 'number' ? heroImage.id : Number(heroImage.id),
             order: 1,
             status: 'published',
           },

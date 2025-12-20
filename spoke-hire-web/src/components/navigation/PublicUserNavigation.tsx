@@ -13,6 +13,7 @@ import { cn } from "~/lib/utils";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Separator } from "~/components/ui/separator";
 import type { Navigation } from "~/lib/payload-api";
+import { LAYOUT_CONSTANTS } from "~/lib/design-tokens";
 
 interface PublicUserNavigationProps {
   navigation?: Navigation | null;
@@ -210,7 +211,11 @@ export function PublicUserNavigation({ navigation }: PublicUserNavigationProps) 
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white border-b border-gray-200">
-      <div className="flex items-center justify-between px-4 py-0 md:px-8 lg:px-[60px] h-[80px]">
+      <div className={cn(
+        "flex items-center justify-between",
+        LAYOUT_CONSTANTS.maxWidthContainer,
+        "h-[72px]"
+      )}>
         {/* Logo */}
         <Link href="/vehicles" className="flex items-center shrink-0">
           <div className="relative w-[120px] h-[28px] md:w-[160px] md:h-[37px]">

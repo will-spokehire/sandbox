@@ -40,7 +40,7 @@ async function seed() {
     // 2. SEED STATS
     // ============================================
     console.log('📊 Seeding stats...')
-    const createdStats = []
+    const createdStats: { id: string | number }[] = []
 
     for (const stat of stats) {
       const existing = await payload.find({
@@ -65,7 +65,7 @@ async function seed() {
     // 3. SEED VALUE PROPS
     // ============================================
     console.log('💎 Seeding value props...')
-    const createdValueProps = []
+    const createdValueProps: { id: string | number }[] = []
 
     for (const prop of valueProps) {
       const existing = await payload.find({
@@ -90,7 +90,7 @@ async function seed() {
     // 4. SEED CTA BLOCKS
     // ============================================
     console.log('🎯 Seeding CTA blocks...')
-    const createdCTABlocks = []
+    const createdCTABlocks: { id: string | number }[] = []
 
     for (const cta of ctaBlocks) {
       const existing = await payload.find({
@@ -102,6 +102,7 @@ async function seed() {
         const created = await payload.create({
           collection: 'cta-blocks',
           data: cta,
+          draft: false,
         })
         createdCTABlocks.push(created)
         console.log(`  ✓ Created CTA block: ${cta.heading}`)
@@ -149,14 +150,14 @@ async function seed() {
           default:
             return block
         }
-      })
+      }) as typeof homepageLayout.layout
 
       await payload.create({
         collection: 'static-pages',
         data: {
           ...homepageLayout,
           layout: layoutWithRelationships,
-        },
+        } as any,
       })
       console.log('  ✓ Created homepage')
     } else {
