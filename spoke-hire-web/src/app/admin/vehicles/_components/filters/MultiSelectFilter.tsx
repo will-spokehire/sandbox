@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { Button } from "~/components/ui/button";
 import {
   Popover,
   PopoverContent,
@@ -96,17 +95,29 @@ export function MultiSelectFilter({
     </>
   );
 
+  // Button base styles matching Figma dropdown component
+  const buttonBaseStyles = cn(
+    "bg-white border border-black border-solid",
+    "h-[40px] px-4 py-2",
+    "flex items-center justify-between",
+    "font-degular text-[16px] font-normal leading-[1.2] tracking-[-0.16px]",
+    "text-black",
+    "transition-colors",
+    "hover:bg-spoke-grey",
+    className
+  );
+
   // Only render after mount to avoid hydration issues
   if (!isMounted) {
     return (
-      <Button
-        variant="outline"
-        className={cn("justify-between", className)}
+      <button
+        type="button"
+        className={buttonBaseStyles}
         disabled
       >
-        <span className="truncate">{placeholder}</span>
-        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-      </Button>
+        <span>{placeholder}</span>
+        <ChevronsUpDown className="h-[13px] w-4 shrink-0" />
+      </button>
     );
   }
 
@@ -115,13 +126,13 @@ export function MultiSelectFilter({
     return (
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
-          <Button
-            variant="outline"
-            className="w-full justify-between"
+          <button
+            type="button"
+            className={cn(buttonBaseStyles, "w-full")}
           >
-            <span className="truncate">{getDisplayText()}</span>
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
+            <span>{getDisplayText()}</span>
+            <ChevronsUpDown className="h-[13px] w-4 shrink-0" />
+          </button>
         </SheetTrigger>
         <SheetContent side="bottom" className="h-[80vh]">
           <SheetHeader>
@@ -143,15 +154,15 @@ export function MultiSelectFilter({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
+        <button
+          type="button"
           role="combobox"
           aria-expanded={open}
-          className={cn("justify-between", className)}
+          className={buttonBaseStyles}
         >
-          <span className="truncate">{getDisplayText()}</span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
+          <span className="flex-1 text-left">{getDisplayText()}</span>
+          <ChevronsUpDown className="h-[13px] w-4 shrink-0 ml-2" />
+        </button>
       </PopoverTrigger>
       <PopoverContent className="w-[280px] p-0" align="start">
         <Command>

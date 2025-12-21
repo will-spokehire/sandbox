@@ -201,7 +201,7 @@ export function PublicVehicleFilters() {
 
       {/* Desktop: Inline Filters with Modern Design */}
       <div className="hidden md:block">
-        <div className="flex flex-wrap gap-3 items-start">
+        <div className="flex items-center gap-4">
           <FilterControls
             makeOptions={makeOptions}
             modelOptions={modelOptions}
@@ -218,18 +218,6 @@ export function PublicVehicleFilters() {
             renderStandardOption={renderStandardOption}
             isLoadingFilters={isLoadingFilters}
           />
-
-          {hasActiveFilters && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleClearFilters}
-              className="self-start"
-            >
-              <X className="h-4 w-4 mr-1" />
-              Clear all
-            </Button>
-          )}
         </div>
       </div>
     </div>

@@ -53,7 +53,7 @@ export function PublicVehicleGrid({
   // Loading state
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
         {Array.from({ length: 12 }).map((_, i) => (
           <Card key={i} className="overflow-hidden">
             <Skeleton className="aspect-[4/3] w-full" />
@@ -101,7 +101,7 @@ export function PublicVehicleGrid({
 
   // Grid of vehicles
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
       {vehicles.map((vehicle) => (
         <PublicVehicleCard key={vehicle.id} vehicle={vehicle} />
       ))}

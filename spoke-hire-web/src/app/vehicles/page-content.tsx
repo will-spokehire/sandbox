@@ -7,9 +7,8 @@ import { usePublicVehicleFiltersContext } from "~/contexts/PublicVehicleFiltersC
 import { PublicVehicleFilters } from "./_components/PublicVehicleFilters";
 import { PublicVehicleBreadcrumbs } from "./_components/PublicVehicleBreadcrumbs";
 import { PublicVehicleGrid } from "./_components/PublicVehicleGrid";
-import { Button } from "~/components/ui/button";
 import { PageLoading } from "~/components/loading";
-import { StandardPageHeader } from "~/app/_components/layouts/StandardPageHeader";
+import { cn } from "~/lib/utils";
 import { LAYOUT_CONSTANTS } from "~/lib/design-tokens";
 
 interface VehicleData {
@@ -90,57 +89,82 @@ function PublicVehiclesCatalogContent({ initialData, serverTitles, serverFilterO
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const currentPage = filters.page ?? 1;
+
   return (
     <>
       {/* Hero Section */}
-      <StandardPageHeader title={h1} subtitle={h2} variant="hero" />
+      <div className="bg-white">
+        <div className="px-[30px] py-10">
+          <div className="max-w-[760px] flex flex-col gap-6">
+            <h1 className="heading-1 uppercase text-black leading-[0.95]">
+              {h1}
+            </h1>
+            {h2 && (
+              <p className="font-degular text-[18px] font-normal leading-[1.4] tracking-[-0.18px] text-black">
+                {h2}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* Main Content */}
-      <div className={LAYOUT_CONSTANTS.container + " " + LAYOUT_CONSTANTS.pageSpacing}>
-        <div className={LAYOUT_CONSTANTS.sectionSpacing}>
-          {/* Breadcrumbs - Temporarily hidden */}
-          {/* <PublicVehicleBreadcrumbs serverFilterOptions={serverFilterOptions} /> */}
+      <div className="px-[30px] flex flex-col gap-10">
+        {/* Filters */}
+        <PublicVehicleFilters />
 
-          {/* Filters */}
-          <PublicVehicleFilters />
+        {/* Vehicle Grid */}
+        <PublicVehicleGrid
+          vehicles={vehicles}
+          isLoading={isLoading}
+          hasFilters={hasActiveFilters}
+          onClearFilters={clearFilters}
+        />
 
-          {/* Vehicle Grid */}
-          <PublicVehicleGrid
-            vehicles={vehicles}
-            isLoading={isLoading}
-            hasFilters={hasActiveFilters}
-            onClearFilters={clearFilters}
-          />
-
-          {/* Pagination */}
-          {totalPages > 1 && !isLoading && (
-            <div className="flex items-center justify-center gap-2 pt-6">
+        {/* Pagination */}
+        {totalPages > 1 && !isLoading && (
+          <div className="flex items-center justify-center px-8 py-16">
+            <div className="flex items-center gap-4">
               {/* Previous Button */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange((filters.page ?? 1) - 1)}
-                disabled={(filters.page ?? 1) === 1 || isFetching}
+              <button
+                type="button"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1 || isFetching}
+                className={cn(
+                  "h-[40px] px-5 py-0 border border-black border-solid",
+                  "font-degular text-[22px] font-normal leading-[1.3] tracking-[-0.22px]",
+                  "transition-colors duration-150",
+                  "disabled:opacity-40 disabled:cursor-not-allowed",
+                  "hover:bg-spoke-black hover:text-spoke-white"
+                )}
               >
                 Previous
-              </Button>
+              </button>
 
               {/* Page Numbers - Desktop only */}
-              <div className="hidden md:flex items-center gap-1">
+              <div className="hidden md:flex items-center gap-4">
                 {/* First page */}
-                {(filters.page ?? 1) > 3 && (
+                {currentPage > 3 && (
                   <>
-                    <Button
-                      variant={1 === (filters.page ?? 1) ? "default" : "outline"}
-                      size="sm"
+                    <button
+                      type="button"
                       onClick={() => handlePageChange(1)}
                       disabled={isFetching}
-                      className="w-10"
+                      className={cn(
+                        "h-[40px] min-w-[30px] px-2 flex items-center justify-center border border-black border-solid",
+                        "font-degular text-[22px] font-normal leading-[1.3] tracking-[-0.22px]",
+                        "transition-colors duration-150",
+                        "disabled:opacity-40 disabled:cursor-not-allowed",
+                        "hover:bg-spoke-black hover:text-spoke-white"
+                      )}
                     >
                       1
-                    </Button>
-                    {(filters.page ?? 1) > 4 && (
-                      <span className="px-2 text-muted-foreground">...</span>
+                    </button>
+                    {currentPage > 4 && (
+                      <span className="font-degular text-2xl leading-[1.2] text-black">
+                        ...
+                      </span>
                     )}
                   </>
                 )}
@@ -148,58 +172,79 @@ function PublicVehiclesCatalogContent({ initialData, serverTitles, serverFilterO
                 {/* Pages around current */}
                 {Array.from({ length: totalPages }, (_, i) => i + 1)
                   .filter((page) => {
-                    // Show current page and 2 pages on each side
-                    return page >= (filters.page ?? 1) - 2 && page <= (filters.page ?? 1) + 2;
+                    return page >= currentPage - 2 && page <= currentPage + 2;
                   })
                   .map((page) => (
-                    <Button
+                    <button
                       key={page}
-                      variant={page === (filters.page ?? 1) ? "default" : "outline"}
-                      size="sm"
+                      type="button"
                       onClick={() => handlePageChange(page)}
                       disabled={isFetching}
-                      className="w-10"
+                      className={cn(
+                        "h-[40px] min-w-[30px] px-2 flex items-center justify-center border border-black border-solid",
+                        "font-degular text-[22px] font-normal leading-[1.3] tracking-[-0.22px]",
+                        "transition-colors duration-150",
+                        "disabled:opacity-40 disabled:cursor-not-allowed",
+                        page === currentPage
+                          ? "bg-spoke-black text-spoke-white"
+                          : "hover:bg-spoke-black hover:text-spoke-white"
+                      )}
                     >
                       {page}
-                    </Button>
+                    </button>
                   ))}
 
                 {/* Last page */}
-                {(filters.page ?? 1) < totalPages - 2 && (
+                {currentPage < totalPages - 2 && (
                   <>
-                    {(filters.page ?? 1) < totalPages - 3 && (
-                      <span className="px-2 text-muted-foreground">...</span>
+                    {currentPage < totalPages - 3 && (
+                      <span className="font-degular text-2xl leading-[1.2] text-black">
+                        ...
+                      </span>
                     )}
-                    <Button
-                      variant={totalPages === (filters.page ?? 1) ? "default" : "outline"}
-                      size="sm"
+                    <button
+                      type="button"
                       onClick={() => handlePageChange(totalPages)}
                       disabled={isFetching}
-                      className="w-10"
+                      className={cn(
+                        "h-[40px] min-w-[30px] px-2 flex items-center justify-center border border-black border-solid",
+                        "font-degular text-[22px] font-normal leading-[1.3] tracking-[-0.22px]",
+                        "transition-colors duration-150",
+                        "disabled:opacity-40 disabled:cursor-not-allowed",
+                        totalPages === currentPage
+                          ? "bg-spoke-black text-spoke-white"
+                          : "hover:bg-spoke-black hover:text-spoke-white"
+                      )}
                     >
                       {totalPages}
-                    </Button>
+                    </button>
                   </>
                 )}
               </div>
 
               {/* Page Indicator - Mobile only */}
               <div className="md:hidden px-3 py-1.5 text-sm font-medium text-muted-foreground">
-                {filters.page ?? 1} / {totalPages}
+                {currentPage} / {totalPages}
               </div>
 
               {/* Next Button */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange((filters.page ?? 1) + 1)}
-                disabled={(filters.page ?? 1) === totalPages || isFetching}
+              <button
+                type="button"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages || isFetching}
+                className={cn(
+                  "h-[40px] px-5 py-0 border border-black border-solid",
+                  "font-degular text-[22px] font-normal leading-[1.3] tracking-[-0.22px]",
+                  "transition-colors duration-150",
+                  "disabled:opacity-40 disabled:cursor-not-allowed",
+                  "hover:bg-spoke-black hover:text-spoke-white"
+                )}
               >
                 Next
-              </Button>
+              </button>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </>
   );
