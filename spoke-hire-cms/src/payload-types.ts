@@ -480,18 +480,28 @@ export interface StaticPage {
       }
     | {
         title?: string | null;
-        subtitle?: string | null;
-        filterBy?: ('manual' | 'category' | 'featured') | null;
+        /**
+         * Support multiline text with formatting
+         */
+        subtitle?: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
         /**
          * Select specific FAQs to display
          */
-        selectedFAQs?: (number | Faq)[] | null;
-        category?: ('general' | 'vehicle-owners' | 'renters' | 'pricing' | 'technical') | null;
-        /**
-         * Maximum number of featured FAQs to display
-         */
-        limit?: number | null;
-        displayStyle?: ('accordion' | 'two-column' | 'list') | null;
+        selectedFAQs: (number | Faq)[];
         /**
          * Expand all FAQ items by default
          */
@@ -1086,11 +1096,7 @@ export interface StaticPagesSelect<T extends boolean = true> {
           | {
               title?: T;
               subtitle?: T;
-              filterBy?: T;
               selectedFAQs?: T;
-              category?: T;
-              limit?: T;
-              displayStyle?: T;
               defaultExpanded?: T;
               hideOnMobile?: T;
               id?: T;

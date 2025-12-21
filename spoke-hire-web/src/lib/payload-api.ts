@@ -157,12 +157,22 @@ export interface TestimonialsSectionBlockData {
 export interface FAQSectionBlockData {
   blockType: 'faq-section'
   title?: string
-  subtitle?: string
-  filterBy: 'manual' | 'category' | 'featured'
-  selectedFAQs?: FAQ[]
-  category?: string
-  limit?: number
-  displayStyle: 'accordion' | 'two-column' | 'list'
+  subtitle?: string | {
+    root: {
+      type: string
+      children: {
+        type: any
+        version: number
+        [k: string]: unknown
+      }[]
+      direction: ('ltr' | 'rtl') | null
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+      indent: number
+      version: number
+    }
+    [k: string]: unknown
+  }
+  selectedFAQs: FAQ[]
   defaultExpanded: boolean
   hideOnMobile?: boolean
 }

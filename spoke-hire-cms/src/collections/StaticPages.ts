@@ -226,7 +226,8 @@ const TestimonialsSectionBlock: Block = {
 
 /**
  * FAQ Section Block
- * Display frequently asked questions in accordion
+ * Display frequently asked questions in accordion format
+ * Simplified to only support manual FAQ selection
  */
 const FAQSectionBlock: Block = {
   slug: 'faq-section',
@@ -245,68 +246,63 @@ const FAQSectionBlock: Block = {
     },
     {
       name: 'subtitle',
-      type: 'textarea',
+      type: 'richText',
       label: 'Subtitle',
-    },
-    {
-      name: 'filterBy',
-      type: 'select',
-      label: 'Filter By',
-      defaultValue: 'manual',
-      options: [
-        { label: 'Manual Selection', value: 'manual' },
-        { label: 'Category', value: 'category' },
-        { label: 'Featured', value: 'featured' },
-      ],
+      admin: {
+        description: 'Support multiline text with formatting',
+      },
+      hooks: {
+        beforeValidate: [
+          ({ value, data }) => {
+            // If the value is a string (old format), convert it to richText format
+            if (typeof value === 'string' && value.trim()) {
+              // Convert string to Lexical format
+              const lines = value.split('\n').filter(line => line.trim())
+              return {
+                root: {
+                  children: lines.map((line) => ({
+                    children: [
+                      {
+                        detail: 0,
+                        format: 0,
+                        mode: 'normal',
+                        style: '',
+                        text: line.trim(),
+                        type: 'text',
+                        version: 1,
+                      },
+                    ],
+                    direction: 'ltr',
+                    format: '',
+                    indent: 0,
+                    type: 'paragraph',
+                    version: 1,
+                  })),
+                  direction: 'ltr',
+                  format: '',
+                  indent: 0,
+                  type: 'root',
+                  version: 1,
+                },
+              }
+            }
+            return value
+          },
+        ],
+      },
     },
     {
       name: 'selectedFAQs',
       type: 'relationship',
       relationTo: 'faqs',
       hasMany: true,
+      required: true,
       filterOptions: {
         status: { equals: 'published' },
       },
       admin: {
-        condition: (data, siblingData) => siblingData?.filterBy === 'manual',
         description: 'Select specific FAQs to display',
       },
-    },
-    {
-      name: 'category',
-      type: 'select',
-      label: 'Category',
-      options: [
-        { label: 'General', value: 'general' },
-        { label: 'Vehicle Owners', value: 'vehicle-owners' },
-        { label: 'Renters', value: 'renters' },
-        { label: 'Pricing', value: 'pricing' },
-        { label: 'Technical', value: 'technical' },
-      ],
-      admin: {
-        condition: (data, siblingData) => siblingData?.filterBy === 'category',
-      },
-    },
-    {
-      name: 'limit',
-      type: 'number',
-      label: 'Limit',
-      defaultValue: 10,
-      admin: {
-        condition: (data, siblingData) => siblingData?.filterBy === 'featured',
-        description: 'Maximum number of featured FAQs to display',
-      },
-    },
-    {
-      name: 'displayStyle',
-      type: 'select',
-      label: 'Display Style',
-      defaultValue: 'accordion',
-      options: [
-        { label: 'Accordion', value: 'accordion' },
-        { label: 'Two Column', value: 'two-column' },
-        { label: 'List', value: 'list' },
-      ],
     },
     {
       name: 'defaultExpanded',
@@ -833,6 +829,91 @@ export const StaticPages: CollectionConfig = {
     create: ({ req: { user } }) => !!user, // Admin only
     update: ({ req: { user } }) => !!user, // Admin only
     delete: ({ req: { user } }) => !!user, // Admin only
+  },
+  hooks: {
+    afterRead: [
+      ({ doc }) => {
+        // Convert old string subtitle data to richText format for FAQ blocks
+        if (doc.layout && Array.isArray(doc.layout)) {
+          doc.layout = doc.layout.map((block: any) => {
+            if (block.blockType === 'faq-section' && block.subtitle && typeof block.subtitle === 'string') {
+              // Convert string to Lexical format
+              const lines = block.subtitle.split('\n').filter((line: string) => line.trim())
+              block.subtitle = {
+                root: {
+                  children: lines.map((line: string) => ({
+                    children: [
+                      {
+                        detail: 0,
+                        format: 0,
+                        mode: 'normal',
+                        style: '',
+                        text: line.trim(),
+                        type: 'text',
+                        version: 1,
+                      },
+                    ],
+                    direction: 'ltr',
+                    format: '',
+                    indent: 0,
+                    type: 'paragraph',
+                    version: 1,
+                  })),
+                  direction: 'ltr',
+                  format: '',
+                  indent: 0,
+                  type: 'root',
+                  version: 1,
+                },
+              }
+            }
+            return block
+          })
+        }
+        return doc
+      },
+    ],
+    beforeChange: [
+      ({ data }) => {
+        // Also convert on save to persist the conversion
+        if (data.layout && Array.isArray(data.layout)) {
+          data.layout = data.layout.map((block: any) => {
+            if (block.blockType === 'faq-section' && block.subtitle && typeof block.subtitle === 'string') {
+              const lines = block.subtitle.split('\n').filter((line: string) => line.trim())
+              block.subtitle = {
+                root: {
+                  children: lines.map((line: string) => ({
+                    children: [
+                      {
+                        detail: 0,
+                        format: 0,
+                        mode: 'normal',
+                        style: '',
+                        text: line.trim(),
+                        type: 'text',
+                        version: 1,
+                      },
+                    ],
+                    direction: 'ltr',
+                    format: '',
+                    indent: 0,
+                    type: 'paragraph',
+                    version: 1,
+                  })),
+                  direction: 'ltr',
+                  format: '',
+                  indent: 0,
+                  type: 'root',
+                  version: 1,
+                },
+              }
+            }
+            return block
+          })
+        }
+        return data
+      },
+    ],
   },
   fields: [
     // ========================================
