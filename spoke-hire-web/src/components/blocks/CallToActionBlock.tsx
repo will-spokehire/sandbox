@@ -44,14 +44,14 @@ export function CallToActionBlock({ data }: CallToActionBlockProps) {
 
   const getDescriptionPadding = (level: string) => {
     const paddingMap: Record<string, string> = {
-      h1: 'pt-[72px] md:pt-[144px]',
-      h2: 'pt-[63px] md:pt-[96px]',
-      h3: 'pt-[48px] md:pt-[54px]',
-      h4: 'pt-[36px] md:pt-[48px]',
-      h5: 'pt-[27px] md:pt-[36px]',
-      h6: 'pt-[24px] md:pt-[27px]',
+      h1: 'md:pt-[144px]',
+      h2: 'md:pt-[96px]',
+      h3: 'md:pt-[54px]',
+      h4: 'md:pt-[48px]',
+      h5: 'md:pt-[36px]',
+      h6: 'md:pt-[27px]',
     }
-    return paddingMap[level] ?? 'pt-6 md:pt-16' // fallback
+    return paddingMap[level] ?? 'md:pt-16' // fallback
   }
 
   const buttonCount = actions.length
@@ -78,7 +78,10 @@ export function CallToActionBlock({ data }: CallToActionBlockProps) {
           {/* Right Column: Description + Actions (1/3 width) */}
           <div className={cn('flex flex-col gap-6', getDescriptionPadding(headingLevel))}>
             <p className="body-large">{description}</p>
-            <div className="flex flex-row flex-nowrap gap-[22px] md:gap-4">
+            <div className={cn(
+              'flex flex-row flex-nowrap gap-[22px] md:gap-4',
+              buttonCount === 1 ? 'justify-start' : ''
+            )}>
               {actions.map((action, index) => (
                 <Button
                   key={index}
@@ -87,7 +90,7 @@ export function CallToActionBlock({ data }: CallToActionBlockProps) {
                   variant={getButtonVariant(action.style)}
                   className={cn(
                     'text-lg px-6 md:px-8 shrink',
-                    buttonCount === 1 ? 'w-full' : 'flex-1 min-w-0'
+                    buttonCount === 1 ? 'w-auto' : 'flex-1 min-w-0'
                   )}
                 >
                   <Link href={action.link}>{action.label}</Link>

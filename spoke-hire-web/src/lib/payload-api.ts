@@ -259,6 +259,19 @@ export interface SpotlightBlockData {
   hideOnMobile?: boolean
 }
 
+export interface NumberedListItem {
+  number?: string
+  heading: string
+  description: string
+}
+
+export interface NumberedListBlockData {
+  blockType: 'numbered-list'
+  title: string
+  items: NumberedListItem[]
+  hideOnMobile?: boolean
+}
+
 export type PageBlock =
   | StatsBarBlockData
   | ValueStatsBlockData
@@ -273,6 +286,7 @@ export type PageBlock =
   | TwoColumnContentBlockData
   | SpacerBlockData
   | SpotlightBlockData
+  | NumberedListBlockData
 
 export interface StaticPageSEO {
   metaTitle?: string

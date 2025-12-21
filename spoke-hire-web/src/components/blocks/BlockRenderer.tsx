@@ -13,6 +13,7 @@ import { ImageCarouselBlock } from './ImageCarouselBlock'
 import { TwoColumnContentBlock } from './TwoColumnContentBlock'
 import { SpacerBlock } from './SpacerBlock'
 import { SpotlightBlock } from './SpotlightBlock'
+import { NumberedListBlock } from './NumberedListBlock'
 
 interface BlockRendererProps {
   block: PageBlock
@@ -82,6 +83,10 @@ export function BlockRenderer({ block, index }: BlockRendererProps) {
 
     case 'project-spotlight':
       blockContent = <SpotlightBlock key={index} data={block} />
+      break
+
+    case 'numbered-list':
+      blockContent = <NumberedListBlock key={index} data={block} />
       break
 
     default:

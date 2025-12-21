@@ -758,6 +758,66 @@ const SpotlightBlock: Block = {
 }
 
 /**
+ * Numbered List Block (RTBs List)
+ * Display a numbered list with title, items containing headings and descriptions
+ */
+const NumberedListBlock: Block = {
+  slug: 'numbered-list',
+  labels: {
+    singular: 'Numbered List',
+    plural: 'Numbered Lists',
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      label: 'Section Title',
+      required: true,
+      admin: {
+        placeholder: 'LIST YOUR CLASSIC CAR WITH SPOKE',
+      },
+    },
+    {
+      name: 'items',
+      type: 'array',
+      label: 'List Items',
+      required: true,
+      minRows: 1,
+      fields: [
+        {
+          name: 'number',
+          type: 'text',
+          label: 'Number Label',
+          admin: {
+            description: 'Optional custom number (e.g., "01", "02"). If empty, will auto-increment.',
+            placeholder: '01',
+          },
+        },
+        {
+          name: 'heading',
+          type: 'text',
+          label: 'Heading',
+          required: true,
+          admin: {
+            placeholder: 'FREE TO LIST, EASY TO EARN',
+          },
+        },
+        {
+          name: 'description',
+          type: 'textarea',
+          label: 'Description',
+          required: true,
+          admin: {
+            placeholder: 'No listing fees. No exclusivity. No hassle...',
+          },
+        },
+      ],
+    },
+    ...commonBlockFields,
+  ],
+}
+
+/**
  * Spacer Block
  * Add vertical spacing between sections
  */
@@ -899,6 +959,7 @@ export const StaticPages: CollectionConfig = {
         ImageCarouselBlock,
         TwoColumnContentBlock,
         SpotlightBlock,
+        NumberedListBlock,
         SpacerBlock,
       ],
       admin: {

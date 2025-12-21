@@ -719,6 +719,25 @@ export interface StaticPage {
         blockType: 'project-spotlight';
       }
     | {
+        title: string;
+        items: {
+          /**
+           * Optional custom number (e.g., "01", "02"). If empty, will auto-increment.
+           */
+          number?: string | null;
+          heading: string;
+          description: string;
+          id?: string | null;
+        }[];
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'numbered-list';
+      }
+    | {
         /**
          * Vertical spacing between sections
          */
@@ -1198,6 +1217,22 @@ export interface StaticPagesSelect<T extends boolean = true> {
                   };
               showArrows?: T;
               itemsPerView?: T;
+              hideOnMobile?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'numbered-list'?:
+          | T
+          | {
+              title?: T;
+              items?:
+                | T
+                | {
+                    number?: T;
+                    heading?: T;
+                    description?: T;
+                    id?: T;
+                  };
               hideOnMobile?: T;
               id?: T;
               blockName?: T;
