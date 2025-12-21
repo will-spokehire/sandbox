@@ -1,12 +1,12 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Badge } from "~/components/ui/badge";
-import { Separator } from "~/components/ui/separator";
-import { MapPin, Tag } from "lucide-react";
+import Link from "next/link";
+import { TYPOGRAPHY, VEHICLE_DETAIL, SPACING_CLASSES } from "~/lib/design-tokens";
+import { cn } from "~/lib/utils";
 
 interface PublicVehicleBasicInfoProps {
   vehicle: {
+    id: string;
     name: string;
     year: string;
     engineCapacity: number | null;
@@ -46,56 +46,48 @@ interface PublicVehicleBasicInfoProps {
 }
 
 /**
- * Public Vehicle Basic Information Card
+ * Public Vehicle Basic Information
  * 
  * Displays core vehicle details for public viewing.
  * NO price information displayed.
  * NO registration number displayed.
  * NO edit actions.
- * Includes location and collections/tags within the card.
+ * Matches Figma design with no icons, simplified layout.
  */
 export function PublicVehicleBasicInfo({ vehicle }: PublicVehicleBasicInfoProps) {
-  // Build location string
-  const locationParts: string[] = [];
-  if (vehicle.owner.city) locationParts.push(vehicle.owner.city);
-  if (vehicle.owner.county) locationParts.push(vehicle.owner.county);
-  if (vehicle.owner.country) locationParts.push(vehicle.owner.country.name);
-  const hasLocation = locationParts.length > 0;
-
   const hasCollections = (vehicle.collections?.length ?? 0) > 0;
 
   const details = [
     {
       label: "Make & Model",
       value: `${vehicle.make.name} ${vehicle.model.name}`,
-      highlight: true,
     },
     {
       label: "Year",
       value: vehicle.year,
     },
     {
-      label: "Engine Capacity",
-      value: vehicle.engineCapacity ? `${vehicle.engineCapacity}cc` : "N/A",
-    },
-    {
-      label: "Number of Seats",
-      value: vehicle.numberOfSeats ? String(vehicle.numberOfSeats) : "N/A",
-    },
-    {
       label: "Steering",
       value: vehicle.steering?.name ?? "N/A",
+    },
+    {
+      label: "Engine Capacity",
+      value: vehicle.engineCapacity ? `${vehicle.engineCapacity}cc` : "N/A",
     },
     {
       label: "Gearbox",
       value: vehicle.gearbox ?? "N/A",
     },
     {
-      label: "Exterior Colour",
+      label: "Number of Seats",
+      value: vehicle.numberOfSeats ? String(vehicle.numberOfSeats) : "N/A",
+    },
+    {
+      label: "Exterior",
       value: vehicle.exteriorColour ?? "N/A",
     },
     {
-      label: "Interior Colour",
+      label: "Interior",
       value: vehicle.interiorColour ?? "N/A",
     },
     {
@@ -104,87 +96,67 @@ export function PublicVehicleBasicInfo({ vehicle }: PublicVehicleBasicInfoProps)
     },
     {
       label: "Road Legal",
-      value: vehicle.isRoadLegal ? "Yes" : "No",
-      badge: true,
-      badgeVariant: vehicle.isRoadLegal ? "default" : "secondary",
+      value: vehicle.isRoadLegal ? "yes" : "no",
     },
   ];
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Vehicle Details</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Details Grid */}
-        <dl className="grid gap-3 text-sm">
+    <div className={cn("flex flex-col", SPACING_CLASSES.xl)}>
+      {/* Make Enquiry Button */}
+      <Link 
+        href={`/enquiry/new?vehicleId=${vehicle.id}`}
+        className="md:static fixed bottom-0 left-0 right-0 z-50 md:z-auto md:relative"
+      >
+        <div className={cn(
+          "px-4 md:px-0 py-5 md:py-0 bg-white md:bg-transparent",
+          "md:w-full"
+        )}>
+          <button className={cn(VEHICLE_DETAIL.makeEnquiryButton, "w-full", "border-0 md:border md:border-spoke-black")}>
+            Make enquiry
+          </button>
+        </div>
+      </Link>
+
+      {/* Details Section */}
+      <div className={cn("flex flex-col", VEHICLE_DETAIL.sectionGap)}>
+        <h2 className={cn(TYPOGRAPHY.h3, "text-black")}>DETAILS</h2>
+        <dl className={cn("flex flex-col", VEHICLE_DETAIL.detailRowGap)}>
           {details.map((detail, index) => (
-            <div key={index} className="flex justify-between items-center gap-2">
-              <dt className="text-muted-foreground flex items-center gap-1.5">
-                {detail.icon}
+            <div key={index} className="flex justify-between items-start leading-[1.4]">
+              <dt className={cn(TYPOGRAPHY.bodyMedium, "uppercase text-black")}>
                 {detail.label}
               </dt>
-              <dd
-                className={detail.highlight ? "font-semibold text-right" : "text-right"}
-              >
-                {detail.badge ? (
-                  <Badge variant={detail.badgeVariant as any}>{detail.value}</Badge>
-                ) : (
-                  detail.value
-                )}
+              <dd className={cn(
+                TYPOGRAPHY.bodyLargeLight,
+                "text-black uppercase"
+              )}>
+                {detail.value}
               </dd>
             </div>
           ))}
         </dl>
+      </div>
 
-        {/* Location */}
-        {hasLocation && (
-          <>
-            <Separator />
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-sm font-semibold">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                Location
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {locationParts.join(", ")}
-              </div>
+      {/* Tags Section */}
+      {hasCollections && (
+        <div className={cn("flex flex-wrap", VEHICLE_DETAIL.tagGap)}>
+          {vehicle.collections!.map(({ collection }) => (
+            <div
+              key={collection.id}
+              className={cn(
+                "bg-black/10",
+                "py-[4px] px-[10px] pb-[6px]",
+                "flex items-center justify-center"
+              )}
+            >
+              <span className={cn(VEHICLE_DETAIL.tag, "text-black leading-[1.2]")}>
+                {collection.name}
+              </span>
             </div>
-          </>
-        )}
-
-        {/* Collections & Tags */}
-        {hasCollections && (
-          <>
-            <Separator />
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-sm font-semibold">
-                <Tag className="h-4 w-4 text-muted-foreground" />
-                Collections & Tags
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {vehicle.collections!.map(({ collection }) => (
-                  <Badge
-                    key={collection.id}
-                    variant="secondary"
-                    className="text-sm px-3 py-1.5"
-                    style={{
-                      backgroundColor: collection.color
-                        ? `${collection.color}20`
-                        : undefined,
-                      borderColor: collection.color ?? undefined,
-                      color: collection.color ?? undefined,
-                    }}
-                  >
-                    {collection.name}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
-      </CardContent>
-    </Card>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 

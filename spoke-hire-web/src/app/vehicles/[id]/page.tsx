@@ -1,18 +1,15 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/server";
 import { db } from "~/server/db";
 import { PublicVehicleMediaSection } from "./_components/PublicVehicleMediaSection";
 import { PublicVehicleBasicInfo } from "./_components/PublicVehicleBasicInfo";
-import { VehicleDetailBreadcrumbs } from "./_components/VehicleDetailBreadcrumbs";
+import { VehicleDetailHeader } from "./_components/VehicleDetailHeader";
 import { VehicleViewTracker } from "./_components/VehicleViewTracker";
 import { getAppUrl } from "~/lib/app-url";
-import { LAYOUT_CONSTANTS, TYPOGRAPHY } from "~/lib/design-tokens";
+import { LAYOUT_CONSTANTS, TYPOGRAPHY, VEHICLE_DETAIL } from "~/lib/design-tokens";
 import { cn } from "~/lib/utils";
-import { StandardPageHeader } from "~/app/_components/layouts";
 
 interface PageProps {
   params: Promise<{
@@ -275,29 +272,15 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
       />
 
       <div className={LAYOUT_CONSTANTS.bgDefault}>
-        {/* Header with Back Button */}
-        <StandardPageHeader
-          variant="detail"
-          title={`${vehicle.year} ${vehicle.make.name} ${vehicle.model.name}`}
-          backButton={
-            <Link href="/vehicles">
-              <Button variant="ghost" size="sm" className="gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                Back to Catalogue
-              </Button>
-            </Link>
-          }
-        />
+        {/* Vehicle Detail Header */}
+        <VehicleDetailHeader vehicle={vehicle} />
 
       {/* Main Content */}
-      <main className={cn(LAYOUT_CONSTANTS.container, LAYOUT_CONSTANTS.pageSpacing)}>
-        {/* Breadcrumbs - Temporarily hidden */}
-        {/* <VehicleDetailBreadcrumbs vehicle={vehicle} /> */}
-
-        {/* Two-Column Layout */}
-        <div className={LAYOUT_CONSTANTS.detailGrid}>
+      <main className={cn(VEHICLE_DETAIL.containerPadding, "py-5 md:py-10 pb-24 md:pb-10")}>
+        {/* Two-Column Layout - Desktop, Single Column - Mobile */}
+        <div className={VEHICLE_DETAIL.detailGrid}>
           {/* Left Column - Media Gallery & Description (2/3 width on desktop) */}
-          <div className={LAYOUT_CONSTANTS.detailGridLeft}>
+          <div className={cn(VEHICLE_DETAIL.detailGridLeft, "space-y-8")}>
             <section aria-label="Vehicle gallery">
               <h2 className="sr-only">Gallery</h2>
               <PublicVehicleMediaSection vehicle={vehicle} />
@@ -305,30 +288,18 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
 
             {/* Description Section */}
             {vehicle.description && (
-              <section aria-label="Vehicle description" className="prose prose-slate dark:prose-invert max-w-none">
-                <h2 className={TYPOGRAPHY.sectionTitle + " mb-4"}>Description</h2>
-                <div className="text-muted-foreground whitespace-pre-line leading-relaxed">
+              <section aria-label="Vehicle description" className="flex flex-col gap-3.5">
+                <h2 className={cn(TYPOGRAPHY.h3, "text-black")}>Description</h2>
+                <p className={cn(TYPOGRAPHY.bodyMedium, "text-black whitespace-pre-line")}>
                   {vehicle.description}
-                </div>
+                </p>
               </section>
             )}
           </div>
 
           {/* Right Column - Details (1/3 width on desktop) */}
-          <div className={LAYOUT_CONSTANTS.detailGridRight}>
-            {/* Make Enquiry Button - Prominent CTA at the top */}
-            <section aria-label="Contact">
-              <Link href={`/enquiry/new?vehicleId=${vehicle.id}`}>
-                <Button className="w-full" size="lg">
-                  Make Enquiry
-                </Button>
-              </Link>
-            </section>
-
-            <section aria-label="Vehicle specifications">
-              <h2 className="sr-only">Specifications</h2>
-              <PublicVehicleBasicInfo vehicle={vehicle} />
-            </section>
+          <div className={cn(VEHICLE_DETAIL.detailGridRight, "space-y-8")}>
+            <PublicVehicleBasicInfo vehicle={vehicle} />
           </div>
         </div>
       </main>

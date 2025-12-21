@@ -403,3 +403,46 @@ export const STATISTICS_STYLES = {
   text: "statistics-text",
   divider: "w-px h-4 bg-spoke-black rotate-90",
 } as const;
+
+// ============================================
+// VEHICLE DETAIL PAGE STYLES
+// Based on Figma design for vehicle detail pages
+// ============================================
+
+export const VEHICLE_DETAIL = {
+  // Typography tokens (using existing TYPOGRAPHY constants)
+  breadcrumbs: TYPOGRAPHY.bodyLarge, // 22px desktop / 18px mobile
+  title: TYPOGRAPHY.h2, // 64px desktop / 48px mobile, already uppercase
+  location: TYPOGRAPHY.bodyLarge, // 22px desktop / 18px mobile
+  detailsHeading: TYPOGRAPHY.h3, // 36px desktop / 32px mobile
+  detailLabel: `${TYPOGRAPHY.bodyMedium} uppercase`, // 18px with uppercase
+  detailValue: TYPOGRAPHY.bodyLargeLight, // 22px desktop / 18px mobile, light weight
+  tag: `${TYPOGRAPHY.bodySmall} font-medium uppercase`, // 14px with medium weight and uppercase
+
+  // Spacing tokens
+  headerPadding: LAYOUT_CONSTANTS.contentPadding, // px-4 md:px-[30px]
+  breadcrumbsTopPadding: "pt-5 md:pt-[41px]", // 20px mobile, 41px desktop
+  breadcrumbsHorizontalPadding: "px-4 md:px-[32px]", // 16px mobile, 32px desktop
+  breadcrumbsBottomPadding: "pb-0", // No bottom padding on breadcrumbs
+  breadcrumbsTitleGap: "gap-0 md:gap-16", // 0px mobile, 64px desktop gap between breadcrumbs and title (using SPACING_CLASSES["3xl"])
+  titleLocationGap: "gap-[11px] md:gap-6", // 11px mobile, 24px desktop
+  sectionGap: SPACING_CLASSES.xl, // gap-8, 32px
+  thumbnailGap: "gap-2.5", // 10px
+  detailRowGap: "gap-2.5", // 10px
+  tagGap: "gap-1", // 4px
+  mainImageThumbnailGap: "gap-5", // 20px
+
+  // Layout tokens
+  containerPadding: LAYOUT_CONSTANTS.contentPadding,
+  detailGrid: LAYOUT_CONSTANTS.detailGrid,
+  detailGridLeft: LAYOUT_CONSTANTS.detailGridLeft,
+  detailGridRight: LAYOUT_CONSTANTS.detailGridRight,
+
+  // Button tokens
+  makeEnquiryButton: BUTTON_STYLES.primaryTw, // black background, white text
+
+  // Image tokens
+  mainImageDesktop: "aspect-[4/3]",
+  mainImageMobile: "h-[260px]",
+  thumbnailAspect: "aspect-[1161/871]", // mobile thumbnail aspect ratio
+} as const;
