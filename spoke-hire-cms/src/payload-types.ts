@@ -315,22 +315,6 @@ export interface Testimonial {
    * Rating from 1 to 5 stars
    */
   rating?: number | null;
-  /**
-   * Optional photo of the person giving the testimonial
-   */
-  image?: (number | null) | Media;
-  /**
-   * Category for filtering testimonials by use case
-   */
-  category?: ('vehicle-owner' | 'renter' | 'wedding' | 'film') | null;
-  /**
-   * Show this testimonial on homepage and featured sections
-   */
-  featured?: boolean | null;
-  /**
-   * Lower numbers appear first
-   */
-  order: number;
   status: 'draft' | 'published';
   updatedAt: string;
   createdAt: string;
@@ -484,15 +468,8 @@ export interface StaticPage {
       }
     | {
         title?: string | null;
-        subtitle?: string | null;
         selectedTestimonials: (number | Testimonial)[];
-        displayStyle?: ('carousel' | 'grid' | 'masonry') | null;
         showRatings?: boolean | null;
-        showImages?: boolean | null;
-        /**
-         * Number of testimonials visible at once (for carousel)
-         */
-        itemsPerView?: number | null;
         /**
          * Hide this block on mobile devices (screens < 640px)
          */
@@ -1018,10 +995,6 @@ export interface TestimonialsSelect<T extends boolean = true> {
   author?: T;
   role?: T;
   rating?: T;
-  image?: T;
-  category?: T;
-  featured?: T;
-  order?: T;
   status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1102,12 +1075,8 @@ export interface StaticPagesSelect<T extends boolean = true> {
           | T
           | {
               title?: T;
-              subtitle?: T;
               selectedTestimonials?: T;
-              displayStyle?: T;
               showRatings?: T;
-              showImages?: T;
-              itemsPerView?: T;
               hideOnMobile?: T;
               id?: T;
               blockName?: T;

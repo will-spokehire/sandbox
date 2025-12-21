@@ -449,11 +449,11 @@
 
   .footer-link {
     font-family: var(--font-degular);
-    font-size: var(--text-body-small);
-    font-weight: var(--font-weight-medium);
+    font-size: var(--text-body-base);
+    font-weight: var(--font-weight-regular);
     line-height: 1.5;
     letter-spacing: var(--tracking-normal);
-    text-decoration: underline;
+    text-decoration: none;
   }
 }
 

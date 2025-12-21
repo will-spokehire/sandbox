@@ -91,10 +91,6 @@ export interface Testimonial {
   author: string
   role?: string
   rating?: number
-  image?: PayloadMedia
-  category?: string
-  featured: boolean
-  order: number
   status: 'draft' | 'published'
 }
 
@@ -153,12 +149,8 @@ export interface ValuePropsBlockData {
 export interface TestimonialsSectionBlockData {
   blockType: 'testimonials-section'
   title?: string
-  subtitle?: string
   selectedTestimonials: Testimonial[]
-  displayStyle: 'carousel' | 'grid' | 'masonry'
   showRatings: boolean
-  showImages: boolean
-  itemsPerView: number
   hideOnMobile?: boolean
 }
 

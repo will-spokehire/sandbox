@@ -4,7 +4,7 @@ export const Testimonials: CollectionConfig = {
   slug: 'testimonials',
   admin: {
     useAsTitle: 'author',
-    defaultColumns: ['author', 'role', 'category', 'rating', 'featured', 'status', 'order'],
+    defaultColumns: ['author', 'role', 'rating', 'status'],
     description: 'Customer testimonials and reviews displayed across the website',
   },
   access: {
@@ -51,60 +51,6 @@ export const Testimonials: CollectionConfig = {
       admin: {
         description: 'Rating from 1 to 5 stars',
         step: 1,
-      },
-    },
-    {
-      name: 'image',
-      type: 'upload',
-      relationTo: 'media',
-      label: 'Author Photo',
-      admin: {
-        description: 'Optional photo of the person giving the testimonial',
-      },
-    },
-    {
-      name: 'category',
-      type: 'select',
-      label: 'Category',
-      options: [
-        {
-          label: 'Vehicle Owner',
-          value: 'vehicle-owner',
-        },
-        {
-          label: 'Renter',
-          value: 'renter',
-        },
-        {
-          label: 'Wedding',
-          value: 'wedding',
-        },
-        {
-          label: 'Film',
-          value: 'film',
-        },
-      ],
-      admin: {
-        description: 'Category for filtering testimonials by use case',
-      },
-    },
-    {
-      name: 'featured',
-      type: 'checkbox',
-      label: 'Featured',
-      defaultValue: false,
-      admin: {
-        description: 'Show this testimonial on homepage and featured sections',
-      },
-    },
-    {
-      name: 'order',
-      type: 'number',
-      required: true,
-      defaultValue: 0,
-      label: 'Display Order',
-      admin: {
-        description: 'Lower numbers appear first',
       },
     },
     {

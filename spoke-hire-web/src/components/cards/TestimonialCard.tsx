@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
 import { cn } from "~/lib/utils"
 
 export interface TestimonialCardProps {
@@ -17,35 +18,9 @@ export interface TestimonialCardProps {
 }
 
 /**
- * Star icon component
- */
-function StarIcon({
-  filled,
-  className,
-}: {
-  filled: boolean
-  className?: string
-}) {
-  return (
-    <svg
-      className={cn("size-5", className)}
-      viewBox="0 0 20 20"
-      fill={filled ? "currentColor" : "none"}
-      stroke="currentColor"
-      strokeWidth={filled ? 0 : 1.5}
-      aria-hidden="true"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-      />
-    </svg>
-  )
-}
-
-/**
- * Star rating display component
+ * Star rating display component using star.svg
+ * Matches Figma design: 116px total width for 5 stars
+ * Shows filled stars up to the rating, unfilled stars are dimmed
  */
 function StarRatingDisplay({
   rating,
@@ -55,21 +30,33 @@ function StarRatingDisplay({
   className?: string
 }) {
   const fullStars = Math.floor(rating)
-  const hasPartial = rating % 1 !== 0
+  const clampedRating = Math.max(0, Math.min(5, rating)) // Clamp between 0-5
 
   return (
     <div
-      className={cn("flex items-center gap-1", className)}
+      className={cn("flex items-center", className)}
       role="img"
       aria-label={`${rating} out of 5 stars`}
+      style={{ width: '116px', height: '22.889px' }}
     >
-      {Array.from({ length: 5 }, (_, i) => (
-        <StarIcon
-          key={i}
-          filled={i < fullStars || (i === fullStars && hasPartial)}
-          className="text-spoke-black"
-        />
-      ))}
+      {Array.from({ length: 5 }, (_, i) => {
+        const isFilled = i < fullStars
+        return (
+          <Image
+            key={i}
+            src="/star.svg"
+            alt=""
+            width={20}
+            height={19}
+            className="object-contain"
+            style={{ 
+              width: '23.2px', // 116px / 5 = 23.2px per star
+              height: '22.889px',
+              opacity: isFilled ? 1 : 0.3 // Dim unfilled stars
+            }}
+          />
+        )
+      })}
     </div>
   )
 }
@@ -100,24 +87,38 @@ export function TestimonialCard({
 }: TestimonialCardProps) {
   return (
     <article
-      className={cn("flex flex-col gap-4", className)}
+      className={cn("flex flex-col gap-6 w-full", className)}
       aria-label={`Testimonial from ${authorName}`}
+      style={{ maxWidth: '100%', minWidth: 0 }}
     >
       {/* Star Rating */}
       <StarRatingDisplay rating={rating} />
 
-      {/* Quote */}
-      <blockquote className="testimonial-quote text-spoke-black">
+      {/* Quote - body-large-light: 22px desktop / 18px mobile, Degular Light, line-height 1.3, tracking -0.22px */}
+      <blockquote 
+        className="body-large-light text-spoke-black break-words whitespace-normal"
+        style={{ width: '100%', maxWidth: '100%', minWidth: 0, wordWrap: 'break-word', overflowWrap: 'break-word' }}
+      >
         &ldquo;{quote}&rdquo;
       </blockquote>
 
       {/* Author */}
-      <footer className="flex flex-col gap-0.5">
-        <cite className="testimonial-author not-italic text-spoke-black">
+      <footer className="flex flex-col gap-0 w-full" style={{ maxWidth: '100%', minWidth: 0 }}>
+        {/* Author name - body-large: 22px, Degular Regular, line-height 1.3, tracking -0.22px */}
+        <cite 
+          className="body-large not-italic text-spoke-black break-words whitespace-normal"
+          style={{ width: '100%', maxWidth: '100%', minWidth: 0, wordWrap: 'break-word', overflowWrap: 'break-word' }}
+        >
           {authorName}
         </cite>
+        {/* Role/subtitle - label-text: 16px, Degular Regular, line-height 1.4, tracking -0.16px */}
         {authorRole && (
-          <span className="body-medium text-spoke-black/70">{authorRole}</span>
+          <span 
+            className="label-text text-spoke-black break-words whitespace-normal"
+            style={{ width: '100%', maxWidth: '100%', minWidth: 0, wordWrap: 'break-word', overflowWrap: 'break-word' }}
+          >
+            {authorRole}
+          </span>
         )}
       </footer>
     </article>

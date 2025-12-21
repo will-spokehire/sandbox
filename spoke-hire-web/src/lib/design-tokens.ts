@@ -327,7 +327,7 @@ export const FOOTER_TYPOGRAPHY = {
   heading: "footer-heading",
   // Footer body: Degular Light, 16px, line-height 1.4
   body: "footer-body",
-  // Footer link: Degular Medium, 14px, line-height 1.5, underline
+  // Footer link: Degular Medium, 16px, line-height 1.5, underline
   link: "footer-link",
 } as const;
 

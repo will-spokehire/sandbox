@@ -185,7 +185,9 @@ const ValuePropsBlock: Block = {
 
 /**
  * Testimonials Section Block
- * Display customer testimonials
+ * Display customer testimonials in carousel layout
+ * Desktop: 3 cards per row with navigation arrows
+ * Mobile: Single card with scroll dots
  */
 const TestimonialsSectionBlock: Block = {
   slug: 'testimonials-section',
@@ -199,13 +201,8 @@ const TestimonialsSectionBlock: Block = {
       type: 'text',
       label: 'Section Title',
       admin: {
-        placeholder: 'What Our Clients Say',
+        placeholder: 'What Our Customers Say',
       },
-    },
-    {
-      name: 'subtitle',
-      type: 'textarea',
-      label: 'Subtitle',
     },
     {
       name: 'selectedTestimonials',
@@ -218,38 +215,10 @@ const TestimonialsSectionBlock: Block = {
       },
     },
     {
-      name: 'displayStyle',
-      type: 'select',
-      label: 'Display Style',
-      defaultValue: 'carousel',
-      options: [
-        { label: 'Carousel', value: 'carousel' },
-        { label: 'Grid', value: 'grid' },
-        { label: 'Masonry', value: 'masonry' },
-      ],
-    },
-    {
       name: 'showRatings',
       type: 'checkbox',
-      label: 'Show Ratings',
+      label: 'Show Star Ratings',
       defaultValue: true,
-    },
-    {
-      name: 'showImages',
-      type: 'checkbox',
-      label: 'Show Author Images',
-      defaultValue: true,
-    },
-    {
-      name: 'itemsPerView',
-      type: 'number',
-      label: 'Items Per View',
-      defaultValue: 3,
-      min: 1,
-      max: 6,
-      admin: {
-        description: 'Number of testimonials visible at once (for carousel)',
-      },
     },
     ...commonBlockFields,
   ],
