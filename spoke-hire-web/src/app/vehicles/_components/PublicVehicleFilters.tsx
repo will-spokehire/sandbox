@@ -128,13 +128,14 @@ export function PublicVehicleFilters() {
   // Render collection option with color badge
   const renderCollectionOption = (option: { id: string; name: string; color?: string }, selected: boolean) => (
     <>
+      <Check className={cn("mr-2 h-4 w-4", selected ? "opacity-100" : "opacity-0")} />
       {option.color && (
         <div
           className="mr-2 h-3 w-3 rounded-full"
           style={{ backgroundColor: option.color }}
         />
       )}
-      {option.name}
+      <span className={cn(selected && "font-medium")}>{option.name}</span>
     </>
   );
 
@@ -142,7 +143,7 @@ export function PublicVehicleFilters() {
   const renderStandardOption = (option: { id: string; name: string }, selected: boolean) => (
     <>
       <Check className={cn("mr-2 h-4 w-4", selected ? "opacity-100" : "opacity-0")} />
-      {option.name}
+      <span className={cn(selected && "font-medium")}>{option.name}</span>
     </>
   );
 

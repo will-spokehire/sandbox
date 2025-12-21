@@ -86,7 +86,7 @@ export function MultiSelectFilter({
                     isSelected ? "opacity-100" : "opacity-0"
                   )}
                 />
-                {option.name}
+                <span className={cn(isSelected && "font-medium")}>{option.name}</span>
               </>
             )}
           </CommandItem>
