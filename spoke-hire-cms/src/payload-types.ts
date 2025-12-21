@@ -430,27 +430,6 @@ export interface StaticPage {
   layout: (
     | {
         /**
-         * Optional title for admin reference
-         */
-        title?: string | null;
-        /**
-         * Select which hero slides to display
-         */
-        slides: (number | HeroSlide)[];
-        autoplay?: boolean | null;
-        autoplayDelay?: number | null;
-        showArrows?: boolean | null;
-        showDots?: boolean | null;
-        /**
-         * Hide this block on mobile devices (screens < 640px)
-         */
-        hideOnMobile?: boolean | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'hero-carousel';
-      }
-    | {
-        /**
          * Optional title for the section
          */
         title?: string | null;
@@ -604,8 +583,6 @@ export interface StaticPage {
          * Number of latest vehicles to display
          */
         limit?: number | null;
-        displayStyle?: ('grid' | 'carousel' | 'masonry') | null;
-        columns?: ('2' | '3' | '4' | '6') | null;
         /**
          * Display the 'Show all vehicles' button on mobile devices
          */
@@ -1069,19 +1046,6 @@ export interface StaticPagesSelect<T extends boolean = true> {
   layout?:
     | T
     | {
-        'hero-carousel'?:
-          | T
-          | {
-              title?: T;
-              slides?: T;
-              autoplay?: T;
-              autoplayDelay?: T;
-              showArrows?: T;
-              showDots?: T;
-              hideOnMobile?: T;
-              id?: T;
-              blockName?: T;
-            };
         'stats-bar'?:
           | T
           | {
@@ -1175,8 +1139,6 @@ export interface StaticPagesSelect<T extends boolean = true> {
                     id?: T;
                   };
               limit?: T;
-              displayStyle?: T;
-              columns?: T;
               showMobileButton?: T;
               hideOnMobile?: T;
               id?: T;
