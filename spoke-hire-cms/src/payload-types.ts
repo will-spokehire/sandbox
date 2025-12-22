@@ -391,7 +391,7 @@ export interface CarouselImage {
   createdAt: string;
 }
 /**
- * Create and manage static pages using the page builder
+ * Create and manage static pages and articles using the page builder. Articles are accessible at /articles/[slug] and use a specialized template.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "static-pages".
@@ -400,7 +400,7 @@ export interface StaticPage {
   id: number;
   title: string;
   /**
-   * URL path for this page (e.g., "about" becomes /about)
+   * URL path for this page (accessible at /[slug])
    */
   slug: string;
   status: 'draft' | 'published';
@@ -530,11 +530,6 @@ export interface StaticPage {
           };
           [k: string]: unknown;
         };
-        /**
-         * Content width constraint
-         */
-        maxWidth?: ('narrow' | 'default' | 'wide' | 'full') | null;
-        backgroundColor?: ('white' | 'muted' | 'accent') | null;
         /**
          * Hide this block on mobile devices (screens < 640px)
          */
@@ -1106,8 +1101,6 @@ export interface StaticPagesSelect<T extends boolean = true> {
           | T
           | {
               content?: T;
-              maxWidth?: T;
-              backgroundColor?: T;
               hideOnMobile?: T;
               id?: T;
               blockName?: T;

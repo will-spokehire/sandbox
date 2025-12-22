@@ -334,32 +334,6 @@ const RichTextContentBlock: Block = {
       required: true,
       label: 'Content',
     },
-    {
-      name: 'maxWidth',
-      type: 'select',
-      label: 'Content Width',
-      defaultValue: 'default',
-      options: [
-        { label: 'Narrow', value: 'narrow' },
-        { label: 'Default', value: 'default' },
-        { label: 'Wide', value: 'wide' },
-        { label: 'Full', value: 'full' },
-      ],
-      admin: {
-        description: 'Content width constraint',
-      },
-    },
-    {
-      name: 'backgroundColor',
-      type: 'select',
-      label: 'Background Color',
-      defaultValue: 'white',
-      options: [
-        { label: 'White', value: 'white' },
-        { label: 'Muted', value: 'muted' },
-        { label: 'Accent', value: 'accent' },
-      ],
-    },
     ...commonBlockFields,
   ],
 }
@@ -821,7 +795,7 @@ export const StaticPages: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug', 'status', 'updatedAt'],
-    description: 'Create and manage static pages using the page builder',
+    description: 'Create and manage static pages and articles using the page builder. Articles are accessible at /articles/[slug] and use a specialized template.',
     group: 'Content',
   },
   access: {
@@ -936,7 +910,7 @@ export const StaticPages: CollectionConfig = {
       label: 'URL Slug',
       admin: {
         placeholder: 'about',
-        description: 'URL path for this page (e.g., "about" becomes /about)',
+        description: 'URL path for this page (accessible at /[slug])',
       },
       hooks: {
         beforeValidate: [

@@ -180,8 +180,6 @@ export interface FAQSectionBlockData {
 export interface RichTextContentBlockData {
   blockType: 'rich-text-content'
   content: unknown // Lexical rich text
-  maxWidth: 'narrow' | 'default' | 'wide' | 'full'
-  backgroundColor: 'white' | 'muted' | 'accent'
   hideOnMobile?: boolean
 }
 
