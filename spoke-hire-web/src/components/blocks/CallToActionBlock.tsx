@@ -12,12 +12,12 @@ interface CallToActionBlockProps {
  *
  * Displays a call-to-action section with 2-column layout (desktop) / 1-column (mobile).
  * Left column: Heading
- * Right column: Description + Action buttons
+ * Right column: Description + Action buttons (optional)
  */
 export function CallToActionBlock({ data }: CallToActionBlockProps) {
   const { selectedCTA } = data
 
-  if (!selectedCTA || !selectedCTA.actions || selectedCTA.actions.length === 0) {
+  if (!selectedCTA) {
     return null
   }
 
@@ -42,7 +42,7 @@ export function CallToActionBlock({ data }: CallToActionBlockProps) {
     }
   }
 
-  const getDescriptionPadding = (level: string) => {
+  const getDescriptionPadding = (level: string, hasActions: boolean) => {
     const paddingMap: Record<string, string> = {
       h1: 'md:pt-[144px]',
       h2: 'md:pt-[96px]',
@@ -51,10 +51,13 @@ export function CallToActionBlock({ data }: CallToActionBlockProps) {
       h5: 'md:pt-[36px]',
       h6: 'md:pt-[27px]',
     }
-    return paddingMap[level] ?? 'md:pt-16' // fallback
+    const basePadding = paddingMap[level] ?? 'md:pt-16' // fallback
+    // If no actions, reduce padding since there's no button section below
+    return hasActions ? basePadding : 'md:pt-8'
   }
 
-  const buttonCount = actions.length
+  const hasActions = actions && actions.length > 0
+  const buttonCount = hasActions ? actions.length : 0
 
   // Conditional padding based on heading level
   const paddingClasses = headingLevel === 'h1' 
@@ -76,27 +79,29 @@ export function CallToActionBlock({ data }: CallToActionBlockProps) {
           </div>
 
           {/* Right Column: Description + Actions (1/3 width) */}
-          <div className={cn('flex flex-col gap-6', getDescriptionPadding(headingLevel))}>
+          <div className={cn('flex flex-col gap-6', getDescriptionPadding(headingLevel, hasActions))}>
             <p className="body-large">{description}</p>
-            <div className={cn(
-              'flex flex-row flex-nowrap gap-[22px] md:gap-4',
-              buttonCount === 1 ? 'justify-start' : ''
-            )}>
-              {actions.map((action, index) => (
-                <Button
-                  key={index}
-                  asChild
-                  size="lg"
-                  variant={getButtonVariant(action.style)}
-                  className={cn(
-                    'text-lg px-6 md:px-8 shrink',
-                    buttonCount === 1 ? 'w-auto' : 'flex-1 min-w-0'
-                  )}
-                >
-                  <Link href={action.link}>{action.label}</Link>
-                </Button>
-              ))}
-            </div>
+            {hasActions && (
+              <div className={cn(
+                'flex flex-row flex-nowrap gap-[22px] md:gap-4',
+                buttonCount === 1 ? 'justify-start' : ''
+              )}>
+                {actions.map((action, index) => (
+                  <Button
+                    key={index}
+                    asChild
+                    size="lg"
+                    variant={getButtonVariant(action.style)}
+                    className={cn(
+                      'text-lg px-6 md:px-8 shrink',
+                      buttonCount === 1 ? 'w-auto' : 'flex-1 min-w-0'
+                    )}
+                  >
+                    <Link href={action.link}>{action.label}</Link>
+                  </Button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -71,11 +71,10 @@ export const CTABlocks: CollectionConfig = {
     {
       name: 'actions',
       type: 'array',
-      required: true,
-      minRows: 1,
+      required: false,
       label: 'Actions',
       admin: {
-        description: 'Add one or more action buttons',
+        description: 'Add one or more action buttons (optional)',
       },
       fields: [
         {
