@@ -390,7 +390,7 @@ export const AVATAR_STYLES = {
   container: "w-10 h-10 rounded-full overflow-hidden",
   image: "w-full h-full object-cover",
   initials:
-    "w-full h-full flex items-center justify-center font-degular text-sm font-medium tracking-wide",
+    "bg-spoke-grey-light text-spoke-black font-degular text-sm font-medium tracking-wide",
 } as const;
 
 // ============================================

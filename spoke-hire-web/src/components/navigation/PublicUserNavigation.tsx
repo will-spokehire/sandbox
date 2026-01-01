@@ -266,7 +266,7 @@ export function PublicUserNavigation({ navigation }: PublicUserNavigationProps) 
                 <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-800">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-12 w-12">
-                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold text-base">
+                      <AvatarFallback className="bg-spoke-grey-light text-spoke-black font-medium text-base tracking-wide">
                         {initials}
                       </AvatarFallback>
                     </Avatar>

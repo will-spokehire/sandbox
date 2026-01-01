@@ -84,7 +84,7 @@ export function VehicleOwnerInfo({ owner, vehicleId }: VehicleOwnerInfoProps) {
         {/* Owner Header with Avatar */}
         <div className="flex items-center gap-3">
           <Avatar className="h-12 w-12">
-            <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+            <AvatarFallback className="bg-spoke-grey-light text-spoke-black font-medium text-sm tracking-wide">
               {initials}
             </AvatarFallback>
           </Avatar>
