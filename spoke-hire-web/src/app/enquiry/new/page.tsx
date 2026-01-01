@@ -155,51 +155,57 @@ function EnquiryFormContent() {
 
   return (
     <>
-      {/* Header with background (like app pages) */}
-      <div className="bg-slate-50 dark:bg-slate-900 border-b">
-        <div className={cn(LAYOUT_CONSTANTS.container, "py-6 md:py-8 max-w-3xl")}>
-          {vehicleIdFromUrl && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push(`/vehicles/${vehicleIdFromUrl}`)}
-              className="mb-4"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Vehicle
-            </Button>
-          )}
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-            Make an Enquiry
-          </h1>
-          <p className="text-muted-foreground text-base md:text-lg mt-2">
-            Tell us about your requirements and we'll get back to you soon
-          </p>
+      {/* Header - Wizard Style */}
+      <div className="bg-white">
+        <div className="w-full flex flex-col items-center px-4 md:px-[30px] py-[41px]">
+          <div className="w-full max-w-[808px] flex flex-col items-center gap-[11px]">
+            {vehicleIdFromUrl && (
+              <div className="w-full mb-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => router.push(`/vehicles/${vehicleIdFromUrl}`)}
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Vehicle
+                </Button>
+              </div>
+            )}
+            {/* Main Title */}
+            <h1 className="text-[48px] md:text-[96px] font-normal leading-[0.95] uppercase text-black tracking-normal text-center">
+              Make an enquiry
+            </h1>
+            <p className="text-muted-foreground text-base md:text-lg text-center">
+              Tell us about your requirements and we'll get back to you soon
+            </p>
+          </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className={cn(LAYOUT_CONSTANTS.container, LAYOUT_CONSTANTS.pageSpacing, "max-w-3xl")}>
-        {/* Vehicle Info Card (if coming from vehicle page) */}
-        {vehicle && (
-          <Alert className="mb-6">
-            <CheckCircle2 className="h-4 w-4" />
-            <AlertDescription>
-              <span className="font-medium">Vehicle selected:</span>{" "}
-              {vehicle.make.name} {vehicle.model.name} {vehicle.year} - {vehicle.name}
-            </AlertDescription>
-          </Alert>
-        )}
+      <main className="flex-1 bg-white">
+        <div className="w-full flex flex-col items-center px-4 md:px-[30px] py-[41px]">
+          <div className="w-full max-w-[808px] flex flex-col gap-10">
+            {/* Vehicle Info Card (if coming from vehicle page) */}
+            {vehicle && (
+              <Alert className="mb-0">
+                <CheckCircle2 className="h-4 w-4" />
+                <AlertDescription>
+                  <span className="font-medium">Vehicle selected:</span>{" "}
+                  {vehicle.make.name} {vehicle.model.name} {vehicle.year} - {vehicle.name}
+                </AlertDescription>
+              </Alert>
+            )}
 
-        <form onSubmit={onSubmit} className="space-y-6">
-          {/* Enquiry Details Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Enquiry Details</CardTitle>
-              <CardDescription>
-                Tell us about your requirements
-              </CardDescription>
-            </CardHeader>
+            <form onSubmit={onSubmit} className="space-y-6 w-full">
+              {/* Enquiry Details Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Enquiry Details</CardTitle>
+                  <CardDescription>
+                    Tell us about your requirements
+                  </CardDescription>
+                </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="dealType">
@@ -298,35 +304,35 @@ function EnquiryFormContent() {
                   Provide as much detail as possible about your requirements
                 </p>
               </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
 
-          {/* Personal Information Section */}
-          <Card>
-            <CardHeader className={cn(!isEditingPersonalInfo && "pb-4")}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className={cn(!isEditingPersonalInfo && "text-base")}>Personal Information</CardTitle>
-                  {isEditingPersonalInfo && (
-                    <CardDescription>
-                      Your contact details
-                    </CardDescription>
-                  )}
-                </div>
-                {!isEditingPersonalInfo && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setIsEditingPersonalInfo(true)}
-                    disabled={isSubmitting}
-                  >
-                    <Edit2 className="h-4 w-4 mr-2" />
-                    Edit
-                  </Button>
-                )}
-              </div>
-            </CardHeader>
+              {/* Personal Information Section */}
+              <Card>
+                <CardHeader className={cn(!isEditingPersonalInfo && "pb-4")}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className={cn(!isEditingPersonalInfo && "text-base")}>Personal Information</CardTitle>
+                      {isEditingPersonalInfo && (
+                        <CardDescription>
+                          Your contact details
+                        </CardDescription>
+                      )}
+                    </div>
+                    {!isEditingPersonalInfo && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsEditingPersonalInfo(true)}
+                        disabled={isSubmitting}
+                      >
+                        <Edit2 className="h-4 w-4 mr-2" />
+                        Edit
+                      </Button>
+                    )}
+                  </div>
+                </CardHeader>
             <CardContent className={cn(!isEditingPersonalInfo ? "pt-0" : "space-y-4")}>
               {!isEditingPersonalInfo ? (
                 // Compact Preview Mode
@@ -462,40 +468,44 @@ function EnquiryFormContent() {
                       )}
                     </div>
                   </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
+                  </>
+                )}
+              </CardContent>
+            </Card>
 
-          <Separator />
+            <Separator />
 
-          {/* Submit Section */}
-          <div className="flex justify-end gap-4">
-            {vehicleIdFromUrl && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.push(`/vehicles/${vehicleIdFromUrl}`)}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-            )}
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Submitting...
-                </>
-              ) : (
-                "Submit Enquiry"
-              )}
-            </Button>
-          </div>
-        </form>
+            {/* Submit Section */}
+            <div className="flex items-center justify-center w-full">
+              <div className="flex justify-end gap-4 w-full max-w-[480px]">
+                {vehicleIdFromUrl && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => router.push(`/vehicles/${vehicleIdFromUrl}`)}
+                    disabled={isSubmitting}
+                  >
+                    Cancel
+                  </Button>
+                )}
+                <Button type="submit" disabled={isSubmitting} className="flex-1">
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    "submit enquiry"
+                  )}
+                </Button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
-    </>
-  );
+    </main>
+  </>
+);
 }
 
 /**
