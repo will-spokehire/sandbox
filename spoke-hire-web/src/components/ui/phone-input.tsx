@@ -4,6 +4,7 @@ import * as React from "react";
 import { PhoneInput as BasePhoneInput, type CountryIso2 } from "react-international-phone";
 import "react-international-phone/style.css";
 import { cn } from "~/lib/utils";
+import "./phone-input.css";
 
 export interface PhoneInputProps {
   value?: string;
@@ -47,8 +48,7 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
     return (
       <div
         className={cn(
-          "flex w-full rounded-md ring-offset-background",
-          "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
+          "flex w-full phone-input-wrapper",
           className
         )}
       >
@@ -59,23 +59,35 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
           disabled={disabled}
           placeholder={placeholder}
           style={{ width: '100%' }}
+          inputStyle={{
+            borderRadius: 0,
+          }}
           inputClassName={cn(
-            "flex h-10 w-full rounded-r-md rounded-l-none border border-l-0 border-input bg-background px-3 py-2 text-sm",
-            "placeholder:text-muted-foreground",
-            "focus:outline-none focus:border-input",
-            "disabled:cursor-not-allowed disabled:opacity-50"
+            "flex h-[44px] w-full border border-l-0 border-spoke-black bg-spoke-white px-4 py-2",
+            "font-degular text-lg font-medium leading-[1.4] text-spoke-black",
+            "placeholder:text-spoke-black/40",
+            "outline-none",
+            "disabled:opacity-40 disabled:cursor-not-allowed"
           )}
           countrySelectorStyleProps={{
+            buttonStyle: {
+              borderRadius: 0,
+            },
             buttonClassName: cn(
-              "h-10 rounded-l-md rounded-r-none border border-r-0 border-input bg-background px-3",
-              "hover:bg-accent hover:text-accent-foreground",
-              "focus:outline-none focus:border-input",
-              "disabled:cursor-not-allowed disabled:opacity-50"
+              "h-[44px] border border-r-0 border-spoke-black bg-spoke-white px-3",
+              "font-degular text-lg font-medium text-spoke-black",
+              "hover:bg-spoke-black/5",
+              "outline-none",
+              "disabled:opacity-40 disabled:cursor-not-allowed"
             ),
             dropdownStyleProps: {
-              className: "bg-background border border-input rounded-md shadow-lg z-50",
+              style: {
+                borderRadius: 0,
+              },
+              className: "bg-spoke-white border border-spoke-black shadow-lg z-50",
               listItemClassName: cn(
-                "px-3 py-2 hover:bg-accent hover:text-accent-foreground cursor-pointer",
+                "px-3 py-2 hover:bg-spoke-black/5 cursor-pointer",
+                "font-degular text-base font-medium text-spoke-black",
                 "flex items-center gap-2"
               ),
             },

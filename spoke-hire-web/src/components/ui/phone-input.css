@@ -1,0 +1,51 @@
+/**
+ * Custom styles for react-international-phone to match brand design system
+ * Overrides default library styles with spoke-hire brand styling
+ */
+
+/* Override CSS variables for border colors */
+.phone-input-wrapper {
+  --react-international-phone-border-color: #000000;
+  --react-international-phone-country-selector-border-color: #000000;
+  --react-international-phone-border-radius: 0;
+  --react-international-phone-height: 44px;
+}
+
+/* Force black borders on all elements */
+.phone-input-wrapper .react-international-phone-input-container .react-international-phone-input {
+  border: 1px solid #000000 !important;
+  border-radius: 0 !important;
+  border-left: 0 !important;
+}
+
+.phone-input-wrapper .react-international-phone-country-selector-button {
+  border: 1px solid #000000 !important;
+  border-radius: 0 !important;
+  border-right: 0 !important;
+}
+
+/* Remove individual focus states */
+.phone-input-wrapper .react-international-phone-input:focus,
+.phone-input-wrapper .react-international-phone-country-selector-button:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Focus state on entire component wrapper - matches Input component */
+.phone-input-wrapper:focus-within {
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Dropdown styling - rectangular to match brand */
+.react-international-phone-country-selector-dropdown {
+  border-radius: 0 !important;
+  border: 1px solid #000000 !important;
+}
+
+/* Flags - rectangular to match brand */
+.phone-input-wrapper .react-international-phone-flag-emoji,
+.phone-input-wrapper .react-international-phone-country-selector-button__flag-emoji,
+.react-international-phone-country-selector-dropdown .react-international-phone-flag-emoji {
+  border-radius: 0 !important;
+}
+
