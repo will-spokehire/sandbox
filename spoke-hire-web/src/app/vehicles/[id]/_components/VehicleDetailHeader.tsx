@@ -46,8 +46,7 @@ export function VehicleDetailHeader({ vehicle }: VehicleDetailHeaderProps) {
       <div className={cn(
         VEHICLE_DETAIL.headerPadding,
         "pt-5 md:pt-[41px]",
-        "pb-5 md:pb-[41px]",
-        VEHICLE_DETAIL.breadcrumbsTitleGap
+        "pb-5 md:pb-[21px]" // Match Figma: 21px bottom padding for header-to-content gap
       )}>
         <div className={cn("flex flex-col", VEHICLE_DETAIL.titleLocationGap)}>
           {/* Title - flex-wrap with gap for word spacing */}

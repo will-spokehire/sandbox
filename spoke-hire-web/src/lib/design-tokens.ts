@@ -419,27 +419,30 @@ export const VEHICLE_DETAIL = {
   detailValue: TYPOGRAPHY.bodyLargeLight, // 22px desktop / 18px mobile, light weight
   tag: `${TYPOGRAPHY.bodySmall} font-medium uppercase`, // 14px with medium weight and uppercase
 
-  // Spacing tokens
+  // Spacing tokens (exact Figma values)
   headerPadding: LAYOUT_CONSTANTS.contentPadding, // px-4 md:px-[30px]
   breadcrumbsTopPadding: "pt-5 md:pt-[41px]", // 20px mobile, 41px desktop
   breadcrumbsHorizontalPadding: "px-4 md:px-[32px]", // 16px mobile, 32px desktop
   breadcrumbsBottomPadding: "pb-0", // No bottom padding on breadcrumbs
-  breadcrumbsTitleGap: "gap-0 md:gap-16", // 0px mobile, 64px desktop gap between breadcrumbs and title (using SPACING_CLASSES["3xl"])
-  titleLocationGap: "gap-[11px] md:gap-6", // 11px mobile, 24px desktop
-  sectionGap: SPACING_CLASSES.xl, // gap-8, 32px
-  thumbnailGap: "gap-2.5", // 10px
-  detailRowGap: "gap-2.5", // 10px
-  tagGap: "gap-1", // 4px
-  mainImageThumbnailGap: "gap-5", // 20px
+  breadcrumbsTitleGap: "gap-0 md:gap-16", // 0px mobile, 64px desktop gap between breadcrumbs and title
+  titleLocationGap: "gap-1", // 4px - Figma exact value
+  headerToContentGap: "gap-[21px]", // 21px - Figma exact value for gap between header and main content
+  contentHorizontalGap: "gap-6 lg:gap-[40px]", // 24px mobile, 40px desktop - Figma exact value
+  sectionGap: SPACING_CLASSES.xl, // gap-8, 32px - gap between button/details/tags sections
+  detailsHeadingGap: "gap-3.5", // 14px - Figma exact value for gap between DETAILS heading and first row
+  thumbnailGap: "gap-2.5", // 10px - Figma exact value
+  detailRowGap: "gap-2.5", // 10px - Figma exact value
+  tagGap: "gap-[7px]", // 7px - Figma exact value
+  mainImageThumbnailGap: "gap-5", // 20px - Figma exact value
 
   // Layout tokens
   containerPadding: LAYOUT_CONSTANTS.contentPadding,
-  detailGrid: LAYOUT_CONSTANTS.detailGrid,
-  detailGridLeft: LAYOUT_CONSTANTS.detailGridLeft,
-  detailGridRight: LAYOUT_CONSTANTS.detailGridRight,
+  detailGrid: "grid grid-cols-1 lg:grid-cols-[890px_1fr] lg:gap-[40px] gap-6", // Custom grid with exact Figma values
+  detailGridLeft: "space-y-5", // 20px gap between image and description
+  detailGridRight: "space-y-8", // 32px gap between sections in right column
 
-  // Button tokens
-  makeEnquiryButton: BUTTON_STYLES.primaryTw, // black background, white text
+  // Button tokens (exact Figma padding)
+  makeEnquiryButton: "inline-flex items-center justify-center bg-spoke-black text-spoke-white border border-spoke-black px-[23px] py-[11px] font-helvetica text-lg font-normal uppercase leading-relaxed transition-all hover:opacity-90",
 
   // Image tokens
   mainImageDesktop: "aspect-[4/3]",

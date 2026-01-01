@@ -276,11 +276,11 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
         <VehicleDetailHeader vehicle={vehicle} />
 
       {/* Main Content */}
-      <main className={cn(VEHICLE_DETAIL.containerPadding, "py-5 md:py-10 pb-24 md:pb-10")}>
+      <main className={cn(VEHICLE_DETAIL.containerPadding, "py-5 md:py-0 pb-24 md:pb-10")}>
         {/* Two-Column Layout - Desktop, Single Column - Mobile */}
         <div className={VEHICLE_DETAIL.detailGrid}>
-          {/* Left Column - Media Gallery & Description (2/3 width on desktop) */}
-          <div className={cn(VEHICLE_DETAIL.detailGridLeft, "space-y-8")}>
+          {/* Left Column - Media Gallery & Description (890px width on desktop) */}
+          <div className={VEHICLE_DETAIL.detailGridLeft}>
             <section aria-label="Vehicle gallery">
               <h2 className="sr-only">Gallery</h2>
               <PublicVehicleMediaSection vehicle={vehicle} />
@@ -297,8 +297,8 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
             )}
           </div>
 
-          {/* Right Column - Details (1/3 width on desktop) */}
-          <div className={cn(VEHICLE_DETAIL.detailGridRight, "space-y-8")}>
+          {/* Right Column - Details (flexible width on desktop) */}
+          <div className={VEHICLE_DETAIL.detailGridRight}>
             <PublicVehicleBasicInfo vehicle={vehicle} />
           </div>
         </div>

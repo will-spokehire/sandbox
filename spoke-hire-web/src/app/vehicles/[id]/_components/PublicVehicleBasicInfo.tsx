@@ -111,15 +111,15 @@ export function PublicVehicleBasicInfo({ vehicle }: PublicVehicleBasicInfoProps)
           "px-4 md:px-0 py-5 md:py-0 bg-white md:bg-transparent",
           "md:w-full"
         )}>
-          <button className={cn(VEHICLE_DETAIL.makeEnquiryButton, "w-full", "border-0 md:border md:border-spoke-black")}>
+          <button className={cn(VEHICLE_DETAIL.makeEnquiryButton, "w-full")}>
             Make enquiry
           </button>
         </div>
       </Link>
 
       {/* Details Section */}
-      <div className={cn("flex flex-col", VEHICLE_DETAIL.sectionGap)}>
-        <h2 className={cn(TYPOGRAPHY.h3, "text-black")}>DETAILS</h2>
+      <div className="flex flex-col">
+        <h2 className={cn(TYPOGRAPHY.h3, "text-black pb-3.5")}>DETAILS</h2>
         <dl className={cn("flex flex-col", VEHICLE_DETAIL.detailRowGap)}>
           {details.map((detail, index) => (
             <div key={index} className="flex justify-between items-start leading-[1.4]">
