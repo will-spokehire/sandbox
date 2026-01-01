@@ -1,36 +1,35 @@
-'use client';
-
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '~/providers/auth-provider';
+import { redirect } from 'next/navigation';
+import { getPageBySlug } from '~/lib/payload-api';
+import { BlockRenderer } from '~/components/blocks/BlockRenderer';
+import { HomepageLayout } from './layout-homepage';
 
 /**
  * Root Page
  * 
- * Redirects users based on authentication state:
- * - Admin users → /admin
- * - All other users (authenticated or not) → /vehicles
+ * Renders the homepage content from PayloadCMS using the "home" page.
+ * Falls back to redirecting to /vehicles if no homepage exists in CMS.
  */
-export default function Home() {
-  const router = useRouter();
-  const { user, isLoading, isAuthenticated } = useAuth();
+export default async function Home() {
+  const page = await getPageBySlug('home');
+  
+  // Fallback: redirect to vehicles if no homepage in CMS
+  if (!page) {
+    redirect('/vehicles');
+  }
 
-  useEffect(() => {
-    if (!isLoading) {
-      // Redirect admins to admin dashboard
-      if (isAuthenticated && user?.userType === 'ADMIN') {
-        router.push('/admin');
-      } else {
-        // Everyone else goes to vehicles (public catalogue)
-        router.push('/vehicles');
-      }
-    }
-  }, [isLoading, isAuthenticated, user, router]);
-
-  // Show loading state while checking auth and redirecting
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900 dark:border-slate-50"></div>
-    </div>
+    <HomepageLayout>
+      <main>
+        {page.layout && page.layout.length > 0 ? (
+          page.layout.map((block, index) => (
+            <BlockRenderer key={`${block.blockType}-${index}`} block={block} index={index} />
+          ))
+        ) : (
+          <div className="container mx-auto px-4 py-16 text-center">
+            <p className="text-muted-foreground">This page has no content yet.</p>
+          </div>
+        )}
+      </main>
+    </HomepageLayout>
   );
 }

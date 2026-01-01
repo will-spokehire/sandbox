@@ -25,6 +25,29 @@ export interface PayloadIcon {
   svg: PayloadMedia
 }
 
+export interface SiteSettings {
+  id: number
+  siteName: string
+  tagline?: string | null
+  logo?: PayloadMedia | null
+  favicon?: PayloadMedia | null
+  seoDefaults?: {
+    defaultMetaDescription?: string | null
+    defaultOgImage?: PayloadMedia | null
+  } | null
+  analytics?: {
+    googleAnalyticsId?: string | null
+  } | null
+  copyrightText?: string | null
+  contactInfo?: {
+    email?: string | null
+    phone?: string | null
+    address?: string | null
+  } | null
+  updatedAt?: string | null
+  createdAt?: string | null
+}
+
 // ============================================
 // MEDIA URL HELPER
 // ============================================
@@ -558,6 +581,22 @@ export async function getNavigation(): Promise<Navigation | null> {
     return response
   } catch (error) {
     console.error('[PayloadAPI] Error fetching Navigation global:', error)
+    return null
+  }
+}
+
+/**
+ * Get Site Settings global
+ * Includes site name, logo, tagline, SEO defaults, and contact information
+ */
+export async function getSiteSettings(): Promise<SiteSettings | null> {
+  try {
+    const response = await payloadFetch<SiteSettings>(
+      '/globals/site-settings?depth=2'
+    )
+    return response
+  } catch (error) {
+    console.error('[PayloadAPI] Error fetching Site Settings global:', error)
     return null
   }
 }

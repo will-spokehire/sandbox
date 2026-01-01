@@ -182,7 +182,6 @@ async function seedImages() {
             ctaText: 'Find a car',
             ctaLink: '/vehicles',
             image: typeof heroImage.id === 'number' ? heroImage.id : Number(heroImage.id),
-            order: 1,
             status: 'published',
           },
         })

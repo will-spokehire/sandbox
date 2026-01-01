@@ -22,6 +22,7 @@ const RESERVED_SLUGS = [
   'user',
   'vehicles',
   'enquiry',
+  'home', // Handled by root page.tsx at /
 ]
 
 /**

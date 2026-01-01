@@ -250,7 +250,15 @@ export const Navigation: GlobalConfig = {
         },
       ],
     },
+    {
+      name: 'homeSlug',
+      type: 'text',
+      label: 'Home Page URL',
+      defaultValue: '/',
+      admin: {
+        description: 'URL slug for the home page (used for logo link and redirects)',
+        placeholder: '/',
+      },
+    },
   ],
 }
-
-

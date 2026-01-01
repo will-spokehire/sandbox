@@ -77,6 +77,7 @@ export interface Config {
     testimonials: Testimonial;
     faqs: Faq;
     'carousel-images': CarouselImage;
+    spotlights: Spotlight;
     'static-pages': StaticPage;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -95,6 +96,7 @@ export interface Config {
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
     faqs: FaqsSelect<false> | FaqsSelect<true>;
     'carousel-images': CarouselImagesSelect<false> | CarouselImagesSelect<true>;
+    spotlights: SpotlightsSelect<false> | SpotlightsSelect<true>;
     'static-pages': StaticPagesSelect<false> | StaticPagesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -215,10 +217,6 @@ export interface HeroSlide {
   subheading?: string | null;
   ctaText?: string | null;
   ctaLink?: string | null;
-  /**
-   * Lower numbers appear first
-   */
-  order: number;
   status: 'draft' | 'published';
   updatedAt: string;
   createdAt: string;
@@ -236,10 +234,6 @@ export interface Stat {
    * Select an icon from the Icons collection
    */
   icon?: (number | null) | Icon;
-  /**
-   * Lower numbers appear first
-   */
-  order: number;
   status: 'draft' | 'published';
   updatedAt: string;
   createdAt: string;
@@ -258,10 +252,6 @@ export interface ValueProp {
    * Select an icon from the Icons collection
    */
   icon?: (number | null) | Icon;
-  /**
-   * Lower numbers appear first
-   */
-  order: number;
   status: 'draft' | 'published';
   updatedAt: string;
   createdAt: string;
@@ -281,14 +271,16 @@ export interface CtaBlock {
   headingLevel: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
   description: string;
   /**
-   * Add one or more action buttons
+   * Add one or more action buttons (optional)
    */
-  actions: {
-    label: string;
-    link: string;
-    style: 'primary' | 'secondary' | 'outline';
-    id?: string | null;
-  }[];
+  actions?:
+    | {
+        label: string;
+        link: string;
+        style: 'primary' | 'secondary' | 'outline';
+        id?: string | null;
+      }[]
+    | null;
   backgroundStyle: 'primary' | 'secondary' | 'accent';
   status: 'draft' | 'published';
   updatedAt: string;
@@ -346,18 +338,6 @@ export interface Faq {
     };
     [k: string]: unknown;
   };
-  /**
-   * Category for organizing FAQs by topic
-   */
-  category?: ('general' | 'vehicle-owners' | 'renters' | 'pricing' | 'technical') | null;
-  /**
-   * Order within category - lower numbers appear first
-   */
-  order: number;
-  /**
-   * Show this FAQ on homepage and featured sections
-   */
-  featured?: boolean | null;
   status: 'draft' | 'published';
   updatedAt: string;
   createdAt: string;
@@ -382,10 +362,30 @@ export interface CarouselImage {
    * Required for accessibility. Describe the image content.
    */
   alt: string;
+  status: 'draft' | 'published';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Project spotlight items for reuse across multiple pages
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "spotlights".
+ */
+export interface Spotlight {
+  id: number;
   /**
-   * Lower numbers appear first in the carousel
+   * Portrait orientation image (3:4 aspect ratio recommended)
    */
-  order: number;
+  image: number | Media;
+  /**
+   * Project title displayed below the image
+   */
+  caption: string;
+  /**
+   * Optional link to project detail page
+   */
+  link?: string | null;
   status: 'draft' | 'published';
   updatedAt: string;
   createdAt: string;
@@ -669,21 +669,10 @@ export interface StaticPage {
          * Title displayed above the spotlight items
          */
         title?: string | null;
-        images: {
-          /**
-           * Portrait orientation image (3:4 aspect ratio recommended)
-           */
-          image: number | Media;
-          /**
-           * Project title displayed below the image
-           */
-          caption: string;
-          /**
-           * Optional link to project detail page
-           */
-          link?: string | null;
-          id?: string | null;
-        }[];
+        /**
+         * Select spotlight items to display (order matters)
+         */
+        selectedSpotlights: (number | Spotlight)[];
         /**
          * Display left/right arrow buttons for navigation
          */
@@ -835,6 +824,10 @@ export interface PayloadLockedDocument {
         value: number | CarouselImage;
       } | null)
     | ({
+        relationTo: 'spotlights';
+        value: number | Spotlight;
+      } | null)
+    | ({
         relationTo: 'static-pages';
         value: number | StaticPage;
       } | null);
@@ -940,7 +933,6 @@ export interface HeroSlidesSelect<T extends boolean = true> {
   subheading?: T;
   ctaText?: T;
   ctaLink?: T;
-  order?: T;
   status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -952,7 +944,6 @@ export interface HeroSlidesSelect<T extends boolean = true> {
 export interface StatsSelect<T extends boolean = true> {
   label?: T;
   icon?: T;
-  order?: T;
   status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -965,7 +956,6 @@ export interface ValuePropsSelect<T extends boolean = true> {
   title?: T;
   description?: T;
   icon?: T;
-  order?: T;
   status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1011,9 +1001,6 @@ export interface TestimonialsSelect<T extends boolean = true> {
 export interface FaqsSelect<T extends boolean = true> {
   question?: T;
   answer?: T;
-  category?: T;
-  order?: T;
-  featured?: T;
   status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1026,7 +1013,18 @@ export interface CarouselImagesSelect<T extends boolean = true> {
   desktopImage?: T;
   mobileImage?: T;
   alt?: T;
-  order?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "spotlights_select".
+ */
+export interface SpotlightsSelect<T extends boolean = true> {
+  image?: T;
+  caption?: T;
+  link?: T;
   status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1175,14 +1173,7 @@ export interface StaticPagesSelect<T extends boolean = true> {
           | T
           | {
               title?: T;
-              images?:
-                | T
-                | {
-                    image?: T;
-                    caption?: T;
-                    link?: T;
-                    id?: T;
-                  };
+              selectedSpotlights?: T;
               showArrows?: T;
               itemsPerView?: T;
               hideOnMobile?: T;
@@ -1362,6 +1353,10 @@ export interface Navigation {
      */
     showLargeLogo?: boolean | null;
   };
+  /**
+   * URL slug for the home page (used for logo link and redirects)
+   */
+  homeSlug?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1475,6 +1470,7 @@ export interface NavigationSelect<T extends boolean = true> {
         termsOfServiceUrl?: T;
         showLargeLogo?: T;
       };
+  homeSlug?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

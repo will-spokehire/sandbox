@@ -217,7 +217,7 @@ export function PublicUserNavigation({ navigation }: PublicUserNavigationProps) 
         "h-[72px]"
       )}>
         {/* Logo */}
-        <Link href="/vehicles" className="flex items-center shrink-0">
+        <Link href="/" className="flex items-center shrink-0">
           <div className="relative w-[120px] h-[28px] md:w-[160px] md:h-[37px]">
             <Image
               src="/SpokeHire-Logo.svg"
