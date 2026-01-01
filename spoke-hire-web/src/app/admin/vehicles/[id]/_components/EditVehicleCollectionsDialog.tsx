@@ -128,10 +128,10 @@ export function EditVehicleCollectionsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
-          <DialogTitle>Edit Collections & Tags</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-xl md:text-2xl">Edit Collections & Tags</DialogTitle>
+          <DialogDescription className="text-base md:text-lg leading-relaxed">
             Select collections/tags for this vehicle (click to toggle)
           </DialogDescription>
         </DialogHeader>
