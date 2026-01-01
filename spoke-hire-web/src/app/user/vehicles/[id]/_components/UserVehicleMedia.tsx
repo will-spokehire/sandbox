@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Pencil } from "lucide-react";
-import { Card } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { VehicleStatusBadge } from "~/components/vehicles/VehicleStatusBadge";
 import { ImageEditDialog } from "~/components/vehicles/ImageEditDialog";
@@ -93,8 +92,8 @@ export function UserVehicleMedia({ vehicle }: UserVehicleMediaProps) {
       {/* Always stacked vertically: Hero image on top, thumbnails below */}
       <div className="flex flex-col gap-4">
         {/* Main/Hero Image - 4:3 aspect ratio */}
-        <Card className="relative overflow-hidden p-0 group">
-          <div ref={swipeRef} className="relative aspect-[4/3] bg-muted">
+        <div className="relative overflow-hidden group">
+          <div ref={swipeRef} className="relative aspect-[4/3] bg-spoke-grey rounded-md overflow-hidden">
             {hasImages && mainImage ? (
               <Image
                 key={fadeKey}
@@ -102,7 +101,7 @@ export function UserVehicleMedia({ vehicle }: UserVehicleMediaProps) {
                 alt={`${vehicle.name} - Main image`}
                 fill
                 className={cn(
-                  "object-cover cursor-pointer transition-opacity duration-300",
+                  "object-cover cursor-pointer transition-all duration-300 group-hover:scale-105",
                   isImageLoaded ? "opacity-100" : "opacity-0"
                 )}
                 priority
@@ -197,7 +196,7 @@ export function UserVehicleMedia({ vehicle }: UserVehicleMediaProps) {
               </div>
             )}
           </div>
-        </Card>
+        </div>
 
         {/* Thumbnail Gallery - Always below hero image */}
         {hasImages && sortedMedia.length > 1 && (

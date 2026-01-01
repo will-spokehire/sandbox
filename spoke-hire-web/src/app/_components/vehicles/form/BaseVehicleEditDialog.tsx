@@ -66,10 +66,10 @@ export function BaseVehicleEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Vehicle</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-xl md:text-2xl">Edit Vehicle</DialogTitle>
+          <DialogDescription className="text-base md:text-lg leading-relaxed">
             Update {isAdmin ? '' : 'your '}vehicle information. {isAdmin ? 'All fields are optional except name, make, model, and year.' : 'Required fields: name, make, model, year, and agreed value.'}
           </DialogDescription>
         </DialogHeader>

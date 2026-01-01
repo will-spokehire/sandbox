@@ -428,34 +428,35 @@ export function ProfileForm({
 
         {/* Action Buttons - Only show if needed */}
         {(submitButtonText || showCancelButton) && (
-          <div className="flex gap-4 pt-6">
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-1"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  {submitButtonText}
-                </>
-              )}
-            </Button>
+          <div className="flex items-center justify-center gap-4 pt-6">
             {showCancelButton && onCancel && (
               <Button
                 type="button"
                 variant="outline"
                 onClick={onCancel}
                 disabled={isSubmitting}
+                className="w-full max-w-[230px]"
               >
-                Cancel
+                cancel
               </Button>
             )}
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full max-w-[230px]"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  saving...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  {submitButtonText.toLowerCase()}
+                </>
+              )}
+            </Button>
           </div>
         )}
       </form>

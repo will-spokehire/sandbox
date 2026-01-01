@@ -76,67 +76,90 @@ export default function UserProfilePage() {
   // Loading state
   if (isAuthLoading) {
     return (
-      <main className="container mx-auto px-4 py-8 max-w-2xl">
-        <div className="space-y-6">
-          <div>
-            <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-4 w-64 mt-2" />
+      <>
+        {/* Header */}
+        <div className="bg-white">
+          <div className="w-full flex flex-col items-center px-4 md:px-[30px] pt-[41px] pb-[20px]">
+            <div className="w-full max-w-[808px] flex flex-col items-center gap-[11px]">
+              <Skeleton className="h-16 md:h-24 w-64 md:w-96" />
+              <Skeleton className="h-4 w-48 md:w-72" />
+            </div>
           </div>
-          <Card>
-            <CardContent className="pt-6 space-y-6">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-            </CardContent>
-          </Card>
         </div>
-      </main>
+
+        {/* Main Content */}
+        <main className="flex-1 bg-white">
+          <div className="w-full flex flex-col items-center px-4 md:px-[30px] pt-[20px] pb-[41px]">
+            <div className="w-full max-w-[808px] flex flex-col gap-10">
+              <Card>
+                <CardContent className="pt-6 space-y-6">
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </main>
+      </>
     );
   }
 
   return (
-    <main className="container mx-auto px-4 py-8 max-w-2xl">
-      {/* Page Title */}
-      <div className="mb-8">
-        <h1 className="heading-1 mb-2">
-          My Profile
-        </h1>
-        <p className="body-large text-muted-foreground">
-          {isEditing 
-            ? "Update your personal information and contact details"
-            : "View your personal information and contact details"}
-        </p>
+    <>
+      {/* Header - Match Figma design */}
+      <div className="bg-white">
+        <div className="w-full flex flex-col items-center px-4 md:px-[30px] pt-[41px] pb-[20px]">
+          <div className="w-full max-w-[808px] flex flex-col items-center gap-[11px] text-center">
+            {/* Main Title */}
+            <h1 className="text-[48px] md:text-[96px] font-normal leading-[0.95] uppercase text-black tracking-normal">
+              My Profile
+            </h1>
+            <p className="text-muted-foreground text-base md:text-lg">
+              {isEditing 
+                ? "Update your personal information and contact details"
+                : "View your personal information and contact details"}
+            </p>
+          </div>
+        </div>
       </div>
 
-      {isEditing ? (
-        <Card>
-          <CardContent className="pt-6">
-            <ProfileForm
-              defaultValues={defaultValues}
-              onSubmit={handleSubmit}
-              isSubmitting={updateProfileMutation.isPending}
-              submitButtonText="Save Changes"
-              showCancelButton
-              onCancel={() => setIsEditing(false)}
-            />
-          </CardContent>
-        </Card>
-      ) : (
-        <ProfilePreview
-          profile={{
-            firstName: user?.firstName,
-            lastName: user?.lastName,
-            email: user?.email,
-            phone: user?.phone,
-            street: user?.street,
-            city: user?.city,
-            county: user?.county,
-            postcode: user?.postcode,
-            countryName: user?.country?.name,
-          }}
-          onEditClick={() => setIsEditing(true)}
-        />
-      )}
-    </main>
+      {/* Main Content */}
+      <main className="flex-1 bg-white">
+        <div className="w-full flex flex-col items-center px-4 md:px-[30px] pt-[20px] pb-[41px]">
+          <div className="w-full max-w-[808px] flex flex-col gap-10">
+            {isEditing ? (
+              <Card>
+                <CardContent className="pt-6">
+                  <ProfileForm
+                    defaultValues={defaultValues}
+                    onSubmit={handleSubmit}
+                    isSubmitting={updateProfileMutation.isPending}
+                    submitButtonText="Save Changes"
+                    showCancelButton
+                    onCancel={() => setIsEditing(false)}
+                  />
+                </CardContent>
+              </Card>
+            ) : (
+              <ProfilePreview
+                profile={{
+                  firstName: user?.firstName,
+                  lastName: user?.lastName,
+                  email: user?.email,
+                  phone: user?.phone,
+                  street: user?.street,
+                  city: user?.city,
+                  county: user?.county,
+                  postcode: user?.postcode,
+                  countryName: user?.country?.name,
+                }}
+                onEditClick={() => setIsEditing(true)}
+              />
+            )}
+          </div>
+        </div>
+      </main>
+    </>
   );
 }

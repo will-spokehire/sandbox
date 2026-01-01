@@ -138,7 +138,7 @@ export function MediaStep({ vehicleId, onComplete }: MediaStepProps) {
 
       {/* Success Dialog */}
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-xl">
           <DialogHeader>
             <div className="flex items-center gap-3 mb-2">
               <div className="h-12 w-12 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
@@ -146,23 +146,23 @@ export function MediaStep({ vehicleId, onComplete }: MediaStepProps) {
               </div>
               <DialogTitle className="text-xl md:text-2xl">Vehicle Created Successfully!</DialogTitle>
             </div>
-            <DialogDescription className="text-sm md:text-base">
+            <DialogDescription className="text-base md:text-lg leading-relaxed">
               Your vehicle has been added to your collection. You can now view it, or submit it for admin review to get it published.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="flex-col sm:flex-row gap-2">
+          <DialogFooter className="flex-col sm:flex-row gap-3 mt-2">
             <Button 
               variant="outline" 
               onClick={handleViewVehicle}
               disabled={submitForReviewMutation.isPending}
-              className="w-full sm:w-auto"
+              className="w-full sm:flex-1"
             >
               View Vehicle
             </Button>
             <Button 
               onClick={handleSubmitForReview}
               disabled={submitForReviewMutation.isPending}
-              className="w-full sm:w-auto gap-2"
+              className="w-full sm:flex-1 gap-2"
             >
               <Send className="h-4 w-4" />
               {submitForReviewMutation.isPending ? "Submitting..." : "Submit for Review"}

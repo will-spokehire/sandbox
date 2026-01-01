@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { trackEvent } from "~/lib/analytics";
 
@@ -30,12 +29,7 @@ export default function EnquirySuccessPage() {
       <div className="bg-white">
         <div className="w-full flex flex-col items-center px-4 md:px-[30px] py-[41px]">
           <div className="w-full max-w-[808px] flex flex-col items-center gap-[11px]">
-            {/* Success Icon */}
-            <div className="flex justify-center mb-6">
-              <div className="rounded-full bg-green-100 dark:bg-green-900/20 p-4">
-                <CheckCircle className="h-16 w-16 text-green-600 dark:text-green-500" />
-              </div>
-            </div>
+          
             
             {/* Main Title */}
             <h1 className="text-[48px] md:text-[96px] font-normal leading-[0.95] uppercase text-black tracking-normal text-center">

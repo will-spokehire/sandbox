@@ -209,10 +209,10 @@ export function CreateEditDealDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-4xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{dealId ? "Edit Deal" : "Create New Deal"}</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-xl md:text-2xl">{dealId ? "Edit Deal" : "Create New Deal"}</DialogTitle>
+          <DialogDescription className="text-base md:text-lg leading-relaxed">
             {dealId 
               ? "Update the deal details below."
               : "Create a deal. You can add vehicles later from the vehicles page."

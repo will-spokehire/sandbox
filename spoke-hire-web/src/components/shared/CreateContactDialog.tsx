@@ -101,10 +101,10 @@ export function CreateContactDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>Create New Contact</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-xl md:text-2xl">Create New Contact</DialogTitle>
+          <DialogDescription className="text-base md:text-lg leading-relaxed">
             Add a new client contact to the system
           </DialogDescription>
         </DialogHeader>

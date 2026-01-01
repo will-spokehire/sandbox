@@ -52,7 +52,7 @@ export function WizardLayout({
     <>
       {/* Wizard Header - Match Figma design */}
       <div className="bg-white">
-        <div className="w-full flex flex-col items-center px-4 md:px-[30px] py-[41px]">
+        <div className="w-full flex flex-col items-center px-4 md:px-[30px] pt-[41px] pb-[20px]">
           <div className="w-full max-w-[808px] flex flex-col items-center gap-20 md:gap-[80px]">
             {/* Main Title */}
             <div className="w-full flex flex-col items-center gap-[11px] text-center">
@@ -69,19 +69,30 @@ export function WizardLayout({
 
       {/* Main Content */}
       <main className="flex-1 bg-white">
-        <div className="w-full flex flex-col items-center px-4 md:px-[30px] py-[41px]">
+        <div className="w-full flex flex-col items-center px-4 md:px-[30px] pt-[20px] pb-[41px]">
           <div className="w-full max-w-[808px] flex flex-col gap-10">
             {/* Form Content */}
             <div className="w-full">{children}</div>
 
             {/* Navigation Buttons - Hide on media step as it has its own button */}
             {canGoNext && (
-              <div className="w-full flex items-center justify-center">
+              <div className="w-full flex items-center justify-center gap-4">
+                {canGoBack && onBack && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={onBack}
+                    disabled={isLoading}
+                    className="w-full max-w-[230px]"
+                  >
+                    back
+                  </Button>
+                )}
                 <Button
                   type="button"
                   onClick={isLastStep ? onSubmit : onNext}
                   disabled={!canGoNext || isLoading}
-                  className="w-full max-w-[480px]"
+                  className="w-full max-w-[230px]"
                 >
                   {isLoading ? (
                     <div className="flex items-center">

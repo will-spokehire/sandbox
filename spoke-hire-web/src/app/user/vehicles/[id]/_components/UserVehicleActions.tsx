@@ -175,15 +175,15 @@ export function UserVehicleActions({
 
       {/* Publish Confirmation Dialog */}
       <Dialog open={isPublishDialogOpen} onOpenChange={setIsPublishDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-xl">
           <DialogHeader>
             <div className="flex items-center gap-3 mb-2">
               <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
                 <Send className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
-              <DialogTitle>Submit for Review?</DialogTitle>
+              <DialogTitle className="text-xl md:text-2xl">Submit for Review?</DialogTitle>
             </div>
-            <DialogDescription>
+            <DialogDescription className="text-base md:text-lg leading-relaxed">
               Your vehicle will be submitted to an admin for review. You&apos;ll receive an email once it&apos;s been reviewed.
             </DialogDescription>
           </DialogHeader>
@@ -207,15 +207,15 @@ export function UserVehicleActions({
 
       {/* Deactivate Confirmation Dialog */}
       <Dialog open={isDeactivateDialogOpen} onOpenChange={setIsDeactivateDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-xl">
           <DialogHeader>
             <div className="flex items-center gap-3 mb-2">
               <div className="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
                 <Power className="h-5 w-5 text-slate-600 dark:text-slate-400" />
               </div>
-              <DialogTitle>Deactivate Vehicle?</DialogTitle>
+              <DialogTitle className="text-xl md:text-2xl">Deactivate Vehicle?</DialogTitle>
             </div>
-            <DialogDescription>
+            <DialogDescription className="text-base md:text-lg leading-relaxed">
               This vehicle will be deactivated and hidden from your active listings. You can activate it again later if needed.
             </DialogDescription>
           </DialogHeader>
@@ -240,15 +240,15 @@ export function UserVehicleActions({
 
       {/* Activate Confirmation Dialog */}
       <Dialog open={isActivateDialogOpen} onOpenChange={setIsActivateDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-xl">
           <DialogHeader>
             <div className="flex items-center gap-3 mb-2">
               <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
                 <Power className="h-5 w-5 text-green-600 dark:text-green-400" />
               </div>
-              <DialogTitle>Activate Vehicle?</DialogTitle>
+              <DialogTitle className="text-xl md:text-2xl">Activate Vehicle?</DialogTitle>
             </div>
-            <DialogDescription>
+            <DialogDescription className="text-base md:text-lg leading-relaxed">
               Your vehicle will be moved to &quot;In Review&quot; status and submitted to an admin for review.
             </DialogDescription>
           </DialogHeader>

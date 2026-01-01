@@ -4,7 +4,6 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Card } from '~/components/ui/card';
 import { VehicleStatusBadge } from '~/components/vehicles/VehicleStatusBadge';
 import { useSwipeGesture } from '~/hooks/useSwipeGesture';
 import { formatPricingRate } from '~/lib/pricing';
@@ -101,8 +100,8 @@ export function UserVehicleCard({ vehicle, href }: UserVehicleCardProps) {
 
   return (
     <Link href={linkHref}>
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer p-0 gap-0">
-        <div ref={swipeRef} className="relative aspect-[4/3] bg-slate-100 dark:bg-slate-800 group">
+      <div className="card-base group cursor-pointer transition-all duration-200">
+        <div ref={swipeRef} className="relative aspect-[4/3] bg-slate-100 dark:bg-slate-800 overflow-hidden bg-spoke-grey">
           {imageUrl ? (
             <Image
               key={fadeKey}
@@ -110,7 +109,7 @@ export function UserVehicleCard({ vehicle, href }: UserVehicleCardProps) {
               alt={currentImage?.altText || vehicle.name}
               fill
               className={cn(
-                "object-cover transition-opacity duration-300",
+                "object-cover transition-opacity duration-300 group-hover:scale-105",
                 isImageLoaded ? "opacity-100" : "opacity-0"
               )}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -192,18 +191,18 @@ export function UserVehicleCard({ vehicle, href }: UserVehicleCardProps) {
           )}
         </div>
 
-        <div className="p-4 pt-3">
-          <h3 className="font-semibold text-lg mb-1 text-slate-900 dark:text-slate-50 truncate">
-            {vehicle.name}
+        <div className="flex flex-col gap-1 pt-3">
+          <h3 className="vehicle-card-title text-spoke-black">
+            {vehicle.year} {vehicle.make.name} {vehicle.model.name}
           </h3>
-          <p className="text-sm font-medium text-primary mb-2">
+          <p className="vehicle-card-location text-spoke-black/70">
             {[
-              vehicle.hourlyRate && `£${vehicle.hourlyRate} hourly`,
-              vehicle.dailyRate && `£${vehicle.dailyRate} daily`
+              vehicle.hourlyRate && `£${vehicle.hourlyRate}/hr`,
+              vehicle.dailyRate && `£${vehicle.dailyRate}/day`
             ].filter(Boolean).join(' • ') || 'Pricing not set'}
           </p>
         </div>
-      </Card>
+      </div>
     </Link>
   );
 }
