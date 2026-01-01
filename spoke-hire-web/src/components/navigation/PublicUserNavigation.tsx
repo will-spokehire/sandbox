@@ -151,10 +151,10 @@ function MobileNavLinks({
             href={item.link}
             onClick={onClick}
             className={cn(
-              "flex items-center px-3 py-2 rounded-md text-base font-medium transition-colors capitalize",
+              "flex items-center px-3 py-2 rounded-md font-degular text-2xl transition-colors capitalize",
               "hover:bg-slate-100 dark:hover:bg-slate-800",
               isActive
-                ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50"
+                ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium"
                 : "text-slate-600 dark:text-slate-400"
             )}
           >
