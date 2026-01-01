@@ -75,7 +75,14 @@ export function Combobox({
           role="combobox"
           aria-expanded={open}
           disabled={disabled}
-          className="w-full justify-between"
+          className={cn(
+            // Match Input component styling
+            "w-full h-[44px] bg-spoke-white border border-spoke-black",
+            "px-4 py-2 justify-between",
+            "font-degular text-lg font-medium leading-[1.4] text-spoke-black",
+            "hover:bg-spoke-white hover:text-spoke-black",
+            !selectedOption?.label && !value && "text-spoke-black/40"
+          )}
         >
           {selectedOption?.label ?? (value ? value : placeholder)}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -98,9 +105,9 @@ export function Combobox({
             <CommandEmpty>
               {allowCustomValue && searchValue ? (
                 <div className="py-6 text-center text-sm">
-                  <p className="text-muted-foreground mb-2">{emptyText}</p>
-                  <p className="text-xs text-muted-foreground">
-                    Press <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">Enter</kbd> to add &quot;{searchValue}&quot;
+                  <p className="text-spoke-black/60 mb-2">{emptyText}</p>
+                  <p className="text-xs text-spoke-black/60">
+                    Press <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 border border-spoke-black bg-spoke-grey px-1.5 font-mono text-[10px] font-medium text-spoke-black">Enter</kbd> to add &quot;{searchValue}&quot;
                   </p>
                 </div>
               ) : (
