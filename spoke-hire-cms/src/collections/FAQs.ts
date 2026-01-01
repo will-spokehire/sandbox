@@ -4,7 +4,7 @@ export const FAQs: CollectionConfig = {
   slug: 'faqs',
   admin: {
     useAsTitle: 'question',
-    defaultColumns: ['question', 'category', 'featured', 'status', 'order'],
+    defaultColumns: ['question', 'status'],
     description: 'Frequently asked questions displayed across the website',
   },
   access: {
@@ -33,55 +33,6 @@ export const FAQs: CollectionConfig = {
       },
     },
     {
-      name: 'category',
-      type: 'select',
-      label: 'Category',
-      options: [
-        {
-          label: 'General',
-          value: 'general',
-        },
-        {
-          label: 'Vehicle Owners',
-          value: 'vehicle-owners',
-        },
-        {
-          label: 'Renters',
-          value: 'renters',
-        },
-        {
-          label: 'Pricing',
-          value: 'pricing',
-        },
-        {
-          label: 'Technical',
-          value: 'technical',
-        },
-      ],
-      admin: {
-        description: 'Category for organizing FAQs by topic',
-      },
-    },
-    {
-      name: 'order',
-      type: 'number',
-      required: true,
-      defaultValue: 0,
-      label: 'Display Order',
-      admin: {
-        description: 'Order within category - lower numbers appear first',
-      },
-    },
-    {
-      name: 'featured',
-      type: 'checkbox',
-      label: 'Featured',
-      defaultValue: false,
-      admin: {
-        description: 'Show this FAQ on homepage and featured sections',
-      },
-    },
-    {
       name: 'status',
       type: 'select',
       required: true,
@@ -99,5 +50,7 @@ export const FAQs: CollectionConfig = {
     },
   ],
 }
+
+
 
 

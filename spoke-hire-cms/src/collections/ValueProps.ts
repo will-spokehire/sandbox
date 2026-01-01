@@ -4,7 +4,7 @@ export const ValueProps: CollectionConfig = {
   slug: 'value-props',
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'status', 'order'],
+    defaultColumns: ['title', 'status'],
     description: 'Feature grid highlighting platform benefits',
   },
   access: {
@@ -39,16 +39,6 @@ export const ValueProps: CollectionConfig = {
       label: 'Icon',
       admin: {
         description: 'Select an icon from the Icons collection',
-      },
-    },
-    {
-      name: 'order',
-      type: 'number',
-      required: true,
-      defaultValue: 0,
-      label: 'Display Order',
-      admin: {
-        description: 'Lower numbers appear first',
       },
     },
     {

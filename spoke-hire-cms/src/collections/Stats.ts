@@ -4,7 +4,7 @@ export const Stats: CollectionConfig = {
   slug: 'stats',
   admin: {
     useAsTitle: 'label',
-    defaultColumns: ['label', 'status', 'order'],
+    defaultColumns: ['label', 'status'],
     description: 'Key metrics displayed as badges on homepage',
   },
   access: {
@@ -30,16 +30,6 @@ export const Stats: CollectionConfig = {
       label: 'Icon',
       admin: {
         description: 'Select an icon from the Icons collection',
-      },
-    },
-    {
-      name: 'order',
-      type: 'number',
-      required: true,
-      defaultValue: 0,
-      label: 'Display Order',
-      admin: {
-        description: 'Lower numbers appear first',
       },
     },
     {

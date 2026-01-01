@@ -4,7 +4,7 @@ export const CarouselImages: CollectionConfig = {
   slug: 'carousel-images',
   admin: {
     useAsTitle: 'alt',
-    defaultColumns: ['alt', 'order', 'status'],
+    defaultColumns: ['alt', 'status'],
     description: 'Images for image carousel blocks (supports mobile and desktop variants)',
   },
   access: {
@@ -41,16 +41,6 @@ export const CarouselImages: CollectionConfig = {
       admin: {
         placeholder: 'Descriptive text for accessibility',
         description: 'Required for accessibility. Describe the image content.',
-      },
-    },
-    {
-      name: 'order',
-      type: 'number',
-      required: true,
-      defaultValue: 0,
-      label: 'Display Order',
-      admin: {
-        description: 'Lower numbers appear first in the carousel',
       },
     },
     {

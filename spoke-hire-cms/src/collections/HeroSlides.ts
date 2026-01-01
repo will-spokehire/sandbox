@@ -4,7 +4,7 @@ export const HeroSlides: CollectionConfig = {
   slug: 'hero-slides',
   admin: {
     useAsTitle: 'heading',
-    defaultColumns: ['heading', 'status', 'order'],
+    defaultColumns: ['heading', 'status'],
     description: 'Rotating hero section slides for homepage',
   },
   access: {
@@ -49,16 +49,6 @@ export const HeroSlides: CollectionConfig = {
       },
     },
     {
-      name: 'order',
-      type: 'number',
-      required: true,
-      defaultValue: 0,
-      label: 'Display Order',
-      admin: {
-        description: 'Lower numbers appear first',
-      },
-    },
-    {
       name: 'status',
       type: 'select',
       required: true,
@@ -76,5 +66,7 @@ export const HeroSlides: CollectionConfig = {
     },
   ],
 }
+
+
 
 

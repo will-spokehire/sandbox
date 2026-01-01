@@ -64,7 +64,6 @@ export interface HeroSlide {
   subheading?: string
   ctaText?: string
   ctaLink?: string
-  order: number
   status: 'draft' | 'published'
 }
 
@@ -72,7 +71,6 @@ export interface Stat {
   id: string
   label: string
   icon?: string | PayloadIcon
-  order: number
   status: 'draft' | 'published'
 }
 
@@ -81,7 +79,6 @@ export interface ValueProp {
   title: string
   description: string
   icon?: string | PayloadIcon
-  order: number
   status: 'draft' | 'published'
 }
 
@@ -98,9 +95,6 @@ export interface FAQ {
   id: string
   question: string
   answer: unknown // Lexical rich text
-  category?: string
-  order: number
-  featured: boolean
   status: 'draft' | 'published'
 }
 
@@ -218,7 +212,6 @@ export interface CarouselImage {
   desktopImage: PayloadMedia
   mobileImage?: PayloadMedia
   alt: string
-  order: number
   status: 'draft' | 'published'
 }
 
@@ -433,36 +426,6 @@ export async function getPageSlugs(): Promise<string[]> {
 // ============================================
 // CONTENT COLLECTIONS API (for block data)
 // ============================================
-
-/**
- * Get FAQs by category
- */
-export async function getFAQsByCategory(category: string): Promise<FAQ[]> {
-  try {
-    const response = await payloadFetch<PayloadResponse<FAQ>>(
-      `/faqs?where[category][equals]=${encodeURIComponent(category)}&where[status][equals]=published&sort=order&depth=1`
-    )
-    return response.docs
-  } catch (error) {
-    console.error(`[PayloadAPI] Error fetching FAQs for category "${category}":`, error)
-    return []
-  }
-}
-
-/**
- * Get featured FAQs
- */
-export async function getFeaturedFAQs(limit: number = 10): Promise<FAQ[]> {
-  try {
-    const response = await payloadFetch<PayloadResponse<FAQ>>(
-      `/faqs?where[featured][equals]=true&where[status][equals]=published&sort=order&limit=${limit}&depth=1`
-    )
-    return response.docs
-  } catch (error) {
-    console.error('[PayloadAPI] Error fetching featured FAQs:', error)
-    return []
-  }
-}
 
 /**
  * Get testimonials by IDs
