@@ -108,10 +108,12 @@ export function TechnicalDetailsStep({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl md:text-2xl font-bold">Technical Details</h2>
-        <p className="text-sm md:text-base text-muted-foreground mt-1">
-          Provide specifications and condition information
+      <div className="w-full flex flex-col gap-3 items-center text-center mb-6">
+        <h2 className="text-[32px] md:text-[40px] font-normal leading-[0.95] uppercase text-black tracking-[-0.4px]">
+          Technical Details
+        </h2>
+        <p className="text-[18px] md:text-[22px] font-normal leading-[1.3] text-black tracking-[-0.22px]">
+          Specifications and features
         </p>
       </div>
 

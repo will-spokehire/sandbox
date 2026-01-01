@@ -19,11 +19,15 @@ export function FooterClient() {
         // Fetch from PayloadCMS API directly
         const apiUrl = process.env.NEXT_PUBLIC_PAYLOAD_API_URL || 'http://localhost:3000'
         const baseUrl = apiUrl.replace(/\/+$/, '').replace(/\/api\/?$/, '')
-        const response = await fetch(`${baseUrl}/api/globals/navigation?depth=2`)
+        const response = await fetch(`${baseUrl}/api/globals/navigation?depth=2`, {
+          cache: 'no-store',
+        })
         
         if (response.ok) {
           const data = await response.json()
           setNavigation(data)
+        } else {
+          console.error(`Failed to fetch navigation: ${response.status} ${response.statusText}`)
         }
       } catch (error) {
         console.error('Failed to fetch navigation:', error)
@@ -41,4 +45,3 @@ export function FooterClient() {
 }
 
 export default FooterClient
-

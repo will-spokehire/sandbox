@@ -102,10 +102,12 @@ export function MediaStep({ vehicleId, onComplete }: MediaStepProps) {
   return (
     <>
       <div className="space-y-6">
-        <div>
-          <h2 className="text-xl md:text-2xl font-bold">Add Photos</h2>
-          <p className="text-sm md:text-base text-muted-foreground mt-1">
-            Upload at least one photo of your vehicle to continue
+        <div className="w-full flex flex-col gap-3 items-center text-center mb-6">
+          <h2 className="text-[32px] md:text-[40px] font-normal leading-[0.95] uppercase text-black tracking-[-0.4px]">
+            Add Photos
+          </h2>
+          <p className="text-[18px] md:text-[22px] font-normal leading-[1.3] text-black tracking-[-0.22px]">
+            Upload images of your vehicle
           </p>
         </div>
 

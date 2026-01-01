@@ -405,7 +405,7 @@ export default function AddVehiclePage() {
       modelId: basicInfoData.modelId!,
       year: basicInfoData.year!,
       registration: basicInfoData.registration!,
-      price: basicInfoData.price,
+      price: basicInfoData.price!,
       hourlyRate: data.hourlyRate,
       dailyRate: data.dailyRate,
       engineCapacity: technicalDetailsData.engineCapacity!,
@@ -563,36 +563,12 @@ export default function AddVehiclePage() {
   
   const nextButtonText = "Next";
 
-  // Get step-specific title and description based on current step
-  const getStepTitleAndDescription = () => {
-    const basicInfoStep = profileNeedsCompletion ? 1 : 0;
-    const technicalStep = profileNeedsCompletion ? 2 : 1;
-    const vehicleDetailsStep = profileNeedsCompletion ? 3 : 2;
-    
-    if (profileNeedsCompletion && currentStep === 0) {
-      return { title: "PROFILE INFORMATION", description: "Complete your profile details" };
-    } else if (currentStep === basicInfoStep) {
-      return { title: "BASIC VEHICLE INFORMATION", description: "Tell us about your vehicle" };
-    } else if (currentStep === technicalStep) {
-      return { title: "TECHNICAL DETAILS", description: "Specifications and features" };
-    } else if (currentStep === vehicleDetailsStep) {
-      return { title: "VEHICLE LISTING", description: "Name, description, and collections" };
-    } else if (isMediaStep) {
-      return { title: "ADD PHOTOS", description: "Upload images of your vehicle" };
-    }
-    return { title: undefined, description: undefined };
-  };
-
-  const { title: stepTitle, description: stepDescription } = getStepTitleAndDescription();
-
   return (
     <>
       <WizardLayout
         currentStep={currentStep}
         totalSteps={totalSteps}
         steps={steps}
-        stepTitle={stepTitle}
-        stepDescription={stepDescription}
         onBack={handleBack}
         onNext={handleNext}
         canGoBack={canGoBack}

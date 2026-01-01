@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
-import { Menu, User, LogOut } from "lucide-react";
+import { Menu, User, LogOut, Car } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "~/components/ui/sheet";
 import { UserMenu } from "~/components/auth/UserMenu";
@@ -312,6 +312,17 @@ export function PublicUserNavigation({ navigation }: PublicUserNavigationProps) 
                   >
                     <User className="h-4 w-4 mr-2" />
                     Profile
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      router.push('/user/vehicles');
+                    }}
+                  >
+                    <Car className="h-4 w-4 mr-2" />
+                    My Vehicles
                   </Button>
                   <Button
                     variant="ghost"

@@ -1,5 +1,5 @@
 import { PublicUserNavigation } from "~/components/navigation/PublicUserNavigation";
-import { FooterClient } from "~/components/footer/FooterClient";
+import { Footer } from "~/components/footer/Footer";
 import { LAYOUT_CONSTANTS } from "~/lib/design-tokens";
 import { cn } from "~/lib/utils";
 import { getNavigation } from "~/lib/payload-api";
@@ -21,7 +21,7 @@ export default async function UserLayout({
     <div className={cn(LAYOUT_CONSTANTS.pageWrapper, LAYOUT_CONSTANTS.bgMuted)}>
       <PublicUserNavigation navigation={navigation} />
       <main className={LAYOUT_CONSTANTS.mainContent}>{children}</main>
-      <FooterClient />
+      <Footer navigation={navigation} />
     </div>
   );
 }

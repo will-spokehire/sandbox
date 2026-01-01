@@ -12,7 +12,7 @@ import {
 } from '~/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '~/components/ui/avatar';
 import { Button } from '~/components/ui/button';
-import { LogOut, User, Shield } from 'lucide-react';
+import { LogOut, User, Shield, Car } from 'lucide-react';
 
 /**
  * User Menu Component
@@ -69,6 +69,13 @@ export function UserMenu() {
         >
           <User className="mr-2 h-4 w-4" />
           <span>Profile</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem 
+          className="cursor-pointer text-base"
+          onClick={() => router.push('/user/vehicles')}
+        >
+          <Car className="mr-2 h-4 w-4" />
+          <span>My Vehicles</span>
         </DropdownMenuItem>
         {user.userType === 'ADMIN' && (
           <DropdownMenuItem disabled className="cursor-default text-base">

@@ -98,10 +98,10 @@ export default function UserProfilePage() {
     <main className="container mx-auto px-4 py-8 max-w-2xl">
       {/* Page Title */}
       <div className="mb-8">
-        <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-50 mb-2">
+        <h1 className="heading-1 mb-2">
           My Profile
-        </h2>
-        <p className="text-slate-600 dark:text-slate-400">
+        </h1>
+        <p className="body-large text-muted-foreground">
           {isEditing 
             ? "Update your personal information and contact details"
             : "View your personal information and contact details"}

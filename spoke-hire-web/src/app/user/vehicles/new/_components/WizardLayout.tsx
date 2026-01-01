@@ -9,8 +9,6 @@ interface WizardLayoutProps {
   currentStep: number;
   totalSteps: number;
   steps: Array<{ number: number; title: string; description?: string }>;
-  stepTitle?: string;
-  stepDescription?: string;
   onBack?: () => void;
   onNext?: () => void;
   onSubmit?: () => void;
@@ -37,8 +35,6 @@ export function WizardLayout({
   currentStep,
   totalSteps,
   steps,
-  stepTitle,
-  stepDescription,
   onBack,
   onNext,
   onSubmit,
@@ -65,25 +61,8 @@ export function WizardLayout({
               </h1>
             </div>
 
-            {/* Progress Stepper and Step Title Section */}
-            <div className="w-full flex flex-col gap-6 items-center">
-              {/* Progress Stepper */}
-              <ProgressStepper steps={steps} currentStep={currentStep} />
-              
-              {/* Step-specific Title and Description */}
-              {stepTitle && (
-                <div className="w-full flex flex-col gap-3 items-center text-center">
-                  <h2 className="text-[32px] md:text-[40px] font-normal leading-[0.95] uppercase text-black tracking-[-0.4px]">
-                    {stepTitle}
-                  </h2>
-                  {stepDescription && (
-                    <p className="text-[18px] md:text-[22px] font-normal leading-[1.3] text-black tracking-[-0.22px]">
-                      {stepDescription}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
+            {/* Progress Stepper */}
+            <ProgressStepper steps={steps} currentStep={currentStep} />
           </div>
         </div>
       </div>

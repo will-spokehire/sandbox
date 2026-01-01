@@ -180,10 +180,12 @@ export function VehicleDetailsStep({
         </div>
       )}
 
-      <div>
-        <h2 className="text-xl md:text-2xl font-bold">Vehicle Details</h2>
-        <p className="text-sm md:text-base text-muted-foreground mt-1">
-          Add a description and tags to make your vehicle stand out
+      <div className="w-full flex flex-col gap-3 items-center text-center mb-6">
+        <h2 className="text-[32px] md:text-[40px] font-normal leading-[0.95] uppercase text-black tracking-[-0.4px]">
+          Vehicle Listing
+        </h2>
+        <p className="text-[18px] md:text-[22px] font-normal leading-[1.3] text-black tracking-[-0.22px]">
+          Name, description, and collections
         </p>
       </div>
 
