@@ -1,5 +1,6 @@
 "use client";
 
+import { Fragment } from "react";
 import { Check } from "lucide-react";
 import { cn } from "~/lib/utils";
 
@@ -32,10 +33,9 @@ export function ProgressStepper({ steps, currentStep }: ProgressStepperProps) {
             const isCompleted = currentStep > step.number;
 
             return (
-              <>
+              <Fragment key={`step-${step.number}`}>
                 {/* Step circle */}
                 <div
-                  key={`step-${step.number}`}
                   className={cn(
                     "flex items-center justify-center rounded-full border transition-all",
                     "size-[48px] shrink-0",
@@ -61,9 +61,9 @@ export function ProgressStepper({ steps, currentStep }: ProgressStepperProps) {
 
                 {/* Connector line (flex-grow divider) */}
                 {index < steps.length - 1 && (
-                  <div key={`line-${step.number}`} className="flex-1 h-px bg-black mx-0" />
+                  <div className="flex-1 h-px bg-black mx-0" />
                 )}
-              </>
+              </Fragment>
             );
           })}
         </div>
