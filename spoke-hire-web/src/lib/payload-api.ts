@@ -222,6 +222,14 @@ export interface CarouselImage {
   status: 'draft' | 'published'
 }
 
+export interface Spotlight {
+  id: string
+  image: PayloadMedia
+  caption: string
+  link?: string
+  status: 'draft' | 'published'
+}
+
 export interface ImageCarouselBlockData {
   blockType: 'image-carousel'
   images: CarouselImage[]
@@ -249,11 +257,7 @@ export interface SpacerBlockData {
 export interface SpotlightBlockData {
   blockType: 'project-spotlight'
   title?: string
-  images: {
-    image: PayloadMedia
-    caption?: string
-    link?: string
-  }[]
+  selectedSpotlights: Spotlight[]
   showArrows: boolean
   itemsPerView?: number
   hideOnMobile?: boolean

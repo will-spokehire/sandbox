@@ -16,6 +16,7 @@ import { CTABlocks } from './collections/CTABlocks'
 import { Testimonials } from './collections/Testimonials'
 import { FAQs } from './collections/FAQs'
 import { CarouselImages } from './collections/CarouselImages'
+import { Spotlights } from './collections/Spotlights'
 import { StaticPages } from './collections/StaticPages'
 import { Navigation } from './globals/Navigation'
 import { SiteSettings } from './globals/SiteSettings'
@@ -44,6 +45,7 @@ export default buildConfig({
     Testimonials,
     FAQs,
     CarouselImages,
+    Spotlights,
     StaticPages,
   ],
   globals: [

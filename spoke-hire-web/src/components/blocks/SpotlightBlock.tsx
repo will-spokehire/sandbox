@@ -21,17 +21,18 @@ interface SpotlightBlockProps {
  * Desktop: Multiple cards with navigation arrows
  */
 export function SpotlightBlock({ data }: SpotlightBlockProps) {
-  const { title, images, showArrows, itemsPerView = 4 } = data
+  const { title, selectedSpotlights, showArrows, itemsPerView = 4 } = data
   const [currentIndex, setCurrentIndex] = React.useState(0)
   const desktopScrollRef = React.useRef<HTMLDivElement>(null)
   const mobileScrollRef = React.useRef<HTMLDivElement>(null)
   const [mobileCurrentIndex, setMobileCurrentIndex] = React.useState(0)
 
-  if (!images || images.length === 0) {
+  if (!selectedSpotlights || selectedSpotlights.length === 0) {
     return null
   }
 
-  const totalItems = images.length
+  // Use spotlights in the order they were selected (relationship field maintains order)
+  const totalItems = selectedSpotlights.length
   const maxIndex = Math.max(0, totalItems - itemsPerView)
 
   const goToPrevious = () => {
@@ -151,12 +152,12 @@ export function SpotlightBlock({ data }: SpotlightBlockProps) {
             '[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'
           )}
         >
-          {images.map((item, index) => {
+          {selectedSpotlights.map((item, index) => {
             const gapTotal = 21 * (itemsPerView - 1)
             const cardWidth = `calc((100% - ${gapTotal}px) / ${itemsPerView})`
             return (
               <div
-                key={item.image.id || index}
+                key={item.id || index}
                 className="flex-shrink-0 snap-center"
                 style={{ 
                   width: cardWidth,
@@ -182,9 +183,9 @@ export function SpotlightBlock({ data }: SpotlightBlockProps) {
             className="flex overflow-x-auto gap-0 snap-x snap-mandatory"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
-            {images.map((item, index) => (
+            {selectedSpotlights.map((item, index) => (
               <div
-                key={item.image.id || index}
+                key={item.id || index}
                 className="min-w-full snap-center shrink-0"
               >
                 <SpotlightCard

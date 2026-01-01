@@ -618,7 +618,7 @@ const TwoColumnContentBlock: Block = {
 /**
  * Project Spotlight Block
  * Display horizontal carousel of project spotlight items
- * Uses Media collection images with captions and links (same as ImageGalleryBlock)
+ * References Spotlights collection for reusable spotlight items
  */
 const SpotlightBlock: Block = {
   slug: 'project-spotlight',
@@ -637,42 +637,17 @@ const SpotlightBlock: Block = {
       },
     },
     {
-      name: 'images',
-      type: 'array',
-      label: 'Spotlight Images',
+      name: 'selectedSpotlights',
+      type: 'relationship',
+      relationTo: 'spotlights',
+      hasMany: true,
       required: true,
-      minRows: 1,
-      fields: [
-        {
-          name: 'image',
-          type: 'upload',
-          relationTo: 'media',
-          required: true,
-          label: 'Image',
-          admin: {
-            description: 'Portrait orientation image (3:4 aspect ratio recommended)',
-          },
-        },
-        {
-          name: 'caption',
-          type: 'text',
-          label: 'Caption/Title',
-          required: true,
-          admin: {
-            description: 'Project title displayed below the image',
-            placeholder: 'ABOUT BLANC',
-          },
-        },
-        {
-          name: 'link',
-          type: 'text',
-          label: 'Link',
-          admin: {
-            description: 'Optional link to project detail page',
-            placeholder: '/projects/about-blanc',
-          },
-        },
-      ],
+      filterOptions: {
+        status: { equals: 'published' },
+      },
+      admin: {
+        description: 'Select spotlight items to display (order matters)',
+      },
     },
     {
       name: 'showArrows',

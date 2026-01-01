@@ -193,27 +193,46 @@ async function seedImages() {
     }
 
     // ============================================
-    // 3. UPLOAD PROJECT SPOTLIGHT IMAGES
+    // 3. CREATE SPOTLIGHT COLLECTION ITEMS
     // ============================================
-    console.log('\n🌟 Uploading project spotlight images...')
-    const spotlightImages: { image: string | number; caption: string; link: string }[] = []
+    console.log('\n🌟 Creating spotlight collection items...')
+    const spotlightIds: (string | number)[] = []
 
-    for (const project of IMAGES.projectSpotlight) {
+    for (let i = 0; i < IMAGES.projectSpotlight.length; i++) {
+      const project = IMAGES.projectSpotlight[i]
       const uploaded = await uploadImageFromPath(payload, project.localPath, project.alt)
+      
       if (uploaded) {
-        spotlightImages.push({
-          image: uploaded.id,
-          caption: project.caption,
-          link: project.link,
+        // Check if spotlight item already exists
+        const existing = await payload.find({
+          collection: 'spotlights',
+          where: { caption: { equals: project.caption } },
         })
-        console.log(`  ✓ Uploaded: ${project.caption}`)
+
+        if (existing.docs.length > 0) {
+          console.log(`  ○ Spotlight already exists: ${project.caption}`)
+          spotlightIds.push(existing.docs[0].id)
+        } else {
+          // Create new spotlight item
+          const spotlight = await payload.create({
+            collection: 'spotlights',
+            data: {
+              image: typeof uploaded.id === 'number' ? uploaded.id : Number(uploaded.id),
+              caption: project.caption,
+              link: project.link,
+              status: 'published',
+            },
+          })
+          spotlightIds.push(spotlight.id)
+          console.log(`  ✓ Created spotlight: ${project.caption}`)
+        }
       }
     }
 
     // ============================================
     // 4. UPDATE HOMEPAGE WITH PROJECT SPOTLIGHT BLOCK
     // ============================================
-    if (spotlightImages.length > 0) {
+    if (spotlightIds.length > 0) {
       console.log('\n📄 Updating homepage with project spotlight block...')
 
       const homepage = await payload.find({
@@ -235,11 +254,11 @@ async function seedImages() {
           const ctaIndex = layout.findIndex((block) => block.blockType === 'call-to-action-block')
           const insertIndex = ctaIndex > 0 ? ctaIndex : layout.length
 
-          // Create the project spotlight block
+          // Create the project spotlight block with references to spotlight collection items
           const spotlightBlock = {
             blockType: 'project-spotlight',
             title: 'PROJECT SPOTLIGHT',
-            images: spotlightImages,
+            selectedSpotlights: spotlightIds,
             showArrows: true,
             itemsPerView: 4,
           }
@@ -271,33 +290,32 @@ async function seedImages() {
             }
           }
         } else {
-          // Update existing spotlight block with new images if needed
+          // Update existing spotlight block with new spotlight references if needed
           const spotlightBlockIndex = layout.findIndex((block) => block.blockType === 'project-spotlight')
           if (spotlightBlockIndex >= 0) {
             const existingBlock = layout[spotlightBlockIndex]
-            const existingImageIds = (existingBlock.images || []).map((img: any) => 
-              typeof img.image === 'object' ? img.image.id : img.image
+            const existingSpotlightIds = (existingBlock.selectedSpotlights || []).map((id: any) => 
+              typeof id === 'object' ? id.id : id
             )
-            const newImageIds = spotlightImages.map(img => img.image)
             
-            // Check if we need to update images
-            const needsUpdate = spotlightImages.length > 0 && 
-              (existingImageIds.length === 0 || 
-               JSON.stringify(existingImageIds.sort()) !== JSON.stringify(newImageIds.sort()))
+            // Check if we need to update spotlights
+            const needsUpdate = spotlightIds.length > 0 && 
+              (existingSpotlightIds.length === 0 || 
+               JSON.stringify(existingSpotlightIds.sort()) !== JSON.stringify(spotlightIds.sort()))
             
             if (needsUpdate) {
               layout[spotlightBlockIndex] = {
                 ...existingBlock,
-                images: spotlightImages,
+                selectedSpotlights: spotlightIds,
               }
               await payload.update({
                 collection: 'static-pages',
                 id: page.id,
                 data: { layout },
               })
-              console.log('  ✓ Updated existing project spotlight block with images')
+              console.log('  ✓ Updated existing project spotlight block with spotlight references')
             } else {
-              console.log('  ○ Project spotlight block already exists with images')
+              console.log('  ○ Project spotlight block already exists with spotlight references')
             }
           }
         }
@@ -329,7 +347,7 @@ async function seedImages() {
     console.log('\n✅ Image seed completed!')
     console.log('\nSummary:')
     console.log(`  - Hero image: ${heroImage ? '✓' : '⚠️ missing'}`)
-    console.log(`  - Project spotlight images: ${spotlightImages?.length || 0}/4`)
+    console.log(`  - Spotlight items: ${spotlightIds?.length || 0}/4`)
   } catch (error) {
     console.error('❌ Image seed failed:', error)
     throw error
