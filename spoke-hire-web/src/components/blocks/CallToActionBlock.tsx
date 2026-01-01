@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { cn } from '~/lib/utils'
 import { Button } from '~/components/ui/button'
 import type { CallToActionBlockData } from '~/lib/payload-api'
+import { LAYOUT_CONSTANTS } from '~/lib/design-tokens'
 
 interface CallToActionBlockProps {
   data: CallToActionBlockData
@@ -66,7 +67,7 @@ export function CallToActionBlock({ data }: CallToActionBlockProps) {
 
   return (
     <section className={cn(paddingClasses, bgClasses[backgroundStyle])}>
-      <div className="container mx-auto px-4 md:px-[30px]">
+      <div className={LAYOUT_CONSTANTS.maxWidthContainer}>
         <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-8 md:gap-12 items-start">
           {/* Left Column: Heading (2/3 width) */}
           <div>
