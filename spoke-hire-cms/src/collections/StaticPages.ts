@@ -9,7 +9,7 @@ import { commonBlockFields } from '@/fields/commonBlockFields'
  * Stats Bar Block
  * Display key metrics/stats
  */
-const StatsBarBlock: Block = {
+export const StatsBarBlock: Block = {
   slug: 'stats-bar',
   labels: {
     singular: 'Stats Bar',
@@ -83,7 +83,7 @@ const StatsBarBlock: Block = {
  * Value Stats Block
  * Display stats in simple horizontal layout matching hero style
  */
-const ValueStatsBlock: Block = {
+export const ValueStatsBlock: Block = {
   slug: 'value-stats',
   labels: {
     singular: 'Value Stats',
@@ -123,7 +123,7 @@ const ValueStatsBlock: Block = {
  * Value Propositions Block
  * Display feature grid highlighting platform benefits
  */
-const ValuePropsBlock: Block = {
+export const ValuePropsBlock: Block = {
   slug: 'value-props-section',
   labels: {
     singular: 'Value Propositions',
@@ -189,7 +189,7 @@ const ValuePropsBlock: Block = {
  * Desktop: 3 cards per row with navigation arrows
  * Mobile: Single card with scroll dots
  */
-const TestimonialsSectionBlock: Block = {
+export const TestimonialsSectionBlock: Block = {
   slug: 'testimonials-section',
   labels: {
     singular: 'Testimonials Section',
@@ -229,7 +229,7 @@ const TestimonialsSectionBlock: Block = {
  * Display frequently asked questions in accordion format
  * Simplified to only support manual FAQ selection
  */
-const FAQSectionBlock: Block = {
+export const FAQSectionBlock: Block = {
   slug: 'faq-section',
   labels: {
     singular: 'FAQ Section',
@@ -321,7 +321,7 @@ const FAQSectionBlock: Block = {
  * Rich Text Content Block
  * Free-form rich text content with formatting
  */
-const RichTextContentBlock: Block = {
+export const RichTextContentBlock: Block = {
   slug: 'rich-text-content',
   labels: {
     singular: 'Rich Text Content',
@@ -342,7 +342,7 @@ const RichTextContentBlock: Block = {
  * Call-to-Action Block
  * Call-to-action section with 2-column responsive layout
  */
-const CallToActionBlock: Block = {
+export const CallToActionBlock: Block = {
   slug: 'call-to-action-block',
   labels: {
     singular: 'Call-to-Action Block',
@@ -364,7 +364,7 @@ const CallToActionBlock: Block = {
  * Featured Vehicles Block
  * Display featured vehicles in carousel format
  */
-const FeaturedVehiclesBlock: Block = {
+export const FeaturedVehiclesBlock: Block = {
   slug: 'featured-vehicles',
   labels: {
     singular: 'Featured Vehicles',
@@ -438,7 +438,7 @@ const FeaturedVehiclesBlock: Block = {
  * Image Gallery Block
  * Display image gallery/grid
  */
-const ImageGalleryBlock: Block = {
+export const ImageGalleryBlock: Block = {
   slug: 'image-gallery',
   labels: {
     singular: 'Image Gallery',
@@ -510,7 +510,7 @@ const ImageGalleryBlock: Block = {
  * Image Carousel Block
  * Pure image carousel with auto-play, supports mobile and desktop images
  */
-const ImageCarouselBlock: Block = {
+export const ImageCarouselBlock: Block = {
   slug: 'image-carousel',
   labels: {
     singular: 'Image Carousel',
@@ -559,7 +559,7 @@ const ImageCarouselBlock: Block = {
  * Two-Column Content Block
  * Side-by-side content layout
  */
-const TwoColumnContentBlock: Block = {
+export const TwoColumnContentBlock: Block = {
   slug: 'two-column-content',
   labels: {
     singular: 'Two-Column Content',
@@ -620,7 +620,7 @@ const TwoColumnContentBlock: Block = {
  * Display horizontal carousel of project spotlight items
  * References Spotlights collection for reusable spotlight items
  */
-const SpotlightBlock: Block = {
+export const SpotlightBlock: Block = {
   slug: 'project-spotlight',
   labels: {
     singular: 'Project Spotlight',
@@ -675,7 +675,7 @@ const SpotlightBlock: Block = {
  * Numbered List Block (RTBs List)
  * Display a numbered list with title, items containing headings and descriptions
  */
-const NumberedListBlock: Block = {
+export const NumberedListBlock: Block = {
   slug: 'numbered-list',
   labels: {
     singular: 'Numbered List',
@@ -735,7 +735,7 @@ const NumberedListBlock: Block = {
  * Spacer Block
  * Add vertical spacing between sections
  */
-const SpacerBlock: Block = {
+export const SpacerBlock: Block = {
   slug: 'spacer',
   labels: {
     singular: 'Spacer',

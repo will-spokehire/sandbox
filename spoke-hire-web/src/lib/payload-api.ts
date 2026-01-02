@@ -329,6 +329,17 @@ export interface StaticPage {
   updatedAt: string
 }
 
+export interface StaticBlock {
+  id: string | number
+  name: string
+  pageSlug: string
+  order?: number | null
+  status: 'draft' | 'published'
+  layout: PageBlock[]
+  createdAt: string
+  updatedAt: string
+}
+
 interface PayloadResponse<T> {
   docs: T[]
   totalDocs: number
@@ -442,6 +453,29 @@ export async function getPageSlugs(): Promise<string[]> {
     return pages.map((page) => page.slug)
   } catch (error) {
     console.error('[PayloadAPI] Error fetching page slugs:', error)
+    return []
+  }
+}
+
+// ============================================
+// STATIC BLOCKS API
+// ============================================
+
+/**
+ * Get all static blocks for a specific page slug
+ * Returns blocks sorted by order field (ascending)
+ */
+export async function getBlocksByPageSlug(pageSlug: string): Promise<StaticBlock[]> {
+  try {
+    const response = await payloadFetch<PayloadResponse<StaticBlock>>(
+      `/static-blocks?where[pageSlug][equals]=${encodeURIComponent(pageSlug)}&where[status][equals]=published&sort=order&depth=3`
+    )
+
+    // Sort by order field (ascending) - API should handle this, but ensure it's sorted
+    const blocks = response.docs.sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+    return blocks
+  } catch (error) {
+    console.error(`[PayloadAPI] Error fetching blocks with pageSlug "${pageSlug}":`, error)
     return []
   }
 }

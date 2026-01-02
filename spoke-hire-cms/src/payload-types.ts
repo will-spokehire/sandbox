@@ -79,6 +79,7 @@ export interface Config {
     'carousel-images': CarouselImage;
     spotlights: Spotlight;
     'static-pages': StaticPage;
+    'static-blocks': StaticBlock;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -98,6 +99,7 @@ export interface Config {
     'carousel-images': CarouselImagesSelect<false> | CarouselImagesSelect<true>;
     spotlights: SpotlightsSelect<false> | SpotlightsSelect<true>;
     'static-pages': StaticPagesSelect<false> | StaticPagesSelect<true>;
+    'static-blocks': StaticBlocksSelect<false> | StaticBlocksSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -760,6 +762,344 @@ export interface StaticPage {
   createdAt: string;
 }
 /**
+ * Reusable content blocks that can be embedded on regular pages. Group blocks by pageSlug (e.g., "vehicle-page") and control order with the order field.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "static-blocks".
+ */
+export interface StaticBlock {
+  id: number;
+  /**
+   * Display name for this block (for admin use)
+   */
+  name: string;
+  /**
+   * Page identifier to group blocks together (e.g., "vehicle-page"). All blocks with the same pageSlug will be rendered on that page.
+   */
+  pageSlug: string;
+  /**
+   * Sort order for blocks on the same page (lower numbers appear first)
+   */
+  order?: number | null;
+  status: 'draft' | 'published';
+  /**
+   * Build your block by adding and arranging content blocks
+   */
+  layout: (
+    | {
+        /**
+         * Optional title for the section
+         */
+        title?: string | null;
+        displayStyle?: ('badges' | 'cards' | 'minimal' | 'large') | null;
+        /**
+         * Select stats to display (order matters)
+         */
+        selectedStats: (number | Stat)[];
+        /**
+         * Number of columns on desktop
+         */
+        columns?: ('2' | '3' | '4') | null;
+        backgroundColor?: ('default' | 'muted' | 'accent' | 'primary') | null;
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'stats-bar';
+      }
+    | {
+        /**
+         * Select stats to display (order matters)
+         */
+        selectedStats: (number | Stat)[];
+        backgroundColor?: ('default' | 'muted' | 'accent' | 'primary') | null;
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'value-stats';
+      }
+    | {
+        title: string;
+        /**
+         * Supporting text below the title
+         */
+        subtitle?: string | null;
+        selectedProps: (number | ValueProp)[];
+        displayStyle?: ('grid' | 'list' | 'carousel') | null;
+        columns?: ('2' | '3' | '4') | null;
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'value-props-section';
+      }
+    | {
+        title?: string | null;
+        selectedTestimonials: (number | Testimonial)[];
+        showRatings?: boolean | null;
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'testimonials-section';
+      }
+    | {
+        title?: string | null;
+        /**
+         * Support multiline text with formatting
+         */
+        subtitle?: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        /**
+         * Select specific FAQs to display
+         */
+        selectedFAQs: (number | Faq)[];
+        /**
+         * Expand all FAQ items by default
+         */
+        defaultExpanded?: boolean | null;
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'faq-section';
+      }
+    | {
+        content: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        };
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'rich-text-content';
+      }
+    | {
+        selectedCTA: number | CtaBlock;
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'call-to-action-block';
+      }
+    | {
+        title?: string | null;
+        subtitle?: string | null;
+        selectionType?: ('manual' | 'latest') | null;
+        /**
+         * Enter vehicle IDs manually (one per line)
+         */
+        vehicleIds?:
+          | {
+              vehicleId: string;
+              id?: string | null;
+            }[]
+          | null;
+        /**
+         * Number of latest vehicles to display
+         */
+        limit?: number | null;
+        /**
+         * Display the 'Show all vehicles' button on mobile devices
+         */
+        showMobileButton?: boolean | null;
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'featured-vehicles';
+      }
+    | {
+        title?: string | null;
+        images: {
+          image: number | Media;
+          caption?: string | null;
+          /**
+           * Optional URL when image is clicked
+           */
+          link?: string | null;
+          id?: string | null;
+        }[];
+        displayStyle?: ('grid' | 'masonry' | 'carousel' | 'lightbox-grid') | null;
+        columns?: ('2' | '3' | '4' | '5') | null;
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'image-gallery';
+      }
+    | {
+        /**
+         * Select carousel images to display (order matters)
+         */
+        images: (number | CarouselImage)[];
+        /**
+         * Automatically advance to next image
+         */
+        autoplay?: boolean | null;
+        /**
+         * Seconds between automatic slide transitions
+         */
+        autoplayDelay?: number | null;
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'image-carousel';
+      }
+    | {
+        leftColumn: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        };
+        rightColumn: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        };
+        columnRatio?: ('50-50' | '60-40' | '40-60' | '70-30' | '30-70') | null;
+        /**
+         * Stack columns in reverse order on mobile
+         */
+        reverseOnMobile?: boolean | null;
+        verticalAlignment?: ('top' | 'center' | 'bottom') | null;
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'two-column-content';
+      }
+    | {
+        /**
+         * Title displayed above the spotlight items
+         */
+        title?: string | null;
+        /**
+         * Select spotlight items to display (order matters)
+         */
+        selectedSpotlights: (number | Spotlight)[];
+        /**
+         * Display left/right arrow buttons for navigation
+         */
+        showArrows?: boolean | null;
+        /**
+         * Number of items visible at once (default: 4)
+         */
+        itemsPerView?: number | null;
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'project-spotlight';
+      }
+    | {
+        title: string;
+        items: {
+          /**
+           * Optional custom number (e.g., "01", "02"). If empty, will auto-increment.
+           */
+          number?: string | null;
+          heading: string;
+          description: string;
+          id?: string | null;
+        }[];
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'numbered-list';
+      }
+    | {
+        /**
+         * Vertical spacing between sections
+         */
+        height?: ('small' | 'medium' | 'large' | 'extra-large') | null;
+        /**
+         * Hide this block on mobile devices (screens < 640px)
+         */
+        hideOnMobile?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'spacer';
+      }
+  )[];
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -830,6 +1170,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'static-pages';
         value: number | StaticPage;
+      } | null)
+    | ({
+        relationTo: 'static-blocks';
+        value: number | StaticBlock;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1218,6 +1562,185 @@ export interface StaticPagesSelect<T extends boolean = true> {
           | {
               keyword?: T;
               id?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "static-blocks_select".
+ */
+export interface StaticBlocksSelect<T extends boolean = true> {
+  name?: T;
+  pageSlug?: T;
+  order?: T;
+  status?: T;
+  layout?:
+    | T
+    | {
+        'stats-bar'?:
+          | T
+          | {
+              title?: T;
+              displayStyle?: T;
+              selectedStats?: T;
+              columns?: T;
+              backgroundColor?: T;
+              hideOnMobile?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'value-stats'?:
+          | T
+          | {
+              selectedStats?: T;
+              backgroundColor?: T;
+              hideOnMobile?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'value-props-section'?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              selectedProps?: T;
+              displayStyle?: T;
+              columns?: T;
+              hideOnMobile?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'testimonials-section'?:
+          | T
+          | {
+              title?: T;
+              selectedTestimonials?: T;
+              showRatings?: T;
+              hideOnMobile?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'faq-section'?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              selectedFAQs?: T;
+              defaultExpanded?: T;
+              hideOnMobile?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'rich-text-content'?:
+          | T
+          | {
+              content?: T;
+              hideOnMobile?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'call-to-action-block'?:
+          | T
+          | {
+              selectedCTA?: T;
+              hideOnMobile?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'featured-vehicles'?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              selectionType?: T;
+              vehicleIds?:
+                | T
+                | {
+                    vehicleId?: T;
+                    id?: T;
+                  };
+              limit?: T;
+              showMobileButton?: T;
+              hideOnMobile?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'image-gallery'?:
+          | T
+          | {
+              title?: T;
+              images?:
+                | T
+                | {
+                    image?: T;
+                    caption?: T;
+                    link?: T;
+                    id?: T;
+                  };
+              displayStyle?: T;
+              columns?: T;
+              hideOnMobile?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'image-carousel'?:
+          | T
+          | {
+              images?: T;
+              autoplay?: T;
+              autoplayDelay?: T;
+              hideOnMobile?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'two-column-content'?:
+          | T
+          | {
+              leftColumn?: T;
+              rightColumn?: T;
+              columnRatio?: T;
+              reverseOnMobile?: T;
+              verticalAlignment?: T;
+              hideOnMobile?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'project-spotlight'?:
+          | T
+          | {
+              title?: T;
+              selectedSpotlights?: T;
+              showArrows?: T;
+              itemsPerView?: T;
+              hideOnMobile?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'numbered-list'?:
+          | T
+          | {
+              title?: T;
+              items?:
+                | T
+                | {
+                    number?: T;
+                    heading?: T;
+                    description?: T;
+                    id?: T;
+                  };
+              hideOnMobile?: T;
+              id?: T;
+              blockName?: T;
+            };
+        spacer?:
+          | T
+          | {
+              height?: T;
+              hideOnMobile?: T;
+              id?: T;
+              blockName?: T;
             };
       };
   updatedAt?: T;

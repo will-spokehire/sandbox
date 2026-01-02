@@ -11,6 +11,8 @@ import { SimilarVehicles } from "./_components/SimilarVehicles";
 import { getAppUrl } from "~/lib/app-url";
 import { LAYOUT_CONSTANTS, TYPOGRAPHY, VEHICLE_DETAIL } from "~/lib/design-tokens";
 import { cn } from "~/lib/utils";
+import { getBlocksByPageSlug } from "~/lib/payload-api";
+import { BlockRenderer } from "~/components/blocks/BlockRenderer";
 
 interface PageProps {
   params: Promise<{
@@ -249,6 +251,9 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
     itemListElement: breadcrumbItems,
   };
 
+  // Fetch static blocks for vehicle page
+  const staticBlocks = await getBlocksByPageSlug('vehicle-page');
+
   return (
     <>
       {/* Analytics Tracking */}
@@ -306,6 +311,25 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
 
         {/* Similar Vehicles Section */}
         <SimilarVehicles vehicleId={vehicle.id} />
+
+        {/* Static Blocks Section */}
+        {staticBlocks.length > 0 && (
+          <>
+            {staticBlocks.map((staticBlock) => (
+              <div key={staticBlock.id}>
+                {staticBlock.layout && staticBlock.layout.length > 0 ? (
+                  staticBlock.layout.map((block, index) => (
+                    <BlockRenderer
+                      key={`${staticBlock.id}-${block.blockType}-${index}`}
+                      block={block}
+                      index={index}
+                    />
+                  ))
+                ) : null}
+              </div>
+            ))}
+          </>
+        )}
       </main>
       </div>
     </>

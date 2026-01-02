@@ -18,6 +18,7 @@ import { FAQs } from './collections/FAQs'
 import { CarouselImages } from './collections/CarouselImages'
 import { Spotlights } from './collections/Spotlights'
 import { StaticPages } from './collections/StaticPages'
+import { StaticBlocks } from './collections/StaticBlocks'
 import { Navigation } from './globals/Navigation'
 import { SiteSettings } from './globals/SiteSettings'
 
@@ -47,6 +48,7 @@ export default buildConfig({
     CarouselImages,
     Spotlights,
     StaticPages,
+    StaticBlocks,
   ],
   globals: [
     Navigation,
