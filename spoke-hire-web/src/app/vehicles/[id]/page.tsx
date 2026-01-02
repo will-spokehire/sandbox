@@ -7,6 +7,7 @@ import { PublicVehicleMediaSection } from "./_components/PublicVehicleMediaSecti
 import { PublicVehicleBasicInfo } from "./_components/PublicVehicleBasicInfo";
 import { VehicleDetailHeader } from "./_components/VehicleDetailHeader";
 import { VehicleViewTracker } from "./_components/VehicleViewTracker";
+import { SimilarVehicles } from "./_components/SimilarVehicles";
 import { getAppUrl } from "~/lib/app-url";
 import { LAYOUT_CONSTANTS, TYPOGRAPHY, VEHICLE_DETAIL } from "~/lib/design-tokens";
 import { cn } from "~/lib/utils";
@@ -302,6 +303,9 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
             <PublicVehicleBasicInfo vehicle={vehicle} />
           </div>
         </div>
+
+        {/* Similar Vehicles Section */}
+        <SimilarVehicles vehicleId={vehicle.id} />
       </main>
       </div>
     </>

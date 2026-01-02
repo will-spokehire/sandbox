@@ -52,6 +52,10 @@ const getPublicVehicleByIdInputSchema = z.object({
   id: z.string(),
 });
 
+const getSimilarVehiclesInputSchema = z.object({
+  vehicleId: z.string(),
+});
+
 // ============================================================================
 // Router Definition
 // ============================================================================
@@ -215,6 +219,53 @@ export const publicVehicleRouter = createTRPCRouter({
       const models = await repository.getModelsByMakeWithPublishedVehicles(input.makeId);
       
       return models as Array<{ id: string; name: string }>;
+    }),
+
+  /**
+   * Get similar vehicles for a given vehicle
+   * Returns up to 6 vehicles that match by same make OR same decade
+   * Public endpoint - no authentication required
+   * Only returns PUBLISHED vehicles
+   */
+  getSimilar: publicProcedure
+    .input(getSimilarVehiclesInputSchema)
+    .query(async ({ ctx, input }) => {
+      try {
+        const service = ServiceFactory.createSimilarVehiclesService(ctx.db);
+        const vehicles = await service.getSimilarVehicles(input.vehicleId);
+
+        // Map to exclude sensitive owner information (same structure as list endpoint)
+        const publicVehicles = vehicles.map((vehicle) => ({
+          id: vehicle.id,
+          name: vehicle.name,
+          year: vehicle.year,
+          registration: vehicle.registration,
+          status: vehicle.status,
+          make: vehicle.make,
+          model: vehicle.model,
+          media: vehicle.media,
+          collections: vehicle.collections?.map((vc) => ({
+            id: vc.collection.id,
+            name: vc.collection.name,
+          })),
+          // Owner location only (no contact info)
+          owner: {
+            id: vehicle.owner.id,
+            city: vehicle.owner.city,
+            county: vehicle.owner.county,
+            postcode: vehicle.owner.postcode,
+            latitude: vehicle.owner.latitude,
+            longitude: vehicle.owner.longitude,
+            country: vehicle.owner.country,
+          },
+        }));
+
+        return publicVehicles;
+      } catch (error) {
+        // If vehicle not found or any error, return empty array
+        console.error("Error fetching similar vehicles:", error);
+        return [];
+      }
     }),
 });
 
