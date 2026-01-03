@@ -95,7 +95,7 @@ function PublicVehiclesCatalogContent({ initialData, serverTitles, serverFilterO
     <>
       {/* Hero Section */}
       <div className="bg-white">
-        <div className="px-[30px] py-10">
+        <div className="px-4 md:px-[30px] py-10">
           <div className="max-w-[760px] flex flex-col gap-6">
             <h1 className="heading-1 uppercase text-black leading-[0.95]">
               {h1}
@@ -110,7 +110,7 @@ function PublicVehiclesCatalogContent({ initialData, serverTitles, serverFilterO
       </div>
 
       {/* Main Content */}
-      <div className="px-[30px] flex flex-col gap-10">
+      <div className="px-4 md:px-[30px] flex flex-col gap-10">
         {/* Filters */}
         <PublicVehicleFilters />
 

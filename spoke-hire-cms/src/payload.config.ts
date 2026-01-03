@@ -72,6 +72,10 @@ export default buildConfig({
     // Conditional storage: S3 for production, local filesystem for development
     // In development (localhost), PayloadCMS uses local filesystem storage by default
     // In production, use Supabase Storage S3
+    //
+    // Note: There's a known issue with UploadHandlersProvider timing in PayloadCMS
+    // See: https://github.com/payloadcms/payload/issues/13353
+    // The Suspense boundary in admin layout helps mitigate this issue
     ...(isProduction
       ? [
           s3Storage({
@@ -86,6 +90,7 @@ export default buildConfig({
                 accessKeyId: process.env.SUPABASE_ACCESS_KEY_ID || '',
                 secretAccessKey: process.env.SUPABASE_SECRET_ACCESS_KEY || '',
               },
+              forcePathStyle: true, // Required for Supabase S3 compatibility
             },
           }),
         ]

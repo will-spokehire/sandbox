@@ -58,8 +58,8 @@ export interface SiteSettings {
  */
 function getMediaBaseUrl(): string {
   const apiUrl = process.env.NEXT_PUBLIC_PAYLOAD_API_URL || 'http://localhost:3000'
-  // Remove trailing /api if present
-  return apiUrl.replace(/\/api\/?$/, '')
+  // Remove trailing /api if present, then remove any trailing slashes
+  return apiUrl.replace(/\/api\/?$/, '').replace(/\/+$/, '')
 }
 
 /**

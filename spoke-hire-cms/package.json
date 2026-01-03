@@ -1,7 +1,7 @@
 {
   "name": "spoke-hire-cms",
   "version": "1.0.0",
-  "description": "A blank template to get started with Payload 3.0",
+  "description": "SpokeHire CMS",
   "license": "MIT",
   "type": "module",
   "scripts": {
@@ -25,7 +25,7 @@
     "@payloadcms/db-postgres": "3.68.4",
     "@payloadcms/next": "3.68.4",
     "@payloadcms/richtext-lexical": "3.68.4",
-    "@payloadcms/storage-s3": "^3.68.4",
+    "@payloadcms/storage-s3": "3.68.4",
     "@payloadcms/ui": "3.68.4",
     "cross-env": "^7.0.3",
     "dotenv": "16.4.7",

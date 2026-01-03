@@ -79,7 +79,7 @@ export function SimilarVehicles({ vehicleId }: SimilarVehiclesProps) {
         setCurrentIndex(clampedIndex);
       }
     }
-  }, [vehicles]);
+  }, [vehicles?.length ?? 0]);
 
   React.useEffect(() => {
     const resizeObserver = new ResizeObserver((entries) => {
@@ -171,8 +171,8 @@ export function SimilarVehicles({ vehicleId }: SimilarVehiclesProps) {
     <section
       className={cn(
         "bg-white flex flex-col items-center overflow-clip",
-        LAYOUT_CONSTANTS.contentPadding,
-        "py-[41px] gap-[41px] md:gap-[41px]"
+        "px-0",
+        "py-[41px] gap-[20px] md:gap-[41px]"
       )}
       aria-label="Similar vehicles"
     >
@@ -277,7 +277,7 @@ export function SimilarVehicles({ vehicleId }: SimilarVehiclesProps) {
         </div>
 
         {/* Mobile: Single card carousel */}
-        <div className="md:hidden flex flex-col items-start relative shrink-0 w-full">
+        <div className="md:hidden flex flex-col relative shrink-0 w-full gap-[20px]">
           <div
             ref={mobileCarouselRef}
             className="flex overflow-x-auto gap-0 snap-x snap-mandatory w-full"
@@ -292,7 +292,7 @@ export function SimilarVehicles({ vehicleId }: SimilarVehiclesProps) {
 
           {/* Mobile Scroll Dots */}
           {vehicles.length > 1 && (
-            <div className="flex gap-[8px] items-center justify-center relative shrink-0 mt-5">
+            <div className="flex w-full items-center justify-center">
               <MobileScrollDots
                 totalItems={vehicles.length}
                 currentIndex={currentIndex}

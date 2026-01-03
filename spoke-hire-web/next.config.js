@@ -73,6 +73,12 @@ const config = {
         port: "3001",
         pathname: "/api/media/**",
       },
+      // PayloadCMS (Production - Vercel)
+      {
+        protocol: "https",
+        hostname: "spoke-hire-cms-cornerapp-vertextree.vercel.app",
+        pathname: "/api/media/**",
+      },
     ],
   },
 };

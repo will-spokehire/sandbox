@@ -500,6 +500,15 @@
     color: var(--spoke-white);
   }
   
+  /* Cookie banner button hover states */
+  div[id*="rcc"] button[style*="var(--spoke-black)"]:hover {
+    opacity: 0.9 !important;
+  }
+  div[id*="rcc"] button[style*="transparent"]:hover {
+    background: var(--spoke-black) !important;
+    color: var(--spoke-white) !important;
+  }
+  
   /* Input base styles */
   .input-base {
     font-family: var(--font-degular);

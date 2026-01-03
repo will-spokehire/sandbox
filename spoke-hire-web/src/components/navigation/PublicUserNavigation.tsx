@@ -101,18 +101,18 @@ function DesktopNavLinks({
 
       {/* Auth Buttons for Non-Authenticated Users */}
       {!isLoading && !isAuthenticated && (
-        <>
-          <Button variant="ghost" asChild>
-            <Link href="/auth/login">
-              Login
-            </Link>
-          </Button>
-          <Button asChild>
-            <Link href="/auth/signup">
-              Sign Up
-            </Link>
-          </Button>
-        </>
+        <Button variant="ghost" asChild>
+          <Link href="/auth/login">
+            Login
+          </Link>
+        </Button>
+      )}
+      {!isLoading && !isAuthenticated && (
+        <Button asChild>
+          <Link href="/auth/signup">
+            Sign Up
+          </Link>
+        </Button>
       )}
     </nav>
   );
