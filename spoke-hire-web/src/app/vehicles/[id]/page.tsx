@@ -262,7 +262,7 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
         vehicleName={`${vehicle.make.name} ${vehicle.model.name}`}
         make={vehicle.make.name}
         model={vehicle.model.name}
-        year={vehicle.year}
+        year={Number(vehicle.year)}
       />
       
       {/* JSON-LD Structured Data - Product */}
@@ -312,25 +312,26 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
         {/* Similar Vehicles Section */}
         <SimilarVehicles vehicleId={vehicle.id} />
 
-        {/* Static Blocks Section */}
-        {staticBlocks.length > 0 && (
-          <>
-            {staticBlocks.map((staticBlock) => (
-              <div key={staticBlock.id}>
-                {staticBlock.layout && staticBlock.layout.length > 0 ? (
-                  staticBlock.layout.map((block, index) => (
-                    <BlockRenderer
-                      key={`${staticBlock.id}-${block.blockType}-${index}`}
-                      block={block}
-                      index={index}
-                    />
-                  ))
-                ) : null}
-              </div>
-            ))}
-          </>
-        )}
       </main>
+
+      {/* Static Blocks Section */}
+      {staticBlocks.length > 0 && (
+        <>
+          {staticBlocks.map((staticBlock) => (
+            <div key={staticBlock.id}>
+              {staticBlock.layout && staticBlock.layout.length > 0 ? (
+                staticBlock.layout.map((block, index) => (
+                  <BlockRenderer
+                    key={`${staticBlock.id}-${block.blockType}-${index}`}
+                    block={block}
+                    index={index}
+                  />
+                ))
+              ) : null}
+            </div>
+          ))}
+        </>
+      )}
       </div>
     </>
   );
