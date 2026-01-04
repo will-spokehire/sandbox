@@ -1,5 +1,4 @@
 import * as React from 'react'
-import { cn } from '~/lib/utils'
 import type { StatsBarBlockData } from '~/lib/payload-api'
 import { StatsBadge } from '~/components/ui/stats-badge'
 import { renderIcon, getIconComponent } from '~/lib/icon-renderer'
@@ -15,39 +14,21 @@ interface StatsBarBlockProps {
  * Displays key metrics/stats in various display styles.
  */
 export function StatsBarBlock({ data }: StatsBarBlockProps) {
-  const { title, displayStyle, selectedStats, columns, backgroundColor } = data
+  const { title, displayStyle, selectedStats } = data
 
   if (!selectedStats || selectedStats.length === 0) {
     return null
   }
 
-  const bgClasses = {
-    default: 'bg-white',
-    muted: 'bg-muted',
-    accent: 'bg-accent',
-    primary: 'bg-primary text-primary-foreground',
-  }
-
-  // Get column class based on columns value (handles both string and number)
-  const getColumnClass = (cols: string | number) => {
-    const colNum = String(cols)
-    switch (colNum) {
-      case '2': return 'grid-cols-2'
-      case '3': return 'grid-cols-2 md:grid-cols-3'
-      case '4': return 'grid-cols-2 md:grid-cols-4'
-      default: return 'grid-cols-2 md:grid-cols-4'
-    }
-  }
-
   return (
-    <section className={cn('pt-[60px] pb-0', bgClasses[backgroundColor])}>
-      <div className="container mx-auto px-4">
+    <section className="pt-[60px] pb-0">
+      <div className="flex flex-col items-center px-4">
         {title && (
           <h2 className="text-2xl md:text-3xl font-bold text-center mb-8">{title}</h2>
         )}
 
         {displayStyle === 'badges' && (
-          <div className={cn('grid gap-4 md:gap-6', getColumnClass(columns))}>
+          <div className="flex flex-wrap items-center justify-center gap-6">
             {selectedStats.map((stat) => (
               <StatsBadge
                 key={stat.id}
@@ -59,7 +40,7 @@ export function StatsBarBlock({ data }: StatsBarBlockProps) {
         )}
 
         {displayStyle === 'cards' && (
-          <div className={cn('grid gap-6', getColumnClass(columns))}>
+          <div className="flex flex-wrap items-center justify-center gap-6">
             {selectedStats.map((stat) => {
               const IconComponent = typeof stat.icon === 'string' 
                 ? getIconComponent(stat.icon) 
@@ -82,7 +63,7 @@ export function StatsBarBlock({ data }: StatsBarBlockProps) {
         )}
 
         {displayStyle === 'minimal' && (
-          <div className={cn('grid gap-8', getColumnClass(columns))}>
+          <div className="flex flex-wrap items-center justify-center gap-8">
             {selectedStats.map((stat) => (
               <div key={stat.id} className="text-center">
                 <div className="text-sm text-muted-foreground">{stat.label}</div>
@@ -92,7 +73,7 @@ export function StatsBarBlock({ data }: StatsBarBlockProps) {
         )}
 
         {displayStyle === 'large' && (
-          <div className={cn('grid gap-8', getColumnClass(columns))}>
+          <div className="flex flex-wrap items-center justify-center gap-8">
             {selectedStats.map((stat) => {
               const IconComponent = typeof stat.icon === 'string' 
                 ? getIconComponent(stat.icon) 

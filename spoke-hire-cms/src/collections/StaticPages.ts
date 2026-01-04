@@ -49,32 +49,6 @@ export const StatsBarBlock: Block = {
         description: 'Select stats to display (order matters)',
       },
     },
-    {
-      name: 'columns',
-      type: 'select',
-      label: 'Columns',
-      defaultValue: '4',
-      options: [
-        { label: '2 Columns', value: '2' },
-        { label: '3 Columns', value: '3' },
-        { label: '4 Columns', value: '4' },
-      ],
-      admin: {
-        description: 'Number of columns on desktop',
-      },
-    },
-    {
-      name: 'backgroundColor',
-      type: 'select',
-      label: 'Background Color',
-      defaultValue: 'default',
-      options: [
-        { label: 'Default', value: 'default' },
-        { label: 'Muted', value: 'muted' },
-        { label: 'Accent', value: 'accent' },
-        { label: 'Primary', value: 'primary' },
-      ],
-    },
     ...commonBlockFields,
   ],
 }

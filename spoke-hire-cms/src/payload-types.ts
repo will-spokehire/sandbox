@@ -425,11 +425,6 @@ export interface StaticPage {
          */
         selectedStats: (number | Stat)[];
         /**
-         * Number of columns on desktop
-         */
-        columns?: ('2' | '3' | '4') | null;
-        backgroundColor?: ('default' | 'muted' | 'accent' | 'primary') | null;
-        /**
          * Hide this block on mobile devices (screens < 640px)
          */
         hideOnMobile?: boolean | null;
@@ -796,11 +791,6 @@ export interface StaticBlock {
          * Select stats to display (order matters)
          */
         selectedStats: (number | Stat)[];
-        /**
-         * Number of columns on desktop
-         */
-        columns?: ('2' | '3' | '4') | null;
-        backgroundColor?: ('default' | 'muted' | 'accent' | 'primary') | null;
         /**
          * Hide this block on mobile devices (screens < 640px)
          */
@@ -1391,8 +1381,6 @@ export interface StaticPagesSelect<T extends boolean = true> {
               title?: T;
               displayStyle?: T;
               selectedStats?: T;
-              columns?: T;
-              backgroundColor?: T;
               hideOnMobile?: T;
               id?: T;
               blockName?: T;
@@ -1585,8 +1573,6 @@ export interface StaticBlocksSelect<T extends boolean = true> {
               title?: T;
               displayStyle?: T;
               selectedStats?: T;
-              columns?: T;
-              backgroundColor?: T;
               hideOnMobile?: T;
               id?: T;
               blockName?: T;

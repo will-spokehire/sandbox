@@ -141,8 +141,6 @@ export interface StatsBarBlockData {
   title?: string
   displayStyle: 'badges' | 'cards' | 'minimal' | 'large'
   selectedStats: Stat[]
-  columns: '2' | '3' | '4' | 2 | 3 | 4
-  backgroundColor: 'default' | 'muted' | 'accent' | 'primary'
   hideOnMobile?: boolean
 }
 
