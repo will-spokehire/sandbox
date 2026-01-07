@@ -72,7 +72,7 @@ export class SimilarVehiclesService {
    * 
    * Algorithm:
    * - Find vehicles with same make OR same decade
-   * - Exclude current vehicle AND vehicles with same year
+   * - Exclude current vehicle only
    * - Only PUBLISHED vehicles
    * - Priority order: make+model+decade+color > make+model+decade > make+decade > make > decade
    * - Limit to 6 results
@@ -98,7 +98,7 @@ export class SimilarVehiclesService {
 
     // Validate year is a valid number
     if (isNaN(currentYearNum)) {
-      // If year is not a valid number, only match by make (exclude same year)
+      // If year is not a valid number, only match by make
       const similarVehicles = await this.db.vehicle.findMany({
         where: {
           status: "PUBLISHED",
@@ -106,9 +106,6 @@ export class SimilarVehiclesService {
             not: vehicleId,
           },
           makeId: currentMakeId,
-          year: {
-            not: currentYear, // Exclude same year
-          },
         },
         include: {
           make: {
@@ -220,15 +217,12 @@ export class SimilarVehiclesService {
     const decadeStartStr = String(decadeStart);
     const decadeEndStr = String(decadeEnd);
 
-    // Build query: same make OR same decade, exclude same year
+    // Build query: same make OR same decade
     const similarVehicles = await this.db.vehicle.findMany({
       where: {
         status: "PUBLISHED",
         id: {
           not: vehicleId, // Exclude current vehicle
-        },
-        year: {
-          not: currentYear, // Exclude same year
         },
         OR: [
           {
