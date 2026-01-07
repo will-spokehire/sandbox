@@ -20,10 +20,6 @@ interface VehicleData {
 
 interface PublicVehiclesCatalogContentProps {
   initialData: VehicleData;
-  serverTitles: {
-    h1: string;
-    h2: string;
-  };
   serverFilterOptions: any;
 }
 
@@ -33,11 +29,8 @@ interface PublicVehiclesCatalogContentProps {
  * Displays published vehicles with filters.
  * Client component for interactivity with SSR initial data.
  */
-function PublicVehiclesCatalogContent({ initialData, serverTitles, serverFilterOptions }: PublicVehiclesCatalogContentProps) {
+function PublicVehiclesCatalogContent({ initialData, serverFilterOptions }: PublicVehiclesCatalogContentProps) {
   const { filters, updateFilters, clearFilters, hasActiveFilters } = usePublicVehicleFiltersContext();
-  
-  // Use server-rendered titles (no client-side fetch needed!)
-  const { h1, h2 } = serverTitles;
 
   // Pagination settings
   const itemsPerPage = 40;
@@ -95,22 +88,20 @@ function PublicVehiclesCatalogContent({ initialData, serverTitles, serverFilterO
     <>
       {/* Hero Section */}
       <div className="bg-white">
-        <div className="px-4 md:px-[30px] py-10">
+        <div className=" py-10">
           <div className="max-w-[760px] flex flex-col gap-6">
             <h1 className="heading-1 uppercase text-black leading-[0.95]">
-              {h1}
+              explore classic cars for hire
             </h1>
-            {h2 && (
-              <p className="font-degular text-[18px] font-normal leading-[1.4] tracking-[-0.18px] text-black">
-                {h2}
-              </p>
-            )}
+            <p className="font-degular text-[18px] font-normal leading-[1.4] tracking-[-0.18px] text-black">
+              Discover thousands of vehicles available to hire from action vehicles to wedding cars.
+            </p>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="px-4 md:px-[30px] flex flex-col gap-10">
+      <div className="flex flex-col gap-10">
         {/* Filters */}
         <PublicVehicleFilters />
 
@@ -256,12 +247,11 @@ function PublicVehiclesCatalogContent({ initialData, serverTitles, serverFilterO
  * Public-facing vehicle catalogue with SSR and SEO optimisation.
  * No authentication required.
  */
-export default function PublicVehiclesPageContent({ initialData, serverTitles, serverFilterOptions }: PublicVehiclesCatalogContentProps) {
+export default function PublicVehiclesPageContent({ initialData, serverFilterOptions }: PublicVehiclesCatalogContentProps) {
   return (
     <Suspense fallback={<PageLoading />}>
       <PublicVehiclesCatalogContent 
         initialData={initialData}
-        serverTitles={serverTitles}
         serverFilterOptions={serverFilterOptions}
       />
     </Suspense>

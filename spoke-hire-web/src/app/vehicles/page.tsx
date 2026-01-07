@@ -142,22 +142,12 @@ export default async function PublicVehiclesPage({ searchParams }: PageProps) {
     filterOptions = null;
   }
 
-  // Generate H1 and H2 titles server-side
-  const titles = generatePageTitles({
-    makeIds,
-    modelId: params.modelId,
-    collectionIds,
-    yearFrom: params.yearFrom,
-    countryIds,
-    counties,
-  }, filterOptions);
-
   // Generate JSON-LD structured data for catalogue page with ItemList
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: titles.h1,
-    description: titles.h2,
+    name: "Explore Classic Cars for Hire",
+    description: "Discover thousands of vehicles available to hire from action vehicles to wedding cars.",
     url: `${appUrl}/vehicles`,
     isPartOf: {
       "@type": "WebSite",
@@ -191,7 +181,6 @@ export default async function PublicVehiclesPage({ searchParams }: PageProps) {
       <PublicVehicleFiltersProvider>
         <PublicVehiclesPageContent 
           initialData={initialData} 
-          serverTitles={titles}
           serverFilterOptions={filterOptions}
         />
       </PublicVehicleFiltersProvider>
@@ -199,120 +188,3 @@ export default async function PublicVehiclesPage({ searchParams }: PageProps) {
   );
 }
 
-/**
- * Generate page titles server-side based on filters
- */
-function generatePageTitles(
-  filters: {
-    makeIds?: string[];
-    modelId?: string;
-    collectionIds?: string[];
-    yearFrom?: string;
-    countryIds?: string[];
-    counties?: string[];
-  },
-  filterOptions: any
-) {
-  let h1 = "";
-  let h2 = "";
-
-  // ========================================
-  // H1: Geography + Cars + "for Hire"
-  // ========================================
-  const h1Parts: string[] = [];
-
-  // 1. Vehicle/Make/Model info
-  if (filters.makeIds && filters.makeIds.length > 0 && filterOptions?.makes) {
-    const makes = filterOptions.makes.filter((m: any) => filters.makeIds?.includes(m.id));
-    const makeNames = makes.map((m: any) => m.name);
-    
-    if (makeNames.length > 0) {
-      if (filters.modelId && filterOptions?.models) {
-        // Make + Model
-        const model = filterOptions.models.find((m: any) => m.id === filters.modelId);
-        if (model) {
-          h1Parts.push(`${makeNames.join(" & ")} ${model.name}`);
-        } else {
-          h1Parts.push(makeNames.join(" & "));
-        }
-      } else {
-        // Just Make(s)
-        h1Parts.push(makeNames.join(" & "));
-      }
-    }
-  } else {
-    // No specific make - use generic
-    h1Parts.push("Classic Vehicles");
-  }
-
-  // 2. Add "for Hire"
-  h1Parts.push("for Hire");
-
-  // 3. Add Location (Geography)
-  const locationParts: string[] = [];
-  
-  if (filters.counties && filters.counties.length > 0) {
-    locationParts.push(filters.counties.join(", "));
-  }
-  
-  if (filters.countryIds && filters.countryIds.length > 0 && filterOptions?.countries) {
-    const countries = filterOptions.countries.filter((c: any) => filters.countryIds?.includes(c.id));
-    const countryNames = countries.map((c: any) => c.name);
-    if (countryNames.length > 0) {
-      locationParts.push(countryNames.join(", "));
-    }
-  }
-
-  if (locationParts.length > 0) {
-    h1Parts.push(`in ${locationParts.join(", ")}`);
-  }
-
-  h1 = h1Parts.join(" ");
-
-  // ========================================
-  // H2: SEO-friendly subtitle/description
-  // ========================================
-  const collectionNames: string[] = [];
-  let hasDecade = false;
-
-  // 1. Collections/Tags
-  if (filters.collectionIds && filters.collectionIds.length > 0 && filterOptions?.collections) {
-    const collections = filterOptions.collections.filter((c: any) => filters.collectionIds?.includes(c.id));
-    collectionNames.push(...collections.map((c: any) => c.name));
-  }
-
-  // 2. Decade
-  if (filters.yearFrom) {
-    hasDecade = true;
-  }
-
-  // Build H2 based on what filters are active
-  if (collectionNames.length > 0 && hasDecade) {
-    h2 = `Explore our ${collectionNames.join(" & ")} vehicles from the ${filters.yearFrom}s`;
-  } else if (collectionNames.length > 0) {
-    h2 = `Browse our ${collectionNames.join(" & ")} vehicles`;
-  } else if (hasDecade) {
-    h2 = `Discover vintage vehicles from the ${filters.yearFrom}s`;
-  } else if (filters.makeIds && filters.makeIds.length > 0 && filterOptions?.makes) {
-    const makes = filterOptions.makes.filter((m: any) => filters.makeIds?.includes(m.id));
-    const makeNames = makes.map((m: any) => m.name);
-    if (makeNames.length > 0) {
-      if (filters.modelId && filterOptions?.models) {
-        const model = filterOptions.models.find((m: any) => m.id === filters.modelId);
-        h2 = `Premium ${makeNames.join(" & ")} ${model?.name ?? ''} available for your special occasion`;
-      } else if (makeNames.length === 1) {
-        h2 = `Discover our collection of ${makeNames[0]} vehicles`;
-      } else {
-        h2 = `Premium ${makeNames.join(" & ")} vehicles available`;
-      }
-    } else {
-      h2 = "Discover meticulously maintained classic and vintage vehicles";
-    }
-  } else if (locationParts.length > 0) {
-    h2 = "Classic and vintage vehicles available in your area";
-  } else {
-    h2 = "Discover meticulously maintained classic and vintage vehicles for your special occasions";
-  }
-
-  return { h1, h2 };
-}
