@@ -722,10 +722,9 @@ export const SpacerBlock: Block = {
       label: 'Height',
       defaultValue: 'medium',
       options: [
-        { label: 'Small (2rem)', value: 'small' },
-        { label: 'Medium (4rem)', value: 'medium' },
-        { label: 'Large (6rem)', value: 'large' },
-        { label: 'Extra Large (8rem)', value: 'extra-large' },
+        { label: 'Small (20px)', value: 'small' },
+        { label: 'Medium (40px)', value: 'medium' },
+        { label: 'Large (60px)', value: 'large' },
       ],
       admin: {
         description: 'Vertical spacing between sections',

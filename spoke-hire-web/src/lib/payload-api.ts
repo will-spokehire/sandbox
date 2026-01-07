@@ -264,7 +264,7 @@ export interface TwoColumnContentBlockData {
 
 export interface SpacerBlockData {
   blockType: 'spacer'
-  height: 'small' | 'medium' | 'large' | 'extra-large'
+  height: 'small' | 'medium' | 'large'
   hideOnMobile?: boolean
 }
 

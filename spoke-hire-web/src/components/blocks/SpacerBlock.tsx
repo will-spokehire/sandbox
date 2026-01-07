@@ -14,10 +14,9 @@ export function SpacerBlock({ data }: SpacerBlockProps) {
   const { height } = data
 
   const heightClasses = {
-    small: 'h-8 md:h-12', // 2rem / 3rem
-    medium: 'h-16 md:h-20', // 4rem / 5rem
-    large: 'h-24 md:h-32', // 6rem / 8rem
-    'extra-large': 'h-32 md:h-40', // 8rem / 10rem
+    small: 'h-4 md:h-5', // 16px mobile / 20px desktop
+    medium: 'h-8 md:h-10', // 32px mobile / 40px desktop
+    large: 'h-12 md:h-[60px]', // 48px mobile / 60px desktop
   }
 
   return (
@@ -30,6 +29,7 @@ export function SpacerBlock({ data }: SpacerBlockProps) {
 }
 
 export default SpacerBlock
+
 
 
 
