@@ -34,13 +34,13 @@ function LoadingSpinner({ className }: { className?: string }) {
 }
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-spoke-black/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all cursor-pointer disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-spoke-black/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
   {
     variants: {
       variant: {
         // Brand primary - solid black background (replaces old default)
         default:
-          "bg-spoke-black text-spoke-white border border-spoke-black font-helvetica uppercase tracking-normal hover:opacity-90",
+          "bg-spoke-black text-spoke-white border border-spoke-black font-helvetica uppercase tracking-normal cursor-pointer hover:bg-spoke-white hover:text-spoke-black hover:border-spoke-black",
         // Brand outline - transparent with black border (replaces old outline)
         outline:
           "bg-transparent text-spoke-black border border-spoke-black font-helvetica uppercase tracking-normal hover:bg-spoke-black hover:text-spoke-white",

@@ -111,7 +111,7 @@ export function PublicVehicleBasicInfo({ vehicle }: PublicVehicleBasicInfoProps)
           "px-4 md:px-0 py-5 md:py-0 bg-white md:bg-transparent",
           "md:w-full"
         )}>
-          <button className={cn(VEHICLE_DETAIL.makeEnquiryButton, "w-full")}>
+          <button className={VEHICLE_DETAIL.makeEnquiryButton}>
             Make enquiry
           </button>
         </div>

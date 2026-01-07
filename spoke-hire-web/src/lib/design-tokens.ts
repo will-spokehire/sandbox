@@ -20,7 +20,7 @@ export const LAYOUT_CONSTANTS = {
   maxWidthContainer: "max-w-[1512px] mx-auto px-4 md:px-[30px]",
 
   // Common content wrapper padding (matches header and carousels)
-  contentPadding: "px-4 md:px-[30px]",
+  contentPadding: "",
 
   // Spacing
   pageSpacing: "py-8 md:py-12",
@@ -166,9 +166,9 @@ export const BUTTON_STYLES = {
 
   // Full Tailwind variants (alternative to CSS classes)
   primaryTw:
-    "inline-flex items-center justify-center bg-spoke-black text-spoke-white border border-spoke-black px-6 py-3 font-helvetica text-lg font-normal uppercase leading-relaxed transition-all hover:opacity-90",
+    "inline-flex items-center justify-center bg-spoke-black text-spoke-white border border-spoke-black px-6 py-3 font-helvetica text-lg font-normal uppercase leading-relaxed transition-all cursor-pointer hover:bg-spoke-white hover:text-spoke-black hover:border-spoke-black",
   secondaryTw:
-    "inline-flex items-center justify-center bg-transparent text-spoke-black border border-spoke-black px-6 py-3 font-helvetica text-lg font-normal uppercase leading-relaxed transition-all hover:bg-spoke-black hover:text-spoke-white",
+    "inline-flex items-center justify-center bg-transparent text-spoke-black border border-spoke-black px-6 py-3 font-helvetica text-lg font-normal uppercase leading-relaxed transition-all cursor-pointer hover:bg-spoke-black hover:text-spoke-white",
 } as const;
 
 // ============================================
@@ -318,7 +318,7 @@ export const FOOTER_SPACING = {
   columnGap: "gap-16", // 64px gap between columns (matches SPACING_CLASSES["3xl"])
   linkGap: "gap-[10px]", // Gap between link items
   contactGap: "gap-6", // 24px gap in contact section (matches SPACING_CLASSES.lg)
-  padding: "pt-[60px] md:pt-[100px] pb-[30px] px-4 md:px-[30px]", // Top 60px mobile, 100px desktop, bottom 30px, horizontal 16px mobile, 30px desktop
+  padding: "pt-[60px] md:pt-[100px] pb-[30px]", // Top 60px mobile, 100px desktop, bottom 30px, horizontal 16px mobile, 30px desktop
 } as const;
 
 // Footer-specific typography constants matching Figma design
@@ -422,7 +422,7 @@ export const VEHICLE_DETAIL = {
   // Spacing tokens (exact Figma values)
   headerPadding: LAYOUT_CONSTANTS.contentPadding, // px-4 md:px-[30px]
   breadcrumbsTopPadding: "pt-5 md:pt-[41px]", // 20px mobile, 41px desktop
-  breadcrumbsHorizontalPadding: "px-4 md:px-[32px]", // 16px mobile, 32px desktop
+  breadcrumbsHorizontalPadding: "", // 16px mobile, 32px desktop
   breadcrumbsBottomPadding: "pb-0", // No bottom padding on breadcrumbs
   breadcrumbsTitleGap: "gap-0 md:gap-16", // 0px mobile, 64px desktop gap between breadcrumbs and title
   titleLocationGap: "gap-1", // 4px - Figma exact value
@@ -442,7 +442,7 @@ export const VEHICLE_DETAIL = {
   detailGridRight: "space-y-8", // 32px gap between sections in right column
 
   // Button tokens (exact Figma padding)
-  makeEnquiryButton: "inline-flex items-center justify-center bg-spoke-black text-spoke-white border border-spoke-black px-[23px] py-[11px] font-helvetica text-lg font-normal uppercase leading-relaxed transition-all hover:opacity-90",
+  makeEnquiryButton: "btn-base btn-primary w-full",
 
   // Image tokens
   mainImageDesktop: "aspect-[4/3]",
