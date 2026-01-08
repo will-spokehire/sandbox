@@ -44,13 +44,13 @@ export function ValueStatsBlock({ data }: ValueStatsBlockProps) {
               >
                 {typeof stat.icon === 'string' ? (
                   <IconComponent
-                    className="w-4 h-4 md:w-5 md:h-5 text-spoke-black"
+                    className="w-3.5 h-3.5 md:w-3.5 md:h-3.5 text-spoke-black"
                     strokeWidth={1.5}
                   />
                 ) : (
-                  renderIcon(stat.icon, 'w-4 h-4 md:w-5 md:h-5 text-spoke-black')
+                  renderIcon(stat.icon, 'h-3.5 text-spoke-black')
                 )}
-                <span className="font-degular text-sm md:text-[20px] leading-[1.5] uppercase text-spoke-black whitespace-nowrap">
+                <span className="font-degular text-sm md:text-[20px] uppercase text-spoke-black whitespace-nowrap">
                   {stat.label}
                 </span>
               </div>

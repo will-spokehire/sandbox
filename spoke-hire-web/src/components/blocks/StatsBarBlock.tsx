@@ -32,7 +32,7 @@ export function StatsBarBlock({ data }: StatsBarBlockProps) {
             {selectedStats.map((stat) => (
               <StatsBadge
                 key={stat.id}
-                icon={renderIcon(stat.icon, 'size-3.5')}
+                icon={renderIcon(stat.icon)}
                 label={stat.label}
               />
             ))}

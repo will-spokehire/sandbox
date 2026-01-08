@@ -26,7 +26,7 @@ export interface StatsBadgeGroupProps {
  *
  * Features:
  * - Icon + text in horizontal layout
- * - Archivo font, 12px, uppercase
+ * - Degular font, 20px, uppercase
  * - Pill format with rounded corners
  *
  * @example
@@ -43,8 +43,8 @@ export function StatsBadge({ icon, label, className }: StatsBadgeProps) {
         className
       )}
     >
-      <span className="shrink-0 text-spoke-black [&>svg]:size-3.5">{icon}</span>
-      <span className="statistics-text text-spoke-black whitespace-nowrap">
+      <span className="shrink-0 text-spoke-black [&>svg]:!w-[14px] [&>svg]:!h-[14px] [&>svg]:!max-w-[14px] [&>svg]:!max-h-[14px] [&>img]:!w-[14px] [&>img]:!h-[14px] [&>img]:!max-w-[14px] [&>img]:!max-h-[14px] md:[&>svg]:!w-[14px] md:[&>svg]:!h-[14px] md:[&>img]:!w-[14px] md:[&>img]:!h-[14px]">{icon}</span>
+      <span className="font-degular text-[20px] leading-[1.5] uppercase text-spoke-black whitespace-nowrap">
         {label}
       </span>
     </div>
