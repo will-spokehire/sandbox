@@ -213,7 +213,7 @@ export function PublicUserNavigation({ navigation }: PublicUserNavigationProps) 
     <header className="sticky top-0 z-50 w-full bg-white border-b border-gray-200">
       <div className={cn(
         "flex items-center justify-between",
-        LAYOUT_CONSTANTS.maxWidthContainer,
+        
         "h-[72px]"
       )}>
         {/* Logo */}

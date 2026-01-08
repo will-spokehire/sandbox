@@ -197,7 +197,7 @@ export function FAQSectionBlock({ data }: FAQSectionBlockProps) {
 
   return (
     <section className="bg-white pt-[60px] pb-0">
-      <div className={cn(LAYOUT_CONSTANTS.contentPadding)}>
+      <div >
         <div className="flex flex-col gap-[30px] md:gap-10 w-full">
           {/* Title Section */}
           {(title || subtitle) && (

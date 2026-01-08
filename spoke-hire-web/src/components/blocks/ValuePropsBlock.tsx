@@ -38,13 +38,13 @@ export function ValuePropsBlock({ data }: ValuePropsBlockProps) {
   // Split Layout (matching Figma design)
   if (isSplitLayout) {
     return (
-      <section className="bg-white pt-[60px] md:pt-[100px] pb-0 px-[30px]">
-        <div className="container mx-auto">
-          <div className="flex flex-col lg:flex-row gap-8 lg:gap-[206px] items-start">
-            {/* Left Column */}
-            <div className="w-full lg:w-[524px] shrink-0 flex flex-col gap-[22px]">
+      <section className="bg-white pt-[60px] md:pt-[100px]">
+        <div className="mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start min-w-0">
+            {/* Left Column - 2 columns width */}
+            <div className="lg:col-span-2 flex flex-col gap-[22px] min-w-0">
               {/* Main Heading */}
-              <h2 className="heading-2 text-black w-full">
+              <h2 className="heading-2 text-black w-full max-w-[524px]">
                 {title.includes('\n') ? (
                   title.split('\n').map((line, i) => (
                     <span key={i}>
@@ -59,15 +59,15 @@ export function ValuePropsBlock({ data }: ValuePropsBlockProps) {
 
               {/* Description and Buttons */}
               {subtitle && (
-                <div className="flex flex-col gap-[40px]">
+                <div className="flex flex-col gap-[40px] max-w-[524px]">
                   <p className="body-large text-black w-full">{subtitle}</p>
 
                   {/* Button Group */}
                   <div className="flex flex-row flex-nowrap gap-[22px] md:gap-[24px] items-center">
-                    <Button asChild variant="default" className="flex-1 min-w-0 shrink">
+                    <Button asChild variant="default" className="shrink-0">
                       <Link href="/vehicles">ALL VEHICLES</Link>
                     </Button>
-                    <Button asChild variant="outline" className="flex-1 min-w-0 shrink">
+                    <Button asChild variant="outline" className="shrink-0">
                       <Link href="/contact">GET IN TOUCH</Link>
                     </Button>
                   </div>
@@ -75,9 +75,9 @@ export function ValuePropsBlock({ data }: ValuePropsBlockProps) {
               )}
             </div>
 
-            {/* Right Column - 2x2 Grid */}
-            <div className="flex-1 w-full">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-[32px]">
+            {/* Right Column - 2 columns width with 2x2 grid */}
+            <div className="lg:col-span-2 min-w-0">
+              <div className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-2 gap-[32px]">
                 {selectedProps.map((prop) => {
                   const IconComponent = typeof prop.icon === 'string' 
                     ? getIconComponent(prop.icon) 
@@ -85,7 +85,7 @@ export function ValuePropsBlock({ data }: ValuePropsBlockProps) {
                   return (
                     <div
                       key={prop.id}
-                      className="flex flex-col gap-[24px] items-start text-black"
+                      className="flex flex-col gap-[24px] items-start text-black min-w-0"
                     >
                       {/* Icon */}
                       <div className="w-[30px] h-[30px] shrink-0">

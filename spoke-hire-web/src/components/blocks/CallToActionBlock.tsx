@@ -2,7 +2,6 @@ import Link from 'next/link'
 import { cn } from '~/lib/utils'
 import { Button } from '~/components/ui/button'
 import type { CallToActionBlockData } from '~/lib/payload-api'
-import { LAYOUT_CONSTANTS } from '~/lib/design-tokens'
 
 interface CallToActionBlockProps {
   data: CallToActionBlockData
@@ -54,7 +53,7 @@ export function CallToActionBlock({ data }: CallToActionBlockProps) {
     }
     const basePadding = paddingMap[level] ?? 'md:pt-16' // fallback
     // If no actions, reduce padding since there's no button section below
-    return hasActions ? basePadding : 'md:pt-8'
+    return basePadding 
   }
 
   const hasActions = actions && actions.length > 0
@@ -67,7 +66,7 @@ export function CallToActionBlock({ data }: CallToActionBlockProps) {
 
   return (
     <section className={cn(paddingClasses, bgClasses[backgroundStyle])}>
-      <div className={LAYOUT_CONSTANTS.maxWidthContainer}>
+      <div >
         <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-8 md:gap-12 items-start">
           {/* Left Column: Heading (2/3 width) */}
           <div>

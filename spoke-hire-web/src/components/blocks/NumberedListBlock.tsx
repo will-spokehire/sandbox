@@ -21,7 +21,7 @@ export function NumberedListBlock({ data }: NumberedListBlockProps) {
   }
 
   return (
-    <section className="bg-white px-4 md:px-[30px] pt-[60px] pb-0">
+    <section className="bg-white  pt-[60px] pb-0">
       <div className="flex flex-col gap-[44px] items-center w-full">
         {/* Main Title */}
         <div className="flex items-end justify-between relative shrink-0 w-full">

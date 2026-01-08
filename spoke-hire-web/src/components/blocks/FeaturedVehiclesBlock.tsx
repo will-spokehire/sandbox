@@ -191,7 +191,7 @@ export function FeaturedVehiclesBlock({ data }: FeaturedVehiclesBlockProps) {
 
   return (
     <section className={cn("bg-white pt-[60px] pb-0", LAYOUT_CONSTANTS.contentPadding)}>
-      <div className="max-w-[1448px] mx-auto w-full flex flex-col gap-5 items-center">
+      <div className=" mx-auto w-full flex flex-col gap-5 items-center">
         {/* Header - Left-aligned title with right-aligned button (desktop) */}
         {(title || subtitle) && (
           <div className="w-full flex flex-col md:flex-row md:items-end md:justify-between gap-3 md:gap-0">

@@ -709,7 +709,7 @@ export interface StaticPage {
         /**
          * Vertical spacing between sections
          */
-        height?: ('small' | 'medium' | 'large' | 'extra-large') | null;
+        height?: ('small' | 'medium' | 'large') | null;
         /**
          * Hide this block on mobile devices (screens < 640px)
          */
@@ -1076,7 +1076,7 @@ export interface StaticBlock {
         /**
          * Vertical spacing between sections
          */
-        height?: ('small' | 'medium' | 'large' | 'extra-large') | null;
+        height?: ('small' | 'medium' | 'large') | null;
         /**
          * Hide this block on mobile devices (screens < 640px)
          */

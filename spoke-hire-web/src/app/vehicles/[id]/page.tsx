@@ -285,22 +285,12 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
       <main className={cn(VEHICLE_DETAIL.containerPadding, "py-5 md:py-0 pb-24 md:pb-10")}>
         {/* Two-Column Layout - Desktop, Single Column - Mobile */}
         <div className={VEHICLE_DETAIL.detailGrid}>
-          {/* Left Column - Media Gallery & Description (890px width on desktop) */}
+          {/* Left Column - Media Gallery (890px width on desktop) */}
           <div className={VEHICLE_DETAIL.detailGridLeft}>
             <section aria-label="Vehicle gallery">
               <h2 className="sr-only">Gallery</h2>
               <PublicVehicleMediaSection vehicle={vehicle} />
             </section>
-
-            {/* Description Section */}
-            {vehicle.description && (
-              <section aria-label="Vehicle description" className="flex flex-col gap-3.5">
-                <h2 className={cn(TYPOGRAPHY.h3, "text-black")}>Description</h2>
-                <p className={cn(TYPOGRAPHY.bodyMedium, "text-black whitespace-pre-line")}>
-                  {vehicle.description}
-                </p>
-              </section>
-            )}
           </div>
 
           {/* Right Column - Details (flexible width on desktop) */}
@@ -308,6 +298,24 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
             <PublicVehicleBasicInfo vehicle={vehicle} />
           </div>
         </div>
+
+        {/* Full-Width Description Section */}
+        {vehicle.description && (
+          <section 
+            aria-label="Vehicle description" 
+            className={cn(
+              "w-full py-[41px]",
+              "flex flex-col gap-3.5"
+            )}
+          >
+            <h2 className={cn(TYPOGRAPHY.h3, "text-black uppercase tracking-[0.72px]")}>
+              Description
+            </h2>
+            <p className={cn(TYPOGRAPHY.bodyMedium, "text-black whitespace-pre-line tracking-[-0.16px]")}>
+              {vehicle.description}
+            </p>
+          </section>
+        )}
 
         {/* Similar Vehicles Section */}
         <SimilarVehicles vehicleId={vehicle.id} />
