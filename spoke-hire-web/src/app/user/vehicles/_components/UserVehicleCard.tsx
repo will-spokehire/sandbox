@@ -109,7 +109,7 @@ export function UserVehicleCard({ vehicle, href }: UserVehicleCardProps) {
               alt={currentImage?.altText || vehicle.name}
               fill
               className={cn(
-                "object-cover transition-opacity duration-300 group-hover:scale-105",
+                "object-cover object-center transition-opacity duration-300 group-hover:scale-105 transition-transform duration-300",
                 isImageLoaded ? "opacity-100" : "opacity-0"
               )}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

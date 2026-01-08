@@ -64,7 +64,7 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
           }}
           inputClassName={cn(
             "flex h-[44px] w-full border border-l-0 border-spoke-black bg-spoke-white px-4 py-2",
-            "font-degular text-lg font-medium leading-[1.4] text-spoke-black",
+            "font-degular leading-[1.4] text-spoke-black",
             "placeholder:text-spoke-black/40",
             "outline-none",
             "disabled:opacity-40 disabled:cursor-not-allowed"

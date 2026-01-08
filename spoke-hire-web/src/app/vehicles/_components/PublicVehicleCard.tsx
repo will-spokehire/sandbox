@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSwipeGesture } from "~/hooks/useSwipeGesture";
 import { cn } from "~/lib/utils";
+import { CARD_STYLES } from "~/lib/design-tokens";
 
 interface PublicVehicleCardProps {
   vehicle: {
@@ -141,13 +142,13 @@ export function PublicVehicleCard({ vehicle }: PublicVehicleCardProps) {
         {/* Content - Gap of 4px between title and location */}
         <div className="flex flex-col gap-1 text-black">
           {/* Vehicle Title - Using vehicle-card-title class */}
-          <div className="vehicle-card-title text-spoke-black">
+          <div className={cn(CARD_STYLES.vehicleCardTitle, "text-spoke-black")}>
             {title}
           </div>
 
           {/* Location - Using body-large class */}
           {location && (
-            <p className="vehicle-card-location text-spoke-black">
+            <p className={cn(CARD_STYLES.vehicleCardLocation, "text-spoke-black/70")}>
               {location}
             </p>
           )}

@@ -16,6 +16,8 @@
   border: 1px solid #000000 !important;
   border-radius: 0 !important;
   border-left: 0 !important;
+  font-size: var(--text-body-base);
+  font-weight: var(--font-weight-medium);
 }
 
 .phone-input-wrapper .react-international-phone-country-selector-button {

@@ -9,6 +9,8 @@ import { Card, CardContent } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 import { ProfileForm, ProfilePreview } from "~/app/_components/shared";
 import type { ProfileFormData } from "../vehicles/new/_components/validation";
+import { TYPOGRAPHY } from "~/lib/design-tokens";
+import { cn } from "~/lib/utils";
 
 /**
  * User Profile Page
@@ -112,10 +114,10 @@ export default function UserProfilePage() {
         <div className="w-full flex flex-col items-center px-4 md:px-[30px] pt-[41px] pb-[20px]">
           <div className="w-full max-w-[808px] flex flex-col items-center gap-[11px] text-center">
             {/* Main Title */}
-            <h1 className="text-[48px] md:text-[96px] font-normal leading-[0.95] uppercase text-black tracking-normal">
+            <h1 className={cn(TYPOGRAPHY.heroTitle, "text-black")}>
               My Profile
             </h1>
-            <p className="text-muted-foreground text-base md:text-lg">
+            <p className={cn(TYPOGRAPHY.pageDescription, "text-black")}>
               {isEditing 
                 ? "Update your personal information and contact details"
                 : "View your personal information and contact details"}

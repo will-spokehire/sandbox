@@ -435,7 +435,7 @@ export function ProfileForm({
                 variant="outline"
                 onClick={onCancel}
                 disabled={isSubmitting}
-                className="w-full max-w-[230px]"
+                className=""
               >
                 cancel
               </Button>
@@ -443,7 +443,7 @@ export function ProfileForm({
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full max-w-[230px]"
+              className=""
             >
               {isSubmitting ? (
                 <>
