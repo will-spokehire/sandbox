@@ -376,9 +376,18 @@ function getApiBaseUrl(): string {
 const PAYLOAD_API_BASE = getApiBaseUrl()
 
 /**
- * Fetch wrapper with error handling
+ * Fetch wrapper with error handling and cache tagging
+ * All PayloadCMS API calls are tagged with 'cms-content' for broad cache invalidation
  */
-async function payloadFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
+async function payloadFetch<T>(
+  endpoint: string,
+  options?: RequestInit & {
+    next?: {
+      tags?: string[]
+      revalidate?: number | false
+    }
+  }
+): Promise<T> {
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`
   const url = `${PAYLOAD_API_BASE}${cleanEndpoint}`
 
@@ -389,7 +398,12 @@ async function payloadFetch<T>(endpoint: string, options?: RequestInit): Promise
         'Content-Type': 'application/json',
         ...options?.headers,
       },
-    })
+      // Add cache tag for broad invalidation
+      next: {
+        tags: ['cms-content'],
+        ...options?.next,
+      },
+    } as RequestInit)
 
     if (!response.ok) {
       throw new Error(`PayloadCMS API error: ${response.status} ${response.statusText}`)

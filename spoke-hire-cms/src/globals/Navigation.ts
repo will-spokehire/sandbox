@@ -1,4 +1,5 @@
 import type { GlobalConfig } from 'payload'
+import { revalidateWebsite } from '../hooks/revalidateWebsite'
 
 export const Navigation: GlobalConfig = {
   slug: 'navigation',
@@ -8,6 +9,13 @@ export const Navigation: GlobalConfig = {
   access: {
     read: () => true, // Public read access
     update: ({ req: { user } }) => !!user, // Admin only
+  },
+  hooks: {
+    afterChange: [
+      async () => {
+        await revalidateWebsite('navigation', 'update')
+      },
+    ],
   },
   fields: [
     {

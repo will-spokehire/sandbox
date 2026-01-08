@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { revalidateWebsite } from '../hooks/revalidateWebsite'
 
 export const HeroSlides: CollectionConfig = {
   slug: 'hero-slides',
@@ -12,6 +13,18 @@ export const HeroSlides: CollectionConfig = {
     create: ({ req: { user } }) => !!user, // Admin only
     update: ({ req: { user } }) => !!user, // Admin only
     delete: ({ req: { user } }) => !!user, // Admin only
+  },
+  hooks: {
+    afterChange: [
+      async ({ operation, doc }) => {
+        await revalidateWebsite('hero-slides', operation === 'create' ? 'create' : 'update')
+      },
+    ],
+    afterDelete: [
+      async () => {
+        await revalidateWebsite('hero-slides', 'delete')
+      },
+    ],
   },
   fields: [
     {

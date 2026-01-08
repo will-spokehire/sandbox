@@ -753,6 +753,18 @@ export const StaticPages: CollectionConfig = {
     delete: ({ req: { user } }) => !!user, // Admin only
   },
   hooks: {
+    afterChange: [
+      async ({ operation }) => {
+        const { revalidateWebsite } = await import('../hooks/revalidateWebsite')
+        await revalidateWebsite('static-pages', operation === 'create' ? 'create' : 'update')
+      },
+    ],
+    afterDelete: [
+      async () => {
+        const { revalidateWebsite } = await import('../hooks/revalidateWebsite')
+        await revalidateWebsite('static-pages', 'delete')
+      },
+    ],
     afterRead: [
       ({ doc }) => {
         // Convert old string subtitle data to richText format for FAQ blocks

@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { revalidateWebsite } from '../hooks/revalidateWebsite'
 
 export const Stats: CollectionConfig = {
   slug: 'stats',
@@ -12,6 +13,18 @@ export const Stats: CollectionConfig = {
     create: ({ req: { user } }) => !!user, // Admin only
     update: ({ req: { user } }) => !!user, // Admin only
     delete: ({ req: { user } }) => !!user, // Admin only
+  },
+  hooks: {
+    afterChange: [
+      async ({ operation }) => {
+        await revalidateWebsite('stats', operation === 'create' ? 'create' : 'update')
+      },
+    ],
+    afterDelete: [
+      async () => {
+        await revalidateWebsite('stats', 'delete')
+      },
+    ],
   },
   fields: [
     {

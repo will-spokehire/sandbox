@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { revalidateWebsite } from '../hooks/revalidateWebsite'
 
 export const CarouselImages: CollectionConfig = {
   slug: 'carousel-images',
@@ -12,6 +13,18 @@ export const CarouselImages: CollectionConfig = {
     create: ({ req: { user } }) => !!user, // Admin only
     update: ({ req: { user } }) => !!user, // Admin only
     delete: ({ req: { user } }) => !!user, // Admin only
+  },
+  hooks: {
+    afterChange: [
+      async ({ operation }) => {
+        await revalidateWebsite('carousel-images', operation === 'create' ? 'create' : 'update')
+      },
+    ],
+    afterDelete: [
+      async () => {
+        await revalidateWebsite('carousel-images', 'delete')
+      },
+    ],
   },
   fields: [
     {
