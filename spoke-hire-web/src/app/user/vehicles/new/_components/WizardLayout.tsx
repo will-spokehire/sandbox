@@ -90,6 +90,7 @@ export function WizardLayout({
                 )}
                 <Button
                   type="button"
+                  variant="default"
                   onClick={isLastStep ? onSubmit : onNext}
                   disabled={!canGoNext || isLoading}
                   className="w-full max-w-[230px]"

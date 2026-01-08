@@ -170,6 +170,7 @@ export function BasicInfoStep({ onComplete, defaultValues, onValidationChange }:
 
       <Form {...form}>
         <form className="space-y-6">
+          {/* Make and Model in a grid - consistent spacing with other fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Make */}
             <FormField
@@ -195,9 +196,7 @@ export function BasicInfoStep({ onComplete, defaultValues, onValidationChange }:
                       disabled={isLoadingFilters}
                     />
                   </FormControl>
-                  <FormDescription className="min-h-[20px]">
-                    {/* Reserved space for consistency */}
-                  </FormDescription>
+                  
                   <FormMessage />
                 </FormItem>
               )}
@@ -215,16 +214,14 @@ export function BasicInfoStep({ onComplete, defaultValues, onValidationChange }:
                       options={modelOptions}
                       value={field.value}
                       onValueChange={field.onChange}
-                      placeholder="Select or type model"
+                      placeholder=  {!selectedMakeId ? "Select a make first" : "Select or type model"}
                       searchPlaceholder="Search models..."
                       emptyText="No model found."
                       disabled={!selectedMakeId || isLoadingModels}
                       allowCustomValue={true}
                     />
                   </FormControl>
-                  <FormDescription className="min-h-[20px]">
-                    {!selectedMakeId && "Select a make first"}
-                  </FormDescription>
+                  
                   <FormMessage />
                 </FormItem>
               )}
