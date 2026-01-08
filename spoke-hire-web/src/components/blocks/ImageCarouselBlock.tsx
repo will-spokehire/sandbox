@@ -68,7 +68,7 @@ export function ImageCarouselBlock({ data }: ImageCarouselBlockProps) {
 
   return (
     <section className="relative w-full overflow-hidden bg-white pt-[40px] pb-0">
-      <div className={LAYOUT_CONSTANTS.maxWidthContainer}>
+      <div >
         <div className="relative w-full h-[50vh] md:h-[60vh] lg:h-[813px]">
         {images.map((image, index) => {
           const displayImage = isMobile && image.mobileImage
@@ -81,8 +81,8 @@ export function ImageCarouselBlock({ data }: ImageCarouselBlockProps) {
             <div
               key={image.id}
               className={cn(
-                'absolute inset-0 transition-opacity duration-700',
-                index === currentIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                'absolute inset-0',
+                index === currentIndex ? '' : 'hidden pointer-events-none'
               )}
               role="group"
               aria-roledescription="slide"
