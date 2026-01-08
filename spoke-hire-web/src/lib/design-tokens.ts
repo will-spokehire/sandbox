@@ -75,7 +75,7 @@ export const TYPOGRAPHY = {
   heroTitle: "heading-1",
   sectionTitle: "heading-3",
   subsectionTitle: "heading-4",
-  pageDescription: "body-large text-muted-foreground",
+  pageDescription: "body-large text-black",
   bodyText: "body-medium",
   smallText: "body-small",
 } as const;

@@ -2,7 +2,6 @@
 
 import { Suspense } from 'react';
 import Link from 'next/link';
-import { Plus } from 'lucide-react';
 import { useRequireAuth } from '~/providers/auth-provider';
 import { api } from '~/trpc/react';
 import { useURLFilters } from '~/hooks/useURLFilters';
@@ -13,6 +12,8 @@ import { Skeleton } from '~/components/ui/skeleton';
 import { Card, CardContent } from '~/components/ui/card';
 import { z } from 'zod';
 import type { VehicleStatus } from '@prisma/client';
+import { TYPOGRAPHY } from '~/lib/design-tokens';
+import { cn } from '~/lib/utils';
 
 // Filter schema for URL-based filter management
 const userVehicleFiltersSchema = z.object({
@@ -154,20 +155,19 @@ function UserVehiclesPageContent() {
     <>
       {/* Header */}
       <div className="bg-white">
-        <div className="px-4 md:px-[30px] py-10 md:py-[41px]">
+        <div className=" py-10 md:py-[41px]">
           {/* Title and Add Button Row */}
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-[11px]">
             <h1 className="text-[48px] md:text-[96px] font-normal leading-[0.95] uppercase text-black tracking-normal">
               My Vehicles
             </h1>
-            <Link href="/user/vehicles/new" className="sm:pt-2 sm:pt-4">
-              <Button size="lg">
-                <Plus className="h-5 w-5 mr-2" />
+            <Button asChild size="lg" className="sm:pt-2 sm:pt-4">
+              <Link href="/user/vehicles/new">
                 Add Vehicle
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
-          <p className="text-muted-foreground text-base md:text-lg max-w-3xl">
+          <p className={cn(TYPOGRAPHY.pageDescription, "max-w-3xl")}>
             View and manage your vehicle listings
           </p>
         </div>
@@ -175,7 +175,7 @@ function UserVehiclesPageContent() {
 
       {/* Main Content */}
       <main className="flex-1 bg-white">
-        <div className="px-4 md:px-[30px] py-8">
+        <div className="py-8">
           {/* Status Filter Tabs */}
           <div className="mb-8">
             <VehicleStatusTabs

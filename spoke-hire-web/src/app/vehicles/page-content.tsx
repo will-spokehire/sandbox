@@ -9,7 +9,7 @@ import { PublicVehicleBreadcrumbs } from "./_components/PublicVehicleBreadcrumbs
 import { PublicVehicleGrid } from "./_components/PublicVehicleGrid";
 import { PageLoading } from "~/components/loading";
 import { cn } from "~/lib/utils";
-import { LAYOUT_CONSTANTS } from "~/lib/design-tokens";
+import { TYPOGRAPHY } from "~/lib/design-tokens";
 
 interface VehicleData {
   vehicles: any[];
@@ -93,7 +93,7 @@ function PublicVehiclesCatalogContent({ initialData, serverFilterOptions }: Publ
             <h1 className="heading-1 uppercase text-black leading-[0.95]">
               explore classic cars for hire
             </h1>
-            <p className="font-degular text-[18px] font-normal leading-[1.4] tracking-[-0.18px] text-black">
+            <p className={cn(TYPOGRAPHY.pageDescription, "text-black")}>
               Discover thousands of vehicles available to hire from action vehicles to wedding cars.
             </p>
           </div>

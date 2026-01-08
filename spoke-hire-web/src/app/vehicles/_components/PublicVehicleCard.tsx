@@ -98,7 +98,7 @@ export function PublicVehicleCard({ vehicle }: PublicVehicleCardProps) {
 
   return (
     <Link href={`/vehicles/${vehicle.id}`} className="group block">
-      <div className="bg-white flex flex-col gap-5 overflow-clip">
+      <div className="bg-white flex flex-col gap-4 overflow-clip">
         {/* Image Container - 4:3 aspect ratio */}
         <div 
           ref={swipeRef}
@@ -111,7 +111,7 @@ export function PublicVehicleCard({ vehicle }: PublicVehicleCardProps) {
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className={cn(
-              "object-cover object-center transition-opacity duration-300",
+              "object-cover object-center transition-opacity duration-300 group-hover:scale-105 transition-transform duration-300",
               isImageLoaded ? "opacity-100" : "opacity-0"
             )}
             onLoad={() => setIsImageLoaded(true)}
@@ -147,7 +147,7 @@ export function PublicVehicleCard({ vehicle }: PublicVehicleCardProps) {
 
           {/* Location - Using body-large class */}
           {location && (
-            <p className="body-large text-spoke-black">
+            <p className="vehicle-card-location text-spoke-black">
               {location}
             </p>
           )}
