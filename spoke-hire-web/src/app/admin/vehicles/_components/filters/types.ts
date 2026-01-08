@@ -20,6 +20,7 @@ export interface MultiSelectFilterProps {
   searchPlaceholder?: string;
   enableSearch?: boolean;
   className?: string;
+  onClear?: () => void;
 }
 
 export interface SingleSelectFilterProps {

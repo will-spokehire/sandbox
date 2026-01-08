@@ -245,6 +245,7 @@ function FilterControls({
         onChange={(makeIds) => {
           updateFilters({ makeIds, modelId: undefined });
         }}
+        onClear={() => updateFilters({ makeIds: undefined, modelId: undefined })}
         renderOption={renderStandardOption}
         searchPlaceholder="Search makes..."
         className="md:w-[180px]"
@@ -276,6 +277,7 @@ function FilterControls({
         options={decades}
         selectedIds={selectedDecades}
         onChange={handleDecadeChange}
+        onClear={() => updateFilters({ decadeIds: undefined })}
         renderOption={renderStandardOption}
         enableSearch={false}
         className="md:w-[160px]"
@@ -312,6 +314,7 @@ function FilterControls({
         options={collectionOptions}
         selectedIds={filters.collectionIds ?? []}
         onChange={(collectionIds) => updateFilters({ collectionIds })}
+        onClear={() => updateFilters({ collectionIds: undefined })}
         renderOption={renderCollectionOption}
         enableSearch={false}
         className="md:w-[200px]"

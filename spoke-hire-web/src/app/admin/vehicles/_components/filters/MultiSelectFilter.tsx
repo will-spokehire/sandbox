@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, X } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -42,6 +42,7 @@ export function MultiSelectFilter({
   searchPlaceholder = "Search...",
   enableSearch = true,
   className,
+  onClear,
 }: MultiSelectFilterProps) {
   const [open, setOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -67,8 +68,27 @@ export function MultiSelectFilter({
     return `${selectedIds.length} selected`;
   };
 
+  const handleClear = () => {
+    if (onClear) {
+      onClear();
+    } else {
+      onChange([]);
+    }
+    setOpen(false);
+  };
+
   const renderCommandItems = () => (
     <>
+      {selectedIds.length > 0 && (
+        <CommandItem
+          value="__clear__"
+          onSelect={handleClear}
+          className="text-muted-foreground border-b"
+        >
+          <X className="mr-2 h-4 w-4" />
+          <span>Clear</span>
+        </CommandItem>
+      )}
       {options.map((option) => {
         const isSelected = selectedIds.includes(option.id);
         return (
