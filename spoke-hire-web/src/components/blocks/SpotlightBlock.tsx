@@ -89,7 +89,7 @@ export function SpotlightBlock({ data }: SpotlightBlockProps) {
   }, [checkMobileScroll])
 
   return (
-    <section className="bg-white pt-[60px] md:pt-[100px] pb-0">
+    <section className="bg-white py-[40px]">
       <div className="w-full">
         {/* Title Layout */}
         {title && (
@@ -104,12 +104,12 @@ export function SpotlightBlock({ data }: SpotlightBlockProps) {
 
         {/* Navigation Arrows - Desktop only, positioned between title and cards */}
         {showArrows && totalItems > itemsPerView && (
-          <div className="hidden md:flex items-center justify-between px-0 py-[10px] w-full">
+          <div className="hidden md:flex items-center justify-between px-0 py-[20px] w-full">
             <button
               onClick={goToPrevious}
               disabled={currentIndex === 0}
               className={cn(
-                'h-[15px] w-[101px] flex items-center justify-center shrink-0 relative',
+                'h-[40px] w-[100px] flex items-center justify-center shrink-0 relative',
                 'transition-opacity',
                 currentIndex === 0 && 'opacity-30 cursor-not-allowed'
               )}
@@ -118,8 +118,8 @@ export function SpotlightBlock({ data }: SpotlightBlockProps) {
               <Image
                 src="/arrow-left.svg"
                 alt="Previous"
-                width={101}
-                height={15}
+                width={100}
+                height={40}
                 className="w-full h-full"
               />
             </button>
@@ -127,7 +127,7 @@ export function SpotlightBlock({ data }: SpotlightBlockProps) {
               onClick={goToNext}
               disabled={currentIndex >= maxIndex}
               className={cn(
-                'h-[15px] w-[101px] flex items-center justify-center shrink-0 relative',
+                'h-[40px] w-[100px] flex items-center justify-center shrink-0 relative',
                 'transition-opacity',
                 currentIndex >= maxIndex && 'opacity-30 cursor-not-allowed'
               )}
@@ -136,12 +136,17 @@ export function SpotlightBlock({ data }: SpotlightBlockProps) {
               <Image
                 src="/arrow-right.svg"
                 alt="Next"
-                width={101}
-                height={15}
+                width={100}
+                height={40}
                 className="w-full h-full"
               />
             </button>
           </div>
+        )}
+
+        {/* Spacer when arrows are not shown - maintains consistent spacing */}
+        {(!showArrows || totalItems <= itemsPerView) && (
+          <div className="hidden md:block py-[20px] w-full" />
         )}
 
         {/* Desktop Card Row */}
@@ -177,7 +182,7 @@ export function SpotlightBlock({ data }: SpotlightBlockProps) {
         </div>
 
         {/* Mobile: Single card with scroll dots */}
-        <div className="md:hidden flex flex-col gap-[41px] w-full">
+        <div className="md:hidden flex flex-col gap-[36px] mt-[36px] w-full">
           <div
             ref={mobileScrollRef}
             className="flex overflow-x-auto gap-0 snap-x snap-mandatory"

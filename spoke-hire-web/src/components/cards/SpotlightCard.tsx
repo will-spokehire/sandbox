@@ -69,7 +69,7 @@ export function SpotlightCard({
       </div>
 
       {/* Content */}
-      <div className="flex flex-col gap-1 pt-3">
+      <div className="flex flex-col gap-[7px]">
         <h3 className={cn(titleClass, "text-spoke-black")}>{title}</h3>
         {subtitle && (
           <p className="body-medium text-spoke-black/70">{subtitle}</p>
