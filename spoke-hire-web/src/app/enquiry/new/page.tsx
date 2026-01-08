@@ -157,7 +157,7 @@ function EnquiryFormContent() {
     <>
       {/* Header - Wizard Style */}
       <div className="bg-white">
-        <div className="w-full flex flex-col items-center px-4 md:px-[30px] py-[41px]">
+        <div className="w-full flex flex-col items-center px-4 md:px-[30px] pt-[41px] pb-[20px]">
           <div className="w-full max-w-[808px] flex flex-col items-center gap-[11px]">
             {vehicleIdFromUrl && (
               <div className="w-full mb-4">
@@ -172,12 +172,14 @@ function EnquiryFormContent() {
               </div>
             )}
             {/* Main Title */}
-            <h1 className="text-[48px] md:text-[96px] font-normal leading-[0.95] uppercase text-black tracking-normal text-center">
-              Make an enquiry
-            </h1>
-            <p className="text-muted-foreground text-base md:text-lg text-center">
-              Tell us about your requirements and we'll get back to you soon
-            </p>
+            <div className="w-full flex flex-col items-center gap-[11px] text-center">
+              <h1 className="text-[48px] md:text-[96px] font-normal leading-[0.95] uppercase text-black tracking-normal">
+                Make an enquiry
+              </h1>
+              <p className={cn(TYPOGRAPHY.bodyLarge, "text-center")}>
+                Tell us about your requirements and we'll get back to you soon
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -202,9 +204,6 @@ function EnquiryFormContent() {
               <Card>
                 <CardHeader>
                   <CardTitle>Enquiry Details</CardTitle>
-                  <CardDescription>
-                    Tell us about your requirements
-                  </CardDescription>
                 </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -240,7 +239,7 @@ function EnquiryFormContent() {
                     id="date"
                     {...form.register("date")}
                     disabled={isSubmitting}
-                    placeholder="e.g., Jan 15, 2025"
+                    placeholder="e.g. 1st January 2026"
                   />
                   {form.formState.errors.date && (
                     <p className="text-sm text-red-500">
@@ -257,7 +256,7 @@ function EnquiryFormContent() {
                     id="time"
                     {...form.register("time")}
                     disabled={isSubmitting}
-                    placeholder="e.g., 9:00 AM"
+                    placeholder="e.g. 09:00-17:00"
                   />
                   {form.formState.errors.time && (
                     <p className="text-sm text-red-500">
@@ -275,7 +274,7 @@ function EnquiryFormContent() {
                   id="location"
                   {...form.register("location")}
                   disabled={isSubmitting}
-                  placeholder="e.g., Studio 51, London"
+                  placeholder="e.g. Studio 51, London"
                 />
                 {form.formState.errors.location && (
                   <p className="text-sm text-red-500">
@@ -300,7 +299,7 @@ function EnquiryFormContent() {
                     {form.formState.errors.brief.message}
                   </p>
                 )}
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   Provide as much detail as possible about your requirements
                 </p>
               </div>
@@ -477,7 +476,7 @@ function EnquiryFormContent() {
 
             {/* Submit Section */}
             <div className="flex items-center justify-center w-full">
-              <div className="flex justify-end gap-4 w-full max-w-[480px]">
+              <div className="flex justify-end gap-4 ">
                 {vehicleIdFromUrl && (
                   <Button
                     type="button"
