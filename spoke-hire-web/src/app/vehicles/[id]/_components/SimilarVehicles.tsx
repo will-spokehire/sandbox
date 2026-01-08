@@ -5,7 +5,7 @@ import Image from "next/image";
 import { api } from "~/trpc/react";
 import { PublicVehicleCard } from "~/app/vehicles/_components/PublicVehicleCard";
 import { MobileScrollDots } from "~/components/blocks/MobileScrollDots";
-import { TYPOGRAPHY, LAYOUT_CONSTANTS, BUTTON_STYLES } from "~/lib/design-tokens";
+import { TYPOGRAPHY, LAYOUT_CONSTANTS } from "~/lib/design-tokens";
 import { cn } from "~/lib/utils";
 
 interface SimilarVehiclesProps {
@@ -176,8 +176,8 @@ export function SimilarVehicles({ vehicleId }: SimilarVehiclesProps) {
       )}
       aria-label="Similar vehicles"
     >
-      {/* Desktop: Title Layout with Button */}
-      <div className="hidden md:flex items-end justify-between relative shrink-0 w-full max-w-[1448px]">
+      {/* Desktop: Title Layout */}
+      <div className="hidden md:flex items-end relative shrink-0 w-full max-w-[1448px]">
         <div className="flex flex-col gap-3 items-start not-italic relative shrink-0 text-black w-[711px]">
           <h2 className={cn(TYPOGRAPHY.h2, "leading-[0.95] relative shrink-0 text-nowrap tracking-[-0.64px] uppercase")}>
             classic cars like this
@@ -186,16 +186,6 @@ export function SimilarVehicles({ vehicleId }: SimilarVehiclesProps) {
             See similar vehicles that fit your brief.
           </p>
         </div>
-        {/* Optional "See similar cars" button - matching Figma design */}
-        <button
-          className={cn(
-            BUTTON_STYLES.secondaryTw,
-            "border border-black border-solid px-[23px] py-[11px]"
-          )}
-          aria-label="See similar cars"
-        >
-          See similar cars
-        </button>
       </div>
 
       {/* Mobile: Title Layout */}
