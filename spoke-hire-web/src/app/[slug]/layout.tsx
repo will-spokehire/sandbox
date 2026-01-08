@@ -21,7 +21,9 @@ export default async function StaticPageLayout({
     <div className={cn(LAYOUT_CONSTANTS.pageWrapper, LAYOUT_CONSTANTS.bgDefault)}>
       <PublicUserNavigation navigation={navigation} />
       {children}
-      <FooterWrapper />
+      <div className="mt-10">
+        <FooterWrapper />
+      </div>
     </div>
   );
 }
