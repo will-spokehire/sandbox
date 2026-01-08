@@ -40,6 +40,7 @@ export function MultiSelectFilter({
   onChange,
   renderOption,
   searchPlaceholder = "Search...",
+  enableSearch = true,
   className,
 }: MultiSelectFilterProps) {
   const [open, setOpen] = useState(false);
@@ -139,7 +140,7 @@ export function MultiSelectFilter({
             <SheetTitle>{label}</SheetTitle>
           </SheetHeader>
           <Command className="mt-4">
-            <CommandInput placeholder={searchPlaceholder} />
+            {enableSearch && <CommandInput placeholder={searchPlaceholder} />}
             <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup>{renderCommandItems()}</CommandGroup>
@@ -166,7 +167,7 @@ export function MultiSelectFilter({
       </PopoverTrigger>
       <PopoverContent className="w-[280px] p-0" align="start">
         <Command>
-          <CommandInput placeholder={searchPlaceholder} />
+          {enableSearch && <CommandInput placeholder={searchPlaceholder} />}
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
             <CommandGroup>{renderCommandItems()}</CommandGroup>

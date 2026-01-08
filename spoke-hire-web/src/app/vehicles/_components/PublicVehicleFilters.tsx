@@ -288,7 +288,7 @@ function FilterControls({
         selectedIds={selectedDecade ? [selectedDecade.id] : []}
         onChange={handleDecadeChange}
         renderOption={renderStandardOption}
-        searchPlaceholder="Search decades..."
+        enableSearch={false}
         className="md:w-[160px]"
       />
 
@@ -324,7 +324,7 @@ function FilterControls({
         selectedIds={filters.collectionIds ?? []}
         onChange={(collectionIds) => updateFilters({ collectionIds })}
         renderOption={renderCollectionOption}
-        searchPlaceholder="Search collections..."
+        enableSearch={false}
         className="md:w-[200px]"
       />
     </>
