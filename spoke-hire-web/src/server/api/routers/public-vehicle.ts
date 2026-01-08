@@ -24,8 +24,7 @@ const listPublicVehiclesInputSchema = z.object({
   makeIds: z.array(z.string()).optional(),
   modelId: z.string().optional(),
   collectionIds: z.array(z.string()).optional(),
-  yearFrom: z.string().optional(),
-  yearTo: z.string().optional(),
+  decadeIds: z.array(z.string()).optional(),
   
   // Location filters
   countryIds: z.array(z.string()).optional(),
@@ -71,9 +70,40 @@ export const publicVehicleRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const service = ServiceFactory.createVehicleService(ctx.db);
       
+      // Convert decadeIds to yearFrom/yearTo if provided
+      let yearFrom: string | undefined;
+      let yearTo: string | undefined;
+      
+      if (input.decadeIds && input.decadeIds.length > 0) {
+        const currentYear = new Date().getFullYear();
+        const startDecade = 1920;
+        const decades: Array<{ id: string; yearFrom: number; yearTo: number }> = [];
+        
+        // Build decades array
+        for (let year = startDecade; year <= currentYear; year += 10) {
+          const decadeEnd = Math.min(year + 9, currentYear);
+          decades.push({
+            id: `${year}s`,
+            yearFrom: year,
+            yearTo: decadeEnd,
+          });
+        }
+        
+        // Find selected decades and calculate range
+        const selectedDecades = decades.filter((d) => input.decadeIds!.includes(d.id));
+        if (selectedDecades.length > 0) {
+          const yearFroms = selectedDecades.map((d) => d.yearFrom);
+          const yearTos = selectedDecades.map((d) => d.yearTo);
+          yearFrom = String(Math.min(...yearFroms));
+          yearTo = String(Math.max(...yearTos));
+        }
+      }
+      
       // Force status to PUBLISHED for public access
       const result = await service.listVehicles({
         ...input,
+        yearFrom,
+        yearTo,
         status: "PUBLISHED", // Override - only show published vehicles
       });
 
@@ -169,8 +199,7 @@ export const publicVehicleRouter = createTRPCRouter({
         makeIds: z.array(z.string()).optional(),
         modelId: z.string().optional(),
         collectionIds: z.array(z.string()).optional(),
-        yearFrom: z.string().optional(),
-        yearTo: z.string().optional(),
+        decadeIds: z.array(z.string()).optional(),
         countryIds: z.array(z.string()).optional(),
         counties: z.array(z.string()).optional(),
       }).optional()
@@ -196,8 +225,38 @@ export const publicVehicleRouter = createTRPCRouter({
         };
       }
 
+      // Convert decadeIds to yearFrom/yearTo if provided for filter options
+      let filterInput = input;
+      if (input.decadeIds && input.decadeIds.length > 0) {
+        const currentYear = new Date().getFullYear();
+        const startDecade = 1920;
+        const decades: Array<{ id: string; yearFrom: number; yearTo: number }> = [];
+        
+        // Build decades array
+        for (let year = startDecade; year <= currentYear; year += 10) {
+          const decadeEnd = Math.min(year + 9, currentYear);
+          decades.push({
+            id: `${year}s`,
+            yearFrom: year,
+            yearTo: decadeEnd,
+          });
+        }
+        
+        // Find selected decades and calculate range
+        const selectedDecades = decades.filter((d) => input.decadeIds!.includes(d.id));
+        if (selectedDecades.length > 0) {
+          const yearFroms = selectedDecades.map((d) => d.yearFrom);
+          const yearTos = selectedDecades.map((d) => d.yearTo);
+          filterInput = {
+            ...input,
+            yearFrom: String(Math.min(...yearFroms)),
+            yearTo: String(Math.max(...yearTos)),
+          };
+        }
+      }
+      
       // Get dynamic filter options based on current filters
-      const options = await repository.getPublicFilterOptions(input);
+      const options = await repository.getPublicFilterOptions(filterInput);
 
       return {
         makes: options.makes as Array<{ id: string; name: string }>,

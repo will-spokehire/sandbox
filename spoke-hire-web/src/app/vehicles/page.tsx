@@ -9,8 +9,7 @@ interface PageProps {
     makeIds?: string;
     modelId?: string;
     collectionIds?: string;
-    yearFrom?: string;
-    yearTo?: string;
+    decadeIds?: string;
     countryIds?: string;
     counties?: string;
     page?: string;
@@ -91,6 +90,7 @@ export default async function PublicVehiclesPage({ searchParams }: PageProps) {
   // Parse filter parameters from URL
   const makeIds = params.makeIds?.split(",").filter(Boolean);
   const collectionIds = params.collectionIds?.split(",").filter(Boolean);
+  const decadeIds = params.decadeIds?.split(",").filter(Boolean);
   const countryIds = params.countryIds?.split(",").filter(Boolean);
   const counties = params.counties?.split(",").filter(Boolean);
   const page = params.page ? parseInt(params.page, 10) : 1;
@@ -109,8 +109,7 @@ export default async function PublicVehiclesPage({ searchParams }: PageProps) {
         makeIds: makeIds && makeIds.length > 0 ? makeIds : undefined,
         modelId: params.modelId,
         collectionIds: collectionIds && collectionIds.length > 0 ? collectionIds : undefined,
-        yearFrom: params.yearFrom,
-        yearTo: params.yearTo,
+        decadeIds: decadeIds && decadeIds.length > 0 ? decadeIds : undefined,
         countryIds: countryIds && countryIds.length > 0 ? countryIds : undefined,
         counties: counties && counties.length > 0 ? counties : undefined,
         sortBy: (params.sortBy as "name" | "createdAt" | "updatedAt" | "year" | "distance") ?? "createdAt",
@@ -118,13 +117,12 @@ export default async function PublicVehiclesPage({ searchParams }: PageProps) {
         includeTotalCount: true,
       }),
       // Fetch filter options if there are active filters
-      (makeIds?.length || params.modelId || collectionIds?.length || params.yearFrom || countryIds?.length || counties?.length)
+      (makeIds?.length || params.modelId || collectionIds?.length || decadeIds?.length || countryIds?.length || counties?.length)
         ? api.publicVehicle.getFilterOptions({
             makeIds,
             modelId: params.modelId,
             collectionIds,
-            yearFrom: params.yearFrom,
-            yearTo: params.yearTo,
+            decadeIds,
             countryIds,
             counties,
           })

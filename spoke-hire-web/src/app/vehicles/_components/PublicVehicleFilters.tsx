@@ -35,8 +35,7 @@ export function PublicVehicleFilters() {
       makeIds: filters.makeIds,
       modelId: filters.modelId,
       collectionIds: filters.collectionIds,
-      yearFrom: filters.yearFrom,
-      yearTo: filters.yearTo,
+      decadeIds: filters.decadeIds,
       countryIds: filters.countryIds,
       counties: filters.counties,
     },
@@ -102,15 +101,7 @@ export function PublicVehicleFilters() {
   }, [multipleMakesSelected, filters.modelId, updateFilters]);
 
   const handleDecadeChange = (decadeIds: string[]) => {
-    if (decadeIds.length === 0) {
-      updateFilters({ yearFrom: undefined, yearTo: undefined });
-    } else {
-      // Use first selected decade
-      const decade = decades.find((d) => d.id === decadeIds[0]);
-      if (decade) {
-        updateFilters({ yearFrom: decade.yearFrom, yearTo: decade.yearTo });
-      }
-    }
+    updateFilters({ decadeIds: decadeIds.length > 0 ? decadeIds : undefined });
   };
 
   const handleClearFilters = () => {
@@ -121,7 +112,7 @@ export function PublicVehicleFilters() {
     (filters.makeIds?.length ?? 0) +
     (filters.modelId ? 1 : 0) +
     (filters.collectionIds?.length ?? 0) +
-    (filters.yearFrom ? 1 : 0) +
+    (filters.decadeIds?.length ?? 0) +
     (filters.countryIds?.length ?? 0) +
     (filters.counties?.length ?? 0);
 
@@ -147,10 +138,8 @@ export function PublicVehicleFilters() {
     </>
   );
 
-  // Get selected decade for display
-  const selectedDecade = filters.yearFrom
-    ? decades.find((d) => d.yearFrom === filters.yearFrom)
-    : undefined;
+  // Get selected decades for display
+  const selectedDecades = filters.decadeIds ?? [];
 
   return (
     <div className="space-y-4">
@@ -180,7 +169,7 @@ export function PublicVehicleFilters() {
                 countryOptions={countryOptions}
                 countyOptions={countyOptions}
                 decades={decades}
-                selectedDecade={selectedDecade}
+                selectedDecades={selectedDecades}
                 filters={filters}
                 updateFilters={updateFilters}
                 handleModelChange={handleModelChange}
@@ -210,7 +199,7 @@ export function PublicVehicleFilters() {
             countryOptions={countryOptions}
             countyOptions={countyOptions}
             decades={decades}
-            selectedDecade={selectedDecade}
+            selectedDecades={selectedDecades}
             filters={filters}
             updateFilters={updateFilters}
             handleModelChange={handleModelChange}
@@ -233,7 +222,7 @@ function FilterControls({
   countryOptions,
   countyOptions,
   decades,
-  selectedDecade,
+  selectedDecades,
   filters,
   updateFilters,
   handleModelChange,
@@ -285,7 +274,7 @@ function FilterControls({
         label="Select Decade"
         placeholder="All decades"
         options={decades}
-        selectedIds={selectedDecade ? [selectedDecade.id] : []}
+        selectedIds={selectedDecades}
         onChange={handleDecadeChange}
         renderOption={renderStandardOption}
         enableSearch={false}
