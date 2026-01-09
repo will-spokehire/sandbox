@@ -70,7 +70,6 @@ export interface Config {
     users: User;
     media: Media;
     icons: Icon;
-    'hero-slides': HeroSlide;
     stats: Stat;
     'value-props': ValueProp;
     'cta-blocks': CtaBlock;
@@ -90,7 +89,6 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     icons: IconsSelect<false> | IconsSelect<true>;
-    'hero-slides': HeroSlidesSelect<false> | HeroSlidesSelect<true>;
     stats: StatsSelect<false> | StatsSelect<true>;
     'value-props': ValuePropsSelect<false> | ValuePropsSelect<true>;
     'cta-blocks': CtaBlocksSelect<false> | CtaBlocksSelect<true>;
@@ -203,23 +201,6 @@ export interface Icon {
    * Upload the SVG icon file from Figma
    */
   svg: number | Media;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Rotating hero section slides for homepage
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "hero-slides".
- */
-export interface HeroSlide {
-  id: number;
-  image: number | Media;
-  heading: string;
-  subheading?: string | null;
-  ctaText?: string | null;
-  ctaLink?: string | null;
-  status: 'draft' | 'published';
   updatedAt: string;
   createdAt: string;
 }
@@ -1126,10 +1107,6 @@ export interface PayloadLockedDocument {
         value: number | Icon;
       } | null)
     | ({
-        relationTo: 'hero-slides';
-        value: number | HeroSlide;
-      } | null)
-    | ({
         relationTo: 'stats';
         value: number | Stat;
       } | null)
@@ -1254,20 +1231,6 @@ export interface MediaSelect<T extends boolean = true> {
 export interface IconsSelect<T extends boolean = true> {
   name?: T;
   svg?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "hero-slides_select".
- */
-export interface HeroSlidesSelect<T extends boolean = true> {
-  image?: T;
-  heading?: T;
-  subheading?: T;
-  ctaText?: T;
-  ctaLink?: T;
-  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }

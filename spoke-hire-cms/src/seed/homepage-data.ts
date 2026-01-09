@@ -7,21 +7,6 @@
  */
 
 // ============================================
-// HERO SLIDES
-// ============================================
-export const heroSlides = [
-  {
-    heading: 'Classic car hire made easy',
-    subheading:
-      "Access the UK's largest classic car hire platform with thousands of vehicles available to hire today. Can't see it on the site? We'll find it.",
-    ctaText: 'Find a car',
-    ctaLink: '/vehicles',
-    order: 1,
-    status: 'published' as const,
-  },
-]
-
-// ============================================
 // STATS BAR
 // ============================================
 // Note: Icons need to be uploaded to Icons collection and assigned manually in CMS

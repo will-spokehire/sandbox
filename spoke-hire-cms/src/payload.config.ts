@@ -9,7 +9,6 @@ import sharp from 'sharp'
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Icons } from './collections/Icons'
-import { HeroSlides } from './collections/HeroSlides'
 import { Stats } from './collections/Stats'
 import { ValueProps } from './collections/ValueProps'
 import { CTABlocks } from './collections/CTABlocks'
@@ -39,7 +38,6 @@ export default buildConfig({
     Users,
     Media,
     Icons,
-    HeroSlides,
     Stats,
     ValueProps,
     CTABlocks,

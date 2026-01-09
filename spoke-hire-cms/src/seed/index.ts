@@ -11,7 +11,7 @@
 import 'dotenv/config'
 import { getPayload } from 'payload'
 import config from '../payload.config'
-import { heroSlides, stats, valueProps, ctaBlocks, homepageLayout } from './homepage-data'
+import { stats, valueProps, ctaBlocks, homepageLayout } from './homepage-data'
 import { footerData } from './footer-data'
 import { headerData } from './header-data'
 
@@ -22,22 +22,7 @@ async function seed() {
 
   try {
     // ============================================
-    // 1. SEED HERO SLIDES (Skipped - requires image upload first)
-    // ============================================
-    console.log('📸 Hero slides... (skipped - requires images to be uploaded first)')
-    console.log('  ℹ️  Upload hero images via CMS admin, then create hero slides manually')
-    const createdHeroSlides: { id: string | number }[] = []
-
-    // Fetch any existing hero slides for linking
-    const existingHeroSlides = await payload.find({
-      collection: 'hero-slides',
-      where: { status: { equals: 'published' } },
-      limit: 10,
-    })
-    createdHeroSlides.push(...existingHeroSlides.docs)
-
-    // ============================================
-    // 2. SEED STATS
+    // 1. SEED STATS
     // ============================================
     console.log('📊 Seeding stats...')
     const createdStats: { id: string | number }[] = []
@@ -62,7 +47,7 @@ async function seed() {
     }
 
     // ============================================
-    // 3. SEED VALUE PROPS
+    // 2. SEED VALUE PROPS
     // ============================================
     console.log('💎 Seeding value props...')
     const createdValueProps: { id: string | number }[] = []
@@ -87,7 +72,7 @@ async function seed() {
     }
 
     // ============================================
-    // 4. SEED CTA BLOCKS
+    // 3. SEED CTA BLOCKS
     // ============================================
     console.log('🎯 Seeding CTA blocks...')
     const createdCTABlocks: { id: string | number }[] = []
@@ -113,7 +98,7 @@ async function seed() {
     }
 
     // ============================================
-    // 5. SEED HOMEPAGE STATIC PAGE
+    // 4. SEED HOMEPAGE STATIC PAGE
     // ============================================
     console.log('📄 Seeding homepage...')
 
@@ -160,7 +145,7 @@ async function seed() {
     }
 
     // ============================================
-    // 6. SEED NAVIGATION GLOBAL (Header & Footer)
+    // 5. SEED NAVIGATION GLOBAL (Header & Footer)
     // ============================================
     console.log('\n🔗 Seeding Navigation global (header & footer)...')
 
@@ -190,7 +175,6 @@ async function seed() {
 
     console.log('\n✅ Seed completed successfully!')
     console.log('\nSummary:')
-    console.log(`  - Hero Slides: ${createdHeroSlides.length}`)
     console.log(`  - Stats: ${createdStats.length}`)
     console.log(`  - Value Props: ${createdValueProps.length}`)
     console.log(`  - CTA Blocks: ${createdCTABlocks.length}`)

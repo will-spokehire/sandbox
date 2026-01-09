@@ -2,7 +2,7 @@
  * Image Seed Script for PayloadCMS
  *
  * This script downloads images from URLs and uploads them to PayloadCMS Media collection.
- * It then creates hero slides and updates the homepage with the image gallery.
+ * It then creates spotlight items and updates the homepage with the project spotlight block.
  *
  * Run with: NODE_OPTIONS=--no-deprecation npx tsx src/seed/seed-images.ts
  */
@@ -162,37 +162,7 @@ async function seedImages() {
     const heroImage = await uploadImageFromPath(payload, IMAGES.hero.localPath, IMAGES.hero.alt)
 
     // ============================================
-    // 2. CREATE HERO SLIDE (if image was uploaded)
-    // ============================================
-    if (heroImage) {
-      console.log('\n🎠 Creating hero slide...')
-
-      const existingSlide = await payload.find({
-        collection: 'hero-slides',
-        where: { heading: { equals: 'Classic car hire made easy' } },
-      })
-
-      if (existingSlide.docs.length === 0) {
-        await payload.create({
-          collection: 'hero-slides',
-          data: {
-            heading: 'Classic car hire made easy',
-            subheading:
-              "Access the UK's largest classic car hire platform with thousands of vehicles available to hire today. Can't see it on the site? We'll find it.",
-            ctaText: 'Find a car',
-            ctaLink: '/vehicles',
-            image: typeof heroImage.id === 'number' ? heroImage.id : Number(heroImage.id),
-            status: 'published',
-          },
-        })
-        console.log('  ✓ Created hero slide')
-      } else {
-        console.log('  ○ Hero slide already exists')
-      }
-    }
-
-    // ============================================
-    // 3. CREATE SPOTLIGHT COLLECTION ITEMS
+    // 2. CREATE SPOTLIGHT COLLECTION ITEMS
     // ============================================
     console.log('\n🌟 Creating spotlight collection items...')
     const spotlightIds: (string | number)[] = []
@@ -229,7 +199,7 @@ async function seedImages() {
     }
 
     // ============================================
-    // 4. UPDATE HOMEPAGE WITH PROJECT SPOTLIGHT BLOCK
+    // 3. UPDATE HOMEPAGE WITH PROJECT SPOTLIGHT BLOCK
     // ============================================
     if (spotlightIds.length > 0) {
       console.log('\n📄 Updating homepage with project spotlight block...')
@@ -318,28 +288,6 @@ async function seedImages() {
             }
           }
         }
-      }
-    }
-
-    // ============================================
-    // 5. LINK HERO SLIDES TO HOMEPAGE
-    // ============================================
-    console.log('\n🔗 Linking hero slides to homepage...')
-
-    const heroSlides = await payload.find({
-      collection: 'hero-slides',
-      where: { status: { equals: 'published' } },
-    })
-
-    if (heroSlides.docs.length > 0) {
-      const homepage = await payload.find({
-        collection: 'static-pages',
-        where: { slug: { equals: 'home' } },
-      })
-
-      if (homepage.docs.length > 0) {
-        // Hero carousel block has been removed - no longer linking hero slides
-        console.log('  ○ Hero carousel block removed - skipping hero slide linking')
       }
     }
 

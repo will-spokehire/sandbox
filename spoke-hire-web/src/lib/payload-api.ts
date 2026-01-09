@@ -80,16 +80,6 @@ export function getMediaUrl(url: string | undefined): string {
   return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`
 }
 
-export interface HeroSlide {
-  id: string
-  image: PayloadMedia
-  heading: string
-  subheading?: string
-  ctaText?: string
-  ctaLink?: string
-  status: 'draft' | 'published'
-}
-
 export interface Stat {
   id: string
   label: string
@@ -524,22 +514,6 @@ export async function getStatsByIds(ids: string[]): Promise<Stat[]> {
     return response.docs
   } catch (error) {
     console.error('[PayloadAPI] Error fetching stats by IDs:', error)
-    return []
-  }
-}
-
-/**
- * Get hero slides by IDs
- */
-export async function getHeroSlidesByIds(ids: string[]): Promise<HeroSlide[]> {
-  try {
-    const idsParam = ids.map((id) => `where[id][in]=${id}`).join('&')
-    const response = await payloadFetch<PayloadResponse<HeroSlide>>(
-      `/hero-slides?${idsParam}&where[status][equals]=published&depth=1`
-    )
-    return response.docs
-  } catch (error) {
-    console.error('[PayloadAPI] Error fetching hero slides by IDs:', error)
     return []
   }
 }
