@@ -161,7 +161,7 @@ export function PublicVehicleFilters() {
             <SheetHeader>
               <SheetTitle>Filters</SheetTitle>
             </SheetHeader>
-            <div className="space-y-4 mt-6">
+            <div className="space-y-4 mt-6 px-[16px]">
               <FilterControls
                 makeOptions={makeOptions}
                 modelOptions={modelOptions}
