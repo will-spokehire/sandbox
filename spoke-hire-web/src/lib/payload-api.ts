@@ -184,6 +184,8 @@ export interface FAQSectionBlockData {
 
 export interface RichTextContentBlockData {
   blockType: 'rich-text-content'
+  header?: string
+  headerType?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
   content: unknown // Lexical rich text
   hideOnMobile?: boolean
 }
@@ -202,19 +204,6 @@ export interface FeaturedVehiclesBlockData {
   vehicleIds?: { vehicleId: string }[]
   limit?: number
   showMobileButton?: boolean
-  hideOnMobile?: boolean
-}
-
-export interface ImageGalleryBlockData {
-  blockType: 'image-gallery'
-  title?: string
-  images: {
-    image: PayloadMedia
-    caption?: string
-    link?: string
-  }[]
-  displayStyle: 'grid' | 'masonry' | 'carousel' | 'lightbox-grid'
-  columns: '2' | '3' | '4' | '5' | 2 | 3 | 4 | 5
   hideOnMobile?: boolean
 }
 
@@ -239,16 +228,6 @@ export interface ImageCarouselBlockData {
   images: CarouselImage[]
   autoplay: boolean
   autoplayDelay: number
-  hideOnMobile?: boolean
-}
-
-export interface TwoColumnContentBlockData {
-  blockType: 'two-column-content'
-  leftColumn: unknown // Lexical rich text
-  rightColumn: unknown // Lexical rich text
-  columnRatio: '50-50' | '60-40' | '40-60' | '70-30' | '30-70'
-  reverseOnMobile: boolean
-  verticalAlignment: 'top' | 'center' | 'bottom'
   hideOnMobile?: boolean
 }
 
@@ -289,9 +268,7 @@ export type PageBlock =
   | RichTextContentBlockData
   | CallToActionBlockData
   | FeaturedVehiclesBlockData
-  | ImageGalleryBlockData
   | ImageCarouselBlockData
-  | TwoColumnContentBlockData
   | SpacerBlockData
   | SpotlightBlockData
   | NumberedListBlockData

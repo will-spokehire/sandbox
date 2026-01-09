@@ -303,6 +303,33 @@ export const RichTextContentBlock: Block = {
   },
   fields: [
     {
+      name: 'header',
+      type: 'text',
+      required: false,
+      label: 'Header',
+      admin: {
+        description: 'Optional header text displayed on the left side',
+      },
+    },
+    {
+      name: 'headerType',
+      type: 'select',
+      required: false,
+      label: 'Header Type',
+      defaultValue: 'h2',
+      options: [
+        { label: 'H1', value: 'h1' },
+        { label: 'H2', value: 'h2' },
+        { label: 'H3', value: 'h3' },
+        { label: 'H4', value: 'h4' },
+        { label: 'H5', value: 'h5' },
+        { label: 'H6', value: 'h6' },
+      ],
+      admin: {
+        description: 'Heading level for the header (defaults to H2)',
+      },
+    },
+    {
       name: 'content',
       type: 'richText',
       required: true,
@@ -409,78 +436,6 @@ export const FeaturedVehiclesBlock: Block = {
 }
 
 /**
- * Image Gallery Block
- * Display image gallery/grid
- */
-export const ImageGalleryBlock: Block = {
-  slug: 'image-gallery',
-  labels: {
-    singular: 'Image Gallery',
-    plural: 'Image Galleries',
-  },
-  fields: [
-    {
-      name: 'title',
-      type: 'text',
-      label: 'Section Title',
-    },
-    {
-      name: 'images',
-      type: 'array',
-      label: 'Images',
-      required: true,
-      minRows: 1,
-      fields: [
-        {
-          name: 'image',
-          type: 'upload',
-          relationTo: 'media',
-          required: true,
-        },
-        {
-          name: 'caption',
-          type: 'text',
-          label: 'Caption',
-        },
-        {
-          name: 'link',
-          type: 'text',
-          label: 'Link URL',
-          admin: {
-            description: 'Optional URL when image is clicked',
-          },
-        },
-      ],
-    },
-    {
-      name: 'displayStyle',
-      type: 'select',
-      label: 'Display Style',
-      defaultValue: 'grid',
-      options: [
-        { label: 'Grid', value: 'grid' },
-        { label: 'Masonry', value: 'masonry' },
-        { label: 'Carousel', value: 'carousel' },
-        { label: 'Lightbox Grid', value: 'lightbox-grid' },
-      ],
-    },
-    {
-      name: 'columns',
-      type: 'select',
-      label: 'Columns',
-      defaultValue: '3',
-      options: [
-        { label: '2 Columns', value: '2' },
-        { label: '3 Columns', value: '3' },
-        { label: '4 Columns', value: '4' },
-        { label: '5 Columns', value: '5' },
-      ],
-    },
-    ...commonBlockFields,
-  ],
-}
-
-/**
  * Image Carousel Block
  * Pure image carousel with auto-play, supports mobile and desktop images
  */
@@ -524,66 +479,6 @@ export const ImageCarouselBlock: Block = {
         description: 'Seconds between automatic slide transitions',
         condition: (data, siblingData) => siblingData?.autoplay,
       },
-    },
-    ...commonBlockFields,
-  ],
-}
-
-/**
- * Two-Column Content Block
- * Side-by-side content layout
- */
-export const TwoColumnContentBlock: Block = {
-  slug: 'two-column-content',
-  labels: {
-    singular: 'Two-Column Content',
-    plural: 'Two-Column Contents',
-  },
-  fields: [
-    {
-      name: 'leftColumn',
-      type: 'richText',
-      required: true,
-      label: 'Left Column Content',
-    },
-    {
-      name: 'rightColumn',
-      type: 'richText',
-      required: true,
-      label: 'Right Column Content',
-    },
-    {
-      name: 'columnRatio',
-      type: 'select',
-      label: 'Column Ratio',
-      defaultValue: '50-50',
-      options: [
-        { label: '50/50', value: '50-50' },
-        { label: '60/40', value: '60-40' },
-        { label: '40/60', value: '40-60' },
-        { label: '70/30', value: '70-30' },
-        { label: '30/70', value: '30-70' },
-      ],
-    },
-    {
-      name: 'reverseOnMobile',
-      type: 'checkbox',
-      label: 'Reverse on Mobile',
-      defaultValue: true,
-      admin: {
-        description: 'Stack columns in reverse order on mobile',
-      },
-    },
-    {
-      name: 'verticalAlignment',
-      type: 'select',
-      label: 'Vertical Alignment',
-      defaultValue: 'top',
-      options: [
-        { label: 'Top', value: 'top' },
-        { label: 'Center', value: 'center' },
-        { label: 'Bottom', value: 'bottom' },
-      ],
     },
     ...commonBlockFields,
   ],
@@ -939,9 +834,7 @@ export const StaticPages: CollectionConfig = {
         RichTextContentBlock,
         CallToActionBlock,
         FeaturedVehiclesBlock,
-        ImageGalleryBlock,
         ImageCarouselBlock,
-        TwoColumnContentBlock,
         SpotlightBlock,
         NumberedListBlock,
         SpacerBlock,

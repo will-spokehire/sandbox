@@ -89,7 +89,7 @@ export function SpotlightBlock({ data }: SpotlightBlockProps) {
   }, [checkMobileScroll])
 
   return (
-    <section className="bg-white py-[40px]">
+    <section className="bg-white pt-[60px] md:pt-[100px] pb-0">
       <div className="w-full">
         {/* Title Layout */}
         {title && (

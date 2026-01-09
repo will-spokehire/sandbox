@@ -161,7 +161,7 @@ function UserVehiclesPageContent() {
             <h1 className="text-[48px] md:text-[96px] font-normal leading-[0.95] uppercase text-black tracking-normal">
               My Vehicles
             </h1>
-            <Button asChild size="lg" className="sm:pt-2 sm:pt-4">
+            <Button asChild>
               <Link href="/user/vehicles/new">
                 Add Vehicle
               </Link>

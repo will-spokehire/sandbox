@@ -31,7 +31,7 @@ export function TestimonialsBlock({ data }: TestimonialsBlockProps) {
   }
 
   return (
-    <section className={cn("bg-white pt-[60px] pb-0", LAYOUT_CONSTANTS.contentPadding)}>
+    <section className={cn("", LAYOUT_CONSTANTS.contentPadding)}>
       <TestimonialsCarousel
         testimonials={selectedTestimonials}
         showRatings={showRatings}
@@ -197,7 +197,7 @@ function TestimonialsCarousel({
   if (testimonials.length === 0) return null
 
   return (
-    <div className="w-full flex flex-col gap-[60px] md:gap-[60px]">
+    <div className="w-full flex flex-col gap-[40px] md:gap-[60px] pt-[60px] md:pt-[100px]">
       {/* Title and Arrows Layout - Desktop */}
       {title && (
         <div className="hidden md:flex w-full items-end justify-between">

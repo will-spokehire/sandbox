@@ -493,6 +493,14 @@ export interface StaticPage {
         blockType: 'faq-section';
       }
     | {
+        /**
+         * Optional header text displayed on the left side
+         */
+        header?: string | null;
+        /**
+         * Heading level for the header (defaults to H2)
+         */
+        headerType?: ('h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6') | null;
         content: {
           root: {
             type: string;
@@ -556,27 +564,6 @@ export interface StaticPage {
         blockType: 'featured-vehicles';
       }
     | {
-        title?: string | null;
-        images: {
-          image: number | Media;
-          caption?: string | null;
-          /**
-           * Optional URL when image is clicked
-           */
-          link?: string | null;
-          id?: string | null;
-        }[];
-        displayStyle?: ('grid' | 'masonry' | 'carousel' | 'lightbox-grid') | null;
-        columns?: ('2' | '3' | '4' | '5') | null;
-        /**
-         * Hide this block on mobile devices (screens < 640px)
-         */
-        hideOnMobile?: boolean | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'image-gallery';
-      }
-    | {
         /**
          * Select carousel images to display (order matters)
          */
@@ -596,51 +583,6 @@ export interface StaticPage {
         id?: string | null;
         blockName?: string | null;
         blockType: 'image-carousel';
-      }
-    | {
-        leftColumn: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        };
-        rightColumn: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        };
-        columnRatio?: ('50-50' | '60-40' | '40-60' | '70-30' | '30-70') | null;
-        /**
-         * Stack columns in reverse order on mobile
-         */
-        reverseOnMobile?: boolean | null;
-        verticalAlignment?: ('top' | 'center' | 'bottom') | null;
-        /**
-         * Hide this block on mobile devices (screens < 640px)
-         */
-        hideOnMobile?: boolean | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'two-column-content';
       }
     | {
         /**
@@ -860,6 +802,14 @@ export interface StaticBlock {
         blockType: 'faq-section';
       }
     | {
+        /**
+         * Optional header text displayed on the left side
+         */
+        header?: string | null;
+        /**
+         * Heading level for the header (defaults to H2)
+         */
+        headerType?: ('h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6') | null;
         content: {
           root: {
             type: string;
@@ -923,27 +873,6 @@ export interface StaticBlock {
         blockType: 'featured-vehicles';
       }
     | {
-        title?: string | null;
-        images: {
-          image: number | Media;
-          caption?: string | null;
-          /**
-           * Optional URL when image is clicked
-           */
-          link?: string | null;
-          id?: string | null;
-        }[];
-        displayStyle?: ('grid' | 'masonry' | 'carousel' | 'lightbox-grid') | null;
-        columns?: ('2' | '3' | '4' | '5') | null;
-        /**
-         * Hide this block on mobile devices (screens < 640px)
-         */
-        hideOnMobile?: boolean | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'image-gallery';
-      }
-    | {
         /**
          * Select carousel images to display (order matters)
          */
@@ -963,51 +892,6 @@ export interface StaticBlock {
         id?: string | null;
         blockName?: string | null;
         blockType: 'image-carousel';
-      }
-    | {
-        leftColumn: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        };
-        rightColumn: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        };
-        columnRatio?: ('50-50' | '60-40' | '40-60' | '70-30' | '30-70') | null;
-        /**
-         * Stack columns in reverse order on mobile
-         */
-        reverseOnMobile?: boolean | null;
-        verticalAlignment?: ('top' | 'center' | 'bottom') | null;
-        /**
-         * Hide this block on mobile devices (screens < 640px)
-         */
-        hideOnMobile?: boolean | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'two-column-content';
       }
     | {
         /**
@@ -1393,6 +1277,8 @@ export interface StaticPagesSelect<T extends boolean = true> {
         'rich-text-content'?:
           | T
           | {
+              header?: T;
+              headerType?: T;
               content?: T;
               hideOnMobile?: T;
               id?: T;
@@ -1424,42 +1310,12 @@ export interface StaticPagesSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
-        'image-gallery'?:
-          | T
-          | {
-              title?: T;
-              images?:
-                | T
-                | {
-                    image?: T;
-                    caption?: T;
-                    link?: T;
-                    id?: T;
-                  };
-              displayStyle?: T;
-              columns?: T;
-              hideOnMobile?: T;
-              id?: T;
-              blockName?: T;
-            };
         'image-carousel'?:
           | T
           | {
               images?: T;
               autoplay?: T;
               autoplayDelay?: T;
-              hideOnMobile?: T;
-              id?: T;
-              blockName?: T;
-            };
-        'two-column-content'?:
-          | T
-          | {
-              leftColumn?: T;
-              rightColumn?: T;
-              columnRatio?: T;
-              reverseOnMobile?: T;
-              verticalAlignment?: T;
               hideOnMobile?: T;
               id?: T;
               blockName?: T;
@@ -1585,6 +1441,8 @@ export interface StaticBlocksSelect<T extends boolean = true> {
         'rich-text-content'?:
           | T
           | {
+              header?: T;
+              headerType?: T;
               content?: T;
               hideOnMobile?: T;
               id?: T;
@@ -1616,42 +1474,12 @@ export interface StaticBlocksSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
-        'image-gallery'?:
-          | T
-          | {
-              title?: T;
-              images?:
-                | T
-                | {
-                    image?: T;
-                    caption?: T;
-                    link?: T;
-                    id?: T;
-                  };
-              displayStyle?: T;
-              columns?: T;
-              hideOnMobile?: T;
-              id?: T;
-              blockName?: T;
-            };
         'image-carousel'?:
           | T
           | {
               images?: T;
               autoplay?: T;
               autoplayDelay?: T;
-              hideOnMobile?: T;
-              id?: T;
-              blockName?: T;
-            };
-        'two-column-content'?:
-          | T
-          | {
-              leftColumn?: T;
-              rightColumn?: T;
-              columnRatio?: T;
-              reverseOnMobile?: T;
-              verticalAlignment?: T;
               hideOnMobile?: T;
               id?: T;
               blockName?: T;

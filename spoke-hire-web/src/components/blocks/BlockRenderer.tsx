@@ -8,9 +8,7 @@ import { FAQSectionBlock } from './FAQSectionBlock'
 import { RichTextContentBlock } from './RichTextContentBlock'
 import { CallToActionBlock } from './CallToActionBlock'
 import { FeaturedVehiclesBlock } from './FeaturedVehiclesBlock'
-import { ImageGalleryBlock } from './ImageGalleryBlock'
 import { ImageCarouselBlock } from './ImageCarouselBlock'
-import { TwoColumnContentBlock } from './TwoColumnContentBlock'
 import { SpacerBlock } from './SpacerBlock'
 import { SpotlightBlock } from './SpotlightBlock'
 import { NumberedListBlock } from './NumberedListBlock'
@@ -65,16 +63,8 @@ export function BlockRenderer({ block, index }: BlockRendererProps) {
       blockContent = <FeaturedVehiclesBlock key={index} data={block} />
       break
 
-    case 'image-gallery':
-      blockContent = <ImageGalleryBlock key={index} data={block} />
-      break
-
     case 'image-carousel':
       blockContent = <ImageCarouselBlock key={index} data={block} />
-      break
-
-    case 'two-column-content':
-      blockContent = <TwoColumnContentBlock key={index} data={block} />
       break
 
     case 'spacer':

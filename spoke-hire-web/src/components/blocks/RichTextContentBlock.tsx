@@ -130,10 +130,13 @@ function escapeHtml(text: string): string {
  * RichTextContentBlock Component
  *
  * Renders free-form rich text content from Payload's Lexical editor
- * with article-style typography and layout (right-aligned, 710px max-width).
+ * with article-style typography and layout.
+ * 
+ * When a header is provided, renders a two-column layout (header left, content right).
+ * When no header is provided, maintains backward-compatible right-aligned single-column layout.
  */
 export function RichTextContentBlock({ data }: RichTextContentBlockProps) {
-  const { content } = data
+  const { header, headerType = 'h2', content } = data
 
   if (!content) {
     return null
@@ -141,9 +144,74 @@ export function RichTextContentBlock({ data }: RichTextContentBlockProps) {
 
   const htmlContent = serializeLexicalToHTML(content)
 
+  // Map headerType to heading tag and typography class
+  const headingClasses: Record<string, string> = {
+    h1: 'heading-1',
+    h2: 'heading-2',
+    h3: 'heading-3',
+    h4: 'heading-4',
+    h5: 'heading-5',
+    h6: 'heading-6',
+  }
+  const headingClass = headingClasses[headerType] || 'heading-2'
+  const headingLevel = headerType || 'h2'
+
+  // Render header with appropriate heading tag
+  const renderHeader = () => {
+    const headerClassName = cn(
+      headingClass,
+      'text-black',
+      'w-full md:w-[400px]',
+      'shrink-0'
+    )
+
+    switch (headingLevel) {
+      case 'h1':
+        return <h1 className={headerClassName}>{header}</h1>
+      case 'h2':
+        return <h2 className={headerClassName}>{header}</h2>
+      case 'h3':
+        return <h3 className={headerClassName}>{header}</h3>
+      case 'h4':
+        return <h4 className={headerClassName}>{header}</h4>
+      case 'h5':
+        return <h5 className={headerClassName}>{header}</h5>
+      case 'h6':
+        return <h6 className={headerClassName}>{header}</h6>
+      default:
+        return <h2 className={headerClassName}>{header}</h2>
+    }
+  }
+
+  // If header exists, render two-column layout
+  if (header) {
+    return (
+      <section className="bg-white pt-[60px] md:pt-[100px] pb-0">
+        <div className="container mx-auto ">
+          <div className="flex flex-col md:flex-row items-start justify-between w-full gap-8 md:gap-12">
+            {/* Header on left */}
+            {renderHeader()}
+            {/* Content on right */}
+            <div
+              className={cn(
+                'flex flex-col gap-6 md:gap-[38px]',
+                'w-full md:w-[658px]',
+                'shrink-0',
+                'text-black',
+                'relative' // For images to break out
+              )}
+              dangerouslySetInnerHTML={{ __html: htmlContent }}
+            />
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  // Backward compatibility: no header, render existing right-aligned layout
   return (
-    <section className="bg-white pt-[60px] pb-0">
-      <div className="container mx-auto px-4 md:px-[30px]">
+    <section className="bg-white pt-[60px] md:pt-[100px] pb-0">
+      <div className="container mx-auto">
         <div className="flex items-start justify-end w-full">
           <div
             className={cn(

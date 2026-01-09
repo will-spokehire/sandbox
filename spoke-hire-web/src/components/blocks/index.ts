@@ -14,8 +14,6 @@ export { FAQSectionBlock } from './FAQSectionBlock'
 export { RichTextContentBlock } from './RichTextContentBlock'
 export { CallToActionBlock } from './CallToActionBlock'
 export { FeaturedVehiclesBlock } from './FeaturedVehiclesBlock'
-export { ImageGalleryBlock } from './ImageGalleryBlock'
 export { ImageCarouselBlock } from './ImageCarouselBlock'
-export { TwoColumnContentBlock } from './TwoColumnContentBlock'
 export { SpacerBlock } from './SpacerBlock'
 
