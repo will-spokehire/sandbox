@@ -264,7 +264,6 @@ export interface CtaBlock {
         id?: string | null;
       }[]
     | null;
-  backgroundStyle: 'primary' | 'secondary' | 'accent';
   status: 'draft' | 'published';
   updatedAt: string;
   createdAt: string;
@@ -1157,7 +1156,6 @@ export interface CtaBlocksSelect<T extends boolean = true> {
         style?: T;
         id?: T;
       };
-  backgroundStyle?: T;
   status?: T;
   updatedAt?: T;
   createdAt?: T;

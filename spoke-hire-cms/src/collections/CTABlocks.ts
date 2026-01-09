@@ -132,27 +132,6 @@ export const CTABlocks: CollectionConfig = {
       ],
     },
     {
-      name: 'backgroundStyle',
-      type: 'select',
-      required: true,
-      defaultValue: 'primary',
-      label: 'Background Style',
-      options: [
-        {
-          label: 'Primary',
-          value: 'primary',
-        },
-        {
-          label: 'Secondary',
-          value: 'secondary',
-        },
-        {
-          label: 'Accent',
-          value: 'accent',
-        },
-      ],
-    },
-    {
       name: 'status',
       type: 'select',
       required: true,

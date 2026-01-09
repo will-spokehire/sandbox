@@ -91,7 +91,6 @@ export const ctaBlocks = [
         style: 'outline' as const,
       },
     ],
-    backgroundStyle: 'primary' as const,
     status: 'published' as const,
   },
 ]

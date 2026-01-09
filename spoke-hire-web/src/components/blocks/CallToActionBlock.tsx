@@ -21,13 +21,7 @@ export function CallToActionBlock({ data }: CallToActionBlockProps) {
     return null
   }
 
-  const { heading, description, actions, backgroundStyle, headingLevel = 'h2' } = selectedCTA
-
-  const bgClasses = {
-    primary: 'bg-white text-foreground',
-    secondary: 'bg-secondary text-secondary-foreground',
-    accent: 'bg-accent text-accent-foreground',
-  }
+  const { heading, description, actions, headingLevel = 'h2' } = selectedCTA
 
   const getButtonVariant = (style: string) => {
     switch (style) {
@@ -65,7 +59,7 @@ export function CallToActionBlock({ data }: CallToActionBlockProps) {
     : 'pt-[60px] pb-0'
 
   return (
-    <section className={cn(paddingClasses, bgClasses[backgroundStyle])}>
+    <section className={cn(paddingClasses, 'bg-white text-foreground')}>
       <div >
         <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-8 md:gap-12 items-start">
           {/* Left Column: Heading (2/3 width) */}

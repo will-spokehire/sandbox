@@ -121,7 +121,6 @@ export interface CTABlockContent {
     link: string
     style: 'primary' | 'secondary' | 'outline'
   }>
-  backgroundStyle: 'primary' | 'secondary' | 'accent'
   status: 'draft' | 'published'
 }
 
