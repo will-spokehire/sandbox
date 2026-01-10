@@ -26,7 +26,7 @@ export default function Loading() {
       </div>
 
       {/* Main Content Skeleton */}
-      <main className={cn(VEHICLE_DETAIL.containerPadding, "py-5 md:py-10 pb-24 md:pb-10")}>
+      <main className={cn(VEHICLE_DETAIL.containerPadding, "py-5 md:py-10 pb-4 md:pb-10")}>
         {/* Two-Column Layout Skeleton */}
         <div className={VEHICLE_DETAIL.detailGrid}>
           {/* Left Column - Media Gallery Skeleton */}

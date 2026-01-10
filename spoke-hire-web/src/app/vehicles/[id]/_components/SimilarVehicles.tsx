@@ -172,7 +172,7 @@ export function SimilarVehicles({ vehicleId }: SimilarVehiclesProps) {
       className={cn(
         "bg-white flex flex-col items-center overflow-clip",
         "px-0",
-        "py-[41px] gap-[20px] md:gap-[41px]"
+        "pt-[41px] gap-[20px] md:gap-[41px]"
       )}
       aria-label="Similar vehicles"
     >

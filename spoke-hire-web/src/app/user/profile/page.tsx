@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useRequireAuth } from "~/providers/auth-provider";
 import { api } from "~/trpc/react";
-import { Card, CardContent } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 import { ProfileForm, ProfilePreview } from "~/app/_components/shared";
 import type { ProfileFormData } from "../vehicles/new/_components/validation";
@@ -93,13 +92,11 @@ export default function UserProfilePage() {
         <main className="flex-1 bg-white">
           <div className="w-full flex flex-col items-center px-4 md:px-[30px] pt-[20px] pb-[41px]">
             <div className="w-full max-w-[808px] flex flex-col gap-10">
-              <Card>
-                <CardContent className="pt-6 space-y-6">
-                  <Skeleton className="h-10 w-full" />
-                  <Skeleton className="h-10 w-full" />
-                  <Skeleton className="h-10 w-full" />
-                </CardContent>
-              </Card>
+              <div className="space-y-6">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </div>
             </div>
           </div>
         </main>
@@ -131,18 +128,14 @@ export default function UserProfilePage() {
         <div className="w-full flex flex-col items-center px-4 md:px-[30px] pt-[20px] pb-[41px]">
           <div className="w-full max-w-[808px] flex flex-col gap-10">
             {isEditing ? (
-              <Card>
-                <CardContent className="pt-6">
-                  <ProfileForm
-                    defaultValues={defaultValues}
-                    onSubmit={handleSubmit}
-                    isSubmitting={updateProfileMutation.isPending}
-                    submitButtonText="Save Changes"
-                    showCancelButton
-                    onCancel={() => setIsEditing(false)}
-                  />
-                </CardContent>
-              </Card>
+              <ProfileForm
+                defaultValues={defaultValues}
+                onSubmit={handleSubmit}
+                isSubmitting={updateProfileMutation.isPending}
+                submitButtonText="Save Changes"
+                showCancelButton
+                onCancel={() => setIsEditing(false)}
+              />
             ) : (
               <ProfilePreview
                 profile={{

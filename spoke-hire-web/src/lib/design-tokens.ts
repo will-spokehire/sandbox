@@ -29,7 +29,7 @@ export const LAYOUT_CONSTANTS = {
 
   // Backgrounds
   bgDefault: "bg-background",
-  bgMuted: "bg-slate-50 dark:bg-slate-900",
+  bgMuted: "bg-spoke-white",
   bgSpoke: "bg-spoke-grey", // #F4F4F5
 
   // Page wrapper

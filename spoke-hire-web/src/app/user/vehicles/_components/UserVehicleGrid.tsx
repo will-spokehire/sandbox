@@ -44,7 +44,7 @@ interface UserVehicleGridProps {
 export function UserVehicleGrid({ vehicles }: UserVehicleGridProps) {
   if (vehicles.length === 0) {
     return (
-      <div className="text-center py-16">
+      <div className="text-center pt-4 md:pt-8">
         <div className="mb-4">
           <svg
             xmlns="http://www.w3.org/2000/svg"

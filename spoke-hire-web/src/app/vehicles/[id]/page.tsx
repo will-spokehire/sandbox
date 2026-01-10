@@ -282,7 +282,7 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
         <VehicleDetailHeader vehicle={vehicle} />
 
       {/* Main Content */}
-      <main className={cn(VEHICLE_DETAIL.containerPadding, "py-5 md:py-0 pb-24 md:pb-10")}>
+      <main className={cn(VEHICLE_DETAIL.containerPadding, "pt-5 md:pt-0")}>
         {/* Two-Column Layout - Desktop, Single Column - Mobile */}
         <div className={VEHICLE_DETAIL.detailGrid}>
           {/* Left Column - Media Gallery (890px width on desktop) */}
@@ -304,7 +304,7 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
           <section 
             aria-label="Vehicle description" 
             className={cn(
-              "w-full py-[41px]",
+              "w-full pt-4 md:pt-[41px]",
               "flex flex-col gap-3.5"
             )}
           >

@@ -76,6 +76,27 @@ export function PublicVehicleMediaSection({ vehicle }: PublicVehicleMediaSection
     onSwipeRight: goToPrevious,
   });
 
+  // Inject scrollbar hiding styles
+  useEffect(() => {
+    const styleId = 'scrollbar-hide-style';
+    if (document.getElementById(styleId)) return;
+    
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = `
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      const existingStyle = document.getElementById(styleId);
+      if (existingStyle) {
+        document.head.removeChild(existingStyle);
+      }
+    };
+  }, []);
+
   const hasMultipleImages = sortedMedia.length > 1;
 
   return (
@@ -136,35 +157,42 @@ export function PublicVehicleMediaSection({ vehicle }: PublicVehicleMediaSection
 
       {/* Thumbnail Gallery */}
       {sortedMedia.length > 1 && (
-        <div className={cn("flex", VEHICLE_DETAIL.thumbnailGap)}>
-          {sortedMedia.map((media, index) => (
-            <button
-              key={media.id}
-              onClick={() => setSelectedImageIndex(index)}
-              className={cn(
-                "relative overflow-hidden",
-                "flex-1 min-w-0",
-                VEHICLE_DETAIL.thumbnailAspect,
-                "md:flex-none md:w-[133px] md:h-[100px] md:aspect-auto"
-              )}
-            >
-              <Image
-                src={media.publishedUrl ?? media.originalUrl}
-                alt={`${vehicle.name} - Image ${index + 1}`}
-                fill
-                sizes="133px"
-                className={cn(
-                  "object-cover transition-opacity duration-500",
-                  loadedThumbnails.has(media.id)
-                    ? index === selectedImageIndex
-                      ? "opacity-50"
-                      : "opacity-100"
-                    : "opacity-0"
-                )}
-                onLoad={() => setLoadedThumbnails(prev => new Set(prev).add(media.id))}
-              />
-            </button>
-          ))}
+        <div className="relative">
+          {/* Thumbnails - Horizontal scrollable row */}
+          <div 
+            className={cn("overflow-x-auto -mx-2 px-2 scrollbar-hide", VEHICLE_DETAIL.thumbnailGap)}
+            style={{ 
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+            }}
+          >
+            <div className="flex gap-2">
+              {sortedMedia.map((media, index) => (
+                <button
+                  key={media.id}
+                  onClick={() => setSelectedImageIndex(index)}
+                  className={cn(
+                    "relative flex-shrink-0 overflow-hidden",
+                    "w-[calc(25%-0.375rem)] aspect-[4/3]",
+                    "md:w-[133px] md:h-[100px] md:aspect-auto",
+                    index === selectedImageIndex && "opacity-50"
+                  )}
+                >
+                  <Image
+                    src={media.publishedUrl ?? media.originalUrl}
+                    alt={`${vehicle.name} - Image ${index + 1}`}
+                    fill
+                    sizes="(max-width: 768px) 25vw, 133px"
+                    className={cn(
+                      "object-cover transition-opacity duration-500",
+                      loadedThumbnails.has(media.id) ? "opacity-100" : "opacity-0"
+                    )}
+                    onLoad={() => setLoadedThumbnails(prev => new Set(prev).add(media.id))}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </article>

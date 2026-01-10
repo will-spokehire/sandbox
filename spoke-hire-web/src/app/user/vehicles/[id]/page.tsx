@@ -16,7 +16,8 @@ import { AlertCircle, ArrowLeft } from "lucide-react";
 import type { VehicleDetail } from "~/types/vehicle";
 import { EditVehicleDialog } from "./_components/EditVehicleDialog";
 import { formatPricingRate } from "~/lib/pricing";
-
+import { cn } from "~/lib/utils";
+import { TYPOGRAPHY } from "~/lib/design-tokens";
 /**
  * User Vehicle Detail Page
  * 
@@ -70,7 +71,7 @@ export default function UserVehicleDetailPage({
       <>
         {/* Header Skeleton */}
         <div className="bg-white">
-          <div className="px-4 md:px-[30px] py-10 md:py-[41px]">
+          <div className="py-4 md:py-10">
             <div className="flex items-start gap-4">
               <Skeleton className="h-9 w-20 mt-1" />
               <div className="flex-1">
@@ -83,7 +84,7 @@ export default function UserVehicleDetailPage({
 
         {/* Main Content Skeleton */}
         <main className="flex-1 bg-white">
-          <div className="px-4 md:px-[30px] py-8">
+          <div className="py-4 md:py-8">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
               {/* Left Column - Media Skeleton */}
               <div className="lg:col-span-2 space-y-4">
@@ -144,14 +145,14 @@ export default function UserVehicleDetailPage({
     return (
       <>
         <div className="bg-white">
-          <div className="px-4 md:px-[30px] py-10 md:py-[41px]">
+          <div className="py-4 md:py-10">
             <h1 className="text-[48px] md:text-[96px] font-normal leading-[0.95] uppercase text-black tracking-normal">
               Vehicle Not Found
             </h1>
           </div>
         </div>
         <main className="flex-1 bg-white">
-          <div className="px-4 md:px-[30px] py-8">
+          <div className="pt-4 md:pt-8">
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Vehicle Not Found</AlertTitle>
@@ -175,24 +176,28 @@ export default function UserVehicleDetailPage({
     <>
       {/* Header */}
       <div className="bg-white">
-        <div className="px-4 md:px-[30px] py-10 md:py-[41px]">
+        <div className="py-4 md:py-10">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             {/* Left: Back button + Vehicle name */}
-            <div className="flex items-start gap-4 min-w-0 flex-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push(fromRegistration ? "/user/vehicles/new" : "/user/vehicles")}
-                className="mt-1"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
-              </Button>
+            <div className=" gap-4 min-w-0 flex-1">
+              {/* Back button - alone at top on mobile */}
+              <div className="w-full md:w-auto">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => router.push(fromRegistration ? "/user/vehicles/new" : "/user/vehicles")}
+                  className="px-0"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back
+                </Button>
+              </div>
+              {/* Title section - below back button on mobile */}
               <div className="min-w-0 flex-1">
-                <h1 className="text-[32px] md:text-[64px] font-normal leading-[0.95] uppercase text-black tracking-normal mb-[11px]">
+                <h1 className={cn(TYPOGRAPHY.h1, "text-black mb-[11px]")}>
                   {vehicle.year} {vehicle.make.name} {vehicle.model.name}
                 </h1>
-                <p className="text-muted-foreground text-base md:text-lg">
+                <p className={cn(TYPOGRAPHY.bodyLarge, "text-black")} >
                   {[
                     vehicle.hourlyRate && `£${vehicle.hourlyRate}/hr`,
                     vehicle.dailyRate && `£${vehicle.dailyRate}/day`
@@ -214,10 +219,10 @@ export default function UserVehicleDetailPage({
 
       {/* Main Content */}
       <main className="flex-1 bg-white">
-        <div className="px-4 md:px-[30px] py-8">
+        <div className=" py-8">
           {/* Show draft message if vehicle hasn't been submitted yet */}
           {vehicle.status === "DRAFT" && (
-            <Alert className="mb-6 border-amber-500 bg-amber-50 dark:bg-amber-950/20">
+            <Alert className="mb-4 border-amber-500 bg-amber-50 dark:bg-amber-950/20">
               <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
               <AlertTitle className="text-amber-900 dark:text-amber-100">
                 Draft Vehicle

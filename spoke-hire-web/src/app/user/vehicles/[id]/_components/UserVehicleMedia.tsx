@@ -87,6 +87,27 @@ export function UserVehicleMedia({ vehicle }: UserVehicleMediaProps) {
     onSwipeRight: goToPrevious,
   });
 
+  // Inject scrollbar hiding styles
+  useEffect(() => {
+    const styleId = 'scrollbar-hide-style';
+    if (document.getElementById(styleId)) return;
+    
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = `
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      const existingStyle = document.getElementById(styleId);
+      if (existingStyle) {
+        document.head.removeChild(existingStyle);
+      }
+    };
+  }, []);
+
   return (
     <div className="space-y-4">
       {/* Always stacked vertically: Hero image on top, thumbnails below */}
@@ -201,42 +222,48 @@ export function UserVehicleMedia({ vehicle }: UserVehicleMediaProps) {
         {/* Thumbnail Gallery - Always below hero image */}
         {hasImages && sortedMedia.length > 1 && (
           <div className="relative">
-            {/* Thumbnails - Horizontal scrollable grid */}
-            <div className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
-              {sortedMedia.slice(0, 12).map((media, index) => {
-                const isLastThumb = index === 11 && sortedMedia.length > 12;
-                const remainingCount = sortedMedia.length - 12;
-                
-                return (
-                  <button
-                    key={media.id}
-                    onClick={() => isLastThumb ? openLightbox(index) : setSelectedImageIndex(index)}
-                    className={cn(
-                      "relative aspect-[4/3] rounded-md overflow-hidden border-2 transition-all hover:scale-105 hover:shadow-md",
-                      selectedImageIndex === index
-                        ? "border-primary ring-2 ring-primary/20"
-                        : "border-border hover:border-primary/50"
-                    )}
-                  >
-                    <Image
-                      src={media.publishedUrl ?? media.originalUrl}
-                      alt={`${vehicle.name} - Thumbnail ${index + 1}`}
-                      fill
+            {/* Thumbnails - Horizontal scrollable row */}
+            <div 
+              className="overflow-x-auto -mx-2 px-2 scrollbar-hide"
+              style={{ 
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+              }}
+            >
+              <div className="flex gap-2">
+                {sortedMedia.map((media, index) => {
+                  return (
+                    <button
+                      key={media.id}
+                      onClick={() => setSelectedImageIndex(index)}
                       className={cn(
-                        "object-cover transition-opacity duration-500",
-                        loadedThumbnails.has(media.id) ? "opacity-100" : "opacity-0"
+                        "relative flex-shrink-0 aspect-[4/3] rounded-md overflow-hidden border-2 transition-all hover:scale-105 hover:shadow-md",
+                        "w-[calc(25%-0.375rem)] md:w-[133px] md:h-[100px] md:aspect-auto",
+                        selectedImageIndex === index
+                          ? "border-primary ring-2 ring-primary/20"
+                          : "border-border hover:border-primary/50"
                       )}
-                      sizes="(max-width: 768px) 25vw, 150px"
-                      onLoad={() => setLoadedThumbnails(prev => new Set(prev).add(media.id))}
-                    />
-                    {isLastThumb && remainingCount > 0 && (
-                      <div className="absolute inset-0 bg-black/70 flex items-center justify-center text-white font-semibold text-sm">
-                        +{remainingCount}
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
+                    >
+                      <Image
+                        src={media.publishedUrl ?? media.originalUrl}
+                        alt={`${vehicle.name} - Thumbnail ${index + 1}`}
+                        fill
+                        className={cn(
+                          "object-cover transition-opacity duration-500",
+                          loadedThumbnails.has(media.id) ? "opacity-100" : "opacity-0"
+                        )}
+                        sizes="(max-width: 768px) 25vw, 133px"
+                        onLoad={() => setLoadedThumbnails(prev => new Set(prev).add(media.id))}
+                      />
+                      {media.isPrimary && (
+                        <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded font-medium z-10">
+                          Primary
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         )}
