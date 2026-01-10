@@ -70,7 +70,7 @@ function UserVehiclesPageContent() {
       <>
         {/* Header Skeleton */}
         <div className="bg-white">
-          <div className="px-4 md:px-[30px] py-10 md:py-[41px]">
+          <div className="py-4 md:py-10">
             <Skeleton className="h-12 md:h-24 w-64 md:w-96 mb-[11px]" />
             <Skeleton className="h-5 w-48 md:w-64" />
           </div>
@@ -78,7 +78,7 @@ function UserVehiclesPageContent() {
 
         {/* Main Content */}
         <main className="flex-1 bg-white">
-          <div className="px-4 md:px-[30px] py-8">
+          <div className="py-8">
             {/* Tabs Skeleton */}
             <div className="mb-8">
               <Skeleton className="h-10 w-full max-w-md" />
@@ -109,7 +109,7 @@ function UserVehiclesPageContent() {
       <>
         {/* Header */}
         <div className="bg-white">
-          <div className="px-4 md:px-[30px] py-10 md:py-[41px]">
+          <div className=" py-4 md:py-10">
             <h1 className="text-[48px] md:text-[96px] font-normal leading-[0.95] uppercase text-black tracking-normal">
               My Vehicles
             </h1>
@@ -118,7 +118,7 @@ function UserVehiclesPageContent() {
 
         {/* Error Content */}
         <main className="flex-1 bg-white">
-          <div className="px-4 md:px-[30px] py-8">
+          <div className="py-4 md:py-8">
             <div className="text-center py-16">
               <div className="mb-4">
                 <svg
@@ -155,27 +155,29 @@ function UserVehiclesPageContent() {
     <>
       {/* Header */}
       <div className="bg-white">
-        <div className=" py-10 md:py-[41px]">
-          {/* Title and Add Button Row */}
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-[11px]">
-            <h1 className="text-[48px] md:text-[96px] font-normal leading-[0.95] uppercase text-black tracking-normal">
-              My Vehicles
-            </h1>
-            <Button asChild>
+        <div className="py-4 md:py-10">
+          {/* Title */}
+          <h1 className="text-[48px] md:text-[96px] font-normal leading-[0.95] uppercase text-black tracking-normal mb-[11px]">
+            My Vehicles
+          </h1>
+          {/* Sub-text */}
+          <p className={cn(TYPOGRAPHY.pageDescription, "max-w-3xl mb-[11px]")}>
+            View and manage your vehicle listings
+          </p>
+          {/* Add Vehicle Button */}
+          <div className="mb-[11px]">
+            <Button asChild size="sm">
               <Link href="/user/vehicles/new">
                 Add Vehicle
               </Link>
             </Button>
           </div>
-          <p className={cn(TYPOGRAPHY.pageDescription, "max-w-3xl")}>
-            View and manage your vehicle listings
-          </p>
         </div>
       </div>
 
       {/* Main Content */}
       <main className="flex-1 bg-white">
-        <div className="py-8">
+        <div className="">
           {/* Status Filter Tabs */}
           <div className="mb-8">
             <VehicleStatusTabs
@@ -205,7 +207,7 @@ export default function UserVehiclesPage() {
     <Suspense fallback={
       <>
         <div className="bg-white">
-          <div className="px-4 md:px-[30px] py-10 md:py-[41px]">
+          <div className="">
             <div className="flex items-center justify-center py-16">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900 dark:border-slate-50"></div>
             </div>
