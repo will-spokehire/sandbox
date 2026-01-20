@@ -27,14 +27,20 @@ export function MobileScrollDots({
   totalItems = 0,
   currentIndex = 0,
 }: MobileScrollDotsProps) {
+  // Clamp currentIndex to valid range
+  const clampedIndex = React.useMemo(() => {
+    if (totalItems <= 0) return 0
+    return Math.max(0, Math.min(currentIndex, totalItems - 1))
+  }, [currentIndex, totalItems])
+
   // Auto-determine state from currentIndex and totalItems if state not provided
   const determinedState = React.useMemo(() => {
     if (state) return state
     if (totalItems <= 1) return "start" // Single item always shows start state
-    if (currentIndex === 0) return "start"
-    if (currentIndex >= totalItems - 1) return "end"
+    if (clampedIndex === 0) return "start"
+    if (clampedIndex >= totalItems - 1) return "end"
     return "middle"
-  }, [state, currentIndex, totalItems])
+  }, [state, clampedIndex, totalItems])
 
   // Common transition classes for smooth animations
   const dotTransition = "transition-all duration-300 ease-in-out"
@@ -46,16 +52,16 @@ export function MobileScrollDots({
     // Calculate which position should be active (0-6)
     let activePosition = 3 // Default to center (position 3)
     
-    if (totalItems > 2 && currentIndex !== undefined) {
+    if (totalItems > 2 && clampedIndex !== undefined) {
       const middleStartIndex = 1
       const middleEndIndex = totalItems - 2
       const middleRange = middleEndIndex - middleStartIndex + 1
       
       if (middleRange > 0) {
-        // Map currentIndex to positions 1-5 (avoiding edge positions 0 and 6)
+        // Map clampedIndex to positions 1-5 (avoiding edge positions 0 and 6)
         // This creates a smooth movement from left-center to right-center
         const relativePosition = middleRange > 1 
-          ? (currentIndex - middleStartIndex) / (middleRange - 1)
+          ? (clampedIndex - middleStartIndex) / (middleRange - 1)
           : 0.5 // If only one middle item, center it
         activePosition = Math.round(1 + relativePosition * 4)
         activePosition = Math.max(1, Math.min(5, activePosition)) // Clamp to 1-5

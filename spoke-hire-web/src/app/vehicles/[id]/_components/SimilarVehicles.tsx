@@ -71,12 +71,17 @@ export function SimilarVehicles({ vehicleId }: SimilarVehiclesProps) {
     // Check mobile carousel for scroll dots
     if (mobileContainer && vehicles) {
       const mobileScrollLeft = mobileContainer.scrollLeft;
-      const mobileScrollWidth = mobileContainer.scrollWidth;
-      if (mobileScrollWidth > 0 && vehicles.length > 0) {
-        const cardWidth = mobileScrollWidth / vehicles.length;
-        const newIndex = Math.round(mobileScrollLeft / cardWidth);
-        const clampedIndex = Math.max(0, Math.min(newIndex, vehicles.length - 1));
-        setCurrentIndex(clampedIndex);
+      if (vehicles.length > 0) {
+        // Get actual card width from first card element
+        const firstCard = mobileContainer.querySelector('[data-vehicle-card-mobile]') as HTMLElement;
+        if (firstCard) {
+          const cardWidth = firstCard.offsetWidth;
+          const gap = 16; // gap-4 = 16px
+          const scrollDistancePerCard = cardWidth + gap;
+          const newIndex = Math.round(mobileScrollLeft / scrollDistancePerCard);
+          const clampedIndex = Math.max(0, Math.min(newIndex, vehicles.length - 1));
+          setCurrentIndex(clampedIndex);
+        }
       }
     }
   }, [vehicles?.length ?? 0]);
@@ -193,7 +198,7 @@ export function SimilarVehicles({ vehicleId }: SimilarVehiclesProps) {
         <h2 className={cn(TYPOGRAPHY.h2, "leading-[0.95] relative shrink-0 text-nowrap tracking-[-0.42px] uppercase")}>
           more like this
         </h2>
-        <p className={cn(TYPOGRAPHY.bodyMedium, "leading-[1.4] min-w-full relative shrink-0 tracking-[-0.18px] w-[min-content]")}>
+        <p className={cn(TYPOGRAPHY.bodyLarge, "leading-[1.4] min-w-full relative shrink-0 tracking-[-0.18px] w-[min-content]")}>
           See similar vehicles that fit your brief.
         </p>
       </div>
@@ -270,12 +275,12 @@ export function SimilarVehicles({ vehicleId }: SimilarVehiclesProps) {
         <div className="md:hidden flex flex-col relative shrink-0 w-full gap-[20px]">
           <div
             ref={mobileCarouselRef}
-            className="flex overflow-x-auto gap-0 snap-x snap-mandatory w-full"
+            className="flex overflow-x-auto gap-4 snap-x snap-mandatory w-full px-4"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {vehicles.map((vehicle) => (
-              <div key={vehicle.id} className="min-w-full snap-center shrink-0">
-                <PublicVehicleCard vehicle={vehicle} />
+              <div key={vehicle.id} data-vehicle-card-mobile className="w-[calc(100%-1rem)] min-w-[calc(100%-1rem)] snap-center shrink-0">
+                <PublicVehicleCard vehicle={vehicle} disableSwipe={true} />
               </div>
             ))}
           </div>

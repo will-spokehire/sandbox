@@ -163,7 +163,7 @@ export function FeaturedVehiclesBlock({ data }: FeaturedVehiclesBlockProps) {
                     {subtitle}
                   </p>
                 )}
-                <p className="body-medium text-spoke-black md:hidden">
+                <p className="body-large text-spoke-black md:hidden">
                   Check out the latest additions to our roster.
                 </p>
               </div>
@@ -208,7 +208,7 @@ export function FeaturedVehiclesBlock({ data }: FeaturedVehiclesBlockProps) {
                 </p>
               )}
               {/* Mobile subtitle - different text */}
-              <p className="body-medium text-spoke-black md:hidden">
+              <p className="body-large text-spoke-black md:hidden">
                 Check out the latest additions to our roster.
               </p>
             </div>
@@ -288,13 +288,18 @@ function CarouselDisplay({ vehicles }: { vehicles: Vehicle[] }) {
     // Check mobile carousel for scroll dots (mobile only)
     if (mobileContainer) {
       const mobileScrollLeft = mobileContainer.scrollLeft
-      const mobileScrollWidth = mobileContainer.scrollWidth
-      if (mobileScrollWidth > 0 && vehicles.length > 0) {
-        const cardWidth = mobileScrollWidth / vehicles.length
-        const newIndex = Math.round(mobileScrollLeft / cardWidth)
-        // Clamp index to valid range [0, totalItems - 1]
-        const clampedIndex = Math.max(0, Math.min(newIndex, vehicles.length - 1))
-        setCurrentIndex(clampedIndex)
+      if (vehicles.length > 0) {
+        // Get actual card width from first card element
+        const firstCard = mobileContainer.querySelector('[data-vehicle-card-mobile]') as HTMLElement
+        if (firstCard) {
+          const cardWidth = firstCard.offsetWidth
+          const gap = 16 // gap-4 = 16px
+          const scrollDistancePerCard = cardWidth + gap
+          const newIndex = Math.round(mobileScrollLeft / scrollDistancePerCard)
+          // Clamp index to valid range [0, totalItems - 1]
+          const clampedIndex = Math.max(0, Math.min(newIndex, vehicles.length - 1))
+          setCurrentIndex(clampedIndex)
+        }
       }
     }
   }, [vehicles.length])
@@ -471,18 +476,19 @@ function CarouselDisplay({ vehicles }: { vehicles: Vehicle[] }) {
       </div>
 
       {/* Mobile: Single card with scroll dots */}
-      <div className="md:hidden flex flex-col gap-[41px] w-full">
+      <div className="md:hidden flex flex-col gap-[20px] w-full">
         <div
           ref={mobileCarouselRef}
-          className="flex overflow-x-auto gap-0 snap-x snap-mandatory"
+          className="flex overflow-x-auto gap-4 snap-x snap-mandatory px-4"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {vehicles.map((vehicle) => (
             <div
               key={vehicle.id}
-              className="min-w-full snap-center shrink-0"
+              data-vehicle-card-mobile
+              className="w-[calc(100%-1rem)] min-w-[calc(100%-1rem)] snap-center shrink-0"
             >
-              <PublicVehicleCard vehicle={vehicle} />
+              <PublicVehicleCard vehicle={vehicle} disableSwipe={true} />
             </div>
           ))}
         </div>

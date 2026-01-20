@@ -35,6 +35,8 @@ interface PublicVehicleCardProps {
       } | null;
     };
   };
+  /** Disable swipe gestures on mobile (e.g., when used in carousels) */
+  disableSwipe?: boolean;
 }
 
 /**
@@ -43,7 +45,7 @@ interface PublicVehicleCardProps {
  * Simplified card design matching Figma specifications.
  * Shows image carousel, year/make/model, and location.
  */
-export function PublicVehicleCard({ vehicle }: PublicVehicleCardProps) {
+export function PublicVehicleCard({ vehicle, disableSwipe = false }: PublicVehicleCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [fadeKey, setFadeKey] = useState(0);
@@ -91,11 +93,15 @@ export function PublicVehicleCard({ vehicle }: PublicVehicleCardProps) {
     setCurrentImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
   };
 
-  // Swipe gesture for mobile
-  const swipeRef = useSwipeGesture<HTMLDivElement>({
-    onSwipeLeft: goToNextTouch,
-    onSwipeRight: goToPreviousTouch,
-  });
+  // Swipe gesture for mobile (disabled when in carousel contexts)
+  const swipeRef = useSwipeGesture<HTMLDivElement>(
+    disableSwipe
+      ? {}
+      : {
+          onSwipeLeft: goToNextTouch,
+          onSwipeRight: goToPreviousTouch,
+        }
+  );
 
   return (
     <Link href={`/vehicles/${vehicle.id}`} className="group block">
