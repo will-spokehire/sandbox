@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, Suspense } from "react";
+import { useEffect, useMemo, useRef, Suspense } from "react";
 import { toast } from "sonner";
 import { api } from "~/trpc/react";
 import { usePublicVehicleFiltersContext } from "~/contexts/PublicVehicleFiltersContext";
@@ -76,9 +76,39 @@ function PublicVehiclesCatalogContent({ initialData, serverFilterOptions }: Publ
     }
   }, [error]);
 
+  // Track previous page for scroll detection
+  const previousPageRef = useRef<number>(filters.page ?? 1);
+  const needsScrollRef = useRef<boolean>(false);
+
+  // Scroll to top when page changes and data finishes loading
+  useEffect(() => {
+    const currentPage = filters.page ?? 1;
+    const previousPage = previousPageRef.current;
+
+    // Check if page changed
+    if (previousPage !== currentPage) {
+      previousPageRef.current = currentPage;
+      needsScrollRef.current = true;
+    }
+
+    // Scroll when data has finished loading and we need to scroll
+    if (needsScrollRef.current && !isFetching) {
+      needsScrollRef.current = false;
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        // Use document.documentElement for better mobile compatibility
+        if (document.documentElement) {
+          document.documentElement.scrollTo({ top: 0, behavior: "auto" });
+        } else {
+          // Fallback to window.scrollTo
+          window.scrollTo({ top: 0, behavior: "auto" });
+        }
+      });
+    }
+  }, [filters.page, isFetching]);
+
   const handlePageChange = (newPage: number) => {
     updateFilters({ page: newPage });
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const currentPage = filters.page ?? 1;
@@ -87,7 +117,7 @@ function PublicVehiclesCatalogContent({ initialData, serverFilterOptions }: Publ
     <>
       {/* Hero Section */}
       <div className="bg-white">
-        <div className=" py-10">
+        <div className=" pt-4 pb-10 md:pt-10 md:pb-16">
           <div className="max-w-[760px] flex flex-col gap-6">
             <h1 className="heading-1 uppercase text-black leading-[0.95]">
               explore classic cars for hire
@@ -100,7 +130,7 @@ function PublicVehiclesCatalogContent({ initialData, serverFilterOptions }: Publ
       </div>
 
       {/* Main Content */}
-      <div className="flex flex-col gap-10">
+      <div className="flex flex-col gap-6 md:gap-10">
         {/* Filters */}
         <PublicVehicleFilters />
 

@@ -67,8 +67,13 @@ export function useVehiclePagination(
   const handlePageChange = useCallback((page: number) => {
     if (page >= 1 && page <= totalPages && page !== currentPage) {
       onPageChange(page);
-      // Scroll to top of list smoothly
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      // Scroll to top of list - use document.documentElement for better mobile compatibility
+      if (document.documentElement) {
+        document.documentElement.scrollTo({ top: 0, behavior: "auto" });
+      } else {
+        // Fallback to window.scrollTo
+        window.scrollTo({ top: 0, behavior: "auto" });
+      }
     }
   }, [currentPage, totalPages, onPageChange]);
 
