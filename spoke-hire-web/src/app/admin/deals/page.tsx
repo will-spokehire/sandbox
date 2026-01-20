@@ -4,7 +4,7 @@ import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, Mail, Archive, ArchiveRestore, Car, User, Plus, Pencil, MoreHorizontal } from "lucide-react";
 import { format } from "date-fns";
-import type { DealStatus } from "@prisma/client";
+import type { DealStatus, DealType } from "@prisma/client";
 import { useRequireAdmin } from "~/providers/auth-provider";
 import { Button } from "~/components/ui/button";
 import {
@@ -128,10 +128,11 @@ function DealsListContent() {
       />
 
       {/* Filter Bar */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <Button
           variant={showArchived ? "outline" : "default"}
           onClick={toggleArchived}
+          size="sm"
           className="gap-2"
         >
           {showArchived ? (
@@ -151,6 +152,7 @@ function DealsListContent() {
         {!showArchived && (
           <Button
             onClick={() => setShowCreateDialog(true)}
+            size="sm"
             className="gap-2"
           >
             <Plus className="h-4 w-4" />
@@ -370,7 +372,7 @@ function DealsListContent() {
           </div>
 
           {/* Desktop: Table View */}
-          <div className="hidden md:block rounded-md border bg-white dark:bg-slate-800">
+          <div className="hidden md:block rounded-md border">
             <Table>
                 <TableHeader>
                   <TableRow>

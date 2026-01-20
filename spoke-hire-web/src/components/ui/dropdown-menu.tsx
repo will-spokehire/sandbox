@@ -89,7 +89,7 @@ function DropdownMenuItem({
         "relative flex cursor-default select-none items-center gap-2",
         "px-3 py-2",
         // Typography
-        "font-degular text-base font-medium text-spoke-black",
+        "font-degular text-sm font-medium text-spoke-black",
         // Hover/Focus states
         "outline-none focus:bg-spoke-black/5 hover:bg-spoke-black/5",
         // Destructive variant
