@@ -9,7 +9,7 @@ import { OTPVerification } from '~/components/auth/OTPVerification';
 export default function VerifyOtpPage() {
   return (
     <div className="w-full min-h-screen flex items-center justify-center px-4 md:px-[30px] py-[41px]">
-      <div className="w-full max-w-[808px] flex flex-col items-center gap-20 md:gap-[80px]">
+      <div className="w-full max-w-[808px] flex flex-col items-center gap-8 md:gap-[80px]">
         <Suspense fallback={<OTPVerificationSkeleton />}>
           <OTPVerification />
         </Suspense>

@@ -191,9 +191,9 @@ export function OTPVerification() {
   }, [email]);
 
   return (
-    <div className="w-full max-w-[808px] flex flex-col items-center gap-20 md:gap-[80px]">
+    <div className="w-full max-w-[808px] flex flex-col items-center gap-8 md:gap-[80px]">
       {/* Title Section */}
-      <div className="w-full flex flex-col items-center gap-[11px] text-center">
+      <div className="w-full flex flex-col i  tems-center gap-[11px] text-center">
         <h1 className="text-[48px] md:text-[96px] font-normal leading-[0.95] uppercase text-black tracking-normal">
           Verify email
         </h1>

@@ -83,7 +83,7 @@ export function AcceptTermsForm() {
   };
 
   return (
-    <div className="w-full max-w-[808px] flex flex-col items-center gap-20 md:gap-[80px]">
+    <div className="w-full max-w-[808px] flex flex-col items-center gap-8 md:gap-[80px]">
       {/* Title Section */}
       <div className="w-full flex flex-col items-center gap-[11px] text-center">
         <h1 className="text-[48px] md:text-[96px] font-normal leading-[0.95] uppercase text-black tracking-normal">
@@ -106,7 +106,7 @@ export function AcceptTermsForm() {
                 including vehicle listings, bookings, and user responsibilities.
               </p>
               <Link 
-                href="/terms" 
+                href="/terms-of-service" 
                 target="_blank"
                 className="text-base font-normal leading-[1.4] text-black underline decoration-solid underline-offset-auto inline-flex items-center gap-1"
               >
@@ -144,7 +144,7 @@ export function AcceptTermsForm() {
                 when you use our platform.
               </p>
               <Link 
-                href="/privacy" 
+                href="/privacy-policy" 
                 target="_blank"
                 className="text-base font-normal leading-[1.4] text-black underline decoration-solid underline-offset-auto inline-flex items-center gap-1"
               >
