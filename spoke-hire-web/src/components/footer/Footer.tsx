@@ -51,7 +51,7 @@ export async function Footer({ navigation }: FooterProps) {
         )}
 
         {/* Content Section */}
-        <div className={cn('w-full flex flex-col lg:flex-row', FOOTER_STYLES.columnGap, 'items-start')}>
+        <div className={cn('w-full flex flex-col lg:flex-row', FOOTER_STYLES.columnGap, 'items-start justify-start')}>
           {/* Left Column - Contact Info */}
           <div className={cn('flex-1 min-w-0 w-full lg:w-auto', FOOTER_STYLES.contactColumn)}>
             {/* Address */}
@@ -83,8 +83,8 @@ export async function Footer({ navigation }: FooterProps) {
 
             {/* Social Links */}
             {socialLinks && socialLinks.length > 0 && (
-              <div className="flex items-center gap-3 mt-6">
-                <p className={cn(FOOTER_STYLES.body, 'font-["Degular:Light",sans-serif]')}>
+              <div className="flex items-center gap-3">
+                <p className={FOOTER_STYLES.heading}>
                   Follow us
                 </p>
                 <div className="flex items-center gap-3">
