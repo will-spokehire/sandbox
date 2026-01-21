@@ -1,7 +1,6 @@
 import * as React from 'react'
 import type { PageBlock } from '~/lib/payload-api'
 import { StatsBarBlock } from './StatsBarBlock'
-import { ValueStatsBlock } from './ValueStatsBlock'
 import { ValuePropsBlock } from './ValuePropsBlock'
 import { TestimonialsBlock } from './TestimonialsBlock'
 import { FAQSectionBlock } from './FAQSectionBlock'
@@ -33,10 +32,6 @@ export function BlockRenderer({ block, index }: BlockRendererProps) {
   switch (block.blockType) {
     case 'stats-bar':
       blockContent = <StatsBarBlock key={index} data={block} />
-      break
-
-    case 'value-stats':
-      blockContent = <ValueStatsBlock key={index} data={block} />
       break
 
     case 'value-props-section':

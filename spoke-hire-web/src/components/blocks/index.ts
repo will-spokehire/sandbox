@@ -7,7 +7,6 @@
 
 export { BlockRenderer } from './BlockRenderer'
 export { StatsBarBlock } from './StatsBarBlock'
-export { ValueStatsBlock } from './ValueStatsBlock'
 export { ValuePropsBlock } from './ValuePropsBlock'
 export { TestimonialsBlock } from './TestimonialsBlock'
 export { FAQSectionBlock } from './FAQSectionBlock'

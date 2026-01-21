@@ -133,13 +133,6 @@ export interface StatsBarBlockData {
   hideOnMobile?: boolean
 }
 
-export interface ValueStatsBlockData {
-  blockType: 'value-stats'
-  selectedStats: Stat[]
-  backgroundColor?: 'default' | 'muted' | 'accent' | 'primary'
-  hideOnMobile?: boolean
-}
-
 export interface ValuePropsBlockData {
   blockType: 'value-props-section'
   title: string
@@ -260,7 +253,6 @@ export interface NumberedListBlockData {
 
 export type PageBlock =
   | StatsBarBlockData
-  | ValueStatsBlockData
   | ValuePropsBlockData
   | TestimonialsSectionBlockData
   | FAQSectionBlockData
