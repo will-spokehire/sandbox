@@ -108,7 +108,7 @@ export function PublicVehicleBasicInfo({ vehicle }: PublicVehicleBasicInfoProps)
         className="md:static fixed bottom-0 left-0 right-0 z-50 md:z-auto md:relative"
       >
         <div className={cn(
-          "px-4 md:px-0 py-0 md:py-0 bg-white md:bg-transparent",
+          "px-4 md:px-0 py-3 md:py-0 bg-white md:bg-transparent",
           "md:w-full"
         )}>
           <button className={VEHICLE_DETAIL.makeEnquiryButton}>
