@@ -128,7 +128,7 @@ export default function DashboardTestPage() {
                         <span className="font-medium">
                           {userWithVehicle.firstName || userWithVehicle.email}
                         </span>
-                        <span className="text-xs text-muted-foreground">
+                        <span className="body-xs text-muted-foreground">
                           {userWithVehicle.email} • {userWithVehicle._count.vehicles} vehicles
                         </span>
                       </div>

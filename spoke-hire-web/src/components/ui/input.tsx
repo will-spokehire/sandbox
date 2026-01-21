@@ -127,7 +127,7 @@ function Input({
       {error && (
         <p
           id={`${inputId}-error`}
-          className="font-degular text-xs font-medium leading-[1.2] tracking-tight text-red-500"
+          className="font-degular body-xs font-medium leading-[1.2] tracking-tight text-red-500"
           role="alert"
         >
           {error}
@@ -136,7 +136,7 @@ function Input({
       {helpText && !error && (
         <p
           id={`${inputId}-help`}
-          className="font-degular text-xs font-medium leading-[1.2] tracking-tight text-spoke-black/60"
+          className="font-degular body-xs font-medium leading-[1.2] tracking-tight text-spoke-black/60"
         >
           {helpText}
         </p>

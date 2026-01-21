@@ -76,7 +76,7 @@ export default function VehicleDetailError({
               </div>
 
               {error.digest && (
-                <p className="text-xs text-muted-foreground">
+                <p className="body-xs text-muted-foreground">
                   Error ID: {error.digest}
                 </p>
               )}

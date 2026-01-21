@@ -244,7 +244,7 @@ export function ImageCropRotateDialog({
             <DialogDescription>
               Crop and rotate your image. The aspect ratio is fixed at 4:3 for consistency.
               {imageDimensions && (
-                <span className="block text-xs mt-1 text-muted-foreground">
+                <span className="block body-xs mt-1 text-muted-foreground">
                   Original: {imageDimensions.width}×{imageDimensions.height}px
                 </span>
               )}
@@ -289,7 +289,7 @@ export function ImageCropRotateDialog({
               <span className="text-sm text-muted-foreground">
                 {Math.round(zoom * 100)}%
                 {imageDimensions && (imageDimensions.width < MIN_OUTPUT_WIDTH || imageDimensions.height < MIN_OUTPUT_HEIGHT) && (
-                  <span className="text-xs ml-1 hidden sm:inline">(small image)</span>
+                  <span className="body-xs ml-1 hidden sm:inline">(small image)</span>
                 )}
               </span>
             </div>

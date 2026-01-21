@@ -308,7 +308,7 @@ function DealsListContent() {
                             </div>
 
                             {/* Footer */}
-                            <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <div className="flex items-center justify-between body-xs text-muted-foreground">
                               <span>By {creatorName}</span>
                               <span>{format(new Date(deal.createdAt), "MMM d, yyyy")}</span>
                             </div>

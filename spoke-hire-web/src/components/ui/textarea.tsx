@@ -103,7 +103,7 @@ function Textarea({
       {error && (
         <p
           id={`${textareaId}-error`}
-          className="font-degular text-xs font-medium leading-[1.2] tracking-tight text-red-500"
+          className="font-degular body-xs font-medium leading-[1.2] tracking-tight text-red-500"
           role="alert"
         >
           {error}
@@ -112,7 +112,7 @@ function Textarea({
       {helpText && !error && (
         <p
           id={`${textareaId}-help`}
-          className="font-degular text-xs font-medium leading-[1.2] tracking-tight text-spoke-black/60"
+          className="font-degular body-xs font-medium leading-[1.2] tracking-tight text-spoke-black/60"
         >
           {helpText}
         </p>

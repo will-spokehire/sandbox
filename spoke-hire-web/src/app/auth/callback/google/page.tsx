@@ -153,7 +153,7 @@ export default function GoogleCallbackPage() {
               <p className="text-sm text-muted-foreground text-center">
                 {error}
               </p>
-              <p className="text-xs text-muted-foreground text-center">
+              <p className="body-xs text-muted-foreground text-center">
                 Redirecting to login page...
               </p>
             </div>

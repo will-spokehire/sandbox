@@ -106,7 +106,7 @@ export function Combobox({
               {allowCustomValue && searchValue ? (
                 <div className="py-6 text-center text-sm">
                   <p className="text-spoke-black/60 mb-2">{emptyText}</p>
-                  <p className="text-xs text-spoke-black/60">
+                  <p className="body-xs text-spoke-black/60">
                     Press <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 border border-spoke-black bg-spoke-grey px-1.5 font-mono text-[10px] font-medium text-spoke-black">Enter</kbd> to add &quot;{searchValue}&quot;
                   </p>
                 </div>

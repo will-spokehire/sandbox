@@ -264,7 +264,7 @@ function FilterControls({
           className="md:w-[160px]"
         />
         {multipleMakesSelected && (
-          <div className="absolute top-full left-0 mt-1 text-xs text-muted-foreground whitespace-nowrap">
+          <div className="absolute top-full left-0 mt-1 body-xs text-muted-foreground whitespace-nowrap">
             Select one make to filter by model
           </div>
         )}

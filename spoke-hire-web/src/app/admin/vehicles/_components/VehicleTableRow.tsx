@@ -169,7 +169,7 @@ export const VehicleTableRow = memo(function VehicleTableRow({
           <div className="flex flex-col">
             <span className="text-sm">{location}</span>
             {vehicle.distance !== undefined && vehicle.distance !== null && (
-              <span className="text-xs text-muted-foreground">
+              <span className="body-xs text-muted-foreground">
                 {vehicle.distance.toFixed(1)} miles away
               </span>
             )}
@@ -182,7 +182,7 @@ export const VehicleTableRow = memo(function VehicleTableRow({
         <Link href={`/admin/vehicles/${vehicle.id}`} className="block">
           <div className="flex flex-col">
             <span className="text-sm">{ownerName}</span>
-            <span className="text-xs text-muted-foreground truncate max-w-[200px]">
+            <span className="body-xs text-muted-foreground truncate max-w-[200px]">
               {vehicle.owner.email}
             </span>
           </div>

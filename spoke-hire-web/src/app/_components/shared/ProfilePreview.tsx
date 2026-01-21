@@ -76,7 +76,7 @@ export function ProfilePreview({ profile, onEditClick }: ProfilePreviewProps) {
             <div key={detail.label} className="flex items-start gap-3">
               <Icon className="h-4 w-4 text-muted-foreground mt-0.5" />
               <div className="flex-1 min-w-0">
-                <dt className="text-xs text-muted-foreground mb-0.5">
+                <dt className="body-xs text-muted-foreground mb-0.5">
                   {detail.label}
                 </dt>
                 <dd className="text-sm">
@@ -104,7 +104,7 @@ export function ProfilePreview({ profile, onEditClick }: ProfilePreviewProps) {
           <div className="flex items-start gap-3">
             <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
             <div className="flex-1 min-w-0">
-              <dt className="text-xs text-muted-foreground mb-0.5">Address</dt>
+              <dt className="body-xs text-muted-foreground mb-0.5">Address</dt>
               <dd className="text-sm text-foreground space-y-1">
                 {profile.street && (
                   <div className="flex items-start gap-2">

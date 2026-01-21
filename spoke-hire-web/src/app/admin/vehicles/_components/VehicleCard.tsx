@@ -202,18 +202,18 @@ export const VehicleCard = memo(function VehicleCard({
           {/* Key Details Grid */}
           <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm mb-3 pb-3 border-b">
             <div>
-              <span className="text-muted-foreground text-xs">Registration</span>
-              <p className="font-mono font-medium text-xs mt-0.5">
+              <span className="text-muted-foreground body-xs">Registration</span>
+              <p className="font-mono font-medium body-xs mt-0.5">
                 {formatRegistration(vehicle.registration)}
               </p>
             </div>
             <div className="text-right">
-              <span className="text-muted-foreground text-xs">Year</span>
+              <span className="text-muted-foreground body-xs">Year</span>
               <p className="font-semibold mt-0.5">{vehicle.year}</p>
             </div>
             <div>
-              <span className="text-muted-foreground text-xs">Hourly Rate</span>
-              <p className="font-medium text-xs mt-0.5">
+              <span className="text-muted-foreground body-xs">Hourly Rate</span>
+              <p className="font-medium body-xs mt-0.5">
                 {formatPricingRate(
                   vehicle.hourlyRate 
                     ? Number(vehicle.hourlyRate)
@@ -222,8 +222,8 @@ export const VehicleCard = memo(function VehicleCard({
               </p>
             </div>
             <div className="text-right">
-              <span className="text-muted-foreground text-xs">Daily Rate</span>
-              <p className="font-medium text-xs mt-0.5">
+              <span className="text-muted-foreground body-xs">Daily Rate</span>
+              <p className="font-medium body-xs mt-0.5">
                 {formatPricingRate(
                   vehicle.dailyRate 
                     ? Number(vehicle.dailyRate)
@@ -236,8 +236,8 @@ export const VehicleCard = memo(function VehicleCard({
           {/* Owner & Location */}
           <div className="space-y-1.5 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground text-xs">Location</span>
-              <span className="font-medium text-xs truncate ml-2">
+              <span className="text-muted-foreground body-xs">Location</span>
+              <span className="font-medium body-xs truncate ml-2">
                 {location}
               </span>
             </div>
@@ -245,19 +245,19 @@ export const VehicleCard = memo(function VehicleCard({
             {/* Distance (if available) */}
             {distance !== undefined && (
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground text-xs flex items-center gap-1">
+                <span className="text-muted-foreground body-xs flex items-center gap-1">
                   <MapPin className="h-3 w-3" />
                   Distance
                 </span>
-                <span className="font-medium text-xs text-primary">
+                <span className="font-medium body-xs text-primary">
                   {distance.toFixed(1)} miles away
                 </span>
               </div>
             )}
             
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground text-xs">Owner</span>
-              <span className="font-medium text-xs truncate ml-2">
+              <span className="text-muted-foreground body-xs">Owner</span>
+              <span className="font-medium body-xs truncate ml-2">
                 {ownerName}
               </span>
             </div>

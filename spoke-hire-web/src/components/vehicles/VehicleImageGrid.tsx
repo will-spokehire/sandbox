@@ -147,7 +147,7 @@ function SortableImageCard({
       )}
 
       {/* Order Badge */}
-      <div className="absolute bottom-2 left-2 z-10 rounded bg-background/80 px-2 py-1 text-xs font-medium pointer-events-none">
+      <div className="absolute bottom-2 left-2 z-10 rounded bg-background/80 px-2 py-1 body-xs font-medium pointer-events-none">
         {image.order}
       </div>
     </div>

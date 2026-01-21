@@ -205,14 +205,14 @@ export function UserVehicleMedia({ vehicle }: UserVehicleMediaProps) {
 
             {/* Image Counter */}
             {sortedMedia.length > 1 && (
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 bg-black/60 text-white text-xs md:text-sm px-3 py-1 rounded-full font-medium">
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 bg-black/60 text-white body-xs px-3 py-1 rounded-full font-medium">
                 {selectedImageIndex + 1} / {sortedMedia.length}
               </div>
             )}
 
             {/* Click to expand */}
             {hasImages && (
-              <div className="absolute bottom-3 right-3 z-20 bg-black/60 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute bottom-3 right-3 z-20 bg-black/60 text-white body-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
                 Click to expand
               </div>
             )}
@@ -256,7 +256,7 @@ export function UserVehicleMedia({ vehicle }: UserVehicleMediaProps) {
                         onLoad={() => setLoadedThumbnails(prev => new Set(prev).add(media.id))}
                       />
                       {media.isPrimary && (
-                        <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded font-medium z-10">
+                        <div className="absolute top-1 left-1 bg-primary text-primary-foreground body-xs px-1.5 py-0.5 rounded font-medium z-10">
                           Primary
                         </div>
                       )}

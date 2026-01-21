@@ -93,12 +93,12 @@ export function VehicleOwnerInfo({ owner, vehicleId }: VehicleOwnerInfoProps) {
               {ownerName}
             </h3>
             <div className="flex gap-2 mt-1">
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="body-xs">
                 {owner.userType}
               </Badge>
               <Badge
                 variant={owner.status === "ACTIVE" ? "default" : "secondary"}
-                className="text-xs"
+                className="body-xs"
               >
                 {owner.status}
               </Badge>
@@ -114,7 +114,7 @@ export function VehicleOwnerInfo({ owner, vehicleId }: VehicleOwnerInfoProps) {
           <div className="flex items-start gap-3">
             <Mail className="h-4 w-4 text-muted-foreground mt-0.5" />
             <div className="flex-1 min-w-0">
-              <dt className="text-xs text-muted-foreground mb-0.5">Email</dt>
+              <dt className="body-xs text-muted-foreground mb-0.5">Email</dt>
               <dd className="text-sm">
                 <a
                   href={`mailto:${owner.email}`}
@@ -131,7 +131,7 @@ export function VehicleOwnerInfo({ owner, vehicleId }: VehicleOwnerInfoProps) {
             <div className="flex items-start gap-3">
               <Phone className="h-4 w-4 text-muted-foreground mt-0.5" />
               <div className="flex-1 min-w-0">
-                <dt className="text-xs text-muted-foreground mb-0.5">Phone</dt>
+                <dt className="body-xs text-muted-foreground mb-0.5">Phone</dt>
                 <dd className="text-sm">
                   <a
                     href={`tel:${owner.phone}`}
@@ -149,7 +149,7 @@ export function VehicleOwnerInfo({ owner, vehicleId }: VehicleOwnerInfoProps) {
             <div className="flex items-start gap-3">
               <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
               <div className="flex-1 min-w-0">
-                <dt className="text-xs text-muted-foreground mb-0.5">Address</dt>
+                <dt className="body-xs text-muted-foreground mb-0.5">Address</dt>
                 <dd className="text-sm text-foreground">
                   {owner.street && <div>{owner.street}</div>}
                   {owner.city && <div>{owner.city}</div>}
@@ -173,21 +173,21 @@ export function VehicleOwnerInfo({ owner, vehicleId }: VehicleOwnerInfoProps) {
           <dl className="space-y-3">
             {/* Terms & Conditions */}
             <div>
-              <dt className="text-xs text-muted-foreground mb-1">Terms & Conditions</dt>
+              <dt className="body-xs text-muted-foreground mb-1">Terms & Conditions</dt>
               <dd className="text-sm">
                 {owner.termsAcceptedAt ? (
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <Badge variant="default" className="text-xs">
+                      <Badge variant="default" className="body-xs">
                         Accepted
                       </Badge>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="body-xs text-muted-foreground">
                         {formatAcceptanceDate(owner.termsAcceptedAt)}
                       </span>
                     </div>
                     {owner.termsAcceptanceId && (
                       <div className="flex items-center gap-2 mt-1">
-                        <code className="text-xs bg-muted px-2 py-1 rounded font-mono">
+                        <code className="body-xs bg-muted px-2 py-1 rounded font-mono">
                           {owner.termsAcceptanceId}
                         </code>
                         <Button
@@ -202,7 +202,7 @@ export function VehicleOwnerInfo({ owner, vehicleId }: VehicleOwnerInfoProps) {
                     )}
                   </div>
                 ) : (
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge variant="secondary" className="body-xs">
                     Not Accepted
                   </Badge>
                 )}
@@ -211,21 +211,21 @@ export function VehicleOwnerInfo({ owner, vehicleId }: VehicleOwnerInfoProps) {
 
             {/* Privacy Policy */}
             <div>
-              <dt className="text-xs text-muted-foreground mb-1">Privacy Policy</dt>
+              <dt className="body-xs text-muted-foreground mb-1">Privacy Policy</dt>
               <dd className="text-sm">
                 {owner.privacyPolicyAcceptedAt ? (
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <Badge variant="default" className="text-xs">
+                      <Badge variant="default" className="body-xs">
                         Accepted
                       </Badge>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="body-xs text-muted-foreground">
                         {formatAcceptanceDate(owner.privacyPolicyAcceptedAt)}
                       </span>
                     </div>
                     {owner.privacyAcceptanceId && (
                       <div className="flex items-center gap-2 mt-1">
-                        <code className="text-xs bg-muted px-2 py-1 rounded font-mono">
+                        <code className="body-xs bg-muted px-2 py-1 rounded font-mono">
                           {owner.privacyAcceptanceId}
                         </code>
                         <Button
@@ -240,7 +240,7 @@ export function VehicleOwnerInfo({ owner, vehicleId }: VehicleOwnerInfoProps) {
                     )}
                   </div>
                 ) : (
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge variant="secondary" className="body-xs">
                     Not Accepted
                   </Badge>
                 )}
@@ -310,7 +310,7 @@ export function VehicleOwnerInfo({ owner, vehicleId }: VehicleOwnerInfoProps) {
                     className="flex items-center gap-2 p-2 rounded-md border bg-card hover:bg-accent/50 transition-colors group"
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-foreground truncate group-hover:text-primary transition-colors">
+                      <p className="body-xs font-medium text-foreground truncate group-hover:text-primary transition-colors">
                         {vehicle.name}
                       </p>
                       <p className="text-[10px] text-muted-foreground truncate">

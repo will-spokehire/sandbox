@@ -156,7 +156,7 @@ export function VehicleDetailHeader({ vehicle, onEdit }: VehicleDetailHeaderProp
                     </Badge>
                   )}
                 </div>
-                <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400 truncate">
+                <p className="body-xs text-slate-600 dark:text-slate-400 truncate">
                   {[
                     vehicle.hourlyRate && `£${vehicle.hourlyRate} hourly`,
                     vehicle.dailyRate && `£${vehicle.dailyRate} daily`

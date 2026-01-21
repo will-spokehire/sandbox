@@ -105,7 +105,7 @@ export function VehicleBasicInfoFields({
                 <div className="flex items-center gap-2">
                   <FormLabel>Make *</FormLabel>
                   {makeIsUnpublished && (
-                    <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-600 dark:text-yellow-400">
+                    <Badge variant="outline" className="body-xs border-yellow-500 text-yellow-600 dark:text-yellow-400">
                       Unpublished
                     </Badge>
                   )}
@@ -125,7 +125,7 @@ export function VehicleBasicInfoFields({
                   />
                 </FormControl>
                 {makeIsUnpublished && (
-                  <p className="text-xs text-yellow-600 dark:text-yellow-400">
+                  <p className="body-xs text-yellow-600 dark:text-yellow-400">
                     Type to edit
                   </p>
                 )}
@@ -143,7 +143,7 @@ export function VehicleBasicInfoFields({
                 <div className="flex items-center gap-2">
                   <FormLabel>Model *</FormLabel>
                   {modelIsUnpublished && (
-                    <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-600 dark:text-yellow-400">
+                    <Badge variant="outline" className="body-xs border-yellow-500 text-yellow-600 dark:text-yellow-400">
                       Unpublished
                     </Badge>
                   )}
@@ -161,12 +161,12 @@ export function VehicleBasicInfoFields({
                   />
                 </FormControl>
                 {modelIsUnpublished && (
-                  <p className="text-xs text-yellow-600 dark:text-yellow-400">
+                  <p className="body-xs text-yellow-600 dark:text-yellow-400">
                     Type to edit
                   </p>
                 )}
                 {!selectedMakeId && !modelIsUnpublished && (
-                  <p className="text-xs text-muted-foreground">Select a make first</p>
+                  <p className="body-xs text-muted-foreground">Select a make first</p>
                 )}
                 <FormMessage />
               </FormItem>

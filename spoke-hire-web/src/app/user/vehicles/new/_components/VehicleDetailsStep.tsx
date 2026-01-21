@@ -312,10 +312,10 @@ export function VehicleDetailsStep({
                   />
                 </FormControl>
                 <div className="flex justify-between items-center min-h-[20px]">
-                  <FormDescription className="text-xs md:text-sm">
+                  <FormDescription className="body-xs">
                     Optional but recommended for better visibility
                   </FormDescription>
-                  <span className="text-xs text-muted-foreground">{descriptionLength} / 2000</span>
+                  <span className="body-xs text-muted-foreground">{descriptionLength} / 2000</span>
                 </div>
                 <FormMessage />
               </FormItem>
@@ -383,7 +383,7 @@ export function VehicleDetailsStep({
                     )}
                   </div>
                 </FormControl>
-                <FormDescription className="min-h-[20px] text-xs md:text-sm">
+                <FormDescription className="min-h-[20px] body-xs">
                   Select one or more collections to help users find your vehicle
                 </FormDescription>
                 <FormMessage />
@@ -396,7 +396,7 @@ export function VehicleDetailsStep({
             <div className="space-y-4 border-t pt-6">
               <div>
                 <h3 className="text-base md:text-lg font-semibold">Hire Pricing</h3>
-                <p className="text-xs md:text-sm text-muted-foreground mt-1">
+                <p className="body-xs text-muted-foreground mt-1">
                   Set your hourly and daily hire rates
                 </p>
               </div>
@@ -404,7 +404,7 @@ export function VehicleDetailsStep({
               {/* Pricing Tier Info */}
               <Alert>
                 <Info className="h-4 w-4" />
-                <AlertDescription className="text-xs md:text-sm">
+                <AlertDescription className="body-xs">
                   Based on the information you provided, we suggest £{defaultPricing.hourlyRate}/hour and £{defaultPricing.dailyRate}/day. You can adjust these rates as needed.
                 </AlertDescription>
               </Alert>
@@ -430,7 +430,7 @@ export function VehicleDetailsStep({
                           />
                         </div>
                       </FormControl>
-                      <FormDescription className="text-xs md:text-sm">
+                      <FormDescription className="body-xs">
                         Per hour rate in GBP
                       </FormDescription>
                       <FormMessage />
@@ -458,7 +458,7 @@ export function VehicleDetailsStep({
                           />
                         </div>
                       </FormControl>
-                      <FormDescription className="text-xs md:text-sm">
+                      <FormDescription className="body-xs">
                         Up to 12 hours in GBP
                       </FormDescription>
                       <FormMessage />

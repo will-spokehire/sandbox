@@ -80,7 +80,7 @@ export function VehiclePricingFields({ form, isEditMode = false }: FormFieldComp
       <div className="space-y-4 pt-2">
         <div>
           <h4 className="text-sm font-medium">Hire Rates</h4>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="body-xs text-muted-foreground mt-1">
             Set hourly and daily hire rates for your vehicle
           </p>
         </div>
@@ -89,7 +89,7 @@ export function VehiclePricingFields({ form, isEditMode = false }: FormFieldComp
         {defaultPricing && (
           <Alert>
             <Info className="h-4 w-4" />
-            <AlertDescription className="text-xs">
+            <AlertDescription className="body-xs">
               Based on the information you provided, we suggest £{defaultPricing.hourlyRate}/hour and £{defaultPricing.dailyRate}/day.
             </AlertDescription>
           </Alert>
@@ -118,7 +118,7 @@ export function VehiclePricingFields({ form, isEditMode = false }: FormFieldComp
                     />
                   </div>
                 </FormControl>
-                <FormDescription className="text-xs">
+                <FormDescription className="body-xs">
                   Per hour rate in GBP
                 </FormDescription>
                 <FormMessage />
@@ -148,7 +148,7 @@ export function VehiclePricingFields({ form, isEditMode = false }: FormFieldComp
                     />
                   </div>
                 </FormControl>
-                <FormDescription className="text-xs">
+                <FormDescription className="body-xs">
                   Up to 12 hours in GBP
                 </FormDescription>
                 <FormMessage />

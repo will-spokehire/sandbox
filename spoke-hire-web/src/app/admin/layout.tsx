@@ -116,7 +116,7 @@ export default function AdminLayout({
                 <h1 className="text-lg font-bold text-slate-900 dark:text-slate-50">
                   SpokeHire
                 </h1>
-                <p className="text-xs text-slate-600 dark:text-slate-400">
+                <p className="body-xs text-slate-600 dark:text-slate-400">
                   Admin Portal
                 </p>
               </div>
@@ -135,7 +135,7 @@ export default function AdminLayout({
                 <p className="text-sm font-medium text-slate-900 dark:text-slate-50 truncate">
                   {user.firstName ?? user.email}
                 </p>
-                <p className="text-xs text-slate-600 dark:text-slate-400 truncate">
+                <p className="body-xs text-slate-600 dark:text-slate-400 truncate">
                   {user.email}
                 </p>
               </div>
@@ -192,7 +192,7 @@ export default function AdminLayout({
                             <p className="text-sm font-medium truncate">
                               {user.firstName ?? user.email}
                             </p>
-                            <p className="text-xs text-muted-foreground truncate">
+                            <p className="body-xs text-muted-foreground truncate">
                               {user.email}
                             </p>
                           </div>

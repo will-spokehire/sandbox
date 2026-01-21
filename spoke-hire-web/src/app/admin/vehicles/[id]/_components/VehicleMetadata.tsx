@@ -35,7 +35,7 @@ export function VehicleMetadata({ vehicle }: VehicleMetadataProps) {
           <div className="flex items-start gap-3">
             <Calendar className="h-4 w-4 text-muted-foreground mt-0.5" />
             <div>
-              <dt className="text-xs text-muted-foreground mb-1">Created</dt>
+              <dt className="body-xs text-muted-foreground mb-1">Created</dt>
               <dd className="text-sm font-medium text-foreground">
                 {formatDate(vehicle.createdAt)}
               </dd>
@@ -45,7 +45,7 @@ export function VehicleMetadata({ vehicle }: VehicleMetadataProps) {
           <div className="flex items-start gap-3">
             <Calendar className="h-4 w-4 text-muted-foreground mt-0.5" />
             <div>
-              <dt className="text-xs text-muted-foreground mb-1">Last Updated</dt>
+              <dt className="body-xs text-muted-foreground mb-1">Last Updated</dt>
               <dd className="text-sm font-medium text-foreground">
                 {formatDate(vehicle.updatedAt)}
               </dd>
@@ -92,7 +92,7 @@ export function VehicleMetadata({ vehicle }: VehicleMetadataProps) {
 
         {/* Vehicle ID for reference */}
         <Separator />
-        <div className="text-xs text-muted-foreground text-center">
+        <div className="body-xs text-muted-foreground text-center">
           Vehicle ID: <span className="font-mono">{vehicle.id}</span>
         </div>
       </CardContent>

@@ -274,7 +274,7 @@ export function PublicUserNavigation({ navigation }: PublicUserNavigationProps) 
                       <p className="text-sm font-semibold text-slate-900 dark:text-slate-50 truncate">
                         {displayName}
                       </p>
-                      <p className="text-xs text-muted-foreground truncate">
+                      <p className="body-xs text-muted-foreground truncate">
                         {user.email}
                       </p>
                     </div>

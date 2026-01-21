@@ -185,7 +185,7 @@ export function UserVehicleCard({ vehicle, href }: UserVehicleCardProps) {
 
           {/* Image Counter - Bottom Right */}
           {vehicle._count.media > 1 && (
-            <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded z-10">
+            <div className="absolute bottom-2 right-2 bg-black/60 text-white body-xs px-2 py-1 rounded z-10">
               {currentImageIndex + 1} / {vehicle._count.media}
             </div>
           )}

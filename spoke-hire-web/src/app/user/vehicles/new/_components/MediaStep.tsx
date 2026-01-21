@@ -131,7 +131,7 @@ export function MediaStep({ vehicleId, onComplete }: MediaStepProps) {
             size="default"
             className="w-full sm:w-auto"
           >
-            {hasImages ? "Continue" : "Upload at least one photo to continue"}
+            {hasImages ? "Continue" : "Upload at least one photo"}
           </Button>
         </div>
       </div>
