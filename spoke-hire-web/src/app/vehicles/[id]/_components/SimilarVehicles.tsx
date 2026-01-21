@@ -4,7 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import { api } from "~/trpc/react";
 import { PublicVehicleCard } from "~/app/vehicles/_components/PublicVehicleCard";
-import { MobileScrollDots } from "~/components/blocks/MobileScrollDots";
+import { MobileCarousel } from "~/components/ui/mobile-carousel";
 import { TYPOGRAPHY, LAYOUT_CONSTANTS } from "~/lib/design-tokens";
 import { cn } from "~/lib/utils";
 
@@ -29,15 +29,12 @@ export function SimilarVehicles({ vehicleId }: SimilarVehiclesProps) {
   );
 
   const desktopCarouselRef = React.useRef<HTMLDivElement>(null);
-  const mobileCarouselRef = React.useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = React.useState(false);
   const [canScrollRight, setCanScrollRight] = React.useState(false);
   const [needsScroll, setNeedsScroll] = React.useState(false);
-  const [currentIndex, setCurrentIndex] = React.useState(0);
 
   const checkScrollability = React.useCallback(() => {
     const desktopContainer = desktopCarouselRef.current;
-    const mobileContainer = mobileCarouselRef.current;
 
     // Check desktop carousel for arrow states
     if (desktopContainer) {
@@ -67,43 +64,20 @@ export function SimilarVehicles({ vehicleId }: SimilarVehiclesProps) {
         }
       }
     }
-
-    // Check mobile carousel for scroll dots
-    if (mobileContainer && vehicles) {
-      const mobileScrollLeft = mobileContainer.scrollLeft;
-      if (vehicles.length > 0) {
-        // Get actual card width from first card element
-        const firstCard = mobileContainer.querySelector('[data-vehicle-card-mobile]') as HTMLElement;
-        if (firstCard) {
-          const cardWidth = firstCard.offsetWidth;
-          const gap = 16; // gap-4 = 16px
-          const scrollDistancePerCard = cardWidth + gap;
-          const newIndex = Math.round(mobileScrollLeft / scrollDistancePerCard);
-          const clampedIndex = Math.max(0, Math.min(newIndex, vehicles.length - 1));
-          setCurrentIndex(clampedIndex);
-        }
-      }
-    }
-  }, [vehicles?.length ?? 0]);
+  }, []);
 
   React.useEffect(() => {
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        setTimeout(() => {
-          checkScrollability();
-        }, 50);
-      }
+    const resizeObserver = new ResizeObserver(() => {
+      setTimeout(() => {
+        checkScrollability();
+      }, 50);
     });
 
     if (desktopCarouselRef.current) {
       resizeObserver.observe(desktopCarouselRef.current);
     }
-    if (mobileCarouselRef.current) {
-      resizeObserver.observe(mobileCarouselRef.current);
-    }
 
     const desktopCarousel = desktopCarouselRef.current;
-    const mobileCarousel = mobileCarouselRef.current;
 
     const checkAfterLayout = () => {
       requestAnimationFrame(() => {
@@ -118,18 +92,12 @@ export function SimilarVehicles({ vehicleId }: SimilarVehiclesProps) {
     if (desktopCarousel) {
       desktopCarousel.addEventListener("scroll", checkScrollability);
     }
-    if (mobileCarousel) {
-      mobileCarousel.addEventListener("scroll", checkScrollability);
-    }
     window.addEventListener("resize", checkAfterLayout);
 
     return () => {
       resizeObserver.disconnect();
       if (desktopCarousel) {
         desktopCarousel.removeEventListener("scroll", checkScrollability);
-      }
-      if (mobileCarousel) {
-        mobileCarousel.removeEventListener("scroll", checkScrollability);
       }
       window.removeEventListener("resize", checkAfterLayout);
     };
@@ -272,28 +240,12 @@ export function SimilarVehicles({ vehicleId }: SimilarVehiclesProps) {
         </div>
 
         {/* Mobile: Single card carousel */}
-        <div className="md:hidden flex flex-col relative shrink-0 w-full gap-[20px]">
-          <div
-            ref={mobileCarouselRef}
-            className="flex overflow-x-auto gap-4 snap-x snap-mandatory w-full px-4"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-          >
+        <div className="md:hidden w-full px-4">
+          <MobileCarousel dotsGap="20px">
             {vehicles.map((vehicle) => (
-              <div key={vehicle.id} data-vehicle-card-mobile className="w-[calc(100%-1rem)] min-w-[calc(100%-1rem)] snap-center shrink-0">
-                <PublicVehicleCard vehicle={vehicle} disableSwipe={true} />
-              </div>
+              <PublicVehicleCard key={vehicle.id} vehicle={vehicle} disableSwipe={true} />
             ))}
-          </div>
-
-          {/* Mobile Scroll Dots */}
-          {vehicles.length > 1 && (
-            <div className="flex w-full items-center justify-center">
-              <MobileScrollDots
-                totalItems={vehicles.length}
-                currentIndex={currentIndex}
-              />
-            </div>
-          )}
+          </MobileCarousel>
         </div>
       </div>
     </section>

@@ -8,6 +8,7 @@ import { Input } from '~/components/ui/input';
 import { api } from '~/trpc/react';
 import { toast } from 'sonner';
 import { GoogleAuthButton } from './GoogleAuthButton';
+import { useAuth } from '~/providers/auth-provider';
 
 /**
  * Login Form Component
@@ -33,11 +34,21 @@ interface LoginFormProps {
 export function LoginForm({ termsUrl = '/terms-of-service', privacyUrl = '/privacy-policy' }: LoginFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user, isLoading: isAuthLoading, isAuthenticated } = useAuth();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
   // Get callbackUrl from search params
   const callbackUrl = searchParams.get('callbackUrl');
+
+  // Redirect authenticated users to callback URL or appropriate dashboard
+  useEffect(() => {
+    if (!isAuthLoading && isAuthenticated && user) {
+      const defaultRedirect = user.userType === 'ADMIN' ? '/admin' : '/user/vehicles';
+      const redirect = callbackUrl ?? defaultRedirect;
+      router.push(redirect);
+    }
+  }, [isAuthLoading, isAuthenticated, user, callbackUrl, router]);
 
   // Show error if redirected from callback
   useEffect(() => {
@@ -97,6 +108,18 @@ export function LoginForm({ termsUrl = '/terms-of-service', privacyUrl = '/priva
     }
   };
 
+  // Show loading state while checking authentication or if already authenticated
+  if (isAuthLoading || isAuthenticated) {
+    return (
+      <div className="w-full max-w-[808px] flex flex-col items-center justify-center gap-8 min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
+        {isAuthenticated && (
+          <p className="text-base text-black/60">Redirecting...</p>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-[808px] flex flex-col items-center gap-8 md:gap-[80px]">
       {/* Title Section */}
@@ -150,7 +173,7 @@ export function LoginForm({ termsUrl = '/terms-of-service', privacyUrl = '/priva
           </div>
 
           {/* Google Auth Button */}
-          <GoogleAuthButton mode="signin" />
+          <GoogleAuthButton mode="signin" callbackUrl={callbackUrl} />
 
           {/* Terms and Privacy */}
           <div className="w-full text-center">

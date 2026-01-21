@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { cn } from '~/lib/utils'
 import type { TestimonialsSectionBlockData } from '~/lib/payload-api'
 import { TestimonialCard } from '~/components/cards/TestimonialCard'
-import { MobileScrollDots } from './MobileScrollDots'
+import { MobileCarousel } from '~/components/ui/mobile-carousel'
 import { LAYOUT_CONSTANTS } from '~/lib/design-tokens'
 
 interface TestimonialsBlockProps {
@@ -55,15 +55,12 @@ function TestimonialsCarousel({
   title?: string
 }) {
   const desktopCarouselRef = React.useRef<HTMLDivElement>(null)
-  const mobileCarouselRef = React.useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = React.useState(false)
   const [canScrollRight, setCanScrollRight] = React.useState(false)
   const [needsScroll, setNeedsScroll] = React.useState(false)
-  const [currentIndex, setCurrentIndex] = React.useState(0)
 
   const checkScrollability = React.useCallback(() => {
     const desktopContainer = desktopCarouselRef.current
-    const mobileContainer = mobileCarouselRef.current
 
     // Check desktop carousel for arrow states
     if (desktopContainer) {
@@ -93,38 +90,20 @@ function TestimonialsCarousel({
         }
       }
     }
-
-    // Check mobile carousel for scroll dots
-    if (mobileContainer) {
-      const mobileScrollLeft = mobileContainer.scrollLeft
-      const mobileScrollWidth = mobileContainer.scrollWidth
-      if (mobileScrollWidth > 0 && testimonials.length > 0) {
-        const cardWidth = mobileScrollWidth / testimonials.length
-        const newIndex = Math.round(mobileScrollLeft / cardWidth)
-        const clampedIndex = Math.max(0, Math.min(newIndex, testimonials.length - 1))
-        setCurrentIndex(clampedIndex)
-      }
-    }
-  }, [testimonials.length])
+  }, [])
 
   React.useEffect(() => {
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        setTimeout(() => {
-          checkScrollability()
-        }, 50)
-      }
+    const resizeObserver = new ResizeObserver(() => {
+      setTimeout(() => {
+        checkScrollability()
+      }, 50)
     })
 
     if (desktopCarouselRef.current) {
       resizeObserver.observe(desktopCarouselRef.current)
     }
-    if (mobileCarouselRef.current) {
-      resizeObserver.observe(mobileCarouselRef.current)
-    }
 
     const desktopCarousel = desktopCarouselRef.current
-    const mobileCarousel = mobileCarouselRef.current
 
     const checkAfterLayout = () => {
       requestAnimationFrame(() => {
@@ -139,15 +118,9 @@ function TestimonialsCarousel({
     if (desktopCarousel) {
       desktopCarousel.addEventListener('scroll', checkScrollability)
     }
-    if (mobileCarousel) {
-      mobileCarousel.addEventListener('scroll', checkScrollability)
-    }
     window.addEventListener('resize', checkAfterLayout)
 
-    const allImages = [
-      ...(desktopCarousel?.querySelectorAll('img') ?? []),
-      ...(mobileCarousel?.querySelectorAll('img') ?? [])
-    ]
+    const allImages = desktopCarousel?.querySelectorAll('img') ?? []
     allImages.forEach((img) => {
       if (!img.complete) {
         img.addEventListener('load', checkScrollability, { once: true })
@@ -158,9 +131,6 @@ function TestimonialsCarousel({
       resizeObserver.disconnect()
       if (desktopCarousel) {
         desktopCarousel.removeEventListener('scroll', checkScrollability)
-      }
-      if (mobileCarousel) {
-        mobileCarousel.removeEventListener('scroll', checkScrollability)
       }
       window.removeEventListener('resize', checkAfterLayout)
     }
@@ -288,34 +258,17 @@ function TestimonialsCarousel({
             {title.toUpperCase()}
           </h2>
         )}
-        <div
-          ref={mobileCarouselRef}
-          className="flex overflow-x-auto gap-0 snap-x snap-mandatory -mx-4"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
+        <MobileCarousel dotsGap="40px">
           {testimonials.map((testimonial) => (
-            <div
+            <TestimonialCard
               key={testimonial.id}
-              className="min-w-full snap-center shrink-0"
-              style={{ width: '100vw', maxWidth: '100vw' }}
-            >
-              <div className="w-full px-4 box-border" style={{ maxWidth: '100%' }}>
-                <TestimonialCard
-                  quote={testimonial.quote}
-                  authorName={testimonial.author}
-                  authorRole={testimonial.role}
-                  rating={showRatings && testimonial.rating ? testimonial.rating : 5}
-                />
-              </div>
-            </div>
+              quote={testimonial.quote}
+              authorName={testimonial.author}
+              authorRole={testimonial.role}
+              rating={showRatings && testimonial.rating ? testimonial.rating : 5}
+            />
           ))}
-        </div>
-
-        {/* Mobile Scroll Dots */}
-        <MobileScrollDots
-          currentIndex={currentIndex}
-          totalItems={testimonials.length}
-        />
+        </MobileCarousel>
       </div>
     </div>
   )

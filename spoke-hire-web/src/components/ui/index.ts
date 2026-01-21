@@ -23,7 +23,8 @@ export {
   type StatsBadgeProps,
   type StatsBadgeGroupProps,
 } from "./stats-badge"
-export { CarouselDots, type CarouselDotsProps } from "./carousel-dots"
+export { EmblaCarouselDots, type EmblaCarouselDotsProps } from "./embla-carousel-dots"
+export { MobileCarousel, type MobileCarouselProps } from "./mobile-carousel"
 export { StarRating, type StarRatingProps } from "./star-rating"
 export {
   ImageGallery,

@@ -7,7 +7,7 @@ import { cn } from '~/lib/utils'
 import type { FeaturedVehiclesBlockData } from '~/lib/payload-api'
 import { Button } from '~/components/ui/button'
 import { PublicVehicleCard } from '~/app/vehicles/_components/PublicVehicleCard'
-import { MobileScrollDots } from './MobileScrollDots'
+import { MobileCarousel } from '~/components/ui/mobile-carousel'
 import { LAYOUT_CONSTANTS } from '~/lib/design-tokens'
 import { api } from '~/trpc/react'
 
@@ -244,19 +244,14 @@ export function FeaturedVehiclesBlock({ data }: FeaturedVehiclesBlockProps) {
  */
 function CarouselDisplay({ vehicles }: { vehicles: Vehicle[] }) {
   const desktopCarouselRef = React.useRef<HTMLDivElement>(null)
-  const mobileCarouselRef = React.useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = React.useState(false)
   const [canScrollRight, setCanScrollRight] = React.useState(false)
   const [needsScroll, setNeedsScroll] = React.useState(false)
-  const [currentIndex, setCurrentIndex] = React.useState(0)
 
   const checkScrollability = React.useCallback(() => {
-    // For desktop arrows, only check desktop carousel
-    // For mobile scroll dots, check mobile carousel
+    // Check desktop carousel for arrow states
     const desktopContainer = desktopCarouselRef.current
-    const mobileContainer = mobileCarouselRef.current
     
-    // Check desktop carousel for arrow states (desktop only)
     if (desktopContainer) {
       const computedStyle = window.getComputedStyle(desktopContainer)
       const isVisible = computedStyle.display !== 'none' && computedStyle.visibility !== 'hidden'
@@ -284,49 +279,24 @@ function CarouselDisplay({ vehicles }: { vehicles: Vehicle[] }) {
         }
       }
     }
-    
-    // Check mobile carousel for scroll dots (mobile only)
-    if (mobileContainer) {
-      const mobileScrollLeft = mobileContainer.scrollLeft
-      if (vehicles.length > 0) {
-        // Get actual card width from first card element
-        const firstCard = mobileContainer.querySelector('[data-vehicle-card-mobile]') as HTMLElement
-        if (firstCard) {
-          const cardWidth = firstCard.offsetWidth
-          const gap = 16 // gap-4 = 16px
-          const scrollDistancePerCard = cardWidth + gap
-          const newIndex = Math.round(mobileScrollLeft / scrollDistancePerCard)
-          // Clamp index to valid range [0, totalItems - 1]
-          const clampedIndex = Math.max(0, Math.min(newIndex, vehicles.length - 1))
-          setCurrentIndex(clampedIndex)
-        }
-      }
-    }
-  }, [vehicles.length])
+  }, [])
 
   React.useEffect(() => {
-    // Observe both carousels with ResizeObserver
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        // Small delay to ensure layout is stable
-        setTimeout(() => {
-          checkScrollability()
-        }, 50)
-      }
+    // Observe desktop carousel with ResizeObserver
+    const resizeObserver = new ResizeObserver(() => {
+      // Small delay to ensure layout is stable
+      setTimeout(() => {
+        checkScrollability()
+      }, 50)
     })
 
-    // Observe both carousels
     if (desktopCarouselRef.current) {
       resizeObserver.observe(desktopCarouselRef.current)
     }
-    if (mobileCarouselRef.current) {
-      resizeObserver.observe(mobileCarouselRef.current)
-    }
     
     const desktopCarousel = desktopCarouselRef.current
-    const mobileCarousel = mobileCarouselRef.current
 
-    // Also check after initial render with multiple attempts
+    // Also check after initial render
     const checkAfterLayout = () => {
       requestAnimationFrame(() => {
         setTimeout(() => {
@@ -337,20 +307,13 @@ function CarouselDisplay({ vehicles }: { vehicles: Vehicle[] }) {
 
     checkAfterLayout()
 
-    // Add scroll listeners to both carousels
     if (desktopCarousel) {
       desktopCarousel.addEventListener('scroll', checkScrollability)
-    }
-    if (mobileCarousel) {
-      mobileCarousel.addEventListener('scroll', checkScrollability)
     }
     window.addEventListener('resize', checkAfterLayout)
 
     // Also check when images load (they might affect card width)
-    const allImages = [
-      ...(desktopCarousel?.querySelectorAll('img') ?? []),
-      ...(mobileCarousel?.querySelectorAll('img') ?? [])
-    ]
+    const allImages = desktopCarousel?.querySelectorAll('img') ?? []
     allImages.forEach((img) => {
       if (!img.complete) {
         img.addEventListener('load', checkScrollability, { once: true })
@@ -361,9 +324,6 @@ function CarouselDisplay({ vehicles }: { vehicles: Vehicle[] }) {
       resizeObserver.disconnect()
       if (desktopCarousel) {
         desktopCarousel.removeEventListener('scroll', checkScrollability)
-      }
-      if (mobileCarousel) {
-        mobileCarousel.removeEventListener('scroll', checkScrollability)
       }
       window.removeEventListener('resize', checkAfterLayout)
     }
@@ -476,28 +436,12 @@ function CarouselDisplay({ vehicles }: { vehicles: Vehicle[] }) {
       </div>
 
       {/* Mobile: Single card with scroll dots */}
-      <div className="md:hidden flex flex-col gap-[20px] w-full">
-        <div
-          ref={mobileCarouselRef}
-          className="flex overflow-x-auto gap-4 snap-x snap-mandatory px-4"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
+      <div className="md:hidden w-full px-4">
+        <MobileCarousel dotsGap="20px">
           {vehicles.map((vehicle) => (
-            <div
-              key={vehicle.id}
-              data-vehicle-card-mobile
-              className="w-[calc(100%-1rem)] min-w-[calc(100%-1rem)] snap-center shrink-0"
-            >
-              <PublicVehicleCard vehicle={vehicle} disableSwipe={true} />
-            </div>
+            <PublicVehicleCard key={vehicle.id} vehicle={vehicle} disableSwipe={true} />
           ))}
-        </div>
-        
-        {/* Mobile Scroll Dots */}
-        <MobileScrollDots
-          currentIndex={currentIndex}
-          totalItems={vehicles.length}
-        />
+        </MobileCarousel>
       </div>
     </div>
   )

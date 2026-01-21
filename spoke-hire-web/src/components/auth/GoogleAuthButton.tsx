@@ -11,6 +11,8 @@ interface GoogleAuthButtonProps {
   privacyPolicyAccepted?: boolean;
   termsAcceptanceId?: string;
   privacyAcceptanceId?: string;
+  /** URL to redirect to after successful authentication */
+  callbackUrl?: string | null;
 }
 
 /**
@@ -27,11 +29,12 @@ interface GoogleAuthButtonProps {
  * 
  * @example
  * ```tsx
- * <GoogleAuthButton mode="signin" />
+ * <GoogleAuthButton mode="signin" callbackUrl="/user/vehicles/new" />
  * <GoogleAuthButton 
  *   mode="signup" 
  *   termsAccepted={true}
  *   termsAcceptanceId="uuid"
+ *   callbackUrl="/user/vehicles/new"
  * />
  * ```
  */
@@ -41,6 +44,7 @@ export function GoogleAuthButton({
   privacyPolicyAccepted,
   termsAcceptanceId,
   privacyAcceptanceId,
+  callbackUrl,
 }: GoogleAuthButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -49,6 +53,13 @@ export function GoogleAuthButton({
     
     try {
       const supabase = createClient();
+
+      // Store callback URL in sessionStorage for redirect after OAuth
+      if (callbackUrl) {
+        sessionStorage.setItem('oauth_callback_url', callbackUrl);
+      } else {
+        sessionStorage.removeItem('oauth_callback_url');
+      }
 
       // Store T&Cs acceptance in sessionStorage for callback
       if (mode === 'signup' && termsAccepted && privacyPolicyAccepted) {

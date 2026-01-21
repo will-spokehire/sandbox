@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '~/lib/supabase/client';
 import { api } from '~/trpc/react';
@@ -16,10 +16,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
  * 1. Supabase automatically exchanges auth code for session
  * 2. We verify the session exists
  * 3. Call our backend to validate/create user in database
- * 4. Redirect to appropriate dashboard based on userType
+ * 4. Redirect to callback URL or appropriate dashboard based on userType
  * 
  * This is a client component because:
- * - Need to access sessionStorage for T&Cs data
+ * - Need to access sessionStorage for T&Cs data and callback URL
  * - Need to call tRPC mutation with user data
  * - Need to handle loading state and redirects
  */
@@ -27,11 +27,26 @@ export default function GoogleCallbackPage() {
   const router = useRouter();
   const [isVerifying, setIsVerifying] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Use ref for callback URL to avoid stale closure in mutation callbacks
+  const callbackUrlRef = useRef<string | null>(null);
+
+  // Read callback URL from sessionStorage on mount
+  useEffect(() => {
+    const storedCallbackUrl = sessionStorage.getItem('oauth_callback_url');
+    if (storedCallbackUrl) {
+      callbackUrlRef.current = storedCallbackUrl;
+    }
+  }, []);
 
   const verifyMutation = api.auth.verifyGoogleAuth.useMutation({
     onSuccess: (data) => {
-      // Redirect based on user type
-      const redirect = data.user.userType === 'ADMIN' ? '/admin' : '/user/vehicles';
+      // Clear callback URL from sessionStorage
+      sessionStorage.removeItem('oauth_callback_url');
+      
+      // Use callback URL if provided, otherwise redirect based on user type
+      const defaultRedirect = data.user.userType === 'ADMIN' ? '/admin' : '/user/vehicles';
+      const redirect = callbackUrlRef.current ?? defaultRedirect;
       
       toast.success('Welcome!', {
         description: `Successfully signed in as ${data.user.email}`,
@@ -40,6 +55,9 @@ export default function GoogleCallbackPage() {
       router.push(redirect);
     },
     onError: (error) => {
+      // Clear callback URL on error too
+      sessionStorage.removeItem('oauth_callback_url');
+      
       console.error('Google auth verification error:', error);
       setError(error.message);
       setIsVerifying(false);

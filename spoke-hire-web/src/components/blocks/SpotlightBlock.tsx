@@ -6,7 +6,7 @@ import { cn } from '~/lib/utils'
 import type { SpotlightBlockData } from '~/lib/payload-api'
 import { getMediaUrl } from '~/lib/payload-api'
 import { SpotlightCard } from '~/components/cards/SpotlightCard'
-import { MobileScrollDots } from './MobileScrollDots'
+import { MobileCarousel } from '~/components/ui/mobile-carousel'
 
 interface SpotlightBlockProps {
   data: SpotlightBlockData
@@ -24,8 +24,6 @@ export function SpotlightBlock({ data }: SpotlightBlockProps) {
   const { title, selectedSpotlights, showArrows, itemsPerView = 4 } = data
   const [currentIndex, setCurrentIndex] = React.useState(0)
   const desktopScrollRef = React.useRef<HTMLDivElement>(null)
-  const mobileScrollRef = React.useRef<HTMLDivElement>(null)
-  const [mobileCurrentIndex, setMobileCurrentIndex] = React.useState(0)
 
   if (!selectedSpotlights || selectedSpotlights.length === 0) {
     return null
@@ -43,22 +41,6 @@ export function SpotlightBlock({ data }: SpotlightBlockProps) {
     setCurrentIndex((prev) => Math.min(maxIndex, prev + 1))
   }
 
-  // Track mobile scroll position for dots
-  const checkMobileScroll = React.useCallback(() => {
-    const mobileContainer = mobileScrollRef.current
-    if (mobileContainer) {
-      const mobileScrollLeft = mobileContainer.scrollLeft
-      const mobileScrollWidth = mobileContainer.scrollWidth
-      if (mobileScrollWidth > 0 && totalItems > 0) {
-        const cardWidth = mobileScrollWidth / totalItems
-        const newIndex = Math.round(mobileScrollLeft / cardWidth)
-        // Clamp index to valid range [0, totalItems - 1]
-        const clampedIndex = Math.max(0, Math.min(newIndex, totalItems - 1))
-        setMobileCurrentIndex(clampedIndex)
-      }
-    }
-  }, [totalItems])
-
   // Scroll container on index change (desktop)
   React.useEffect(() => {
     if (desktopScrollRef.current) {
@@ -74,19 +56,6 @@ export function SpotlightBlock({ data }: SpotlightBlockProps) {
       }
     }
   }, [currentIndex])
-
-  // Track mobile scroll
-  React.useEffect(() => {
-    const mobileContainer = mobileScrollRef.current
-    if (mobileContainer) {
-      mobileContainer.addEventListener('scroll', checkMobileScroll)
-      checkMobileScroll() // Initial check
-
-      return () => {
-        mobileContainer.removeEventListener('scroll', checkMobileScroll)
-      }
-    }
-  }, [checkMobileScroll])
 
   return (
     <section className="bg-white pt-[60px] md:pt-[100px] pb-0">
@@ -182,33 +151,19 @@ export function SpotlightBlock({ data }: SpotlightBlockProps) {
         </div>
 
         {/* Mobile: Single card with scroll dots */}
-        <div className="md:hidden flex flex-col gap-[36px] mt-[36px] w-full">
-          <div
-            ref={mobileScrollRef}
-            className="flex overflow-x-auto gap-0 snap-x snap-mandatory"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          >
+        <div className="md:hidden mt-[36px] w-full">
+          <MobileCarousel dotsGap="36px">
             {selectedSpotlights.map((item, index) => (
-              <div
+              <SpotlightCard
                 key={item.id || index}
-                className="min-w-full snap-center shrink-0"
-              >
-                <SpotlightCard
-                  title={item.caption || item.image.alt || ''}
-                  imageUrl={getMediaUrl(item.image.url)}
-                  imageAlt={item.image.alt}
-                  href={item.link}
-                  titleSize="h4"
-                />
-              </div>
+                title={item.caption || item.image.alt || ''}
+                imageUrl={getMediaUrl(item.image.url)}
+                imageAlt={item.image.alt}
+                href={item.link}
+                titleSize="h4"
+              />
             ))}
-          </div>
-          
-          {/* Mobile Scroll Dots */}
-          <MobileScrollDots
-            currentIndex={mobileCurrentIndex}
-            totalItems={totalItems}
-          />
+          </MobileCarousel>
         </div>
       </div>
     </section>
