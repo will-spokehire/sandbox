@@ -79,9 +79,10 @@ export function MobileCarousel({
             <div
               key={index}
               className={cn(
-                "min-w-full flex-shrink-0 flex-grow-0",
+                index < slides.length - 1 ? "mr-4" : "",
                 slideClassName
               )}
+              style={{ flex: "0 0 100%", minWidth: 0 }}
             >
               {child}
             </div>
