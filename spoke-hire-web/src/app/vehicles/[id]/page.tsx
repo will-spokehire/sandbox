@@ -304,7 +304,7 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
           <section 
             aria-label="Vehicle description" 
             className={cn(
-              "w-full pt-4 md:pt-[41px]",
+              "w-full pt-6 md:pt-[41px]",
               "flex flex-col gap-3.5"
             )}
           >
