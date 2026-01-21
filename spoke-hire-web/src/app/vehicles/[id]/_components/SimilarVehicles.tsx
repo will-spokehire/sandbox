@@ -240,7 +240,7 @@ export function SimilarVehicles({ vehicleId }: SimilarVehiclesProps) {
         </div>
 
         {/* Mobile: Single card carousel */}
-        <div className="md:hidden w-full px-4">
+        <div className="md:hidden w-full">
           <MobileCarousel dotsGap="20px">
             {vehicles.map((vehicle) => (
               <PublicVehicleCard key={vehicle.id} vehicle={vehicle} disableSwipe={true} />

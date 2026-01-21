@@ -436,7 +436,7 @@ function CarouselDisplay({ vehicles }: { vehicles: Vehicle[] }) {
       </div>
 
       {/* Mobile: Single card with scroll dots */}
-      <div className="md:hidden w-full px-4">
+      <div className="md:hidden w-full">
         <MobileCarousel dotsGap="20px">
           {vehicles.map((vehicle) => (
             <PublicVehicleCard key={vehicle.id} vehicle={vehicle} disableSwipe={true} />
