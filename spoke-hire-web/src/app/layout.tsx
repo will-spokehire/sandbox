@@ -12,12 +12,31 @@ import { AnalyticsProvider } from "~/components/analytics/AnalyticsProvider";
 import { CookieBanner } from "~/components/analytics/CookieBanner";
 import { env } from "~/env";
 import { MaxWidthWrapper } from "~/components/layout/MaxWidthWrapper";
+import {
+  getSiteSettings,
+  getFaviconUrl,
+  getLogoUrl,
+  getDefaultDescription,
+  SEO_CONSTANTS,
+} from "~/lib/seo";
 
-export const metadata: Metadata = {
-  title: "SpokeHire - Classic & Vintage Vehicle Hire",
-  description: "SpokeHire connects you with meticulously maintained classic and vintage vehicles for your special occasions.",
-  icons: [{ rel: "icon", url: "/spoke-hire-logo-1.png" }],
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const siteSettings = await getSiteSettings();
+  const appUrl = getAppUrl();
+
+  return {
+    title: siteSettings?.siteName
+      ? `${siteSettings.siteName} - Classic & Vintage Vehicle Hire`
+      : SEO_CONSTANTS.defaultTitle,
+    description:
+      getDefaultDescription(siteSettings) ?? SEO_CONSTANTS.defaultDescription,
+    icons: {
+      icon: getFaviconUrl(siteSettings),
+      apple: getLogoUrl(siteSettings),
+    },
+    metadataBase: new URL(appUrl),
+  };
+}
 
 export default function RootLayout({
   children,

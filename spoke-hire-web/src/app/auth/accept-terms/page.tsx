@@ -35,8 +35,11 @@ function AcceptTermsFormSkeleton() {
   );
 }
 
-export const metadata = {
-  title: 'Accept Terms - SpokeHire',
-  description: 'Review and accept SpokeHire terms and privacy policy',
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Accept Terms | SpokeHire',
+  description: 'Review and accept SpokeHire terms and privacy policy.',
+  robots: { index: false, follow: false },
 };
 

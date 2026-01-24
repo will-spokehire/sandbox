@@ -1,11 +1,61 @@
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import { getPageBySlug } from '~/lib/payload-api';
+import { getPageBySlug, getMediaUrl } from '~/lib/payload-api';
 import { BlockRenderer } from '~/components/blocks/BlockRenderer';
 import { HomepageLayout } from './layout-homepage';
+import {
+  getSiteSettings,
+  getDefaultOgImage,
+  getDefaultDescription,
+  SEO_CONSTANTS,
+} from '~/lib/seo';
+
+/**
+ * Generate metadata for the homepage
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const [page, siteSettings] = await Promise.all([
+    getPageBySlug('home'),
+    getSiteSettings(),
+  ]);
+
+  const seo = page?.seo ?? {};
+  const title =
+    seo.metaTitle ??
+    (siteSettings?.siteName
+      ? `${siteSettings.siteName} - Classic & Vintage Vehicle Hire`
+      : SEO_CONSTANTS.defaultTitle);
+  const description =
+    seo.metaDescription ??
+    getDefaultDescription(siteSettings) ??
+    SEO_CONSTANTS.defaultDescription;
+  const ogImageUrl = seo.ogImage?.url
+    ? getMediaUrl(seo.ogImage.url)
+    : getDefaultOgImage(siteSettings);
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title: seo.ogTitle ?? title,
+      description: seo.ogDescription ?? description,
+      images: ogImageUrl ? [{ url: ogImageUrl }] : undefined,
+      type: 'website',
+      siteName: SEO_CONSTANTS.siteName,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: seo.ogTitle ?? title,
+      description: seo.ogDescription ?? description,
+      images: ogImageUrl ? [ogImageUrl] : undefined,
+    },
+    keywords: seo.keywords?.map((k) => k.keyword).join(', ') ?? undefined,
+  };
+}
 
 /**
  * Root Page
- * 
+ *
  * Renders the homepage content from PayloadCMS using the "home" page.
  * Falls back to redirecting to /vehicles if no homepage exists in CMS.
  */

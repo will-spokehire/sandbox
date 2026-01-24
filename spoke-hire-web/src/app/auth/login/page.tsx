@@ -40,8 +40,11 @@ function LoginFormSkeleton() {
   );
 }
 
-export const metadata = {
-  title: 'Sign In - SpokeHire',
-  description: 'Sign in to SpokeHire',
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Sign In | SpokeHire',
+  description: 'Sign in to your SpokeHire account to manage your classic vehicle enquiries.',
+  robots: { index: false, follow: false },
 };
 

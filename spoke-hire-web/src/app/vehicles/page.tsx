@@ -3,6 +3,7 @@ import { PublicVehicleFiltersProvider } from "~/contexts/PublicVehicleFiltersCon
 import PublicVehiclesPageContent from "./page-content";
 import { getAppUrl } from "~/lib/app-url";
 import { api } from "~/trpc/server";
+import { getSiteSettings, getDefaultOgImage } from "~/lib/seo";
 
 interface PageProps {
   searchParams: Promise<{
@@ -24,6 +25,10 @@ interface PageProps {
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
   const params = await searchParams;
   const appUrl = getAppUrl();
+  
+  // Fetch site settings for default OG image
+  const siteSettings = await getSiteSettings();
+  const defaultOgImage = getDefaultOgImage(siteSettings);
   
   // Build dynamic title based on filters
   let title = "Browse Classic & Vintage Vehicles for Hire | SpokeHire";
@@ -65,11 +70,13 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
       type: "website",
       siteName: "SpokeHire",
       url: `${appUrl}/vehicles`,
+      images: defaultOgImage ? [{ url: defaultOgImage }] : undefined,
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
+      images: defaultOgImage ? [defaultOgImage] : undefined,
     },
     alternates: {
       canonical: "/vehicles",

@@ -1,8 +1,14 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import { getPageBySlug, getPageSlugs } from '~/lib/payload-api'
+import { getPageBySlug, getPageSlugs, getMediaUrl } from '~/lib/payload-api'
 import { BlockRenderer } from '~/components/blocks'
 import { LAYOUT_CONSTANTS } from '~/lib/design-tokens'
+import {
+  getSiteSettings,
+  getDefaultOgImage,
+  getDefaultDescription,
+  SEO_CONSTANTS,
+} from '~/lib/seo'
 
 interface PageProps {
   params: Promise<{
@@ -85,7 +91,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return {}
   }
 
-  const page = await getPageBySlug(slug)
+  // Fetch page and site settings in parallel
+  const [page, siteSettings] = await Promise.all([
+    getPageBySlug(slug),
+    getSiteSettings(),
+  ])
 
   if (!page) {
     return {
@@ -93,26 +103,35 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     }
   }
 
-  const seo = page.seo || {}
-  const title = seo.metaTitle || `${page.title} | SpokeHire`
-  const description = seo.metaDescription || undefined
+  const seo = page.seo ?? {}
+  const title = seo.metaTitle ?? `${page.title} | SpokeHire`
+  const description =
+    seo.metaDescription ??
+    getDefaultDescription(siteSettings) ??
+    SEO_CONSTANTS.defaultDescription
+
+  // Get OG image with fallback to site settings
+  const ogImageUrl = seo.ogImage?.url
+    ? getMediaUrl(seo.ogImage.url)
+    : getDefaultOgImage(siteSettings)
 
   return {
     title,
     description,
     openGraph: {
-      title: seo.ogTitle || title,
-      description: seo.ogDescription || description,
-      images: seo.ogImage?.url ? [{ url: seo.ogImage.url }] : undefined,
+      title: seo.ogTitle ?? title,
+      description: seo.ogDescription ?? description,
+      images: ogImageUrl ? [{ url: ogImageUrl }] : undefined,
       type: 'website',
+      siteName: SEO_CONSTANTS.siteName,
     },
     twitter: {
       card: 'summary_large_image',
-      title: seo.ogTitle || title,
-      description: seo.ogDescription || description,
-      images: seo.ogImage?.url ? [seo.ogImage.url] : undefined,
+      title: seo.ogTitle ?? title,
+      description: seo.ogDescription ?? description,
+      images: ogImageUrl ? [ogImageUrl] : undefined,
     },
-    keywords: seo.keywords?.map((k) => k.keyword).join(', ') || undefined,
+    keywords: seo.keywords?.map((k) => k.keyword).join(', ') ?? undefined,
   }
 }
 

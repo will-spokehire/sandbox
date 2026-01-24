@@ -34,8 +34,11 @@ function OTPVerificationSkeleton() {
   );
 }
 
-export const metadata = {
-  title: 'Verify Email - SpokeHire',
-  description: 'Verify your email to access SpokeHire',
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Verify Email | SpokeHire',
+  description: 'Verify your email address to complete your SpokeHire account setup.',
+  robots: { index: false, follow: false },
 };
 

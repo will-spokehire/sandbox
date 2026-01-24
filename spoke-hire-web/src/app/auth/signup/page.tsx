@@ -40,8 +40,11 @@ function SignupFormSkeleton() {
   );
 }
 
-export const metadata = {
-  title: 'Sign Up - SpokeHire',
-  description: 'Create your SpokeHire account',
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Create Account | SpokeHire',
+  description: 'Create your SpokeHire account to browse and enquire about classic vehicles.',
+  robots: { index: false, follow: false },
 };
 
