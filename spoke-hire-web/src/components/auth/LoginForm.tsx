@@ -37,9 +37,15 @@ export function LoginForm({ termsUrl = '/terms-of-service', privacyUrl = '/priva
   const { user, isLoading: isAuthLoading, isAuthenticated } = useAuth();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
   
   // Get callbackUrl from search params
   const callbackUrl = searchParams.get('callbackUrl');
+
+  // Track client-side mount to prevent hydration mismatch
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   // Redirect authenticated users to callback URL or appropriate dashboard
   useEffect(() => {
@@ -108,8 +114,9 @@ export function LoginForm({ termsUrl = '/terms-of-service', privacyUrl = '/priva
     }
   };
 
-  // Show loading state while checking authentication or if already authenticated
-  if (isAuthLoading || isAuthenticated) {
+  // Show loading state while mounting, checking authentication, or if already authenticated
+  // The hasMounted check ensures server and client render the same content initially
+  if (!hasMounted || isAuthLoading || isAuthenticated) {
     return (
       <div className="w-full max-w-[808px] flex flex-col items-center justify-center gap-8 min-h-[400px]">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>

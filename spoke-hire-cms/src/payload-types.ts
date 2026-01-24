@@ -413,20 +413,6 @@ export interface StaticPage {
         blockType: 'stats-bar';
       }
     | {
-        /**
-         * Select stats to display (order matters)
-         */
-        selectedStats: (number | Stat)[];
-        backgroundColor?: ('default' | 'muted' | 'accent' | 'primary') | null;
-        /**
-         * Hide this block on mobile devices (screens < 640px)
-         */
-        hideOnMobile?: boolean | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'value-stats';
-      }
-    | {
         title: string;
         /**
          * Supporting text below the title
@@ -720,20 +706,6 @@ export interface StaticBlock {
         id?: string | null;
         blockName?: string | null;
         blockType: 'stats-bar';
-      }
-    | {
-        /**
-         * Select stats to display (order matters)
-         */
-        selectedStats: (number | Stat)[];
-        backgroundColor?: ('default' | 'muted' | 'accent' | 'primary') | null;
-        /**
-         * Hide this block on mobile devices (screens < 640px)
-         */
-        hideOnMobile?: boolean | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'value-stats';
       }
     | {
         title: string;
@@ -1230,15 +1202,6 @@ export interface StaticPagesSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
-        'value-stats'?:
-          | T
-          | {
-              selectedStats?: T;
-              backgroundColor?: T;
-              hideOnMobile?: T;
-              id?: T;
-              blockName?: T;
-            };
         'value-props-section'?:
           | T
           | {
@@ -1390,15 +1353,6 @@ export interface StaticBlocksSelect<T extends boolean = true> {
               title?: T;
               displayStyle?: T;
               selectedStats?: T;
-              hideOnMobile?: T;
-              id?: T;
-              blockName?: T;
-            };
-        'value-stats'?:
-          | T
-          | {
-              selectedStats?: T;
-              backgroundColor?: T;
               hideOnMobile?: T;
               id?: T;
               blockName?: T;

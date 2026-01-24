@@ -167,12 +167,12 @@ function MobileNavLinks({
       {!isLoading && !isAuthenticated && (
         <>
           <Separator className="my-2" />
-          <Button variant="ghost" className="w-full justify-start" asChild>
+          <Button variant="ghost" className="w-full justify-center" asChild>
             <Link href="/auth/login" onClick={onClick}>
               Login
             </Link>
           </Button>
-          <Button className="w-full" asChild>
+          <Button className="w-full justify-center" asChild>
             <Link href="/auth/signup" onClick={onClick}>
               Sign Up
             </Link>
