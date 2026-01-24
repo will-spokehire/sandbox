@@ -54,46 +54,6 @@ export const StatsBarBlock: Block = {
 }
 
 /**
- * Value Stats Block
- * Display stats in simple horizontal layout matching hero style
- */
-export const ValueStatsBlock: Block = {
-  slug: 'value-stats',
-  labels: {
-    singular: 'Value Stats',
-    plural: 'Value Stats',
-  },
-  fields: [
-    {
-      name: 'selectedStats',
-      type: 'relationship',
-      relationTo: 'stats',
-      hasMany: true,
-      required: true,
-      filterOptions: {
-        status: { equals: 'published' },
-      },
-      admin: {
-        description: 'Select stats to display (order matters)',
-      },
-    },
-    {
-      name: 'backgroundColor',
-      type: 'select',
-      label: 'Background Color',
-      defaultValue: 'default',
-      options: [
-        { label: 'Default', value: 'default' },
-        { label: 'Muted', value: 'muted' },
-        { label: 'Accent', value: 'accent' },
-        { label: 'Primary', value: 'primary' },
-      ],
-    },
-    ...commonBlockFields,
-  ],
-}
-
-/**
  * Value Propositions Block
  * Display feature grid highlighting platform benefits
  */
@@ -827,7 +787,6 @@ export const StaticPages: CollectionConfig = {
       minRows: 1,
       blocks: [
         StatsBarBlock,
-        ValueStatsBlock,
         ValuePropsBlock,
         TestimonialsSectionBlock,
         FAQSectionBlock,

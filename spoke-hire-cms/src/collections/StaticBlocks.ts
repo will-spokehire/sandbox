@@ -5,7 +5,6 @@ import { revalidateWebsite } from '../hooks/revalidateWebsite'
 // Import all block definitions from StaticPages
 import {
   StatsBarBlock,
-  ValueStatsBlock,
   ValuePropsBlock,
   TestimonialsSectionBlock,
   FAQSectionBlock,
@@ -103,7 +102,6 @@ export const StaticBlocks: CollectionConfig = {
       minRows: 1,
       blocks: [
         StatsBarBlock,
-        ValueStatsBlock,
         ValuePropsBlock,
         TestimonialsSectionBlock,
         FAQSectionBlock,
