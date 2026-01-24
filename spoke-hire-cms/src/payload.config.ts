@@ -66,6 +66,12 @@ export default buildConfig({
     schemaName: process.env.PAYLOAD_DB_SCHEMA || 'payload', // Use separate schema for PayloadCMS tables
   }),
   sharp,
+  // Upload configuration - set file size limits
+  upload: {
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB in bytes
+    },
+  },
   plugins: [
     // Conditional storage: S3 for production, local filesystem for development
     // In development (localhost), PayloadCMS uses local filesystem storage by default

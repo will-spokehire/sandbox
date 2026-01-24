@@ -22,8 +22,9 @@ const nextConfig = {
   // Disable Prisma auto-detection
   experimental: {
     serverActions: {
-      bodySizeLimit: '5mb',
+      bodySizeLimit: '10mb',
     },
+    proxyClientMaxBodySize: '10mb', // Allow larger file uploads via API routes
   },
 }
 
