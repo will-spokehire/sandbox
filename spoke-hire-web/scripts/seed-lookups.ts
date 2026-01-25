@@ -120,6 +120,7 @@ async function main() {
   const steeringTypes = [
     { name: "Right Hand Drive", code: "RHD" },
     { name: "Left Hand Drive", code: "LHD" },
+    { name: "Single Seated", code: "SS" },
   ];
 
   for (const st of steeringTypes) {

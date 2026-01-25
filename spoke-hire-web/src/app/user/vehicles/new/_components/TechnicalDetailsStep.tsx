@@ -182,7 +182,7 @@ export function TechnicalDetailsStep({
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-4 md:gap-6">
             {/* Steering Type */}
             <FormField
               control={form.control}
@@ -197,7 +197,7 @@ export function TechnicalDetailsStep({
                       disabled={isLoadingFilters}
                       className="flex flex-wrap gap-2 md:gap-3"
                     >
-                      {steeringOptions.map((steering) => (
+                      {steeringOptions.sort((a, b) => b.name.localeCompare(a.name)).map((steering) => (
                         <label
                           key={steering.id}
                           className="cursor-pointer"
@@ -214,7 +214,7 @@ export function TechnicalDetailsStep({
                     </RadioGroup>
                   </FormControl>
                   <FormDescription className="min-h-[20px] body-xs">
-                    Left or right hand drive
+                    Left/right hand drive or Bike/Scooter
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
