@@ -12,7 +12,7 @@ import {
 } from '~/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '~/components/ui/avatar';
 import { Button } from '~/components/ui/button';
-import { LogOut, User, Shield, Car } from 'lucide-react';
+import { LogOut, User, Car } from 'lucide-react';
 
 /**
  * User Menu Component
@@ -77,12 +77,6 @@ export function UserMenu() {
           <Car className="mr-2 h-4 w-4" />
           <span>My Vehicles</span>
         </DropdownMenuItem>
-        {user.userType === 'ADMIN' && (
-          <DropdownMenuItem disabled className="cursor-default text-base">
-            <Shield className="mr-2 h-4 w-4" />
-            <span className="font-semibold">Admin Access</span>
-          </DropdownMenuItem>
-        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="text-red-600 dark:text-red-400 cursor-pointer text-base"
