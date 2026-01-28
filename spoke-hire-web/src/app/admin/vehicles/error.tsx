@@ -25,7 +25,7 @@ export default function VehiclesListError({
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="min-h-screen bg-spoke-white">
       {/* Header */}
       <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
         <div className="container mx-auto px-4 py-4">

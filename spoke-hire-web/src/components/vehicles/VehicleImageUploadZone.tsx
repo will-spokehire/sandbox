@@ -32,13 +32,13 @@ function UploadProgressItem({ upload }: { upload: UploadProgressState }) {
           {upload.uploaded && <Check className="h-4 w-4 text-green-600 flex-shrink-0" />}
           {upload.error && <X className="h-4 w-4 text-red-600 flex-shrink-0" />}
         </div>
-        <span className="text-xs text-muted-foreground whitespace-nowrap">
+        <span className="body-xs text-muted-foreground whitespace-nowrap">
           {upload.uploaded ? "Complete" : `${upload.progress}%`}
         </span>
       </div>
       {upload.uploading && <Progress value={upload.progress} />}
       {upload.error && (
-        <p className="text-xs text-red-600">{upload.error}</p>
+        <p className="body-xs text-red-600">{upload.error}</p>
       )}
     </div>
   );
@@ -225,7 +225,7 @@ export function VehicleImageUploadZone({
         <p className="text-sm font-medium mb-1">
           Drag and drop images here, or click to browse
         </p>
-        <p className="text-xs text-muted-foreground">
+        <p className="body-xs text-muted-foreground">
           JPEG, PNG, WebP up to 15MB • Min 800×600px • Upload starts automatically
         </p>
         <input

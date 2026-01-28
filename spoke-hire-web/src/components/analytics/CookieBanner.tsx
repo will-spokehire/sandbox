@@ -3,6 +3,7 @@
  * 
  * GDPR-compliant cookie consent banner using react-cookie-consent.
  * Only shown in production environment.
+ * Styled to match SpokeHire design system.
  */
 
 "use client";
@@ -26,8 +27,8 @@ export function CookieBanner() {
   return (
     <CookieConsent
       location="bottom"
-      buttonText="Accept"
-      declineButtonText="Decline"
+      buttonText="ACCEPT"
+      declineButtonText="DECLINE"
       enableDeclineButton
       onAccept={() => {
         setConsent(true);
@@ -39,41 +40,57 @@ export function CookieBanner() {
       }}
       cookieName="spokehire_analytics_consent"
       style={{
-        background: "var(--color-background)",
-        border: "1px solid var(--color-border)",
-        borderTop: "1px solid var(--color-border)",
-        boxShadow: "0 -2px 10px rgba(0, 0, 0, 0.1)",
-        padding: "1rem 1.5rem",
+        background: "var(--spoke-white)",
+        border: "1px solid var(--spoke-black)",
+        borderTop: "1px solid var(--spoke-black)",
+        boxShadow: "0 -4px 12px rgba(0, 0, 0, 0.15)",
+        padding: "1.5rem 2rem",
         alignItems: "center",
-        gap: "1rem",
+        gap: "1.5rem",
+        maxWidth: "1512px",
+        margin: "0 auto",
+        width: "100%",
+        display: "flex",
+        flexWrap: "wrap",
       }}
       contentStyle={{
-        color: "var(--color-foreground)",
-        fontSize: "0.875rem",
+        color: "var(--spoke-black)",
+        fontSize: "0.9375rem",
+        lineHeight: "1.5",
         margin: 0,
         flex: "1 1 auto",
+        minWidth: "280px",
+        fontFamily: "var(--font-degular)",
       }}
       buttonStyle={{
-        background: "var(--color-primary)",
-        color: "var(--color-primary-foreground)",
+        background: "var(--spoke-black)",
+        color: "var(--spoke-white)",
         fontSize: "0.875rem",
         fontWeight: "500",
-        padding: "0.5rem 1.5rem",
-        borderRadius: "0.375rem",
-        border: "none",
+        padding: "11px 23px",
+        borderRadius: "0",
+        border: "1px solid var(--spoke-black)",
         cursor: "pointer",
-        transition: "opacity 0.2s",
+        transition: "opacity 0.2s ease",
+        textTransform: "uppercase",
+        letterSpacing: "normal",
+        fontFamily: "var(--font-helvetica)",
+        whiteSpace: "nowrap",
       }}
       declineButtonStyle={{
         background: "transparent",
-        color: "var(--color-muted-foreground)",
+        color: "var(--spoke-black)",
         fontSize: "0.875rem",
         fontWeight: "500",
-        padding: "0.5rem 1.5rem",
-        borderRadius: "0.375rem",
-        border: "1px solid var(--color-border)",
+        padding: "11px 23px",
+        borderRadius: "0",
+        border: "1px solid var(--spoke-black)",
         cursor: "pointer",
-        transition: "all 0.2s",
+        transition: "all 0.2s ease",
+        textTransform: "uppercase",
+        letterSpacing: "normal",
+        fontFamily: "var(--font-helvetica)",
+        whiteSpace: "nowrap",
       }}
       expires={365}
       overlay={false}
@@ -83,8 +100,8 @@ export function CookieBanner() {
         improve your experience.{" "}
         <a
           href="/privacy-policy"
-          className="underline hover:no-underline"
-          style={{ color: "var(--color-primary)" }}
+          className="underline hover:no-underline text-spoke-black font-medium transition-opacity hover:opacity-70"
+          style={{ textDecorationColor: "var(--spoke-black)" }}
         >
           Privacy Policy
         </a>

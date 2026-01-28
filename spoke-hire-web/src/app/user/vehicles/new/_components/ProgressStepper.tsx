@@ -1,5 +1,6 @@
 "use client";
 
+import { Fragment } from "react";
 import { Check } from "lucide-react";
 import { cn } from "~/lib/utils";
 
@@ -18,70 +19,51 @@ interface ProgressStepperProps {
  * Progress Stepper Component
  * 
  * Visual indicator showing the user's progress through the wizard.
- * Shows step numbers, titles, and completion status.
+ * Matches Figma design with black/white styling and horizontal layout.
  * Responsive: horizontal on desktop, compact on mobile.
  */
 export function ProgressStepper({ steps, currentStep }: ProgressStepperProps) {
   return (
     <div className="w-full">
-      {/* Desktop view: Horizontal stepper - Centralized */}
-      <div className="hidden md:flex md:justify-center">
-        <div className="flex items-center">
+      {/* Desktop view: Horizontal stepper matching Figma */}
+      <div className="hidden md:flex md:items-center md:justify-center">
+        <div className="flex items-center w-full max-w-[364px]">
           {steps.map((step, index) => {
-            const isCompleted = currentStep > step.number;
             const isCurrent = currentStep === step.number;
-            const isUpcoming = currentStep < step.number;
+            const isCompleted = currentStep > step.number;
 
             return (
-              <div key={step.number} className="flex items-center">
-                {/* Step indicator */}
-                <div className="flex flex-col items-center">
-                  <div
-                    className={cn(
-                      "flex items-center justify-center w-10 h-10 rounded-full border-2 font-semibold transition-all",
-                      isCompleted && "bg-primary border-primary text-primary-foreground",
-                      isCurrent && "border-primary text-primary bg-primary/10",
-                      isUpcoming && "border-muted-foreground text-muted-foreground"
-                    )}
-                  >
-                    {isCompleted ? (
-                      <Check className="h-5 w-5" />
-                    ) : (
-                      <span>{step.number + 1}</span>
-                    )}
-                  </div>
-                  <div className="mt-2 text-center min-w-[80px]">
-                    <p
+              <Fragment key={`step-${step.number}`}>
+                {/* Step circle */}
+                <div
+                  className={cn(
+                    "flex items-center justify-center rounded-full border transition-all",
+                    "size-[48px] shrink-0",
+                    (isCurrent || isCompleted) && "bg-black border-black",
+                    !isCurrent && !isCompleted && "border-black bg-white"
+                  )}
+                >
+                  {isCompleted ? (
+                    <Check className="h-6 w-6 text-white stroke-[3]" />
+                  ) : (
+                    <span
                       className={cn(
-                        "text-sm font-medium",
-                        isCurrent && "text-primary",
-                        isUpcoming && "text-muted-foreground"
+                        "text-[32px] font-medium leading-[0.8] tracking-[-0.32px] uppercase pb-[4px]",
+                        (isCurrent || isCompleted) && "text-white",
+                        !isCurrent && !isCompleted && "text-black"
                       )}
+                      style={{ fontFamily: "var(--font-degular), sans-serif" }}
                     >
-                      {step.title}
-                    </p>
-                    {step.description && (
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {step.description}
-                      </p>
-                    )}
-                  </div>
+                      {step.number + 1}
+                    </span>
+                  )}
                 </div>
 
-                {/* Connector line */}
+                {/* Connector line (flex-grow divider) */}
                 {index < steps.length - 1 && (
-                  <div className="w-16 h-0.5 mx-4 mb-8">
-                    <div
-                      className={cn(
-                        "h-full transition-colors",
-                        currentStep > step.number
-                          ? "bg-primary"
-                          : "bg-muted"
-                      )}
-                    />
-                  </div>
+                  <div className="flex-1 h-px bg-black mx-0" />
                 )}
-              </div>
+              </Fragment>
             );
           })}
         </div>
@@ -102,7 +84,7 @@ export function ProgressStepper({ steps, currentStep }: ProgressStepperProps) {
         {/* Single progress bar */}
         <div className="w-full bg-muted rounded-full h-2">
           <div
-            className="bg-primary h-2 rounded-full transition-all duration-300"
+            className="bg-black h-2 rounded-full transition-all duration-300"
             style={{
               width: `${((currentStep + 1) / steps.length) * 100}%`,
             }}

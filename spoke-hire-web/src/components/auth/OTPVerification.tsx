@@ -2,16 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
-import { Label } from '~/components/ui/label';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '~/components/ui/card';
 import { api } from '~/trpc/react';
 import { toast } from 'sonner';
 import { createClient } from '~/lib/supabase/client';
@@ -60,7 +53,6 @@ export function OTPVerification() {
       const isNewUser = !data.user.termsAcceptedAt || !data.user.privacyPolicyAcceptedAt;
       trackEvent(isNewUser ? 'user_signed_up' : 'otp_verification_success', {
         userType: data.user.userType,
-        userStatus: data.user.status,
         isNewUser,
       });
       
@@ -199,20 +191,26 @@ export function OTPVerification() {
   }, [email]);
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold">Verify Your Email</CardTitle>
-        <CardDescription>
+    <div className="w-full max-w-[808px] flex flex-col items-center gap-8 md:gap-[80px]">
+      {/* Title Section */}
+      <div className="w-full flex flex-col i  tems-center gap-[11px] text-center">
+        <h1 className="text-[48px] md:text-[96px] font-normal leading-[0.95] uppercase text-black tracking-normal">
+          Verify email
+        </h1>
+        <p className="body-medium font-normal leading-[1.4] text-black tracking-[-0.18px]">
           Enter the verification code sent to your email
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+        </p>
+      </div>
+
+      {/* Form Section */}
+      <div className="w-full max-w-[480px] flex flex-col items-start gap-10">
+        <form onSubmit={handleSubmit} className="w-full flex flex-col gap-10">
+          {/* Email Input */}
+          <div className="w-full flex flex-col gap-1">
             <Input
               id="email"
               type="email"
+              label="Email"
               placeholder="admin@spokehire.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -222,11 +220,12 @@ export function OTPVerification() {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="otp">Verification Code</Label>
+          {/* OTP Input */}
+          <div className="w-full flex flex-col gap-1">
             <Input
               id="otp"
               type="text"
+              label="Verification Code"
               placeholder="123456"
               value={otp}
               onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
@@ -236,43 +235,42 @@ export function OTPVerification() {
               autoFocus={!!email}
               required
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-base font-normal leading-[1.4] text-black/50 mt-1">
               Enter the 6-digit code from your email
             </p>
           </div>
 
+          {/* Submit Button */}
           <Button
             type="submit"
             className="w-full"
             disabled={isLoading || !email || !otp}
           >
-            {isLoading ? 'Verifying...' : 'Verify and sign in'}
+            {isLoading ? 'Verifying...' : 'verify and sign in'}
           </Button>
 
-          <div className="flex items-center justify-between text-sm">
+          {/* Action Links */}
+          <div className="w-full flex items-center justify-between text-base">
             <Button
               type="button"
               variant="link"
               onClick={handleResend}
               disabled={resendMutation.isPending || !email}
-              className="px-0"
+              className="px-0 h-auto text-base font-normal leading-[1.4] text-black/50 hover:text-black underline-offset-auto"
             >
               {resendMutation.isPending ? 'Sending...' : 'Resend code'}
             </Button>
 
-            <Button
-              type="button"
-              variant="link"
-              onClick={handleBack}
-              disabled={isLoading}
-              className="px-0"
+            <Link
+              href="/auth/login"
+              className="text-base font-normal leading-[1.4] text-black/50 hover:text-black underline decoration-solid underline-offset-auto"
             >
               Back to login
-            </Button>
+            </Link>
           </div>
         </form>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 

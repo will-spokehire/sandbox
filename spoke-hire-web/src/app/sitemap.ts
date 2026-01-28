@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { db } from "~/server/db";
 import { getAppUrl } from "~/lib/app-url";
+import { getPageSlugs } from "~/lib/payload-api";
 
 /**
  * Dynamic Sitemap Generator
@@ -132,11 +133,33 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }
     }
 
-    console.log(`✅ Generated sitemap with ${sitemapEntries.length} entries`);
+    console.log(`✅ Generated vehicle sitemap entries: ${sitemapEntries.length}`);
   } catch (error) {
-    console.error("Failed to generate complete sitemap:", error);
-    // Return at least the base pages even if vehicle fetching fails
+    console.error("Failed to generate vehicle sitemap entries:", error);
+    // Continue to add CMS pages even if vehicle fetching fails
   }
+
+  // 5. Add CMS static pages
+  try {
+    const pageSlugs = await getPageSlugs();
+    for (const slug of pageSlugs) {
+      // Skip 'home' as it's handled by the root URL
+      if (slug !== "home") {
+        sitemapEntries.push({
+          url: `${baseUrl}/${slug}`,
+          lastModified: currentDate,
+          changeFrequency: "weekly",
+          priority: 0.7,
+        });
+      }
+    }
+    console.log(`✅ Added ${pageSlugs.filter((s) => s !== "home").length} CMS pages to sitemap`);
+  } catch (error) {
+    console.error("Failed to fetch CMS pages for sitemap:", error);
+    // Continue without CMS pages if fetching fails
+  }
+
+  console.log(`✅ Total sitemap entries: ${sitemapEntries.length}`);
 
   return sitemapEntries;
 }

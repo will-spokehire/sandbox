@@ -87,7 +87,7 @@ export default function VehicleDetailPage({
   // Handle error state
   if (error || !vehicle) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+      <div className="min-h-screen bg-spoke-white">
         <div className="container mx-auto px-4 py-8">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
@@ -107,7 +107,7 @@ export default function VehicleDetailPage({
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="min-h-screen bg-spoke-white">
       {/* Header */}
       <VehicleDetailHeader 
         vehicle={vehicle} 

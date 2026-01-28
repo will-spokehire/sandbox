@@ -466,6 +466,11 @@ export function mapSteeringToType(steering?: string): { name: string; code: stri
     return { name: 'Left Hand Drive', code: 'LHD' };
   }
   
+  // Map "Single-Seater", "single seated", "bike", "scooter" to Single Seated
+  if (steeringLower.includes('single') || steeringLower.includes('bike') || steeringLower.includes('scooter')) {
+    return { name: 'Single Seated', code: 'SS' };
+  }
+  
   return null;
 }
 

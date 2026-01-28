@@ -147,7 +147,7 @@ export function UserSearchSelect({
                       <span>
                         {[user.firstName, user.lastName].filter(Boolean).join(" ") || user.email}
                       </span>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="body-xs text-muted-foreground">
                         {user.company ? `${user.company} • ${user.email}` : user.email}
                       </span>
                     </div>

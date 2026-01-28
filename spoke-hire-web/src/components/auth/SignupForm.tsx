@@ -4,8 +4,6 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
-import { Label } from '~/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { api } from '~/trpc/react';
 import { toast } from 'sonner';
 import Link from 'next/link';
@@ -26,10 +24,15 @@ import { trackEvent } from '~/lib/analytics';
  * 
  * @example
  * ```tsx
- * <SignupForm />
+ * <SignupForm termsUrl="/terms-of-service" privacyUrl="/privacy-policy" />
  * ```
  */
-export function SignupForm() {
+interface SignupFormProps {
+  termsUrl?: string;
+  privacyUrl?: string;
+}
+
+export function SignupForm({ termsUrl = '/terms-of-service', privacyUrl = '/privacy-policy' }: SignupFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
@@ -97,91 +100,96 @@ export function SignupForm() {
   };
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold">Create Account</CardTitle>
-        <CardDescription>
+    <div className="w-full max-w-[808px] flex flex-col items-center gap-8 md:gap-[80px]">
+      {/* Title Section */} 
+      <div className="w-full flex flex-col items-center gap-[11px] text-center">
+        <h1 className="text-[48px] md:text-[96px] font-normal leading-[0.95] uppercase text-black tracking-normal">
+          Sign up
+        </h1>
+        <p className="body-medium font-normal leading-[1.4] text-black tracking-[-0.18px]">
           Enter your email to get started with SpokeHire
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={isLoading}
-              autoComplete="email"
-              autoFocus
-              required
-            />
+        </p>
+      </div>
+
+      {/* Form Section */}
+      <div className="w-full max-w-[480px] flex flex-col items-start gap-10">
+        <form onSubmit={handleSubmit} className="w-full flex flex-col gap-10">
+          {/* Email Input */}
+          <div className="w-full flex flex-col gap-5">
+            <div className="w-full flex flex-col gap-1">
+              <Input
+                id="email"
+                type="email"
+                label="Email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isLoading}
+                autoComplete="email"
+                autoFocus
+                required
+              />
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading || !email}
+            >
+              {isLoading ? 'Sending code...' : 'create account'}
+            </Button>
           </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isLoading || !email}
-          >
-            {isLoading ? 'Sending code...' : 'Create account'}
-          </Button>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or continue with
+          {/* Divider */}
+          <div className="w-full flex items-center justify-center h-5">
+            <div className="flex-1 h-px bg-black" />
+            <div className="px-2">
+              <span className="text-base font-normal leading-[1.4] text-black text-center">
+                Or
               </span>
             </div>
+            <div className="flex-1 h-px bg-black" />
           </div>
 
+          {/* Google Auth Button */}
           <GoogleAuthButton mode="signup" />
 
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground">
+          {/* Terms and Privacy */}
+          <div className="w-full text-center">
+            <p className="text-base font-normal leading-[20px] text-black/50">
+              By clicking continue, you agree to our{' '}
+              <Link 
+                href={termsUrl}
+                className="underline decoration-solid underline-offset-auto"
+              >
+                Terms of Service
+              </Link>
+              {' '}and{' '}
+              <Link 
+                href={privacyUrl}
+                className="underline decoration-solid underline-offset-auto"
+              >
+                Privacy Policy
+              </Link>
+              .
+            </p>
+          </div>
+
+          {/* Sign in link */}
+          <div className="w-full text-center">
+            <p className="text-base font-normal leading-[1.4] text-black/50">
               Already have an account?{' '}
               <Link 
                 href="/auth/login" 
-                className="text-primary hover:underline font-medium"
+                className="text-base font-medium leading-[1.5] text-black underline decoration-solid underline-offset-auto"
               >
                 Sign in
               </Link>
             </p>
           </div>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                How it works
-              </span>
-            </div>
-          </div>
-
-          <div className="text-sm text-muted-foreground space-y-2">
-            <p className="flex items-start gap-2">
-              <span className="text-primary font-bold">1.</span>
-              <span>Enter your email address</span>
-            </p>
-            <p className="flex items-start gap-2">
-              <span className="text-primary font-bold">2.</span>
-              <span>Check your email for a verification code</span>
-            </p>
-            <p className="flex items-start gap-2">
-              <span className="text-primary font-bold">3.</span>
-              <span>Enter the code to complete sign up</span>
-            </p>
-          </div>
         </form>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 

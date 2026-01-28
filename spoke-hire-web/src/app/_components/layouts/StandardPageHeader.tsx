@@ -48,7 +48,7 @@ export function StandardPageHeader({
   // Hero variant: Large centered header with background (marketing/catalogue pages)
   if (variant === "hero") {
     return (
-      <div className="bg-slate-50 dark:bg-slate-900 border-b">
+      <div className=" border-b">
         <div className={cn(LAYOUT_CONSTANTS.container, "py-12 md:py-16")}>
           <div className="max-w-3xl mx-auto text-center space-y-4">
             {breadcrumbs && <div className="mb-4">{breadcrumbs}</div>}
@@ -68,7 +68,7 @@ export function StandardPageHeader({
   // App variant: Medium header with background (dashboard/management pages)
   if (variant === "app") {
     return (
-      <div className="bg-slate-50 dark:bg-slate-900 border-b">
+      <div className="bg-spoke-white border-b">
         <div className={cn(LAYOUT_CONSTANTS.container, "py-6 md:py-8")}>
           {breadcrumbs && <div className="mb-4">{breadcrumbs}</div>}
           <div className="flex items-start justify-between gap-4">
@@ -90,7 +90,7 @@ export function StandardPageHeader({
   // Detail variant: Compact header with back button
   if (variant === "detail") {
     return (
-      <div className="border-b bg-slate-50 dark:bg-slate-900">
+      <div className="border-b bg-spoke-white">
         <div className={cn(LAYOUT_CONSTANTS.container, "py-4")}>
           <div className="space-y-3">
             {backButton && <div>{backButton}</div>}

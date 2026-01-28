@@ -15,8 +15,7 @@ export interface PublicVehicleFilters {
   makeIds?: string[];
   modelId?: string;
   collectionIds?: string[];
-  yearFrom?: string;
-  yearTo?: string;
+  decadeIds?: string[];
   
   // Location filters
   countryIds?: string[];
@@ -37,8 +36,7 @@ export interface PublicVehicleFiltersUpdate {
   makeIds?: string[];
   modelId?: string;
   collectionIds?: string[];
-  yearFrom?: string;
-  yearTo?: string;
+  decadeIds?: string[];
   countryIds?: string[];
   counties?: string[];
   page?: number;
@@ -68,8 +66,7 @@ export function usePublicVehicleFilters() {
     const makeIds = searchParams.get("makeIds")?.split(",").filter(Boolean) ?? [];
     const modelId = searchParams.get("modelId") ?? undefined;
     const collectionIds = searchParams.get("collectionIds")?.split(",").filter(Boolean) ?? [];
-    const yearFrom = searchParams.get("yearFrom") ?? undefined;
-    const yearTo = searchParams.get("yearTo") ?? undefined;
+    const decadeIds = searchParams.get("decadeIds")?.split(",").filter(Boolean) ?? [];
     const countryIds = searchParams.get("countryIds")?.split(",").filter(Boolean) ?? [];
     const counties = searchParams.get("counties")?.split(",").filter(Boolean) ?? [];
     const page = searchParams.get("page") ? parseInt(searchParams.get("page")!, 10) : 1;
@@ -81,8 +78,7 @@ export function usePublicVehicleFilters() {
       makeIds: makeIds.length > 0 ? makeIds : undefined,
       modelId,
       collectionIds: collectionIds.length > 0 ? collectionIds : undefined,
-      yearFrom,
-      yearTo,
+      decadeIds: decadeIds.length > 0 ? decadeIds : undefined,
       countryIds: countryIds.length > 0 ? countryIds : undefined,
       counties: counties.length > 0 ? counties : undefined,
       page,
@@ -104,8 +100,7 @@ export function usePublicVehicleFilters() {
       filters.makeIds?.length ||
       filters.modelId ||
       filters.collectionIds?.length ||
-      filters.yearFrom ||
-      filters.yearTo ||
+      filters.decadeIds?.length ||
       filters.countryIds?.length ||
       filters.counties?.length
     );
@@ -116,9 +111,7 @@ export function usePublicVehicleFilters() {
         trackEvent('vehicle_search', {
           makeIds: filters.makeIds,
           modelId: filters.modelId,
-          decade: filters.yearFrom && filters.yearTo 
-            ? `${filters.yearFrom}-${filters.yearTo}`
-            : undefined,
+          decadeIds: filters.decadeIds,
           collectionIds: filters.collectionIds,
           countryIds: filters.countryIds,
           counties: filters.counties,
@@ -126,7 +119,7 @@ export function usePublicVehicleFilters() {
             filters.makeIds?.length ?? 0,
             filters.modelId ? 1 : 0,
             filters.collectionIds?.length ?? 0,
-            filters.yearFrom || filters.yearTo ? 1 : 0,
+            filters.decadeIds?.length ?? 0,
             filters.countryIds?.length ?? 0,
             filters.counties?.length ?? 0,
           ].reduce((a, b) => a + b, 0),
@@ -181,8 +174,7 @@ export function usePublicVehicleFilters() {
       (filters.makeIds && filters.makeIds.length > 0) ||
       filters.modelId ||
       (filters.collectionIds && filters.collectionIds.length > 0) ||
-      filters.yearFrom ||
-      filters.yearTo ||
+      (filters.decadeIds && filters.decadeIds.length > 0) ||
       (filters.countryIds && filters.countryIds.length > 0) ||
       (filters.counties && filters.counties.length > 0) ||
       (filters.sortBy && filters.sortBy !== "createdAt") ||

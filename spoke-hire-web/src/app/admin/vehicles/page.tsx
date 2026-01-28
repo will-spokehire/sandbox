@@ -212,7 +212,7 @@ function VehiclesPageContent() {
                 <Send className="h-4 w-4" />
                 <span className="hidden sm:inline">Send Deal</span>
                 <span className="sm:hidden">Send</span>
-                <span className="ml-1 px-1.5 py-0.5 text-xs bg-primary-foreground/20 rounded">
+                <span className="ml-1 px-1.5 py-0.5 body-xs bg-primary-foreground/20 rounded">
                   {selectedVehicleIds.length}
                 </span>
               </Button>

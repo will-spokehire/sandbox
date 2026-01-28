@@ -108,10 +108,12 @@ export function TechnicalDetailsStep({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl md:text-2xl font-bold">Technical Details</h2>
-        <p className="text-sm md:text-base text-muted-foreground mt-1">
-          Provide specifications and condition information
+      <div className="w-full flex flex-col gap-3 items-center text-center mb-6">
+        <h2 className="text-[32px] md:text-[40px] font-normal leading-[0.95] uppercase text-black tracking-[-0.4px]">
+          Technical Details
+        </h2>
+        <p className="text-[18px] md:text-[22px] font-normal leading-[1.3] text-black tracking-[-0.22px]">
+          Specifications and features
         </p>
       </div>
 
@@ -139,7 +141,7 @@ export function TechnicalDetailsStep({
                       }}
                     />
                   </FormControl>
-                  <FormDescription className="min-h-[20px] text-xs md:text-sm">
+                  <FormDescription className="min-h-[20px] body-xs">
                     Engine size in cubic centimeters
                   </FormDescription>
                   <FormMessage />
@@ -171,7 +173,7 @@ export function TechnicalDetailsStep({
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormDescription className="min-h-[20px] text-xs md:text-sm">
+                  <FormDescription className="min-h-[20px] body-xs">
                     Total seating capacity
                   </FormDescription>
                   <FormMessage />
@@ -180,7 +182,7 @@ export function TechnicalDetailsStep({
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-4 md:gap-6">
             {/* Steering Type */}
             <FormField
               control={form.control}
@@ -195,7 +197,7 @@ export function TechnicalDetailsStep({
                       disabled={isLoadingFilters}
                       className="flex flex-wrap gap-2 md:gap-3"
                     >
-                      {steeringOptions.map((steering) => (
+                      {steeringOptions.sort((a, b) => b.name.localeCompare(a.name)).map((steering) => (
                         <label
                           key={steering.id}
                           className="cursor-pointer"
@@ -204,15 +206,15 @@ export function TechnicalDetailsStep({
                             value={steering.id}
                             className="sr-only peer"
                           />
-                          <div className="px-3 md:px-4 py-2 md:py-2.5 rounded-md border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground transition-colors text-xs md:text-sm">
+                          <div className="px-3 md:px-4 py-2 md:py-2.5 rounded-md border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground transition-colors body-xs">
                             {steering.name}
                           </div>
                         </label>
                       ))}
                     </RadioGroup>
                   </FormControl>
-                  <FormDescription className="min-h-[20px] text-xs md:text-sm">
-                    Left or right hand drive
+                  <FormDescription className="min-h-[20px] body-xs">
+                    Left/right hand drive or Bike/Scooter
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -242,14 +244,14 @@ export function TechnicalDetailsStep({
                           value={gearbox}
                           className="sr-only peer"
                         />
-                        <div className="px-3 md:px-4 py-2 md:py-2.5 rounded-md border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground transition-colors text-xs md:text-sm">
+                        <div className="px-3 md:px-4 py-2 md:py-2.5 rounded-md border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground transition-colors body-xs">
                           {gearbox}
                         </div>
                       </label>
                     ))}
                   </RadioGroup>
                 </FormControl>
-                <FormDescription className="min-h-[20px] text-xs md:text-sm">
+                <FormDescription className="min-h-[20px] body-xs">
                   Transmission type
                 </FormDescription>
                 <FormMessage />
@@ -268,7 +270,7 @@ export function TechnicalDetailsStep({
                   <RadioGroup
                     onValueChange={field.onChange}
                     value={field.value}
-                    className="flex flex-wrap gap-2 md:gap-3"
+                    className="grid grid-cols-4 md:grid-cols-8 gap-2 md:gap-3"
                   >
                     {VEHICLE_COLORS.map((color) => (
                       <label
@@ -279,18 +281,18 @@ export function TechnicalDetailsStep({
                           value={color}
                           className="sr-only peer"
                         />
-                        <div className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 rounded-md border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground transition-colors text-xs md:text-sm">
+                        <div className="flex items-center justify-center gap-1.5 md:gap-2 px-2 md:px-2.5 py-2 md:py-2.5 rounded-md border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground transition-colors body-xs">
                           <span 
-                            className="inline-block w-3 h-3 md:w-3.5 md:h-3.5 rounded-full border border-gray-300"
+                            className="inline-block w-3 h-3 md:w-3.5 md:h-3.5 rounded-full border border-gray-300 shrink-0"
                             style={{ backgroundColor: COLOR_HEX_MAP[color] }}
                           />
-                          <span>{color}</span>
+                          <span className="truncate">{color}</span>
                         </div>
                       </label>
                     ))}
                   </RadioGroup>
                 </FormControl>
-                <FormDescription className="min-h-[20px] text-xs md:text-sm">
+                <FormDescription className="min-h-[20px] body-xs">
                   Exterior paint colour
                 </FormDescription>
                 <FormMessage />
@@ -309,7 +311,7 @@ export function TechnicalDetailsStep({
                   <RadioGroup
                     onValueChange={field.onChange}
                     value={field.value}
-                    className="flex flex-wrap gap-2 md:gap-3"
+                    className="grid grid-cols-4 md:grid-cols-8 gap-2 md:gap-3"
                   >
                     {VEHICLE_COLORS.map((color) => (
                       <label
@@ -320,18 +322,18 @@ export function TechnicalDetailsStep({
                           value={color}
                           className="sr-only peer"
                         />
-                        <div className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 rounded-md border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground transition-colors text-xs md:text-sm">
+                        <div className="flex items-center justify-center gap-1.5 md:gap-2 px-2 md:px-2.5 py-2 md:py-2.5 rounded-md border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground transition-colors body-xs">
                           <span 
-                            className="inline-block w-3 h-3 md:w-3.5 md:h-3.5 rounded-full border border-gray-300"
+                            className="inline-block w-3 h-3 md:w-3.5 md:h-3.5 rounded-full border border-gray-300 shrink-0"
                             style={{ backgroundColor: COLOR_HEX_MAP[color] }}
                           />
-                          <span>{color}</span>
+                          <span className="truncate">{color}</span>
                         </div>
                       </label>
                     ))}
                   </RadioGroup>
                 </FormControl>
-                <FormDescription className="min-h-[20px] text-xs md:text-sm">
+                <FormDescription className="min-h-[20px] body-xs">
                   Interior upholstery colour
                 </FormDescription>
                 <FormMessage />
@@ -368,7 +370,7 @@ export function TechnicalDetailsStep({
                     ))}
                   </RadioGroup>
                 </FormControl>
-                <FormDescription className="min-h-[20px] text-xs md:text-sm">
+                <FormDescription className="min-h-[20px] body-xs">
                   Current physical condition of the vehicle
                 </FormDescription>
                 <FormMessage />
@@ -390,7 +392,7 @@ export function TechnicalDetailsStep({
                 </FormControl>
                 <div className="space-y-1 leading-none">
                   <FormLabel className="text-sm md:text-base cursor-pointer">Road Legal</FormLabel>
-                  <FormDescription className="text-xs md:text-sm">
+                  <FormDescription className="body-xs">
                     I confirm this vehicle is legal to drive on public roads
                   </FormDescription>
                 </div>

@@ -31,7 +31,9 @@ export function AppHeader({
         
         <div className="flex items-center gap-4">
           <Avatar>
-            <AvatarFallback>AD</AvatarFallback>
+            <AvatarFallback className="bg-spoke-grey-light text-spoke-black font-medium text-sm tracking-wide">
+              AD
+            </AvatarFallback>
           </Avatar>
         </div>
       </div>

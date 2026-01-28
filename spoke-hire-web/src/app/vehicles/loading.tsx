@@ -8,7 +8,7 @@ export default function Loading() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Skeleton */}
-      <div className="bg-slate-50 dark:bg-slate-900 border-b">
+      <div className="bg-spoke-white border-b">
         <div className="container mx-auto px-4 py-12 md:py-16">
           <div className="max-w-3xl mx-auto text-center space-y-4">
             <Skeleton className="h-12 w-3/4 mx-auto" />

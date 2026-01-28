@@ -5,11 +5,10 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
-import { Label } from '~/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { api } from '~/trpc/react';
 import { toast } from 'sonner';
 import { GoogleAuthButton } from './GoogleAuthButton';
+import { useAuth } from '~/providers/auth-provider';
 
 /**
  * Login Form Component
@@ -24,17 +23,38 @@ import { GoogleAuthButton } from './GoogleAuthButton';
  * 
  * @example
  * ```tsx
- * <LoginForm />
+ * <LoginForm termsUrl="/terms-of-service" privacyUrl="/privacy-policy" />
  * ```
  */
-export function LoginForm() {
+interface LoginFormProps {
+  termsUrl?: string;
+  privacyUrl?: string;
+}
+
+export function LoginForm({ termsUrl = '/terms-of-service', privacyUrl = '/privacy-policy' }: LoginFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user, isLoading: isAuthLoading, isAuthenticated } = useAuth();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
   
   // Get callbackUrl from search params
   const callbackUrl = searchParams.get('callbackUrl');
+
+  // Track client-side mount to prevent hydration mismatch
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  // Redirect authenticated users to callback URL or appropriate dashboard
+  useEffect(() => {
+    if (!isAuthLoading && isAuthenticated && user) {
+      const defaultRedirect = user.userType === 'ADMIN' ? '/admin' : '/user/vehicles';
+      const redirect = callbackUrl ?? defaultRedirect;
+      router.push(redirect);
+    }
+  }, [isAuthLoading, isAuthenticated, user, callbackUrl, router]);
 
   // Show error if redirected from callback
   useEffect(() => {
@@ -94,66 +114,110 @@ export function LoginForm() {
     }
   };
 
+  // Show loading state while mounting, checking authentication, or if already authenticated
+  // The hasMounted check ensures server and client render the same content initially
+  if (!hasMounted || isAuthLoading || isAuthenticated) {
+    return (
+      <div className="w-full max-w-[808px] flex flex-col items-center justify-center gap-8 min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
+        {isAuthenticated && (
+          <p className="text-base text-black/60">Redirecting...</p>
+        )}
+      </div>
+    );
+  }
+
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold">Sign In</CardTitle>
-        <CardDescription>
-          Enter your email to receive a verification code
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="admin@spokehire.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={isLoading}
-              autoComplete="email"
-              autoFocus
-              required
-            />
+    <div className="w-full max-w-[808px] flex flex-col items-center gap-8 md:gap-[80px]">
+      {/* Title Section */}
+      <div className="w-full flex flex-col items-center gap-[11px] text-center">
+        <h1 className="text-[48px] md:text-[96px] font-normal leading-[0.95] uppercase text-black tracking-normal">
+          Sign in
+        </h1>
+        <p className="body-medium font-normal leading-[1.4] text-black tracking-[-0.18px]">
+          Enter your email to receive a verification code.
+        </p>
+      </div>
+
+      {/* Form Section */}
+      <div className="w-full max-w-[480px] flex flex-col items-start gap-10">
+        <form onSubmit={handleSubmit} className="w-full flex flex-col gap-10">
+          {/* Email Input */}
+          <div className="w-full flex flex-col gap-5">
+            <div className="w-full flex flex-col gap-1">
+              <Input
+                id="email"
+                type="email"
+                label="Email"
+                placeholder="admin@spokehire.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isLoading}
+                autoComplete="email"
+                autoFocus
+                required
+              />
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading || !email}
+            >
+              {isLoading ? 'Sending code...' : 'send verification code'}
+            </Button>
           </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isLoading || !email}
-          >
-            {isLoading ? 'Sending code...' : 'Send verification code'}
-          </Button>
-
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or continue with
+          {/* Divider */}
+          <div className="w-full flex items-center justify-center h-5">
+            <div className="flex-1 h-px bg-black" />
+            <div className="px-2">
+              <span className="text-base font-normal leading-[1.4] text-black text-center">
+                Or
               </span>
             </div>
+            <div className="flex-1 h-px bg-black" />
           </div>
 
-          <GoogleAuthButton mode="signin" />
+          {/* Google Auth Button */}
+          <GoogleAuthButton mode="signin" callbackUrl={callbackUrl} />
 
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground">
+          {/* Terms and Privacy */}
+          <div className="w-full text-center">
+            <p className="text-base font-normal leading-[20px] text-black/50">
+              By clicking continue, you agree to our{' '}
+              <Link 
+                href={termsUrl}
+                className="underline decoration-solid underline-offset-auto"
+              >
+                Terms of Service
+              </Link>
+              {' '}and{' '}
+              <Link 
+                href={privacyUrl}
+                className="underline decoration-solid underline-offset-auto"
+              >
+                Privacy Policy
+              </Link>
+              .
+            </p>
+          </div>
+
+          {/* Sign up link */}
+          <div className="w-full text-center">
+            <p className="text-base font-normal leading-[1.4] text-black/50">
               Don't have an account?{' '}
               <Link 
                 href="/auth/signup" 
-                className="text-primary hover:underline font-medium"
+                className="text-base font-medium leading-[1.5] text-black underline decoration-solid underline-offset-auto"
               >
                 Sign up
               </Link>
             </p>
           </div>
         </form>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 

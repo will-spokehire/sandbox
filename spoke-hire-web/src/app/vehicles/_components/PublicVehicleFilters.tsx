@@ -35,8 +35,7 @@ export function PublicVehicleFilters() {
       makeIds: filters.makeIds,
       modelId: filters.modelId,
       collectionIds: filters.collectionIds,
-      yearFrom: filters.yearFrom,
-      yearTo: filters.yearTo,
+      decadeIds: filters.decadeIds,
       countryIds: filters.countryIds,
       counties: filters.counties,
     },
@@ -102,15 +101,7 @@ export function PublicVehicleFilters() {
   }, [multipleMakesSelected, filters.modelId, updateFilters]);
 
   const handleDecadeChange = (decadeIds: string[]) => {
-    if (decadeIds.length === 0) {
-      updateFilters({ yearFrom: undefined, yearTo: undefined });
-    } else {
-      // Use first selected decade
-      const decade = decades.find((d) => d.id === decadeIds[0]);
-      if (decade) {
-        updateFilters({ yearFrom: decade.yearFrom, yearTo: decade.yearTo });
-      }
-    }
+    updateFilters({ decadeIds: decadeIds.length > 0 ? decadeIds : undefined });
   };
 
   const handleClearFilters = () => {
@@ -121,20 +112,21 @@ export function PublicVehicleFilters() {
     (filters.makeIds?.length ?? 0) +
     (filters.modelId ? 1 : 0) +
     (filters.collectionIds?.length ?? 0) +
-    (filters.yearFrom ? 1 : 0) +
+    (filters.decadeIds?.length ?? 0) +
     (filters.countryIds?.length ?? 0) +
     (filters.counties?.length ?? 0);
 
   // Render collection option with color badge
   const renderCollectionOption = (option: { id: string; name: string; color?: string }, selected: boolean) => (
     <>
+      <Check className={cn("mr-2 h-4 w-4", selected ? "opacity-100" : "opacity-0")} />
       {option.color && (
         <div
           className="mr-2 h-3 w-3 rounded-full"
           style={{ backgroundColor: option.color }}
         />
       )}
-      {option.name}
+      <span className={cn(selected && "font-medium")}>{option.name}</span>
     </>
   );
 
@@ -142,14 +134,12 @@ export function PublicVehicleFilters() {
   const renderStandardOption = (option: { id: string; name: string }, selected: boolean) => (
     <>
       <Check className={cn("mr-2 h-4 w-4", selected ? "opacity-100" : "opacity-0")} />
-      {option.name}
+      <span className={cn(selected && "font-medium")}>{option.name}</span>
     </>
   );
 
-  // Get selected decade for display
-  const selectedDecade = filters.yearFrom
-    ? decades.find((d) => d.yearFrom === filters.yearFrom)
-    : undefined;
+  // Get selected decades for display
+  const selectedDecades = filters.decadeIds ?? [];
 
   return (
     <div className="space-y-4">
@@ -171,7 +161,7 @@ export function PublicVehicleFilters() {
             <SheetHeader>
               <SheetTitle>Filters</SheetTitle>
             </SheetHeader>
-            <div className="space-y-4 mt-6">
+            <div className="space-y-4 mt-6 px-[16px]">
               <FilterControls
                 makeOptions={makeOptions}
                 modelOptions={modelOptions}
@@ -179,7 +169,7 @@ export function PublicVehicleFilters() {
                 countryOptions={countryOptions}
                 countyOptions={countyOptions}
                 decades={decades}
-                selectedDecade={selectedDecade}
+                selectedDecades={selectedDecades}
                 filters={filters}
                 updateFilters={updateFilters}
                 handleModelChange={handleModelChange}
@@ -201,7 +191,7 @@ export function PublicVehicleFilters() {
 
       {/* Desktop: Inline Filters with Modern Design */}
       <div className="hidden md:block">
-        <div className="flex flex-wrap gap-3 items-start">
+        <div className="flex items-center gap-4">
           <FilterControls
             makeOptions={makeOptions}
             modelOptions={modelOptions}
@@ -209,7 +199,7 @@ export function PublicVehicleFilters() {
             countryOptions={countryOptions}
             countyOptions={countyOptions}
             decades={decades}
-            selectedDecade={selectedDecade}
+            selectedDecades={selectedDecades}
             filters={filters}
             updateFilters={updateFilters}
             handleModelChange={handleModelChange}
@@ -218,18 +208,6 @@ export function PublicVehicleFilters() {
             renderStandardOption={renderStandardOption}
             isLoadingFilters={isLoadingFilters}
           />
-
-          {hasActiveFilters && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleClearFilters}
-              className="self-start"
-            >
-              <X className="h-4 w-4 mr-1" />
-              Clear all
-            </Button>
-          )}
         </div>
       </div>
     </div>
@@ -244,7 +222,7 @@ function FilterControls({
   countryOptions,
   countyOptions,
   decades,
-  selectedDecade,
+  selectedDecades,
   filters,
   updateFilters,
   handleModelChange,
@@ -267,6 +245,7 @@ function FilterControls({
         onChange={(makeIds) => {
           updateFilters({ makeIds, modelId: undefined });
         }}
+        onClear={() => updateFilters({ makeIds: undefined, modelId: undefined })}
         renderOption={renderStandardOption}
         searchPlaceholder="Search makes..."
         className="md:w-[180px]"
@@ -285,7 +264,7 @@ function FilterControls({
           className="md:w-[160px]"
         />
         {multipleMakesSelected && (
-          <div className="absolute top-full left-0 mt-1 text-xs text-muted-foreground whitespace-nowrap">
+          <div className="absolute top-full left-0 mt-1 body-xs text-muted-foreground whitespace-nowrap">
             Select one make to filter by model
           </div>
         )}
@@ -296,10 +275,11 @@ function FilterControls({
         label="Select Decade"
         placeholder="All decades"
         options={decades}
-        selectedIds={selectedDecade ? [selectedDecade.id] : []}
+        selectedIds={selectedDecades}
         onChange={handleDecadeChange}
+        onClear={() => updateFilters({ decadeIds: undefined })}
         renderOption={renderStandardOption}
-        searchPlaceholder="Search decades..."
+        enableSearch={false}
         className="md:w-[160px]"
       />
 
@@ -334,8 +314,9 @@ function FilterControls({
         options={collectionOptions}
         selectedIds={filters.collectionIds ?? []}
         onChange={(collectionIds) => updateFilters({ collectionIds })}
+        onClear={() => updateFilters({ collectionIds: undefined })}
         renderOption={renderCollectionOption}
-        searchPlaceholder="Search collections..."
+        enableSearch={false}
         className="md:w-[200px]"
       />
     </>

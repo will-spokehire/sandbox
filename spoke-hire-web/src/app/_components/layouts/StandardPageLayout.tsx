@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
 import { PublicUserNavigation } from "~/components/navigation/PublicUserNavigation";
-import { PublicFooter } from "~/app/vehicles/_components/PublicFooter";
+import { FooterWrapper } from "~/components/footer/FooterWrapper";
 import { cn } from "~/lib/utils";
 import { LAYOUT_CONSTANTS } from "~/lib/design-tokens";
+import { getNavigation } from "~/lib/payload-api";
 
 interface StandardPageLayoutProps {
   children: ReactNode;
@@ -29,7 +30,7 @@ interface StandardPageLayoutProps {
  * </StandardPageLayout>
  * ```
  */
-export function StandardPageLayout({
+export async function StandardPageLayout({
   children,
   maxWidth = "default",
   background = "default",
@@ -37,12 +38,13 @@ export function StandardPageLayout({
   includeFooter = true,
 }: StandardPageLayoutProps) {
   const bgClass = background === "muted" ? LAYOUT_CONSTANTS.bgMuted : LAYOUT_CONSTANTS.bgDefault;
+  const navigation = await getNavigation();
 
   return (
     <div className={cn(LAYOUT_CONSTANTS.pageWrapper, bgClass)}>
-      {includeNavigation && <PublicUserNavigation />}
+      {includeNavigation && <PublicUserNavigation navigation={navigation} />}
       <main className={LAYOUT_CONSTANTS.mainContent}>{children}</main>
-      {includeFooter && <PublicFooter />}
+      {includeFooter && <FooterWrapper />}
     </div>
   );
 }

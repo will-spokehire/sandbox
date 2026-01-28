@@ -1,0 +1,136 @@
+{
+  "id": 1,
+  "mainMenu": [
+    {
+      "id": "69594a3b4bcbc77eb73e8bcf",
+      "label": "Hire",
+      "link": "/enquiry/new",
+      "icon": null,
+      "children": []
+    },
+    {
+      "id": "69594a3b4bcbc77eb73e8bd0",
+      "label": "Register",
+      "link": "/register",
+      "icon": null,
+      "children": []
+    },
+    {
+      "id": "69594a3b4bcbc77eb73e8bd1",
+      "label": "Vehicles",
+      "link": "/vehicles",
+      "icon": null,
+      "children": []
+    },
+    {
+      "id": "69594a3b4bcbc77eb73e8bd2",
+      "label": "Services",
+      "link": "/services",
+      "icon": null,
+      "children": []
+    }
+  ],
+  "footerColumns": [
+    {
+      "id": "69594a3b4bcbc77eb73e8bd3",
+      "title": null,
+      "type": "contact",
+      "links": [],
+      "contactInfo": {
+        "addressLabel": "Address",
+        "addressValue": "92 Barcombe Avenue, London, SW2 3BA",
+        "emailLabel": "Contact",
+        "emailValue": "hello@spokehire.com"
+      }
+    },
+    {
+      "id": "69594a3b4bcbc77eb73e8bda",
+      "title": null,
+      "type": "links",
+      "links": [
+        {
+          "id": "69594a3b4bcbc77eb73e8bd4",
+          "label": "Our story",
+          "url": "/our-story"
+        },
+        {
+          "id": "69594a3b4bcbc77eb73e8bd5",
+          "label": "Vehicles",
+          "url": "/vehicles"
+        },
+        {
+          "id": "69594a3b4bcbc77eb73e8bd6",
+          "label": "Hire a car",
+          "url": "/enquiry/new"
+        },
+        {
+          "id": "69594a3b4bcbc77eb73e8bd7",
+          "label": "List your car",
+          "url": "/register"
+        },
+        {
+          "id": "69594a3b4bcbc77eb73e8bd8",
+          "label": "Contact us",
+          "url": "mailto:hello@spokehire.com"
+        }
+      ],
+      "contactInfo": {
+        "addressLabel": "Address",
+        "addressValue": null,
+        "emailLabel": "Contact",
+        "emailValue": null
+      }
+    },
+    {
+      "id": "69594a3b4bcbc77eb73e8bdf",
+      "title": null,
+      "type": "links",
+      "links": [
+        {
+          "id": "69594a3b4bcbc77eb73e8bdb",
+          "label": "Classic car hire",
+          "url": "/vehicles"
+        },
+        {
+          "id": "69594a3b4bcbc77eb73e8bdc",
+          "label": "Classic car hire for film",
+          "url": "/vehicles"
+        },
+        {
+          "id": "69594a3b4bcbc77eb73e8bdd",
+          "label": "Classic car hire for photoshoot",
+          "url": "/vehicles"
+        },
+        {
+          "id": "696d1518c4300ba186a11074",
+          "label": "Test link to test blog post",
+          "url": "/test-page"
+        }
+      ],
+      "contactInfo": {
+        "addressLabel": "Address",
+        "addressValue": null,
+        "emailLabel": "Contact",
+        "emailValue": null
+      }
+    }
+  ],
+  "socialLinks": [
+    {
+      "id": "69594a3b4bcbc77eb73e8bf1",
+      "platform": "instagram",
+      "url": "https://instagram.com/spokehire",
+      "icon": "instagram"
+    }
+  ],
+  "footerSettings": {
+    "copyrightText": "© 2026 Spoke Hire Ltd. All rights reserved.",
+    "privacyPolicyUrl": "/privacy-policy",
+    "termsOfServiceUrl": "/terms-of-service",
+    "showLargeLogo": true
+  },
+  "homeSlug": "/",
+  "updatedAt": "2026-01-20T19:32:26.036Z",
+  "createdAt": "2026-01-03T16:56:27.084Z",
+  "globalType": "navigation"
+}

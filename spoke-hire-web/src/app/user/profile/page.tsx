@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useRequireAuth } from "~/providers/auth-provider";
 import { api } from "~/trpc/react";
-import { Card, CardContent } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 import { ProfileForm, ProfilePreview } from "~/app/_components/shared";
 import type { ProfileFormData } from "../vehicles/new/_components/validation";
+import { TYPOGRAPHY } from "~/lib/design-tokens";
+import { cn } from "~/lib/utils";
 
 /**
  * User Profile Page
@@ -76,67 +77,84 @@ export default function UserProfilePage() {
   // Loading state
   if (isAuthLoading) {
     return (
-      <main className="container mx-auto px-4 py-8 max-w-2xl">
-        <div className="space-y-6">
-          <div>
-            <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-4 w-64 mt-2" />
+      <>
+        {/* Header */}
+        <div className="bg-white">
+          <div className="w-full flex flex-col items-center px-4 md:px-[30px] pt-[41px] pb-[20px]">
+            <div className="w-full max-w-[808px] flex flex-col items-center gap-[11px]">
+              <Skeleton className="h-16 md:h-24 w-64 md:w-96" />
+              <Skeleton className="h-4 w-48 md:w-72" />
+            </div>
           </div>
-          <Card>
-            <CardContent className="pt-6 space-y-6">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-            </CardContent>
-          </Card>
         </div>
-      </main>
+
+        {/* Main Content */}
+        <main className="flex-1 bg-white">
+          <div className="w-full flex flex-col items-center px-4 md:px-[30px] pt-[20px] pb-[41px]">
+            <div className="w-full max-w-[808px] flex flex-col gap-10">
+              <div className="space-y-6">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            </div>
+          </div>
+        </main>
+      </>
     );
   }
 
   return (
-    <main className="container mx-auto px-4 py-8 max-w-2xl">
-      {/* Page Title */}
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-50 mb-2">
-          My Profile
-        </h2>
-        <p className="text-slate-600 dark:text-slate-400">
-          {isEditing 
-            ? "Update your personal information and contact details"
-            : "View your personal information and contact details"}
-        </p>
+    <>
+      {/* Header - Match Figma design */}
+      <div className="bg-white">
+        <div className="w-full flex flex-col items-center px-4 md:px-[30px] pt-[41px] pb-[20px]">
+          <div className="w-full max-w-[808px] flex flex-col items-center gap-[11px] text-center">
+            {/* Main Title */}
+            <h1 className={cn(TYPOGRAPHY.heroTitle, "text-black")}>
+              My Profile
+            </h1>
+            <p className={cn(TYPOGRAPHY.pageDescription, "text-black")}>
+              {isEditing 
+                ? "Update your personal information and contact details"
+                : "View your personal information and contact details"}
+            </p>
+          </div>
+        </div>
       </div>
 
-      {isEditing ? (
-        <Card>
-          <CardContent className="pt-6">
-            <ProfileForm
-              defaultValues={defaultValues}
-              onSubmit={handleSubmit}
-              isSubmitting={updateProfileMutation.isPending}
-              submitButtonText="Save Changes"
-              showCancelButton
-              onCancel={() => setIsEditing(false)}
-            />
-          </CardContent>
-        </Card>
-      ) : (
-        <ProfilePreview
-          profile={{
-            firstName: user?.firstName,
-            lastName: user?.lastName,
-            email: user?.email,
-            phone: user?.phone,
-            street: user?.street,
-            city: user?.city,
-            county: user?.county,
-            postcode: user?.postcode,
-            countryName: user?.country?.name,
-          }}
-          onEditClick={() => setIsEditing(true)}
-        />
-      )}
-    </main>
+      {/* Main Content */}
+      <main className="flex-1 bg-white">
+        <div className="w-full flex flex-col items-center px-4 md:px-[30px] pt-[20px] pb-[41px]">
+          <div className="w-full max-w-[808px] flex flex-col gap-10">
+            {isEditing ? (
+              <ProfileForm
+                defaultValues={defaultValues}
+                onSubmit={handleSubmit}
+                isSubmitting={updateProfileMutation.isPending}
+                submitButtonText="Save Changes"
+                showCancelButton
+                onCancel={() => setIsEditing(false)}
+              />
+            ) : (
+              <ProfilePreview
+                profile={{
+                  firstName: user?.firstName,
+                  lastName: user?.lastName,
+                  email: user?.email,
+                  phone: user?.phone,
+                  street: user?.street,
+                  city: user?.city,
+                  county: user?.county,
+                  postcode: user?.postcode,
+                  countryName: user?.country?.name,
+                }}
+                onEditClick={() => setIsEditing(true)}
+              />
+            )}
+          </div>
+        </div>
+      </main>
+    </>
   );
 }

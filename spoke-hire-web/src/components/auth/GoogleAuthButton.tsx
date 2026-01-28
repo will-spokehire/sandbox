@@ -11,6 +11,8 @@ interface GoogleAuthButtonProps {
   privacyPolicyAccepted?: boolean;
   termsAcceptanceId?: string;
   privacyAcceptanceId?: string;
+  /** URL to redirect to after successful authentication */
+  callbackUrl?: string | null;
 }
 
 /**
@@ -27,11 +29,12 @@ interface GoogleAuthButtonProps {
  * 
  * @example
  * ```tsx
- * <GoogleAuthButton mode="signin" />
+ * <GoogleAuthButton mode="signin" callbackUrl="/user/vehicles/new" />
  * <GoogleAuthButton 
  *   mode="signup" 
  *   termsAccepted={true}
  *   termsAcceptanceId="uuid"
+ *   callbackUrl="/user/vehicles/new"
  * />
  * ```
  */
@@ -41,6 +44,7 @@ export function GoogleAuthButton({
   privacyPolicyAccepted,
   termsAcceptanceId,
   privacyAcceptanceId,
+  callbackUrl,
 }: GoogleAuthButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -49,6 +53,13 @@ export function GoogleAuthButton({
     
     try {
       const supabase = createClient();
+
+      // Store callback URL in sessionStorage for redirect after OAuth
+      if (callbackUrl) {
+        sessionStorage.setItem('oauth_callback_url', callbackUrl);
+      } else {
+        sessionStorage.removeItem('oauth_callback_url');
+      }
 
       // Store T&Cs acceptance in sessionStorage for callback
       if (mode === 'signup' && termsAccepted && privacyPolicyAccepted) {
@@ -90,34 +101,37 @@ export function GoogleAuthButton({
   };
 
   return (
-    <Button
+    <button
       type="button"
-      variant="outline"
-      className="w-full"
       onClick={handleGoogleSignIn}
       disabled={isLoading}
+      className="w-full h-9 bg-white border border-black/20 flex items-center justify-center px-4 py-2 shadow-[0px_1px_2px_-1px_rgba(0,0,0,0.1),0px_1px_3px_0px_rgba(0,0,0,0.1)] disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:opacity-90"
     >
-      <svg
-        className="mr-2 h-4 w-4"
-        aria-hidden="true"
-        focusable="false"
-        data-prefix="fab"
-        data-icon="google"
-        role="img"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 488 512"
-      >
-        <path
-          fill="currentColor"
-          d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"
-        ></path>
-      </svg>
-      {isLoading
-        ? 'Redirecting...'
-        : mode === 'signup'
-        ? 'Sign up with Google'
-        : 'Sign in with Google'}
-    </Button>
+      <div className="flex items-center gap-2">
+        <svg
+          className="h-4 w-4"
+          aria-hidden="true"
+          focusable="false"
+          data-prefix="fab"
+          data-icon="google"
+          role="img"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 488 512"
+        >
+          <path
+            fill="currentColor"
+            d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"
+          ></path>
+        </svg>
+        <span className="text-base font-normal leading-[20px] text-black text-center">
+          {isLoading
+            ? 'Redirecting...'
+            : mode === 'signup'
+            ? 'Continue with Google'
+            : 'Continue with Google'}
+        </span>
+      </div>
+    </button>
   );
 }
 

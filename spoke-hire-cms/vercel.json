@@ -1,0 +1,8 @@
+{
+  "buildCommand": "npm run payload generate:importmap && npm run build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "installCommand": "npm install --include=dev",
+  "devCommand": "npm run dev"
+}
+

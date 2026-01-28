@@ -1,0 +1,989 @@
+[
+  {
+    "id": 7,
+    "title": "Services",
+    "slug": "services",
+    "status": "published",
+    "publishedAt": "2026-01-03T18:46:05.471Z",
+    "layout": [
+      {
+        "id": "696d0b937d758f00048931f5",
+        "selectedCTA": 4,
+        "hideOnMobile": false,
+        "blockName": null,
+        "blockType": "call-to-action-block"
+      },
+      {
+        "id": "696d0b937d758f00048931f6",
+        "autoplay": false,
+        "autoplayDelay": 5,
+        "hideOnMobile": false,
+        "blockName": null,
+        "blockType": "image-carousel",
+        "images": [
+          5
+        ]
+      },
+      {
+        "id": "696d0b937d758f00048931fc",
+        "title": "WHAT WE OFFER",
+        "hideOnMobile": false,
+        "blockName": null,
+        "items": [
+          {
+            "id": "696d0b937d758f00048931f8",
+            "number": "01",
+            "heading": "commercial hires",
+            "description": "Specialist action vehicle supply for film, TV, photo shoots and events. Your creative partner, sourcing and securing vehicles that bring your brief to life."
+          },
+          {
+            "id": "696d0b937d758f00048931f9",
+            "number": "02",
+            "heading": "personal hires",
+            "description": "We handle transport, drivers, schedules and on-set coordination so productions and events run smoothly behind the scenes."
+          },
+          {
+            "id": "696d0b937d758f00048931fa",
+            "number": "03",
+            "heading": "logistics & support",
+            "description": "We handle transport, drivers, schedules and on-set coordination so productions and events run smoothly behind the scenes."
+          },
+          {
+            "id": "696d0b937d758f00048931fb",
+            "number": "04",
+            "heading": "action & Modifications",
+            "description": "Vehicle modifications, wraps and decals. From stunt and drift cars to precision driving and tracking support, we help make dynamic movement happen safely."
+          }
+        ],
+        "blockType": "numbered-list"
+      },
+      {
+        "id": "696d0b937d758f00048931fe",
+        "title": "PROJECT SPOTLIGHT",
+        "showArrows": true,
+        "itemsPerView": 4,
+        "hideOnMobile": false,
+        "blockName": null,
+        "blockType": "project-spotlight",
+        "selectedSpotlights": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "id": "696d0b937d758f00048931fd",
+        "title": "What our customers say",
+        "showRatings": true,
+        "hideOnMobile": false,
+        "blockName": null,
+        "blockType": "testimonials-section",
+        "selectedTestimonials": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "id": "696d0b937d758f00048931ff",
+        "selectedCTA": 9,
+        "hideOnMobile": false,
+        "blockName": null,
+        "blockType": "call-to-action-block"
+      }
+    ],
+    "seo": {
+      "metaTitle": "Services",
+      "metaDescription": "Services",
+      "ogTitle": "Services",
+      "ogDescription": "Services",
+      "ogImage": null,
+      "keywords": []
+    },
+    "updatedAt": "2026-01-21T18:25:42.554Z",
+    "createdAt": "2026-01-18T16:34:27.846Z"
+  },
+  {
+    "id": 6,
+    "title": "Blog Post 1",
+    "slug": "blog-post-1",
+    "status": "published",
+    "publishedAt": "2026-01-04T16:27:58.462Z",
+    "layout": [
+      {
+        "id": "695a9487fc81e1636e6d533d",
+        "selectedCTA": 5,
+        "hideOnMobile": false,
+        "blockName": null,
+        "blockType": "call-to-action-block"
+      },
+      {
+        "id": "695a94eafc81e1636e6d533f",
+        "autoplay": false,
+        "autoplayDelay": 5,
+        "hideOnMobile": false,
+        "blockName": null,
+        "blockType": "image-carousel",
+        "images": [
+          4
+        ]
+      },
+      {
+        "id": "695a94bcfc81e1636e6d533e",
+        "header": null,
+        "headerType": "h2",
+        "content": {
+          "root": {
+            "type": "root",
+            "format": "",
+            "indent": 0,
+            "version": 1,
+            "children": [
+              {
+                "tag": "h2",
+                "type": "heading",
+                "format": "",
+                "indent": 0,
+                "version": 1,
+                "children": [
+                  {
+                    "mode": "normal",
+                    "text": "subheading",
+                    "type": "text",
+                    "style": "",
+                    "detail": 0,
+                    "format": 0,
+                    "version": 1
+                  }
+                ],
+                "direction": null
+              },
+              {
+                "type": "paragraph",
+                "format": "",
+                "indent": 0,
+                "version": 1,
+                "children": [
+                  {
+                    "type": "linebreak",
+                    "version": 1
+                  },
+                  {
+                    "mode": "normal",
+                    "text": "What began with period-perfect classics quickly expanded. Productions needed more: modern hero cars, stunt-ready builds, precision drivers, specialist logistics. We stepped up, curating vehicles of every age, shape, and size until our name no longer told the whole story.",
+                    "type": "text",
+                    "style": "",
+                    "detail": 0,
+                    "format": 0,
+                    "version": 1
+                  }
+                ],
+                "direction": null,
+                "textStyle": "",
+                "textFormat": 0
+              },
+              {
+                "tag": "h3",
+                "type": "heading",
+                "format": "",
+                "indent": 0,
+                "version": 1,
+                "children": [
+                  {
+                    "type": "linebreak",
+                    "version": 1
+                  },
+                  {
+                    "mode": "normal",
+                    "text": "subheading",
+                    "type": "text",
+                    "style": "",
+                    "detail": 0,
+                    "format": 0,
+                    "version": 1
+                  }
+                ],
+                "direction": null
+              },
+              {
+                "type": "paragraph",
+                "format": "",
+                "indent": 0,
+                "version": 1,
+                "children": [
+                  {
+                    "type": "linebreak",
+                    "version": 1
+                  },
+                  {
+                    "mode": "normal",
+                    "text": "At Spoke, we remove the vehicle headache — so you can focus on everything else.",
+                    "type": "text",
+                    "style": "",
+                    "detail": 0,
+                    "format": 0,
+                    "version": 1
+                  },
+                  {
+                    "type": "linebreak",
+                    "version": 1
+                  },
+                  {
+                    "type": "linebreak",
+                    "version": 1
+                  },
+                  {
+                    "mode": "normal",
+                    "text": "Born as Capture Classics, we started with period-perfect cars for screen, built on a racing background that taught us how to handle vehicles with care. As our clients and briefs expanded, so did we: modern hero cars, stunt builds, pro drivers, delivery, on-set support. Today, Spoke Hire connects bold ideas to the right vehicles—fast—for both productions and private moments.",
+                    "type": "text",
+                    "style": "",
+                    "detail": 0,
+                    "format": 0,
+                    "version": 1
+                  }
+                ],
+                "direction": null,
+                "textStyle": "",
+                "textFormat": 0
+              }
+            ],
+            "direction": null
+          }
+        },
+        "hideOnMobile": false,
+        "blockName": null,
+        "blockType": "rich-text-content"
+      },
+      {
+        "id": "695a94f9fc81e1636e6d5340",
+        "autoplay": false,
+        "autoplayDelay": 5,
+        "hideOnMobile": false,
+        "blockName": null,
+        "blockType": "image-carousel",
+        "images": [
+          1
+        ]
+      }
+    ],
+    "seo": {
+      "metaTitle": "Blog post 1",
+      "metaDescription": "Blog post 1Blog post 1Blog post 1Blog post 1Blog post 1",
+      "ogTitle": "Blog post 1",
+      "ogDescription": null,
+      "ogImage": null,
+      "keywords": []
+    },
+    "updatedAt": "2026-01-18T17:23:42.364Z",
+    "createdAt": "2026-01-04T16:27:58.622Z"
+  },
+  {
+    "id": 5,
+    "title": "Terms of service",
+    "slug": "terms-of-service",
+    "status": "published",
+    "publishedAt": "2026-01-03T18:52:01.195Z",
+    "layout": [
+      {
+        "id": "6959669a523b2d0004b244b9",
+        "header": null,
+        "headerType": "h2",
+        "content": {
+          "root": {
+            "type": "root",
+            "format": "",
+            "indent": 0,
+            "version": 1,
+            "children": [
+              {
+                "tag": "h1",
+                "type": "heading",
+                "format": "",
+                "indent": 0,
+                "version": 1,
+                "children": [
+                  {
+                    "mode": "normal",
+                    "text": "Terms ",
+                    "type": "text",
+                    "style": "",
+                    "detail": 0,
+                    "format": 0,
+                    "version": 1
+                  }
+                ],
+                "direction": null
+              },
+              {
+                "type": "paragraph",
+                "format": "",
+                "indent": 0,
+                "version": 1,
+                "children": [
+                  {
+                    "mode": "normal",
+                    "text": "privacy-policy",
+                    "type": "text",
+                    "style": "",
+                    "detail": 0,
+                    "format": 0,
+                    "version": 1
+                  }
+                ],
+                "direction": null,
+                "textStyle": "",
+                "textFormat": 0
+              },
+              {
+                "type": "paragraph",
+                "format": "",
+                "indent": 0,
+                "version": 1,
+                "children": [
+                  {
+                    "mode": "normal",
+                    "text": "privacy-policy",
+                    "type": "text",
+                    "style": "",
+                    "detail": 0,
+                    "format": 0,
+                    "version": 1
+                  }
+                ],
+                "direction": null,
+                "textStyle": "",
+                "textFormat": 0
+              },
+              {
+                "type": "paragraph",
+                "format": "",
+                "indent": 0,
+                "version": 1,
+                "children": [
+                  {
+                    "mode": "normal",
+                    "text": "privacy-policy privacy-policy privacy-policy privacy-policyprivacy-policy privacy-policy privacy-policy privacy-policyprivacy-policy privacy-policy privacy-policy privacy-policyprivacy-policy privacy-policy privacy-policy privacy-policyprivacy-policy privacy-policy privacy-policy privacy-policyprivacy-policy privacy-policy privacy-policy privacy-policyprivacy-policy privacy-policy privacy-policy privacy-policyprivacy-policy privacy-policy privacy-policy privacy-policyprivacy-policy privacy-policy privacy-policy privacy-policyprivacy-policy privacy-policy privacy-policy privacy-policyprivacy-policy privacy-policy privacy-policy privacy-policyprivacy-policy privacy-policy privacy-policy privacy-policyprivacy-policy privacy-policy privacy-policy privacy-policyprivacy-policy privacy-policy privacy-policy privacy-policyprivacy-policy privacy-policy privacy-policy privacy-policy",
+                    "type": "text",
+                    "style": "",
+                    "detail": 0,
+                    "format": 0,
+                    "version": 1
+                  }
+                ],
+                "direction": null,
+                "textStyle": "",
+                "textFormat": 0
+              },
+              {
+                "tag": "h2",
+                "type": "heading",
+                "format": "",
+                "indent": 0,
+                "version": 1,
+                "children": [
+                  {
+                    "mode": "normal",
+                    "text": "privacy-policy",
+                    "type": "text",
+                    "style": "",
+                    "detail": 0,
+                    "format": 0,
+                    "version": 1
+                  }
+                ],
+                "direction": null
+              },
+              {
+                "type": "paragraph",
+                "format": "",
+                "indent": 0,
+                "version": 1,
+                "children": [
+                  {
+                    "mode": "normal",
+                    "text": "privacy-policyprivacy-policy",
+                    "type": "text",
+                    "style": "",
+                    "detail": 0,
+                    "format": 0,
+                    "version": 1
+                  }
+                ],
+                "direction": null,
+                "textStyle": "",
+                "textFormat": 0
+              }
+            ],
+            "direction": null
+          }
+        },
+        "hideOnMobile": false,
+        "blockName": null,
+        "blockType": "rich-text-content"
+      }
+    ],
+    "seo": {
+      "metaTitle": "Terms of service",
+      "metaDescription": "Terms of service",
+      "ogTitle": "Terms of service",
+      "ogDescription": "Terms of service",
+      "ogImage": null,
+      "keywords": []
+    },
+    "updatedAt": "2026-01-03T18:58:21.951Z",
+    "createdAt": "2026-01-03T18:57:30.835Z"
+  },
+  {
+    "id": 4,
+    "title": "Privacy policy",
+    "slug": "privacy-policy",
+    "status": "published",
+    "publishedAt": "2026-01-03T18:52:01.195Z",
+    "layout": [
+      {
+        "id": "6959653abb11482f744a4dfb",
+        "header": null,
+        "headerType": "h2",
+        "content": {
+          "root": {
+            "type": "root",
+            "format": "",
+            "indent": 0,
+            "version": 1,
+            "children": [
+              {
+                "tag": "h1",
+                "type": "heading",
+                "format": "",
+                "indent": 0,
+                "version": 1,
+                "children": [
+                  {
+                    "mode": "normal",
+                    "text": "privacy-policy",
+                    "type": "text",
+                    "style": "",
+                    "detail": 0,
+                    "format": 0,
+                    "version": 1
+                  }
+                ],
+                "direction": null
+              },
+              {
+                "type": "paragraph",
+                "format": "",
+                "indent": 0,
+                "version": 1,
+                "children": [
+                  {
+                    "mode": "normal",
+                    "text": "privacy-policy",
+                    "type": "text",
+                    "style": "",
+                    "detail": 0,
+                    "format": 0,
+                    "version": 1
+                  }
+                ],
+                "direction": null,
+                "textStyle": "",
+                "textFormat": 0
+              },
+              {
+                "type": "paragraph",
+                "format": "",
+                "indent": 0,
+                "version": 1,
+                "children": [
+                  {
+                    "mode": "normal",
+                    "text": "privacy-policy",
+                    "type": "text",
+                    "style": "",
+                    "detail": 0,
+                    "format": 0,
+                    "version": 1
+                  }
+                ],
+                "direction": null,
+                "textStyle": "",
+                "textFormat": 0
+              },
+              {
+                "type": "paragraph",
+                "format": "",
+                "indent": 0,
+                "version": 1,
+                "children": [
+                  {
+                    "mode": "normal",
+                    "text": "privacy-policy privacy-policy privacy-policy privacy-policyprivacy-policy privacy-policy privacy-policy privacy-policyprivacy-policy privacy-policy privacy-policy privacy-policyprivacy-policy privacy-policy privacy-policy privacy-policyprivacy-policy privacy-policy privacy-policy privacy-policyprivacy-policy privacy-policy privacy-policy privacy-policyprivacy-policy privacy-policy privacy-policy privacy-policyprivacy-policy privacy-policy privacy-policy privacy-policyprivacy-policy privacy-policy privacy-policy privacy-policyprivacy-policy privacy-policy privacy-policy privacy-policyprivacy-policy privacy-policy privacy-policy privacy-policyprivacy-policy privacy-policy privacy-policy privacy-policyprivacy-policy privacy-policy privacy-policy privacy-policyprivacy-policy privacy-policy privacy-policy privacy-policyprivacy-policy privacy-policy privacy-policy privacy-policy",
+                    "type": "text",
+                    "style": "",
+                    "detail": 0,
+                    "format": 0,
+                    "version": 1
+                  }
+                ],
+                "direction": null,
+                "textStyle": "",
+                "textFormat": 0
+              },
+              {
+                "tag": "h2",
+                "type": "heading",
+                "format": "",
+                "indent": 0,
+                "version": 1,
+                "children": [
+                  {
+                    "mode": "normal",
+                    "text": "privacy-policy",
+                    "type": "text",
+                    "style": "",
+                    "detail": 0,
+                    "format": 0,
+                    "version": 1
+                  }
+                ],
+                "direction": null
+              },
+              {
+                "type": "paragraph",
+                "format": "",
+                "indent": 0,
+                "version": 1,
+                "children": [
+                  {
+                    "mode": "normal",
+                    "text": "privacy-policyprivacy-policy",
+                    "type": "text",
+                    "style": "",
+                    "detail": 0,
+                    "format": 0,
+                    "version": 1
+                  }
+                ],
+                "direction": null,
+                "textStyle": "",
+                "textFormat": 0
+              }
+            ],
+            "direction": null
+          }
+        },
+        "hideOnMobile": false,
+        "blockName": null,
+        "blockType": "rich-text-content"
+      }
+    ],
+    "seo": {
+      "metaTitle": "privacy-policy",
+      "metaDescription": "privacy-policy",
+      "ogTitle": "privacy-policy",
+      "ogDescription": "privacy-policy",
+      "ogImage": null,
+      "keywords": []
+    },
+    "updatedAt": "2026-01-03T18:52:57.339Z",
+    "createdAt": "2026-01-03T18:52:01.196Z"
+  },
+  {
+    "id": 3,
+    "title": "Our Story",
+    "slug": "our-story",
+    "status": "published",
+    "publishedAt": "2026-01-03T18:46:05.471Z",
+    "layout": [
+      {
+        "id": "695962e0bb11482f744a4dee",
+        "selectedCTA": 10,
+        "hideOnMobile": false,
+        "blockName": null,
+        "blockType": "call-to-action-block"
+      },
+      {
+        "id": "6959630bbb11482f744a4def",
+        "autoplay": false,
+        "autoplayDelay": 5,
+        "hideOnMobile": false,
+        "blockName": null,
+        "blockType": "image-carousel",
+        "images": [
+          5
+        ]
+      },
+      {
+        "id": "69596363bb11482f744a4df0",
+        "header": "How it began",
+        "headerType": "h2",
+        "content": {
+          "root": {
+            "type": "root",
+            "format": "",
+            "indent": 0,
+            "version": 1,
+            "children": [
+              {
+                "type": "paragraph",
+                "format": "",
+                "indent": 0,
+                "version": 1,
+                "children": [
+                  {
+                    "mode": "normal",
+                    "text": "What began with period-perfect classics quickly expanded. Productions needed more: modern hero cars, stunt-ready builds, precision drivers, specialist logistics. We stepped up, curating vehicles of every age, shape, and size until our name no longer told the whole story.",
+                    "type": "text",
+                    "style": "",
+                    "detail": 0,
+                    "format": 0,
+                    "version": 1
+                  }
+                ],
+                "direction": null,
+                "textStyle": "",
+                "textFormat": 0
+              },
+              {
+                "type": "paragraph",
+                "format": "",
+                "indent": 0,
+                "version": 1,
+                "children": [
+                  {
+                    "type": "linebreak",
+                    "version": 1
+                  },
+                  {
+                    "mode": "normal",
+                    "text": "At Spoke, we remove the vehicle headache — so you can focus on everything else.",
+                    "type": "text",
+                    "style": "",
+                    "detail": 0,
+                    "format": 0,
+                    "version": 1
+                  }
+                ],
+                "direction": null,
+                "textStyle": "",
+                "textFormat": 0
+              },
+              {
+                "type": "paragraph",
+                "format": "",
+                "indent": 0,
+                "version": 1,
+                "children": [
+                  {
+                    "type": "linebreak",
+                    "version": 1
+                  },
+                  {
+                    "mode": "normal",
+                    "text": "Born as Capture Classics, we started with period-perfect cars for screen, built on a racing background that taught us how to handle vehicles with care. As our clients and briefs expanded, so did we: modern hero cars, stunt builds, pro drivers, delivery, on-set support. Today, Spoke Hire connects bold ideas to the right vehicles—fast—for both productions and private moments.",
+                    "type": "text",
+                    "style": "",
+                    "detail": 0,
+                    "format": 0,
+                    "version": 1
+                  }
+                ],
+                "direction": null,
+                "textStyle": "",
+                "textFormat": 0
+              },
+              {
+                "type": "paragraph",
+                "format": "",
+                "indent": 0,
+                "version": 1,
+                "children": [],
+                "direction": null,
+                "textStyle": "",
+                "textFormat": 0
+              }
+            ],
+            "direction": null
+          }
+        },
+        "hideOnMobile": false,
+        "blockName": null,
+        "blockType": "rich-text-content"
+      },
+      {
+        "id": "6959643cbb11482f744a4df9",
+        "selectedCTA": 1,
+        "hideOnMobile": false,
+        "blockName": null,
+        "blockType": "call-to-action-block"
+      }
+    ],
+    "seo": {
+      "metaTitle": "Our Story",
+      "metaDescription": "Our Story",
+      "ogTitle": "Our Story",
+      "ogDescription": "Our Story",
+      "ogImage": null,
+      "keywords": []
+    },
+    "updatedAt": "2026-01-21T18:30:02.480Z",
+    "createdAt": "2026-01-03T18:46:05.554Z"
+  },
+  {
+    "id": 2,
+    "title": "Register",
+    "slug": "register",
+    "status": "published",
+    "publishedAt": "2026-01-03T00:00:00.000Z",
+    "layout": [
+      {
+        "id": "69595f4fbb11482f744a4de0",
+        "selectedCTA": 3,
+        "hideOnMobile": false,
+        "blockName": null,
+        "blockType": "call-to-action-block"
+      },
+      {
+        "id": "69595faebb11482f744a4de3",
+        "autoplay": false,
+        "autoplayDelay": 1,
+        "hideOnMobile": false,
+        "blockName": null,
+        "blockType": "image-carousel",
+        "images": [
+          11
+        ]
+      },
+      {
+        "id": "69596011bb11482f744a4de5",
+        "title": "LIST your classic car WITH SPOKE",
+        "hideOnMobile": false,
+        "blockName": null,
+        "items": [
+          {
+            "id": "69596014bb11482f744a4de6",
+            "number": "01",
+            "heading": "FREE TO LIST, EASY TO EARN",
+            "description": "No listing fees. No exclusivity. No hassle. Register your vehicle in minutes and start earning with Spoke."
+          },
+          {
+            "id": "69596022bb11482f744a4de7",
+            "number": "02",
+            "heading": "Expert support",
+            "description": "Support provided by our team of experts around the clock - Giving you total peace of mind."
+          },
+          {
+            "id": "6959602ebb11482f744a4de8",
+            "number": "03",
+            "heading": "Fast payouts",
+            "description": "Get paid quickly, safely, every time with the guarantee offered by Spoke Hire."
+          },
+          {
+            "id": "6959603abb11482f744a4de9",
+            "number": "04",
+            "heading": "Your Digital garage",
+            "description": "Manage all your vehicles, availability, and pricing from one clean dashboard."
+          }
+        ],
+        "blockType": "numbered-list"
+      },
+      {
+        "id": "6959605cbb11482f744a4dea",
+        "title": "What our customers say",
+        "showRatings": true,
+        "hideOnMobile": false,
+        "blockName": null,
+        "blockType": "testimonials-section",
+        "selectedTestimonials": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "id": "697115ee22cfaf48c58b3d69",
+        "height": "medium",
+        "hideOnMobile": false,
+        "blockName": null,
+        "blockType": "spacer"
+      },
+      {
+        "id": "695960bdbb11482f744a4deb",
+        "autoplay": false,
+        "autoplayDelay": 5,
+        "hideOnMobile": false,
+        "blockName": null,
+        "blockType": "image-carousel",
+        "images": [
+          4
+        ]
+      },
+      {
+        "id": "695961b0bb11482f744a4ded",
+        "selectedCTA": 1,
+        "hideOnMobile": false,
+        "blockName": null,
+        "blockType": "call-to-action-block"
+      }
+    ],
+    "seo": {
+      "metaTitle": "Register",
+      "metaDescription": "Register Register Register ",
+      "ogTitle": "Register",
+      "ogDescription": "Register Register Register ",
+      "ogImage": null,
+      "keywords": []
+    },
+    "updatedAt": "2026-01-21T18:15:56.114Z",
+    "createdAt": "2026-01-03T18:30:36.261Z"
+  },
+  {
+    "id": 1,
+    "title": "Spoke Hire - classic car",
+    "slug": "home",
+    "status": "published",
+    "publishedAt": "2026-01-03T16:56:26.313Z",
+    "layout": [
+      {
+        "id": "695958ae88fe73bbf6641e62",
+        "selectedCTA": 2,
+        "hideOnMobile": false,
+        "blockName": "Header",
+        "blockType": "call-to-action-block"
+      },
+      {
+        "id": "69594a3a4bcbc77eb73e8bca",
+        "title": "",
+        "displayStyle": "badges",
+        "hideOnMobile": true,
+        "blockName": "Stats",
+        "blockType": "stats-bar",
+        "selectedStats": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "id": "695958da88fe73bbf6641e63",
+        "autoplay": true,
+        "autoplayDelay": 1,
+        "hideOnMobile": false,
+        "blockName": "Images",
+        "blockType": "image-carousel",
+        "images": [
+          7,
+          6,
+          8,
+          9
+        ]
+      },
+      {
+        "id": "69594a3a4bcbc77eb73e8bcb",
+        "title": "FEATURED CARS",
+        "subtitle": "Explore our popular vehicles, available to hire today.",
+        "selectionType": "manual",
+        "limit": 8,
+        "showMobileButton": false,
+        "hideOnMobile": false,
+        "blockName": "FEATURED CARS",
+        "vehicleIds": [
+          {
+            "id": "69595ddcbb11482f744a4dd9",
+            "vehicleId": "cmi1o44dj0006lg04103a9zrn"
+          },
+          {
+            "id": "69595e25bb11482f744a4ddb",
+            "vehicleId": "cmi08ft5n0001ib04f3rooijy"
+          },
+          {
+            "id": "69595e2abb11482f744a4ddc",
+            "vehicleId": "cmhrv236n0001jp04l7dpes85"
+          },
+          {
+            "id": "69595e34bb11482f744a4ddd",
+            "vehicleId": "cmg475ksu03i2v8byr1ws9qia"
+          },
+          {
+            "id": "69595e44bb11482f744a4dde",
+            "vehicleId": "cmg475kp203hqv8by4u37rm86"
+          },
+          {
+            "id": "69595e55bb11482f744a4ddf",
+            "vehicleId": "cmg475k9b03gev8by0dodwzyl"
+          },
+          {
+            "id": "6970b82ce07d90861ddb48c4",
+            "vehicleId": "cmhrv236n0001jp04l7dpes85"
+          }
+        ],
+        "blockType": "featured-vehicles"
+      },
+      {
+        "id": "69594a3a4bcbc77eb73e8bcc",
+        "title": "NEW ARRIVALS",
+        "subtitle": "Check out the latest additions to our roster.",
+        "selectionType": "latest",
+        "limit": 8,
+        "showMobileButton": true,
+        "hideOnMobile": false,
+        "blockName": "NEW ARRIVALS",
+        "vehicleIds": [],
+        "blockType": "featured-vehicles"
+      },
+      {
+        "id": "69594a3a4bcbc77eb73e8bcd",
+        "title": "The UK's Most Trusted Classic Car Supplier",
+        "subtitle": "Discover thousands of vehicles available to hire from action vehicles to wedding cars.",
+        "displayStyle": "grid",
+        "columns": "2",
+        "hideOnMobile": true,
+        "blockName": "The UK's Most Trusted Classic Car Supplier",
+        "blockType": "value-props-section",
+        "selectedProps": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "id": "69595c6fbb11482f744a4dd8",
+        "title": "PROJECT SPOTLIGHT",
+        "showArrows": true,
+        "itemsPerView": 4,
+        "hideOnMobile": false,
+        "blockName": "PROJECT SPOTLIGHT",
+        "blockType": "project-spotlight",
+        "selectedSpotlights": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      {
+        "id": "69594a3a4bcbc77eb73e8bce",
+        "selectedCTA": 1,
+        "hideOnMobile": false,
+        "blockName": "List Your car",
+        "blockType": "call-to-action-block"
+      }
+    ],
+    "seo": {
+      "metaTitle": null,
+      "metaDescription": null,
+      "ogTitle": null,
+      "ogDescription": null,
+      "ogImage": null,
+      "keywords": []
+    },
+    "updatedAt": "2026-01-21T17:49:15.461Z",
+    "createdAt": "2026-01-03T16:56:26.388Z"
+  }
+]

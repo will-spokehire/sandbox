@@ -44,7 +44,7 @@ interface UserVehicleGridProps {
 export function UserVehicleGrid({ vehicles }: UserVehicleGridProps) {
   if (vehicles.length === 0) {
     return (
-      <div className="text-center py-16">
+      <div className="text-center pt-4 md:pt-8">
         <div className="mb-4">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -91,7 +91,7 @@ export function UserVehicleGrid({ vehicles }: UserVehicleGridProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {vehicles.map((vehicle) => (
         <UserVehicleCard key={vehicle.id} vehicle={vehicle} />
       ))}

@@ -102,10 +102,12 @@ export function MediaStep({ vehicleId, onComplete }: MediaStepProps) {
   return (
     <>
       <div className="space-y-6">
-        <div>
-          <h2 className="text-xl md:text-2xl font-bold">Add Photos</h2>
-          <p className="text-sm md:text-base text-muted-foreground mt-1">
-            Upload at least one photo of your vehicle to continue
+        <div className="w-full flex flex-col gap-3 items-center text-center mb-6">
+          <h2 className="text-[32px] md:text-[40px] font-normal leading-[0.95] uppercase text-black tracking-[-0.4px]">
+            Add Photos
+          </h2>
+          <p className="text-[18px] md:text-[22px] font-normal leading-[1.3] text-black tracking-[-0.22px]">
+            Upload images of your vehicle
           </p>
         </div>
 
@@ -129,14 +131,14 @@ export function MediaStep({ vehicleId, onComplete }: MediaStepProps) {
             size="default"
             className="w-full sm:w-auto"
           >
-            {hasImages ? "Continue" : "Upload at least one photo to continue"}
+            {hasImages ? "Continue" : "Upload at least one photo"}
           </Button>
         </div>
       </div>
 
       {/* Success Dialog */}
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-xl">
           <DialogHeader>
             <div className="flex items-center gap-3 mb-2">
               <div className="h-12 w-12 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
@@ -144,23 +146,23 @@ export function MediaStep({ vehicleId, onComplete }: MediaStepProps) {
               </div>
               <DialogTitle className="text-xl md:text-2xl">Vehicle Created Successfully!</DialogTitle>
             </div>
-            <DialogDescription className="text-sm md:text-base">
+            <DialogDescription className="text-base md:text-lg leading-relaxed">
               Your vehicle has been added to your collection. You can now view it, or submit it for admin review to get it published.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="flex-col sm:flex-row gap-2">
+          <DialogFooter className="flex-col sm:flex-row gap-3 mt-2">
             <Button 
               variant="outline" 
               onClick={handleViewVehicle}
               disabled={submitForReviewMutation.isPending}
-              className="w-full sm:w-auto"
+              className="w-full sm:flex-1"
             >
               View Vehicle
             </Button>
             <Button 
               onClick={handleSubmitForReview}
               disabled={submitForReviewMutation.isPending}
-              className="w-full sm:w-auto gap-2"
+              className="w-full sm:flex-1 gap-2"
             >
               <Send className="h-4 w-4" />
               {submitForReviewMutation.isPending ? "Submitting..." : "Submit for Review"}

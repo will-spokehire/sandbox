@@ -51,10 +51,12 @@ export function ProfileStep({ onComplete, defaultValues }: ProfileStepProps) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold">Complete Your Profile</h2>
-        <p className="text-muted-foreground mt-1">
-          Please provide your basic information to create your account.
+      <div className="w-full flex flex-col gap-3 items-center text-center mb-6">
+        <h2 className="text-[32px] md:text-[40px] font-normal leading-[0.95] uppercase text-black tracking-[-0.4px]">
+          Profile Information
+        </h2>
+        <p className="text-[18px] md:text-[22px] font-normal leading-[1.3] text-black tracking-[-0.22px]">
+          Complete your profile details
         </p>
       </div>
 

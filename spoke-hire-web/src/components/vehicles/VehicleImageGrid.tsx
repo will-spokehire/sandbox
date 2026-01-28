@@ -120,7 +120,7 @@ function SortableImageCard({
               e.stopPropagation();
               onEdit(image);
             }}
-            className="rounded bg-primary p-2 text-primary-foreground shadow-lg transition-all hover:bg-primary/90 hover:shadow-xl md:opacity-0 md:shadow-md md:group-hover:opacity-100"
+            className="rounded bg-spoke-grey p-2 text-spoke-black shadow-lg transition-all hover:bg-spoke-grey-light hover:shadow-xl md:opacity-0 md:shadow-md md:group-hover:opacity-100"
             aria-label="Edit image"
           >
             <Pencil className="h-4 w-4" />
@@ -138,7 +138,7 @@ function SortableImageCard({
               e.stopPropagation();
               onDelete(image.id);
             }}
-            className="rounded bg-destructive p-2 text-destructive-foreground shadow-lg transition-all hover:bg-destructive/90 hover:shadow-xl md:opacity-0 md:shadow-md md:group-hover:opacity-100"
+            className="rounded bg-destructive p-2 text-white shadow-lg transition-all hover:bg-destructive/90 hover:shadow-xl md:opacity-0 md:shadow-md md:group-hover:opacity-100"
             aria-label="Delete image"
           >
             <Trash2 className="h-4 w-4" />
@@ -147,7 +147,7 @@ function SortableImageCard({
       )}
 
       {/* Order Badge */}
-      <div className="absolute bottom-2 left-2 z-10 rounded bg-background/80 px-2 py-1 text-xs font-medium pointer-events-none">
+      <div className="absolute bottom-2 left-2 z-10 rounded bg-background/80 px-2 py-1 body-xs font-medium pointer-events-none">
         {image.order}
       </div>
     </div>

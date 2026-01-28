@@ -286,7 +286,7 @@ export function VehicleMediaSection({ vehicle, onSendDeal }: VehicleMediaSection
 
           {/* Image Counter - Show current position */}
           {sortedMedia.length > 1 && (
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 bg-black/60 text-white text-xs md:text-sm px-3 py-1 rounded-full font-medium">
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 bg-black/60 text-white body-xs px-3 py-1 rounded-full font-medium">
               {selectedImageIndex + 1} / {sortedMedia.length}
             </div>
           )}
@@ -334,7 +334,7 @@ export function VehicleMediaSection({ vehicle, onSendDeal }: VehicleMediaSection
                       onLoad={() => setLoadedThumbnails(prev => new Set(prev).add(media.id))}
                     />
                     {media.isPrimary && (
-                      <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded font-medium z-10">
+                      <div className="absolute top-1 left-1 bg-primary text-primary-foreground body-xs px-1.5 py-0.5 rounded font-medium z-10">
                         Primary
                       </div>
                     )}
@@ -342,7 +342,7 @@ export function VehicleMediaSection({ vehicle, onSendDeal }: VehicleMediaSection
                       <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
                         <div className="text-white text-center">
                           <div className="text-2xl font-bold">+{remainingCount}</div>
-                          <div className="text-xs mt-1">more</div>
+                          <div className="body-xs mt-1">more</div>
                         </div>
                       </div>
                     )}

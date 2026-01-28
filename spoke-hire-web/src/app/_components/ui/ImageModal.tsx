@@ -138,7 +138,7 @@ export function ImageModal({
             <p className="text-sm">
               {currentIndex + 1} of {images.length}
             </p>
-            <p className="text-xs text-gray-300 mt-1">
+            <p className="body-xs text-gray-300 mt-1">
               Use arrow keys or click arrows to navigate
             </p>
           </div>

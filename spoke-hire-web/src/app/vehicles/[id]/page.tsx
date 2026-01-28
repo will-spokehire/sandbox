@@ -1,18 +1,18 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/server";
 import { db } from "~/server/db";
 import { PublicVehicleMediaSection } from "./_components/PublicVehicleMediaSection";
 import { PublicVehicleBasicInfo } from "./_components/PublicVehicleBasicInfo";
-import { VehicleDetailBreadcrumbs } from "./_components/VehicleDetailBreadcrumbs";
+import { VehicleDetailHeader } from "./_components/VehicleDetailHeader";
 import { VehicleViewTracker } from "./_components/VehicleViewTracker";
+import { SimilarVehicles } from "./_components/SimilarVehicles";
 import { getAppUrl } from "~/lib/app-url";
-import { LAYOUT_CONSTANTS, TYPOGRAPHY } from "~/lib/design-tokens";
+import { LAYOUT_CONSTANTS, TYPOGRAPHY, VEHICLE_DETAIL } from "~/lib/design-tokens";
 import { cn } from "~/lib/utils";
-import { StandardPageHeader } from "~/app/_components/layouts";
+import { getBlocksByPageSlug } from "~/lib/payload-api";
+import { BlockRenderer } from "~/components/blocks/BlockRenderer";
 
 interface PageProps {
   params: Promise<{
@@ -251,6 +251,9 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
     itemListElement: breadcrumbItems,
   };
 
+  // Fetch static blocks for vehicle page
+  const staticBlocks = await getBlocksByPageSlug('vehicle-page');
+
   return (
     <>
       {/* Analytics Tracking */}
@@ -259,7 +262,7 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
         vehicleName={`${vehicle.make.name} ${vehicle.model.name}`}
         make={vehicle.make.name}
         model={vehicle.model.name}
-        year={vehicle.year}
+        year={Number(vehicle.year)}
       />
       
       {/* JSON-LD Structured Data - Product */}
@@ -275,63 +278,68 @@ export default async function PublicVehicleDetailPage({ params }: PageProps) {
       />
 
       <div className={LAYOUT_CONSTANTS.bgDefault}>
-        {/* Header with Back Button */}
-        <StandardPageHeader
-          variant="detail"
-          title={`${vehicle.year} ${vehicle.make.name} ${vehicle.model.name}`}
-          backButton={
-            <Link href="/vehicles">
-              <Button variant="ghost" size="sm" className="gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                Back to Catalogue
-              </Button>
-            </Link>
-          }
-        />
+        {/* Vehicle Detail Header */}
+        <VehicleDetailHeader vehicle={vehicle} />
 
       {/* Main Content */}
-      <main className={cn(LAYOUT_CONSTANTS.container, LAYOUT_CONSTANTS.pageSpacing)}>
-        {/* Breadcrumbs - Temporarily hidden */}
-        {/* <VehicleDetailBreadcrumbs vehicle={vehicle} /> */}
-
-        {/* Two-Column Layout */}
-        <div className={LAYOUT_CONSTANTS.detailGrid}>
-          {/* Left Column - Media Gallery & Description (2/3 width on desktop) */}
-          <div className={LAYOUT_CONSTANTS.detailGridLeft}>
+      <main className={cn(VEHICLE_DETAIL.containerPadding, "pt-5 md:pt-0")}>
+        {/* Two-Column Layout - Desktop, Single Column - Mobile */}
+        <div className={VEHICLE_DETAIL.detailGrid}>
+          {/* Left Column - Media Gallery (890px width on desktop) */}
+          <div className={VEHICLE_DETAIL.detailGridLeft}>
             <section aria-label="Vehicle gallery">
               <h2 className="sr-only">Gallery</h2>
               <PublicVehicleMediaSection vehicle={vehicle} />
             </section>
-
-            {/* Description Section */}
-            {vehicle.description && (
-              <section aria-label="Vehicle description" className="prose prose-slate dark:prose-invert max-w-none">
-                <h2 className={TYPOGRAPHY.sectionTitle + " mb-4"}>Description</h2>
-                <div className="text-muted-foreground whitespace-pre-line leading-relaxed">
-                  {vehicle.description}
-                </div>
-              </section>
-            )}
           </div>
 
-          {/* Right Column - Details (1/3 width on desktop) */}
-          <div className={LAYOUT_CONSTANTS.detailGridRight}>
-            {/* Make Enquiry Button - Prominent CTA at the top */}
-            <section aria-label="Contact">
-              <Link href={`/enquiry/new?vehicleId=${vehicle.id}`}>
-                <Button className="w-full" size="lg">
-                  Make Enquiry
-                </Button>
-              </Link>
-            </section>
-
-            <section aria-label="Vehicle specifications">
-              <h2 className="sr-only">Specifications</h2>
-              <PublicVehicleBasicInfo vehicle={vehicle} />
-            </section>
+          {/* Right Column - Details (flexible width on desktop) */}
+          <div className={VEHICLE_DETAIL.detailGridRight}>
+            <PublicVehicleBasicInfo vehicle={vehicle} />
           </div>
         </div>
+
+        {/* Full-Width Description Section */}
+        {vehicle.description && (
+          <section 
+            aria-label="Vehicle description" 
+            className={cn(
+              "w-full pt-6 md:pt-[41px]",
+              "flex flex-col gap-3.5"
+            )}
+          >
+            <h2 className={cn(TYPOGRAPHY.h3, "text-black uppercase tracking-[0.72px]")}>
+              Description
+            </h2>
+            <p className={cn(TYPOGRAPHY.bodyMedium, "text-black whitespace-pre-line tracking-[-0.16px]")}>
+              {vehicle.description}
+            </p>
+          </section>
+        )}
+
+        {/* Similar Vehicles Section */}
+        <SimilarVehicles vehicleId={vehicle.id} />
+
       </main>
+
+      {/* Static Blocks Section */}
+      {staticBlocks.length > 0 && (
+        <>
+          {staticBlocks.map((staticBlock) => (
+            <div key={staticBlock.id}>
+              {staticBlock.layout && staticBlock.layout.length > 0 ? (
+                staticBlock.layout.map((block, index) => (
+                  <BlockRenderer
+                    key={`${staticBlock.id}-${block.blockType}-${index}`}
+                    block={block}
+                    index={index}
+                  />
+                ))
+              ) : null}
+            </div>
+          ))}
+        </>
+      )}
       </div>
     </>
   );

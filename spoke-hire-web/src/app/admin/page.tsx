@@ -35,7 +35,7 @@ export default function AdminDashboard() {
               </div>
               <div>
                 <CardTitle className="text-base">Vehicles</CardTitle>
-                <CardDescription className="text-xs">
+                <CardDescription className="body-xs">
                   Manage listings
                 </CardDescription>
               </div>
@@ -58,7 +58,7 @@ export default function AdminDashboard() {
               </div>
               <div>
                 <CardTitle className="text-base">Deals</CardTitle>
-                <CardDescription className="text-xs">
+                <CardDescription className="body-xs">
                   Manage offers
                 </CardDescription>
               </div>
@@ -81,7 +81,7 @@ export default function AdminDashboard() {
               </div>
               <div>
                 <CardTitle className="text-base">Makes</CardTitle>
-                <CardDescription className="text-xs">
+                <CardDescription className="body-xs">
                   Manage brands
                 </CardDescription>
               </div>
@@ -104,7 +104,7 @@ export default function AdminDashboard() {
               </div>
               <div>
                 <CardTitle className="text-base">Models</CardTitle>
-                <CardDescription className="text-xs">
+                <CardDescription className="body-xs">
                   Manage models
                 </CardDescription>
               </div>

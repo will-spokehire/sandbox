@@ -5,10 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '~/components/ui/button';
 import { Checkbox } from '~/components/ui/checkbox';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
-import { Separator } from '~/components/ui/separator';
-import { Alert, AlertDescription } from '~/components/ui/alert';
-import { Shield, FileText, Lock } from 'lucide-react';
 import { api } from '~/trpc/react';
 import { toast } from 'sonner';
 import { useAuth } from '~/providers/auth-provider';
@@ -87,47 +83,38 @@ export function AcceptTermsForm() {
   };
 
   return (
-    <Card className="w-full max-w-2xl">
-      <CardHeader className="space-y-1">
-        <div className="flex items-center gap-2">
-          <Shield className="h-6 w-6 text-primary" />
-          <CardTitle className="text-2xl font-bold">Legal Agreement</CardTitle>
-        </div>
-        <CardDescription>
+    <div className="w-full max-w-[808px] flex flex-col items-center gap-8 md:gap-[80px]">
+      {/* Title Section */}
+      <div className="w-full flex flex-col items-center gap-[11px] text-center">
+        <h1 className="text-[48px] md:text-[96px] font-normal leading-[0.95] uppercase text-black tracking-normal">
+          Legal agreement
+        </h1>
+        <p className="body-medium font-normal leading-[1.4] text-black tracking-[-0.18px]">
           Please review and accept our terms to continue using SpokeHire
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Alert className="mb-6">
-          <FileText className="h-4 w-4" />
-          <AlertDescription>
-            By continuing, you agree to our Terms & Conditions and Privacy Policy. 
-            You can review the full documents by clicking the links below.
-          </AlertDescription>
-        </Alert>
+        </p>
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Form Section */}
+      <div className="w-full max-w-[480px] flex flex-col items-start gap-10">
+        <form onSubmit={handleSubmit} className="w-full flex flex-col gap-10">
           {/* Terms & Conditions Section */}
-          <div className="space-y-4">
-            <div className="flex items-start gap-3 p-4 border rounded-lg bg-muted/50">
-              <FileText className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-              <div className="flex-1 space-y-2">
-                <h3 className="font-semibold text-foreground">Terms & Conditions</h3>
-                <p className="text-sm text-muted-foreground">
-                  Our terms outline the rules and regulations for the use of SpokeHire's platform, 
-                  including vehicle listings, bookings, and user responsibilities.
-                </p>
-                <Link 
-                  href="/terms" 
-                  target="_blank"
-                  className="text-sm text-primary hover:underline inline-flex items-center gap-1"
-                >
-                  Read full Terms & Conditions →
-                </Link>
-              </div>
+          <div className="w-full flex flex-col gap-5">
+            <div className="w-full flex flex-col gap-2 p-4">
+              <h3 className="text-base font-medium text-black">Terms & Conditions</h3>
+              <p className="text-base font-normal leading-[1.4] text-black/50">
+                Our terms outline the rules and regulations for the use of SpokeHire's platform, 
+                including vehicle listings, bookings, and user responsibilities.
+              </p>
+              <Link 
+                href="/terms-of-service" 
+                target="_blank"
+                className="text-base font-normal leading-[1.4] text-black underline decoration-solid underline-offset-auto inline-flex items-center gap-1"
+              >
+                Read full Terms & Conditions →
+              </Link>
             </div>
 
-            <div className="flex items-start space-x-3">
+            <div className="flex items-start gap-3">
               <Checkbox
                 id="terms"
                 checked={termsAccepted}
@@ -136,36 +123,36 @@ export function AcceptTermsForm() {
               />
               <label
                 htmlFor="terms"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                className="text-base font-medium leading-[1.4] text-black cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
                 I have read and agree to the Terms & Conditions
               </label>
             </div>
           </div>
 
-          <Separator />
+          {/* Divider */}
+          <div className="w-full flex items-center justify-center h-5">
+            <div className="flex-1 h-px bg-black" />
+          </div>
 
           {/* Privacy Policy Section */}
-          <div className="space-y-4">
-            <div className="flex items-start gap-3 p-4 border rounded-lg bg-muted/50">
-              <Lock className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-              <div className="flex-1 space-y-2">
-                <h3 className="font-semibold text-foreground">Privacy Policy</h3>
-                <p className="text-sm text-muted-foreground">
-                  Our privacy policy explains how we collect, use, and protect your personal information 
-                  when you use our platform.
-                </p>
-                <Link 
-                  href="/privacy" 
-                  target="_blank"
-                  className="text-sm text-primary hover:underline inline-flex items-center gap-1"
-                >
-                  Read full Privacy Policy →
-                </Link>
-              </div>
+          <div className="w-full flex flex-col gap-5">
+            <div className="w-full flex flex-col gap-2 p-4">
+              <h3 className="text-base font-medium text-black">Privacy Policy</h3>
+              <p className="text-base font-normal leading-[1.4] text-black/50">
+                Our privacy policy explains how we collect, use, and protect your personal information 
+                when you use our platform.
+              </p>
+              <Link 
+                href="/privacy-policy" 
+                target="_blank"
+                className="text-base font-normal leading-[1.4] text-black underline decoration-solid underline-offset-auto inline-flex items-center gap-1"
+              >
+                Read full Privacy Policy →
+              </Link>
             </div>
 
-            <div className="flex items-start space-x-3">
+            <div className="flex items-start gap-3">
               <Checkbox
                 id="privacy"
                 checked={privacyPolicyAccepted}
@@ -174,31 +161,30 @@ export function AcceptTermsForm() {
               />
               <label
                 htmlFor="privacy"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                className="text-base font-medium leading-[1.4] text-black cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
                 I have read and agree to the Privacy Policy
               </label>
             </div>
           </div>
 
-          <Separator />
-
+          {/* Submit Button */}
           <Button
             type="submit"
             className="w-full"
-            size="lg"
             disabled={isLoading || !termsAccepted || !privacyPolicyAccepted}
           >
-            {isLoading ? 'Accepting...' : 'Accept and Continue'}
+            {isLoading ? 'Accepting...' : 'accept and continue'}
           </Button>
 
-          <p className="text-xs text-center text-muted-foreground">
+          {/* Footer Text */}
+          <p className="text-base font-normal leading-[1.4] text-center text-black/50">
             By clicking "Accept and Continue", you acknowledge that you have read and understood 
             both documents and agree to be bound by their terms.
           </p>
         </form>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 

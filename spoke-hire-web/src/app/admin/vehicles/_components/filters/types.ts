@@ -18,7 +18,9 @@ export interface MultiSelectFilterProps {
   onChange: (ids: string[]) => void;
   renderOption?: (option: FilterOption, selected: boolean) => React.ReactNode;
   searchPlaceholder?: string;
+  enableSearch?: boolean;
   className?: string;
+  onClear?: () => void;
 }
 
 export interface SingleSelectFilterProps {

@@ -24,8 +24,7 @@ const listPublicVehiclesInputSchema = z.object({
   makeIds: z.array(z.string()).optional(),
   modelId: z.string().optional(),
   collectionIds: z.array(z.string()).optional(),
-  yearFrom: z.string().optional(),
-  yearTo: z.string().optional(),
+  decadeIds: z.array(z.string()).optional(),
   
   // Location filters
   countryIds: z.array(z.string()).optional(),
@@ -52,6 +51,10 @@ const getPublicVehicleByIdInputSchema = z.object({
   id: z.string(),
 });
 
+const getSimilarVehiclesInputSchema = z.object({
+  vehicleId: z.string(),
+});
+
 // ============================================================================
 // Router Definition
 // ============================================================================
@@ -67,9 +70,40 @@ export const publicVehicleRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const service = ServiceFactory.createVehicleService(ctx.db);
       
+      // Convert decadeIds to yearFrom/yearTo if provided
+      let yearFrom: string | undefined;
+      let yearTo: string | undefined;
+      
+      if (input.decadeIds && input.decadeIds.length > 0) {
+        const currentYear = new Date().getFullYear();
+        const startDecade = 1920;
+        const decades: Array<{ id: string; yearFrom: number; yearTo: number }> = [];
+        
+        // Build decades array
+        for (let year = startDecade; year <= currentYear; year += 10) {
+          const decadeEnd = Math.min(year + 9, currentYear);
+          decades.push({
+            id: `${year}s`,
+            yearFrom: year,
+            yearTo: decadeEnd,
+          });
+        }
+        
+        // Find selected decades and calculate range
+        const selectedDecades = decades.filter((d) => input.decadeIds!.includes(d.id));
+        if (selectedDecades.length > 0) {
+          const yearFroms = selectedDecades.map((d) => d.yearFrom);
+          const yearTos = selectedDecades.map((d) => d.yearTo);
+          yearFrom = String(Math.min(...yearFroms));
+          yearTo = String(Math.max(...yearTos));
+        }
+      }
+      
       // Force status to PUBLISHED for public access
       const result = await service.listVehicles({
         ...input,
+        yearFrom,
+        yearTo,
         status: "PUBLISHED", // Override - only show published vehicles
       });
 
@@ -165,8 +199,7 @@ export const publicVehicleRouter = createTRPCRouter({
         makeIds: z.array(z.string()).optional(),
         modelId: z.string().optional(),
         collectionIds: z.array(z.string()).optional(),
-        yearFrom: z.string().optional(),
-        yearTo: z.string().optional(),
+        decadeIds: z.array(z.string()).optional(),
         countryIds: z.array(z.string()).optional(),
         counties: z.array(z.string()).optional(),
       }).optional()
@@ -192,8 +225,38 @@ export const publicVehicleRouter = createTRPCRouter({
         };
       }
 
+      // Convert decadeIds to yearFrom/yearTo if provided for filter options
+      let filterInput = input;
+      if (input.decadeIds && input.decadeIds.length > 0) {
+        const currentYear = new Date().getFullYear();
+        const startDecade = 1920;
+        const decades: Array<{ id: string; yearFrom: number; yearTo: number }> = [];
+        
+        // Build decades array
+        for (let year = startDecade; year <= currentYear; year += 10) {
+          const decadeEnd = Math.min(year + 9, currentYear);
+          decades.push({
+            id: `${year}s`,
+            yearFrom: year,
+            yearTo: decadeEnd,
+          });
+        }
+        
+        // Find selected decades and calculate range
+        const selectedDecades = decades.filter((d) => input.decadeIds!.includes(d.id));
+        if (selectedDecades.length > 0) {
+          const yearFroms = selectedDecades.map((d) => d.yearFrom);
+          const yearTos = selectedDecades.map((d) => d.yearTo);
+          filterInput = {
+            ...input,
+            yearFrom: String(Math.min(...yearFroms)),
+            yearTo: String(Math.max(...yearTos)),
+          };
+        }
+      }
+      
       // Get dynamic filter options based on current filters
-      const options = await repository.getPublicFilterOptions(input);
+      const options = await repository.getPublicFilterOptions(filterInput);
 
       return {
         makes: options.makes as Array<{ id: string; name: string }>,
@@ -215,6 +278,53 @@ export const publicVehicleRouter = createTRPCRouter({
       const models = await repository.getModelsByMakeWithPublishedVehicles(input.makeId);
       
       return models as Array<{ id: string; name: string }>;
+    }),
+
+  /**
+   * Get similar vehicles for a given vehicle
+   * Returns up to 6 vehicles that match by same make OR same decade
+   * Public endpoint - no authentication required
+   * Only returns PUBLISHED vehicles
+   */
+  getSimilar: publicProcedure
+    .input(getSimilarVehiclesInputSchema)
+    .query(async ({ ctx, input }) => {
+      try {
+        const service = ServiceFactory.createSimilarVehiclesService(ctx.db);
+        const vehicles = await service.getSimilarVehicles(input.vehicleId);
+
+        // Map to exclude sensitive owner information (same structure as list endpoint)
+        const publicVehicles = vehicles.map((vehicle) => ({
+          id: vehicle.id,
+          name: vehicle.name,
+          year: vehicle.year,
+          registration: vehicle.registration,
+          status: vehicle.status,
+          make: vehicle.make,
+          model: vehicle.model,
+          media: vehicle.media,
+          collections: vehicle.collections?.map((vc) => ({
+            id: vc.collection.id,
+            name: vc.collection.name,
+          })),
+          // Owner location only (no contact info)
+          owner: {
+            id: vehicle.owner.id,
+            city: vehicle.owner.city,
+            county: vehicle.owner.county,
+            postcode: vehicle.owner.postcode,
+            latitude: vehicle.owner.latitude,
+            longitude: vehicle.owner.longitude,
+            country: vehicle.owner.country,
+          },
+        }));
+
+        return publicVehicles;
+      } catch (error) {
+        // If vehicle not found or any error, return empty array
+        console.error("Error fetching similar vehicles:", error);
+        return [];
+      }
     }),
 });
 

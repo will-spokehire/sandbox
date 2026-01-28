@@ -209,10 +209,10 @@ export function CreateEditDealDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-4xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{dealId ? "Edit Deal" : "Create New Deal"}</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-xl md:text-2xl">{dealId ? "Edit Deal" : "Create New Deal"}</DialogTitle>
+          <DialogDescription className="text-base md:text-lg leading-relaxed">
             {dealId 
               ? "Update the deal details below."
               : "Create a deal. You can add vehicles later from the vehicles page."
@@ -319,7 +319,7 @@ export function CreateEditDealDialog({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="h-auto py-0 px-2 text-xs"
+                  className="h-auto py-0 px-2 body-xs"
                   onClick={() => setShowCreateContactDialog(true)}
                   disabled={isSubmitting}
                 >
@@ -333,7 +333,7 @@ export function CreateEditDealDialog({
                 disabled={isSubmitting}
                 placeholder="Select client contact..."
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="body-xs text-muted-foreground">
                 The person/company requesting this job
               </p>
             </div>
@@ -345,7 +345,7 @@ export function CreateEditDealDialog({
           <div className="space-y-4">
             <div>
               <h3 className="text-sm font-medium">Financial Information</h3>
-              <p className="text-xs text-muted-foreground mt-1">Optional - you can add this later</p>
+              <p className="body-xs text-muted-foreground mt-1">Optional - you can add this later</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -426,7 +426,7 @@ export function CreateEditDealDialog({
               rows={3}
               className="break-all"
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="body-xs text-muted-foreground">
               For internal use only (not sent to clients)
             </p>
           </div>

@@ -221,7 +221,7 @@ export function VehicleSpecificationFields({
                 ))}
               </RadioGroup>
             </FormControl>
-            <FormDescription className="text-xs">
+            <FormDescription className="body-xs">
               Current physical condition of the vehicle
             </FormDescription>
             <FormMessage />

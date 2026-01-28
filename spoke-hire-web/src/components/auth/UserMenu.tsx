@@ -12,7 +12,7 @@ import {
 } from '~/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '~/components/ui/avatar';
 import { Button } from '~/components/ui/button';
-import { LogOut, User, Shield } from 'lucide-react';
+import { LogOut, User, Car } from 'lucide-react';
 
 /**
  * User Menu Component
@@ -45,40 +45,41 @@ export function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+        <Button variant="ghost" className="relative h-10 w-10 rounded-full focus-visible:ring-0 hover:bg-transparent">
           <Avatar className="h-10 w-10">
-            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
+            <AvatarFallback className="bg-spoke-grey-light text-spoke-black font-medium text-sm tracking-wide">
               {initials}
             </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
+      <DropdownMenuContent className="w-56 font-degular" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{displayName}</p>
-            <p className="text-xs leading-none text-muted-foreground">
+            <p className="text-base font-medium leading-none">{displayName}</p>
+            <p className="body-small leading-none text-muted-foreground">
               {user.email}
             </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem 
-          className="cursor-pointer"
+          className="cursor-pointer text-base"
           onClick={() => router.push('/user/profile')}
         >
           <User className="mr-2 h-4 w-4" />
           <span>Profile</span>
         </DropdownMenuItem>
-        {user.userType === 'ADMIN' && (
-          <DropdownMenuItem disabled className="cursor-default">
-            <Shield className="mr-2 h-4 w-4" />
-            <span className="font-semibold">Admin Access</span>
-          </DropdownMenuItem>
-        )}
+        <DropdownMenuItem 
+          className="cursor-pointer text-base"
+          onClick={() => router.push('/user/vehicles')}
+        >
+          <Car className="mr-2 h-4 w-4" />
+          <span>My Vehicles</span>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          className="text-red-600 dark:text-red-400 cursor-pointer"
+          className="text-red-600 dark:text-red-400 cursor-pointer text-base"
           onClick={async () => {
             await signOut();
           }}

@@ -3,14 +3,14 @@ import { PublicVehicleFiltersProvider } from "~/contexts/PublicVehicleFiltersCon
 import PublicVehiclesPageContent from "./page-content";
 import { getAppUrl } from "~/lib/app-url";
 import { api } from "~/trpc/server";
+import { getSiteSettings, getDefaultOgImage } from "~/lib/seo";
 
 interface PageProps {
   searchParams: Promise<{
     makeIds?: string;
     modelId?: string;
     collectionIds?: string;
-    yearFrom?: string;
-    yearTo?: string;
+    decadeIds?: string;
     countryIds?: string;
     counties?: string;
     page?: string;
@@ -25,6 +25,10 @@ interface PageProps {
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
   const params = await searchParams;
   const appUrl = getAppUrl();
+  
+  // Fetch site settings for default OG image
+  const siteSettings = await getSiteSettings();
+  const defaultOgImage = getDefaultOgImage(siteSettings);
   
   // Build dynamic title based on filters
   let title = "Browse Classic & Vintage Vehicles for Hire | SpokeHire";
@@ -66,11 +70,13 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
       type: "website",
       siteName: "SpokeHire",
       url: `${appUrl}/vehicles`,
+      images: defaultOgImage ? [{ url: defaultOgImage }] : undefined,
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
+      images: defaultOgImage ? [defaultOgImage] : undefined,
     },
     alternates: {
       canonical: "/vehicles",
@@ -91,6 +97,7 @@ export default async function PublicVehiclesPage({ searchParams }: PageProps) {
   // Parse filter parameters from URL
   const makeIds = params.makeIds?.split(",").filter(Boolean);
   const collectionIds = params.collectionIds?.split(",").filter(Boolean);
+  const decadeIds = params.decadeIds?.split(",").filter(Boolean);
   const countryIds = params.countryIds?.split(",").filter(Boolean);
   const counties = params.counties?.split(",").filter(Boolean);
   const page = params.page ? parseInt(params.page, 10) : 1;
@@ -109,8 +116,7 @@ export default async function PublicVehiclesPage({ searchParams }: PageProps) {
         makeIds: makeIds && makeIds.length > 0 ? makeIds : undefined,
         modelId: params.modelId,
         collectionIds: collectionIds && collectionIds.length > 0 ? collectionIds : undefined,
-        yearFrom: params.yearFrom,
-        yearTo: params.yearTo,
+        decadeIds: decadeIds && decadeIds.length > 0 ? decadeIds : undefined,
         countryIds: countryIds && countryIds.length > 0 ? countryIds : undefined,
         counties: counties && counties.length > 0 ? counties : undefined,
         sortBy: (params.sortBy as "name" | "createdAt" | "updatedAt" | "year" | "distance") ?? "createdAt",
@@ -118,13 +124,12 @@ export default async function PublicVehiclesPage({ searchParams }: PageProps) {
         includeTotalCount: true,
       }),
       // Fetch filter options if there are active filters
-      (makeIds?.length || params.modelId || collectionIds?.length || params.yearFrom || countryIds?.length || counties?.length)
+      (makeIds?.length || params.modelId || collectionIds?.length || decadeIds?.length || countryIds?.length || counties?.length)
         ? api.publicVehicle.getFilterOptions({
             makeIds,
             modelId: params.modelId,
             collectionIds,
-            yearFrom: params.yearFrom,
-            yearTo: params.yearTo,
+            decadeIds,
             countryIds,
             counties,
           })
@@ -142,22 +147,12 @@ export default async function PublicVehiclesPage({ searchParams }: PageProps) {
     filterOptions = null;
   }
 
-  // Generate H1 and H2 titles server-side
-  const titles = generatePageTitles({
-    makeIds,
-    modelId: params.modelId,
-    collectionIds,
-    yearFrom: params.yearFrom,
-    countryIds,
-    counties,
-  }, filterOptions);
-
   // Generate JSON-LD structured data for catalogue page with ItemList
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: titles.h1,
-    description: titles.h2,
+    name: "Explore Classic Cars for Hire",
+    description: "Discover thousands of vehicles available to hire from action vehicles to wedding cars.",
     url: `${appUrl}/vehicles`,
     isPartOf: {
       "@type": "WebSite",
@@ -191,7 +186,6 @@ export default async function PublicVehiclesPage({ searchParams }: PageProps) {
       <PublicVehicleFiltersProvider>
         <PublicVehiclesPageContent 
           initialData={initialData} 
-          serverTitles={titles}
           serverFilterOptions={filterOptions}
         />
       </PublicVehicleFiltersProvider>
@@ -199,120 +193,3 @@ export default async function PublicVehiclesPage({ searchParams }: PageProps) {
   );
 }
 
-/**
- * Generate page titles server-side based on filters
- */
-function generatePageTitles(
-  filters: {
-    makeIds?: string[];
-    modelId?: string;
-    collectionIds?: string[];
-    yearFrom?: string;
-    countryIds?: string[];
-    counties?: string[];
-  },
-  filterOptions: any
-) {
-  let h1 = "";
-  let h2 = "";
-
-  // ========================================
-  // H1: Geography + Cars + "for Hire"
-  // ========================================
-  const h1Parts: string[] = [];
-
-  // 1. Vehicle/Make/Model info
-  if (filters.makeIds && filters.makeIds.length > 0 && filterOptions?.makes) {
-    const makes = filterOptions.makes.filter((m: any) => filters.makeIds?.includes(m.id));
-    const makeNames = makes.map((m: any) => m.name);
-    
-    if (makeNames.length > 0) {
-      if (filters.modelId && filterOptions?.models) {
-        // Make + Model
-        const model = filterOptions.models.find((m: any) => m.id === filters.modelId);
-        if (model) {
-          h1Parts.push(`${makeNames.join(" & ")} ${model.name}`);
-        } else {
-          h1Parts.push(makeNames.join(" & "));
-        }
-      } else {
-        // Just Make(s)
-        h1Parts.push(makeNames.join(" & "));
-      }
-    }
-  } else {
-    // No specific make - use generic
-    h1Parts.push("Classic Vehicles");
-  }
-
-  // 2. Add "for Hire"
-  h1Parts.push("for Hire");
-
-  // 3. Add Location (Geography)
-  const locationParts: string[] = [];
-  
-  if (filters.counties && filters.counties.length > 0) {
-    locationParts.push(filters.counties.join(", "));
-  }
-  
-  if (filters.countryIds && filters.countryIds.length > 0 && filterOptions?.countries) {
-    const countries = filterOptions.countries.filter((c: any) => filters.countryIds?.includes(c.id));
-    const countryNames = countries.map((c: any) => c.name);
-    if (countryNames.length > 0) {
-      locationParts.push(countryNames.join(", "));
-    }
-  }
-
-  if (locationParts.length > 0) {
-    h1Parts.push(`in ${locationParts.join(", ")}`);
-  }
-
-  h1 = h1Parts.join(" ");
-
-  // ========================================
-  // H2: SEO-friendly subtitle/description
-  // ========================================
-  const collectionNames: string[] = [];
-  let hasDecade = false;
-
-  // 1. Collections/Tags
-  if (filters.collectionIds && filters.collectionIds.length > 0 && filterOptions?.collections) {
-    const collections = filterOptions.collections.filter((c: any) => filters.collectionIds?.includes(c.id));
-    collectionNames.push(...collections.map((c: any) => c.name));
-  }
-
-  // 2. Decade
-  if (filters.yearFrom) {
-    hasDecade = true;
-  }
-
-  // Build H2 based on what filters are active
-  if (collectionNames.length > 0 && hasDecade) {
-    h2 = `Explore our ${collectionNames.join(" & ")} vehicles from the ${filters.yearFrom}s`;
-  } else if (collectionNames.length > 0) {
-    h2 = `Browse our ${collectionNames.join(" & ")} vehicles`;
-  } else if (hasDecade) {
-    h2 = `Discover vintage vehicles from the ${filters.yearFrom}s`;
-  } else if (filters.makeIds && filters.makeIds.length > 0 && filterOptions?.makes) {
-    const makes = filterOptions.makes.filter((m: any) => filters.makeIds?.includes(m.id));
-    const makeNames = makes.map((m: any) => m.name);
-    if (makeNames.length > 0) {
-      if (filters.modelId && filterOptions?.models) {
-        const model = filterOptions.models.find((m: any) => m.id === filters.modelId);
-        h2 = `Premium ${makeNames.join(" & ")} ${model?.name ?? ''} available for your special occasion`;
-      } else if (makeNames.length === 1) {
-        h2 = `Discover our collection of ${makeNames[0]} vehicles`;
-      } else {
-        h2 = `Premium ${makeNames.join(" & ")} vehicles available`;
-      }
-    } else {
-      h2 = "Discover meticulously maintained classic and vintage vehicles";
-    }
-  } else if (locationParts.length > 0) {
-    h2 = "Classic and vintage vehicles available in your area";
-  } else {
-    h2 = "Discover meticulously maintained classic and vintage vehicles for your special occasions";
-  }
-
-  return { h1, h2 };
-}

@@ -274,7 +274,7 @@ export function SendDealToVehiclesDialog({
                               )}
                             </div>
                             {showNewStats && !isCalculating && (newVehicleCount === 0 || newOwnerCount === 0) && (
-                              <p className="text-xs text-muted-foreground mt-2">
+                              <p className="body-xs text-muted-foreground mt-2">
                                 {newVehicleCount === 0 
                                   ? "All selected vehicles are already in this deal"
                                   : "All vehicle owners have already received this deal"}

@@ -1,7 +1,6 @@
 import "~/styles/globals.css";
 
 import { type Metadata } from "next";
-import { Geist } from "next/font/google";
 import Script from "next/script";
 import { Suspense } from "react";
 
@@ -12,17 +11,32 @@ import { getAppUrl } from "~/lib/app-url";
 import { AnalyticsProvider } from "~/components/analytics/AnalyticsProvider";
 import { CookieBanner } from "~/components/analytics/CookieBanner";
 import { env } from "~/env";
+import { MaxWidthWrapper } from "~/components/layout/MaxWidthWrapper";
+import {
+  getSiteSettings,
+  getFaviconUrl,
+  getLogoUrl,
+  getDefaultDescription,
+  SEO_CONSTANTS,
+} from "~/lib/seo";
 
-export const metadata: Metadata = {
-  title: "SpokeHire - Classic & Vintage Vehicle Hire",
-  description: "SpokeHire connects you with meticulously maintained classic and vintage vehicles for your special occasions.",
-  icons: [{ rel: "icon", url: "/spoke-hire-logo-1.png" }],
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const siteSettings = await getSiteSettings();
+  const appUrl = getAppUrl();
 
-const geist = Geist({
-  subsets: ["latin"],
-  variable: "--font-geist-sans",
-});
+  return {
+    title: siteSettings?.siteName
+      ? `${siteSettings.siteName} - Classic & Vintage Vehicle Hire`
+      : SEO_CONSTANTS.defaultTitle,
+    description:
+      getDefaultDescription(siteSettings) ?? SEO_CONSTANTS.defaultDescription,
+    icons: {
+      icon: getFaviconUrl(siteSettings),
+      apple: getLogoUrl(siteSettings),
+    },
+    metadataBase: new URL(appUrl),
+  };
+}
 
 export default function RootLayout({
   children,
@@ -48,7 +62,7 @@ export default function RootLayout({
   };
   
   return (
-    <html lang="en" className={`${geist.variable}`}>
+    <html lang="en">
       <head>
         {/* Organization Schema */}
         <script
@@ -84,7 +98,9 @@ export default function RootLayout({
           <AuthProvider>
             <Suspense fallback={null}>
               <AnalyticsProvider>
-                {children}
+                <MaxWidthWrapper>
+                  {children}
+                </MaxWidthWrapper>
                 <Toaster />
                 <CookieBanner />
               </AnalyticsProvider>

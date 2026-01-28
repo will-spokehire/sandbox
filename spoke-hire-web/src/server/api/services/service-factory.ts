@@ -24,6 +24,7 @@ import { AIVehicleGeneratorService } from "./ai-vehicle-generator.service";
 import { MakeModelApprovalService } from "./make-model-approval.service";
 import { MakeService } from "./make.service";
 import { ModelService } from "./model.service";
+import { SimilarVehiclesService } from "./similar-vehicles.service";
 import { VehicleRepository } from "../repositories/vehicle.repository";
 import { UserRepository } from "../repositories/user.repository";
 import { LookupRepository } from "../repositories/lookup.repository";
@@ -125,6 +126,13 @@ export class ServiceFactory {
    */
   static createVehicleNameUpdaterService(db: DbClient): VehicleNameUpdaterService {
     return new VehicleNameUpdaterService(db, cacheService);
+  }
+
+  /**
+   * Create SimilarVehiclesService
+   */
+  static createSimilarVehiclesService(db: DbClient): SimilarVehiclesService {
+    return new SimilarVehiclesService(db);
   }
 
   /**

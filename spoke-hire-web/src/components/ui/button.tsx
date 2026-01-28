@@ -4,54 +4,154 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "~/lib/utils"
 
+/**
+ * Loading spinner component for button loading state
+ */
+function LoadingSpinner({ className }: { className?: string }) {
+  return (
+    <svg
+      className={cn("animate-spin", className)}
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      />
+    </svg>
+  )
+}
+
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all cursor-pointer disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-spoke-black/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive:
-          "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+        // Brand primary - solid black background (replaces old default)
+        default:
+          "bg-spoke-black text-spoke-white border border-spoke-black font-helvetica uppercase tracking-normal cursor-pointer hover:bg-spoke-white hover:text-spoke-black hover:border-spoke-black",
+        // Brand outline - transparent with black border (replaces old outline)
         outline:
-          "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+          "bg-transparent text-spoke-black border border-spoke-black font-helvetica uppercase tracking-normal hover:bg-spoke-black hover:text-spoke-white",
+        // Destructive - for dangerous actions
+        destructive:
+          "bg-destructive text-white border border-destructive hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+        // Secondary - subtle background
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "bg-spoke-grey text-spoke-black border border-spoke-grey font-helvetica uppercase tracking-normal hover:bg-spoke-grey-light",
+        // Ghost - no background until hover
         ghost:
-          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
-        link: "text-primary underline-offset-4 hover:underline",
+          "text-spoke-black hover:bg-spoke-grey font-helvetica uppercase tracking-normal",
+        // Link - text-only with underline
+        link: "text-spoke-black underline-offset-4 hover:underline font-degular",
       },
       size: {
-        default: "h-9 px-4 py-2 has-[>svg]:px-3",
-        sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
-        lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
-        icon: "size-9",
+        // Default size matching Figma (padding: 11px 23px)
+        default: "h-auto px-[23px] py-[11px] text-lg",
+        // Small size for compact UI
+        sm: "h-auto px-4 py-2 text-sm",
+        // Large size for hero CTAs
+        lg: "h-auto px-8 py-3 text-xl",
+        // Icon-only button
+        icon: "size-10 p-0",
+      },
+      fullWidth: {
+        true: "w-full",
+        false: "",
       },
     },
     defaultVariants: {
       variant: "default",
       size: "default",
+      fullWidth: false,
     },
   }
 )
 
+export interface ButtonProps
+  extends React.ComponentProps<"button">,
+    VariantProps<typeof buttonVariants> {
+  /** Render as a child component (e.g., Link) */
+  asChild?: boolean
+  /** Show loading spinner and disable interactions */
+  loading?: boolean
+  /** Text to show when loading (defaults to children) */
+  loadingText?: string
+}
+
+/**
+ * Button component with brand styling and loading state
+ *
+ * All variants now use the SpokeHire brand design system:
+ * - default: Solid black background, white text, uppercase
+ * - outline: Transparent with black border, fills on hover
+ * - secondary: Grey background
+ * - ghost: No background until hover
+ * - link: Text-only with underline on hover
+ * - destructive: Red for dangerous actions
+ *
+ * @example
+ * // Primary button (solid black)
+ * <Button>Get Started</Button>
+ *
+ * @example
+ * // Outline button
+ * <Button variant="outline">Learn More</Button>
+ *
+ * @example
+ * // With loading state
+ * <Button loading>Submitting...</Button>
+ *
+ * @example
+ * // Full width button
+ * <Button fullWidth>Continue</Button>
+ *
+ * @example
+ * // Small size
+ * <Button size="sm">Small Button</Button>
+ */
 function Button({
   className,
   variant,
   size,
+  fullWidth,
   asChild = false,
+  loading = false,
+  loadingText,
+  children,
+  disabled,
   ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean
-  }) {
+}: ButtonProps) {
   const Comp = asChild ? Slot : "button"
 
   return (
     <Comp
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size, fullWidth, className }))}
+      disabled={Boolean(disabled) || loading}
+      aria-busy={loading}
       {...props}
-    />
+    >
+      {loading ? (
+        <>
+          <LoadingSpinner className="size-4" />
+          <span>{loadingText ?? children}</span>
+        </>
+      ) : (
+        children
+      )}
+    </Comp>
   )
 }
 

@@ -65,7 +65,7 @@ export function ErrorState({
           )}
 
           {(error as any)?.digest && (
-            <p className="text-xs text-muted-foreground text-center">
+            <p className="body-xs text-muted-foreground text-center">
               Error ID: {(error as any).digest}
             </p>
           )}

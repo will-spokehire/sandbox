@@ -102,7 +102,7 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="min-h-screen bg-spoke-white">
       {/* Desktop Sidebar */}
       <aside className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
         <div className="flex flex-col flex-grow bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 overflow-y-auto">
@@ -116,7 +116,7 @@ export default function AdminLayout({
                 <h1 className="text-lg font-bold text-slate-900 dark:text-slate-50">
                   SpokeHire
                 </h1>
-                <p className="text-xs text-slate-600 dark:text-slate-400">
+                <p className="body-xs text-slate-600 dark:text-slate-400">
                   Admin Portal
                 </p>
               </div>
@@ -135,7 +135,7 @@ export default function AdminLayout({
                 <p className="text-sm font-medium text-slate-900 dark:text-slate-50 truncate">
                   {user.firstName ?? user.email}
                 </p>
-                <p className="text-xs text-slate-600 dark:text-slate-400 truncate">
+                <p className="body-xs text-slate-600 dark:text-slate-400 truncate">
                   {user.email}
                 </p>
               </div>
@@ -192,7 +192,7 @@ export default function AdminLayout({
                             <p className="text-sm font-medium truncate">
                               {user.firstName ?? user.email}
                             </p>
-                            <p className="text-xs text-muted-foreground truncate">
+                            <p className="body-xs text-muted-foreground truncate">
                               {user.email}
                             </p>
                           </div>

@@ -398,6 +398,7 @@ async function setupSteeringTypes(): Promise<Record<string, string>> {
   const steeringTypes = [
     { name: 'Right Hand Drive', code: 'RHD', description: 'Steering wheel on the right side' },
     { name: 'Left Hand Drive', code: 'LHD', description: 'Steering wheel on the left side' },
+    { name: 'Single Seated', code: 'SS', description: 'Motorbikes and scooters without a steering wheel' },
   ];
   
   const steeringMap: Record<string, string> = {};

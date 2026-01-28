@@ -73,9 +73,10 @@ export function PublicVehicleBreadcrumbs({ serverFilterOptions }: PublicVehicleB
   }
 
   // 5. Decade
-  if (filters.yearFrom) {
+  if (filters.decadeIds && filters.decadeIds.length > 0) {
+    const decadeLabels = filters.decadeIds.map(id => id); // IDs are already in format "1980s"
     segments.push({
-      label: `${filters.yearFrom}s`,
+      label: decadeLabels.join(", "),
       level: 'decade',
     });
   }
@@ -114,8 +115,7 @@ export function PublicVehicleBreadcrumbs({ serverFilterOptions }: PublicVehicleB
             updates.modelId = undefined;
             break;
           case 'decade':
-            updates.yearFrom = undefined;
-            updates.yearTo = undefined;
+            updates.decadeIds = undefined;
             break;
           case 'collection':
             updates.collectionIds = undefined;

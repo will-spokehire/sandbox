@@ -1,0 +1,42 @@
+[
+  {
+    "id": 4,
+    "quote": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+    "author": "NAME-1",
+    "role": "Car they rented",
+    "rating": 5,
+    "status": "published",
+    "updatedAt": "2026-01-03T18:31:43.439Z",
+    "createdAt": "2026-01-07T11:55:41.142Z"
+  },
+  {
+    "id": 3,
+    "quote": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+    "author": "NAME-3",
+    "role": "Car they rented",
+    "rating": 5,
+    "status": "published",
+    "updatedAt": "2026-01-03T18:32:10.782Z",
+    "createdAt": "2026-01-03T18:31:50.980Z"
+  },
+  {
+    "id": 2,
+    "quote": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+    "author": "NAME-2",
+    "role": "Car they rented",
+    "rating": 5,
+    "status": "published",
+    "updatedAt": "2026-01-03T18:32:02.888Z",
+    "createdAt": "2026-01-03T18:31:48.477Z"
+  },
+  {
+    "id": 1,
+    "quote": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+    "author": "NAME-1",
+    "role": "Car they rented",
+    "rating": 5,
+    "status": "published",
+    "updatedAt": "2026-01-03T18:31:43.439Z",
+    "createdAt": "2026-01-03T18:31:43.437Z"
+  }
+]

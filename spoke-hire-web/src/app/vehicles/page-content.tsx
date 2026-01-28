@@ -1,16 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, Suspense } from "react";
+import { useEffect, useMemo, useRef, Suspense } from "react";
 import { toast } from "sonner";
 import { api } from "~/trpc/react";
 import { usePublicVehicleFiltersContext } from "~/contexts/PublicVehicleFiltersContext";
 import { PublicVehicleFilters } from "./_components/PublicVehicleFilters";
 import { PublicVehicleBreadcrumbs } from "./_components/PublicVehicleBreadcrumbs";
 import { PublicVehicleGrid } from "./_components/PublicVehicleGrid";
-import { Button } from "~/components/ui/button";
 import { PageLoading } from "~/components/loading";
-import { StandardPageHeader } from "~/app/_components/layouts/StandardPageHeader";
-import { LAYOUT_CONSTANTS } from "~/lib/design-tokens";
+import { cn } from "~/lib/utils";
+import { TYPOGRAPHY } from "~/lib/design-tokens";
 
 interface VehicleData {
   vehicles: any[];
@@ -21,10 +20,6 @@ interface VehicleData {
 
 interface PublicVehiclesCatalogContentProps {
   initialData: VehicleData;
-  serverTitles: {
-    h1: string;
-    h2: string;
-  };
   serverFilterOptions: any;
 }
 
@@ -34,11 +29,8 @@ interface PublicVehiclesCatalogContentProps {
  * Displays published vehicles with filters.
  * Client component for interactivity with SSR initial data.
  */
-function PublicVehiclesCatalogContent({ initialData, serverTitles, serverFilterOptions }: PublicVehiclesCatalogContentProps) {
+function PublicVehiclesCatalogContent({ initialData, serverFilterOptions }: PublicVehiclesCatalogContentProps) {
   const { filters, updateFilters, clearFilters, hasActiveFilters } = usePublicVehicleFiltersContext();
-  
-  // Use server-rendered titles (no client-side fetch needed!)
-  const { h1, h2 } = serverTitles;
 
   // Pagination settings
   const itemsPerPage = 40;
@@ -57,8 +49,7 @@ function PublicVehiclesCatalogContent({ initialData, serverTitles, serverFilterO
       makeIds: filters.makeIds && filters.makeIds.length > 0 ? filters.makeIds : undefined,
       modelId: filters.modelId,
       collectionIds: filters.collectionIds && filters.collectionIds.length > 0 ? filters.collectionIds : undefined,
-      yearFrom: filters.yearFrom,
-      yearTo: filters.yearTo,
+      decadeIds: filters.decadeIds && filters.decadeIds.length > 0 ? filters.decadeIds : undefined,
       countryIds: filters.countryIds && filters.countryIds.length > 0 ? filters.countryIds : undefined,
       counties: filters.counties && filters.counties.length > 0 ? filters.counties : undefined,
       sortBy: filters.sortBy as "name" | "createdAt" | "updatedAt" | "year" | "distance",
@@ -85,62 +76,115 @@ function PublicVehiclesCatalogContent({ initialData, serverTitles, serverFilterO
     }
   }, [error]);
 
+  // Track previous page for scroll detection
+  const previousPageRef = useRef<number>(filters.page ?? 1);
+  const needsScrollRef = useRef<boolean>(false);
+
+  // Scroll to top when page changes and data finishes loading
+  useEffect(() => {
+    const currentPage = filters.page ?? 1;
+    const previousPage = previousPageRef.current;
+
+    // Check if page changed
+    if (previousPage !== currentPage) {
+      previousPageRef.current = currentPage;
+      needsScrollRef.current = true;
+    }
+
+    // Scroll when data has finished loading and we need to scroll
+    if (needsScrollRef.current && !isFetching) {
+      needsScrollRef.current = false;
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        // Use document.documentElement for better mobile compatibility
+        if (document.documentElement) {
+          document.documentElement.scrollTo({ top: 0, behavior: "auto" });
+        } else {
+          // Fallback to window.scrollTo
+          window.scrollTo({ top: 0, behavior: "auto" });
+        }
+      });
+    }
+  }, [filters.page, isFetching]);
+
   const handlePageChange = (newPage: number) => {
     updateFilters({ page: newPage });
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  const currentPage = filters.page ?? 1;
 
   return (
     <>
       {/* Hero Section */}
-      <StandardPageHeader title={h1} subtitle={h2} variant="hero" />
+      <div className="bg-white">
+        <div className=" pt-4 pb-10 md:pt-10 md:pb-16">
+          <div className="max-w-[760px] flex flex-col gap-6">
+            <h1 className="heading-1 uppercase text-black leading-[0.95]">
+              explore classic cars for hire
+            </h1>
+            <p className={cn(TYPOGRAPHY.pageDescription, "text-black")}>
+              Discover thousands of vehicles available to hire from action vehicles to wedding cars.
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Main Content */}
-      <div className={LAYOUT_CONSTANTS.container + " " + LAYOUT_CONSTANTS.pageSpacing}>
-        <div className={LAYOUT_CONSTANTS.sectionSpacing}>
-          {/* Breadcrumbs - Temporarily hidden */}
-          {/* <PublicVehicleBreadcrumbs serverFilterOptions={serverFilterOptions} /> */}
+      <div className="flex flex-col gap-6 md:gap-10">
+        {/* Filters */}
+        <PublicVehicleFilters />
 
-          {/* Filters */}
-          <PublicVehicleFilters />
+        {/* Vehicle Grid */}
+        <PublicVehicleGrid
+          vehicles={vehicles}
+          isLoading={isLoading}
+          hasFilters={hasActiveFilters}
+          onClearFilters={clearFilters}
+        />
 
-          {/* Vehicle Grid */}
-          <PublicVehicleGrid
-            vehicles={vehicles}
-            isLoading={isLoading}
-            hasFilters={hasActiveFilters}
-            onClearFilters={clearFilters}
-          />
-
-          {/* Pagination */}
-          {totalPages > 1 && !isLoading && (
-            <div className="flex items-center justify-center gap-2 pt-6">
+        {/* Pagination */}
+        {totalPages > 1 && !isLoading && (
+          <div className="flex items-center justify-center px-8 py-16">
+            <div className="flex items-center gap-4">
               {/* Previous Button */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange((filters.page ?? 1) - 1)}
-                disabled={(filters.page ?? 1) === 1 || isFetching}
+              <button
+                type="button"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1 || isFetching}
+                className={cn(
+                  "h-[40px] px-5 py-0 border border-black border-solid",
+                  "font-degular text-[22px] font-normal leading-[1.3] tracking-[-0.22px]",
+                  "transition-colors duration-150",
+                  "disabled:opacity-40 disabled:cursor-not-allowed",
+                  "hover:bg-spoke-black hover:text-spoke-white"
+                )}
               >
                 Previous
-              </Button>
+              </button>
 
               {/* Page Numbers - Desktop only */}
-              <div className="hidden md:flex items-center gap-1">
+              <div className="hidden md:flex items-center gap-4">
                 {/* First page */}
-                {(filters.page ?? 1) > 3 && (
+                {currentPage > 3 && (
                   <>
-                    <Button
-                      variant={1 === (filters.page ?? 1) ? "default" : "outline"}
-                      size="sm"
+                    <button
+                      type="button"
                       onClick={() => handlePageChange(1)}
                       disabled={isFetching}
-                      className="w-10"
+                      className={cn(
+                        "h-[40px] min-w-[30px] px-2 flex items-center justify-center border border-black border-solid",
+                        "font-degular text-[22px] font-normal leading-[1.3] tracking-[-0.22px]",
+                        "transition-colors duration-150",
+                        "disabled:opacity-40 disabled:cursor-not-allowed",
+                        "hover:bg-spoke-black hover:text-spoke-white"
+                      )}
                     >
                       1
-                    </Button>
-                    {(filters.page ?? 1) > 4 && (
-                      <span className="px-2 text-muted-foreground">...</span>
+                    </button>
+                    {currentPage > 4 && (
+                      <span className="font-degular text-2xl leading-[1.2] text-black">
+                        ...
+                      </span>
                     )}
                   </>
                 )}
@@ -148,58 +192,79 @@ function PublicVehiclesCatalogContent({ initialData, serverTitles, serverFilterO
                 {/* Pages around current */}
                 {Array.from({ length: totalPages }, (_, i) => i + 1)
                   .filter((page) => {
-                    // Show current page and 2 pages on each side
-                    return page >= (filters.page ?? 1) - 2 && page <= (filters.page ?? 1) + 2;
+                    return page >= currentPage - 2 && page <= currentPage + 2;
                   })
                   .map((page) => (
-                    <Button
+                    <button
                       key={page}
-                      variant={page === (filters.page ?? 1) ? "default" : "outline"}
-                      size="sm"
+                      type="button"
                       onClick={() => handlePageChange(page)}
                       disabled={isFetching}
-                      className="w-10"
+                      className={cn(
+                        "h-[40px] min-w-[30px] px-2 flex items-center justify-center border border-black border-solid",
+                        "font-degular text-[22px] font-normal leading-[1.3] tracking-[-0.22px]",
+                        "transition-colors duration-150",
+                        "disabled:opacity-40 disabled:cursor-not-allowed",
+                        page === currentPage
+                          ? "bg-spoke-black text-spoke-white"
+                          : "hover:bg-spoke-black hover:text-spoke-white"
+                      )}
                     >
                       {page}
-                    </Button>
+                    </button>
                   ))}
 
                 {/* Last page */}
-                {(filters.page ?? 1) < totalPages - 2 && (
+                {currentPage < totalPages - 2 && (
                   <>
-                    {(filters.page ?? 1) < totalPages - 3 && (
-                      <span className="px-2 text-muted-foreground">...</span>
+                    {currentPage < totalPages - 3 && (
+                      <span className="font-degular text-2xl leading-[1.2] text-black">
+                        ...
+                      </span>
                     )}
-                    <Button
-                      variant={totalPages === (filters.page ?? 1) ? "default" : "outline"}
-                      size="sm"
+                    <button
+                      type="button"
                       onClick={() => handlePageChange(totalPages)}
                       disabled={isFetching}
-                      className="w-10"
+                      className={cn(
+                        "h-[40px] min-w-[30px] px-2 flex items-center justify-center border border-black border-solid",
+                        "font-degular text-[22px] font-normal leading-[1.3] tracking-[-0.22px]",
+                        "transition-colors duration-150",
+                        "disabled:opacity-40 disabled:cursor-not-allowed",
+                        totalPages === currentPage
+                          ? "bg-spoke-black text-spoke-white"
+                          : "hover:bg-spoke-black hover:text-spoke-white"
+                      )}
                     >
                       {totalPages}
-                    </Button>
+                    </button>
                   </>
                 )}
               </div>
 
               {/* Page Indicator - Mobile only */}
               <div className="md:hidden px-3 py-1.5 text-sm font-medium text-muted-foreground">
-                {filters.page ?? 1} / {totalPages}
+                {currentPage} / {totalPages}
               </div>
 
               {/* Next Button */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange((filters.page ?? 1) + 1)}
-                disabled={(filters.page ?? 1) === totalPages || isFetching}
+              <button
+                type="button"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages || isFetching}
+                className={cn(
+                  "h-[40px] px-5 py-0 border border-black border-solid",
+                  "font-degular text-[22px] font-normal leading-[1.3] tracking-[-0.22px]",
+                  "transition-colors duration-150",
+                  "disabled:opacity-40 disabled:cursor-not-allowed",
+                  "hover:bg-spoke-black hover:text-spoke-white"
+                )}
               >
                 Next
-              </Button>
+              </button>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </>
   );
@@ -211,12 +276,11 @@ function PublicVehiclesCatalogContent({ initialData, serverTitles, serverFilterO
  * Public-facing vehicle catalogue with SSR and SEO optimisation.
  * No authentication required.
  */
-export default function PublicVehiclesPageContent({ initialData, serverTitles, serverFilterOptions }: PublicVehiclesCatalogContentProps) {
+export default function PublicVehiclesPageContent({ initialData, serverFilterOptions }: PublicVehiclesCatalogContentProps) {
   return (
     <Suspense fallback={<PageLoading />}>
       <PublicVehiclesCatalogContent 
         initialData={initialData}
-        serverTitles={serverTitles}
         serverFilterOptions={serverFilterOptions}
       />
     </Suspense>

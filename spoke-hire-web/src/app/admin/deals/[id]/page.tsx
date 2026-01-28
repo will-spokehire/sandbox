@@ -197,7 +197,7 @@ export default function DealDetailPage({
           <TooltipTrigger asChild>
             <Badge variant={variant} className="flex items-center gap-1 cursor-help">
               {icon}
-              <span className="text-xs">{label}</span>
+              <span className="body-xs">{label}</span>
             </Badge>
           </TooltipTrigger>
           <TooltipContent>
@@ -284,7 +284,7 @@ export default function DealDetailPage({
 
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="min-h-screen bg-spoke-white">
       {/* Header */}
       <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
         <div className="container mx-auto px-4 py-3 md:py-4">
@@ -302,7 +302,7 @@ export default function DealDetailPage({
                   <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-50 truncate">
                     {isDealLoading ? <Skeleton className="h-8 w-64" /> : deal?.name}
                   </h1>
-                  <div className="text-xs md:text-sm text-slate-600 dark:text-slate-400">
+                  <div className="body-xs text-slate-600 dark:text-slate-400">
                     {isDealLoading ? (
                       <Skeleton className="h-4 w-32 mt-1" />
                     ) : (
@@ -691,7 +691,7 @@ export default function DealDetailPage({
                                       <DollarSign className="mr-2 h-4 w-4" />
                                       Set Owner Fee
                                       {dv.ownerRequestedFee && (
-                                        <span className="ml-2 text-xs text-muted-foreground">
+                                        <span className="ml-2 body-xs text-muted-foreground">
                                           (£{Number(dv.ownerRequestedFee).toFixed(2)})
                                         </span>
                                       )}
@@ -779,7 +779,7 @@ export default function DealDetailPage({
                               <div className="flex items-center gap-2">
                                 <Badge variant={statusBadge.variant} className={cn("flex items-center gap-1", statusBadge.className)}>
                                   {statusBadge.icon}
-                                  <span className="text-xs">{statusBadge.label}</span>
+                                  <span className="body-xs">{statusBadge.label}</span>
                                 </Badge>
                               </div>
                             )}
@@ -854,7 +854,7 @@ export default function DealDetailPage({
                                 {dv.status !== "ACTIVE" && (
                                   <Badge variant={statusBadge.variant} className={cn("flex items-center gap-1", statusBadge.className)}>
                                     {statusBadge.icon}
-                                    <span className="text-xs">{statusBadge.label}</span>
+                                    <span className="body-xs">{statusBadge.label}</span>
                                   </Badge>
                                 )}
                               </div>
@@ -958,7 +958,7 @@ export default function DealDetailPage({
                                   <DollarSign className="mr-2 h-4 w-4" />
                                   Set Owner Fee
                                   {dv.ownerRequestedFee && (
-                                    <span className="ml-2 text-xs text-muted-foreground">
+                                    <span className="ml-2 body-xs text-muted-foreground">
                                       (£{Number(dv.ownerRequestedFee).toFixed(2)})
                                     </span>
                                   )}

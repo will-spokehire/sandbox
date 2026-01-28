@@ -159,15 +159,18 @@ export function BasicInfoStep({ onComplete, defaultValues, onValidationChange }:
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold">Basic Vehicle Information</h2>
-        <p className="text-muted-foreground mt-1">
+      <div className="w-full flex flex-col gap-3 items-center text-center mb-6">
+        <h2 className="text-[32px] md:text-[40px] font-normal leading-[0.95] uppercase text-black tracking-[-0.4px]">
+          Basic Vehicle Information
+        </h2>
+        <p className="text-[18px] md:text-[22px] font-normal leading-[1.3] text-black tracking-[-0.22px]">
           Tell us about your vehicle
         </p>
       </div>
 
       <Form {...form}>
         <form className="space-y-6">
+          {/* Make and Model in a grid - consistent spacing with other fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Make */}
             <FormField
@@ -193,9 +196,7 @@ export function BasicInfoStep({ onComplete, defaultValues, onValidationChange }:
                       disabled={isLoadingFilters}
                     />
                   </FormControl>
-                  <FormDescription className="min-h-[20px]">
-                    {/* Reserved space for consistency */}
-                  </FormDescription>
+                  
                   <FormMessage />
                 </FormItem>
               )}
@@ -213,16 +214,14 @@ export function BasicInfoStep({ onComplete, defaultValues, onValidationChange }:
                       options={modelOptions}
                       value={field.value}
                       onValueChange={field.onChange}
-                      placeholder="Select or type model"
+                      placeholder=  {!selectedMakeId ? "Select a make first" : "Select or type model"}
                       searchPlaceholder="Search models..."
                       emptyText="No model found."
                       disabled={!selectedMakeId || isLoadingModels}
                       allowCustomValue={true}
                     />
                   </FormControl>
-                  <FormDescription className="min-h-[20px]">
-                    {!selectedMakeId && "Select a make first"}
-                  </FormDescription>
+                  
                   <FormMessage />
                 </FormItem>
               )}

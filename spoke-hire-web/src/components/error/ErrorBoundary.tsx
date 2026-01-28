@@ -165,7 +165,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                   <AlertTriangle className="h-4 w-4" />
                   <AlertTitle>Component Stack (Development)</AlertTitle>
                   <AlertDescription className="mt-2">
-                    <pre className="text-xs bg-muted p-3 rounded overflow-auto max-h-32">
+                    <pre className="body-xs bg-muted p-3 rounded overflow-auto max-h-32">
                       {errorInfo.componentStack}
                     </pre>
                   </AlertDescription>
@@ -208,7 +208,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               </div>
 
               {process.env.NODE_ENV === "production" && (
-                <p className="text-xs text-muted-foreground text-center">
+                <p className="body-xs text-muted-foreground text-center">
                   If this problem persists, please contact support.
                 </p>
               )}
