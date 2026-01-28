@@ -1,0 +1,23 @@
+{
+  "id": 1,
+  "siteName": "Spoke Hire",
+  "tagline": "Access the UK's largest classic car hire platform with thousands of vehicles available to hire today",
+  "logo": 2,
+  "favicon": 2,
+  "seoDefaults": {
+    "defaultMetaDescription": "Access the UK's largest classic car hire platform with thousands of vehicles available to hire today",
+    "defaultOgImage": 26
+  },
+  "analytics": {
+    "googleAnalyticsId": null
+  },
+  "copyrightText": "© 2026 Spoke Hire Ltd",
+  "contactInfo": {
+    "email": null,
+    "phone": null,
+    "address": null
+  },
+  "updatedAt": "2026-01-25T10:15:43.848Z",
+  "createdAt": "2026-01-03T17:26:27.859Z",
+  "globalType": "site-settings"
+}

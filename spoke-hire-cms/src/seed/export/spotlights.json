@@ -1,0 +1,47 @@
+[
+  {
+    "id": 5,
+    "image": 18,
+    "caption": "OLIVIA DEAN",
+    "link": "/blog-post-1",
+    "status": "published",
+    "updatedAt": "2026-01-21T18:03:47.415Z",
+    "createdAt": "2026-01-07T11:48:46.719Z"
+  },
+  {
+    "id": 4,
+    "image": 12,
+    "caption": "Tottenham Hotspur",
+    "link": "/blog-post-1",
+    "status": "published",
+    "updatedAt": "2026-01-21T18:04:15.180Z",
+    "createdAt": "2026-01-03T18:14:38.712Z"
+  },
+  {
+    "id": 3,
+    "image": 11,
+    "caption": "SACHA KEABEL",
+    "link": "/blog-post-1",
+    "status": "published",
+    "updatedAt": "2026-01-04T16:30:58.033Z",
+    "createdAt": "2026-01-03T18:13:14.707Z"
+  },
+  {
+    "id": 2,
+    "image": 10,
+    "caption": "CENTRAL CEE",
+    "link": "/blog-post-1",
+    "status": "published",
+    "updatedAt": "2026-01-04T16:31:08.536Z",
+    "createdAt": "2026-01-03T18:12:27.905Z"
+  },
+  {
+    "id": 1,
+    "image": 7,
+    "caption": "ABOUT BLANC",
+    "link": "/blog-post-1",
+    "status": "published",
+    "updatedAt": "2026-01-21T18:02:19.931Z",
+    "createdAt": "2026-01-03T18:11:51.404Z"
+  }
+]

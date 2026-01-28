@@ -1,0 +1,92 @@
+[
+  {
+    "id": 11,
+    "desktopImage": 23,
+    "mobileImage": 24,
+    "alt": "test",
+    "status": "published",
+    "updatedAt": "2026-01-21T18:15:47.738Z",
+    "createdAt": "2026-01-21T18:15:47.737Z"
+  },
+  {
+    "id": 9,
+    "desktopImage": 17,
+    "mobileImage": 17,
+    "alt": "test",
+    "status": "published",
+    "updatedAt": "2026-01-21T17:47:23.242Z",
+    "createdAt": "2026-01-21T17:45:43.618Z"
+  },
+  {
+    "id": 8,
+    "desktopImage": 22,
+    "mobileImage": 21,
+    "alt": "test",
+    "status": "published",
+    "updatedAt": "2026-01-21T17:58:42.342Z",
+    "createdAt": "2026-01-21T17:45:13.637Z"
+  },
+  {
+    "id": 7,
+    "desktopImage": 18,
+    "mobileImage": 18,
+    "alt": "test",
+    "status": "published",
+    "updatedAt": "2026-01-21T17:44:47.107Z",
+    "createdAt": "2026-01-21T17:44:47.105Z"
+  },
+  {
+    "id": 6,
+    "desktopImage": 19,
+    "mobileImage": 20,
+    "alt": "test",
+    "status": "published",
+    "updatedAt": "2026-01-21T17:42:45.424Z",
+    "createdAt": "2026-01-21T17:42:45.424Z"
+  },
+  {
+    "id": 5,
+    "desktopImage": 18,
+    "mobileImage": 11,
+    "alt": "About image 1",
+    "status": "published",
+    "updatedAt": "2026-01-07T12:07:43.132Z",
+    "createdAt": "2026-01-03T18:43:04.273Z"
+  },
+  {
+    "id": 4,
+    "desktopImage": 17,
+    "mobileImage": 17,
+    "alt": "ANTHONY SZMIEREK",
+    "status": "published",
+    "updatedAt": "2026-01-03T18:34:03.170Z",
+    "createdAt": "2026-01-03T18:34:03.168Z"
+  },
+  {
+    "id": 3,
+    "desktopImage": 8,
+    "mobileImage": 8,
+    "alt": "Register",
+    "status": "published",
+    "updatedAt": "2026-01-03T18:28:56.292Z",
+    "createdAt": "2026-01-03T18:28:56.291Z"
+  },
+  {
+    "id": 2,
+    "desktopImage": 8,
+    "mobileImage": 8,
+    "alt": "bmw",
+    "status": "published",
+    "updatedAt": "2026-01-03T18:03:47.526Z",
+    "createdAt": "2026-01-03T18:03:47.526Z"
+  },
+  {
+    "id": 1,
+    "desktopImage": 7,
+    "mobileImage": 7,
+    "alt": "Image 1",
+    "status": "published",
+    "updatedAt": "2026-01-03T18:02:31.570Z",
+    "createdAt": "2026-01-03T18:02:31.569Z"
+  }
+]

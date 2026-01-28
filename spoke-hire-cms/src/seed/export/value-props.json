@@ -1,0 +1,38 @@
+[
+  {
+    "id": 4,
+    "title": "Trusted Vehicle Supplier",
+    "description": "Search thousands of vehicles, book with confidence, coordinate seamlessly. We handle the complexity.",
+    "icon": 8,
+    "status": "published",
+    "updatedAt": "2026-01-03T18:18:45.956Z",
+    "createdAt": "2026-01-03T16:56:25.717Z"
+  },
+  {
+    "id": 3,
+    "title": "24 Hour Response Time",
+    "description": "Questions? Issues? We're here. Fast and clear communication whenever you need us across the UK.",
+    "icon": 7,
+    "status": "published",
+    "updatedAt": "2026-01-03T18:18:05.799Z",
+    "createdAt": "2026-01-03T16:56:25.363Z"
+  },
+  {
+    "id": 2,
+    "title": "The UK's Largest Network",
+    "description": "Every vehicle vetted, every detail understood. Real people supporting you every step of the way.",
+    "icon": 6,
+    "status": "published",
+    "updatedAt": "2026-01-03T18:17:35.364Z",
+    "createdAt": "2026-01-03T16:56:24.871Z"
+  },
+  {
+    "id": 1,
+    "title": "Experts in Classic Cars",
+    "description": "We're not just a booking platform. We understand classic cars and their unique needs.",
+    "icon": 5,
+    "status": "published",
+    "updatedAt": "2026-01-03T18:17:04.068Z",
+    "createdAt": "2026-01-03T16:56:24.596Z"
+  }
+]
