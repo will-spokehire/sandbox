@@ -79,6 +79,11 @@ const config = {
         hostname: "spoke-hire-cms-cornerapp-vertextree.vercel.app",
         pathname: "/api/media/**",
       },
+      {
+        protocol: "https",
+        hostname: "spoke-hire-cms.vercel.app",
+        pathname: "/api/media/**",
+      },
     ],
   },
 };

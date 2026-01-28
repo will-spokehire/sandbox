@@ -2,10 +2,7 @@
   "buildCommand": "npm run payload generate:importmap && npm run build",
   "outputDirectory": ".next",
   "framework": "nextjs",
-  "installCommand": "npm install",
-  "devCommand": "npm run dev",
-  "env": {
-    "NODE_ENV": "production"
-  }
+  "installCommand": "npm install --include=dev",
+  "devCommand": "npm run dev"
 }
 

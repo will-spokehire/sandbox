@@ -1,4 +1,9 @@
 import { withPayload } from '@payloadcms/next/withPayload'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -10,21 +15,22 @@ const nextConfig = {
       '.mjs': ['.mts', '.mjs'],
     }
     
+    // Explicit path aliases for Vercel builds
     // Ignore Prisma from workspace root
     webpackConfig.resolve.alias = {
       ...webpackConfig.resolve.alias,
+      '@payload-config': path.resolve(__dirname, './src/payload.config.ts'),
+      '@': path.resolve(__dirname, './src'),
       '@prisma/client': false,
       'prisma': false,
     }
 
     return webpackConfig
   },
-  // Disable Prisma auto-detection
   experimental: {
     serverActions: {
       bodySizeLimit: '10mb',
     },
-    proxyClientMaxBodySize: '10mb', // Allow larger file uploads via API routes
   },
 }
 
