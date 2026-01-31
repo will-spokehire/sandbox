@@ -203,14 +203,10 @@ export function FeaturedVehiclesBlock({ data }: FeaturedVehiclesBlockProps) {
                 </h2>
               )}
               {subtitle && (
-                <p className="body-large text-spoke-black md:block hidden">
+                <p className="body-large text-spoke-black">
                   {subtitle}
                 </p>
               )}
-              {/* Mobile subtitle - different text */}
-              <p className="body-large text-spoke-black md:hidden">
-                Check out the latest additions to our roster.
-              </p>
             </div>
 
             {/* See All Vehicles Button - Desktop only */}
