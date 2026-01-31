@@ -38,12 +38,16 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const appUrl = getAppUrl();
   const isProduction = env.NODE_ENV === "production";
   const gaId = env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+  
+  // Fetch site settings to get logo URL for organization schema
+  const siteSettings = await getSiteSettings();
+  const logoUrl = getLogoUrl(siteSettings);
   
   // Organization structured data for the entire site
   const organizationSchema = {
@@ -51,7 +55,7 @@ export default function RootLayout({
     "@type": "Organization",
     name: "SpokeHire",
     url: appUrl,
-    logo: `${appUrl}/spoke-hire-logo-1.png`,
+    logo: logoUrl.startsWith("http") ? logoUrl : `${appUrl}${logoUrl}`,
     description: "Classic and vintage vehicle hire platform connecting vehicle owners with customers for special occasions",
     sameAs: [
       // Add social media profiles here when available
