@@ -82,11 +82,13 @@ function serializeNode(node: unknown): string {
       return `<${tag} class="${headingClass} text-black">${childrenHTML}</${tag}>`
     
     case 'list':
-      const listTag = typedNode.listType === 'number' ? 'ol' : 'ul'
-      return `<${listTag} class="body-large text-black">${childrenHTML}</${listTag}>`
+      const isOrdered = typedNode.listType === 'number'
+      const listTag = isOrdered ? 'ol' : 'ul'
+      const listStyleClass = isOrdered ? 'list-decimal' : 'list-disc'
+      return `<${listTag} class="${listStyleClass} pl-6 space-y-2 body-large text-black">${childrenHTML}</${listTag}>`
     
     case 'listitem':
-      return `<li class="mb-2">${childrenHTML}</li>`
+      return `<li>${childrenHTML}</li>`
     
     case 'link':
       const target = typedNode.newTab ? ' target="_blank" rel="noopener noreferrer"' : ''
