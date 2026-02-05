@@ -40,7 +40,7 @@ export interface GeneratedVehicleContent {
  * AI Vehicle Generator Service
  */
 export class AIVehicleGeneratorService {
-  private model = google("gemini-2.0-flash-exp");
+  private model = google("gemini-flash-latest");
 
   /**
    * Generate vehicle name using simple pattern: Year Make Model
