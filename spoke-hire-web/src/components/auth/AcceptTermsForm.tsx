@@ -102,8 +102,7 @@ export function AcceptTermsForm() {
             <div className="w-full flex flex-col gap-2 p-4">
               <h3 className="text-base font-medium text-black">Terms & Conditions</h3>
               <p className="text-base font-normal leading-[1.4] text-black/50">
-                Our terms outline the rules and regulations for the use of SpokeHire's platform, 
-                including vehicle listings, bookings, and user responsibilities.
+                Our terms & conditions set out the rules and regulations for the use of SpokeHire's platform, including vehicle listings, bookings, and user responsibilities.
               </p>
               <Link 
                 href="/terms-of-service" 
@@ -140,8 +139,7 @@ export function AcceptTermsForm() {
             <div className="w-full flex flex-col gap-2 p-4">
               <h3 className="text-base font-medium text-black">Privacy Policy</h3>
               <p className="text-base font-normal leading-[1.4] text-black/50">
-                Our privacy policy explains how we collect, use, and protect your personal information 
-                when you use our platform.
+                Our privacy policy explains how we collect, use, and protect your personal data when you use our platform.
               </p>
               <Link 
                 href="/privacy-policy" 
@@ -163,7 +161,7 @@ export function AcceptTermsForm() {
                 htmlFor="privacy"
                 className="text-base font-medium leading-[1.4] text-black cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
-                I have read and agree to the Privacy Policy
+                I have read and agree to the terms of the Privacy Policy
               </label>
             </div>
           </div>
