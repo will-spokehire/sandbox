@@ -23,7 +23,7 @@ import { useAuth } from '~/providers/auth-provider';
  * 
  * @example
  * ```tsx
- * <LoginForm termsUrl="/terms-of-service" privacyUrl="/privacy-policy" />
+ * <LoginForm termsUrl="/terms-and-conditions" privacyUrl="/privacy-policy" />
  * ```
  */
 interface LoginFormProps {
@@ -31,7 +31,7 @@ interface LoginFormProps {
   privacyUrl?: string;
 }
 
-export function LoginForm({ termsUrl = '/terms-of-service', privacyUrl = '/privacy-policy' }: LoginFormProps) {
+export function LoginForm({ termsUrl = '/terms-and-conditions', privacyUrl = '/privacy-policy' }: LoginFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoading: isAuthLoading, isAuthenticated } = useAuth();

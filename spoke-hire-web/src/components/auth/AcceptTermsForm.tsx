@@ -105,7 +105,7 @@ export function AcceptTermsForm() {
                 Our terms & conditions set out the rules and regulations for the use of SpokeHire's platform, including vehicle listings, bookings, and user responsibilities.
               </p>
               <Link 
-                href="/terms-of-service" 
+                href="/terms-and-conditions" 
                 target="_blank"
                 className="text-base font-normal leading-[1.4] text-black underline decoration-solid underline-offset-auto inline-flex items-center gap-1"
               >

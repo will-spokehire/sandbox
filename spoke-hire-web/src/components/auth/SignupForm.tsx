@@ -24,7 +24,7 @@ import { trackEvent } from '~/lib/analytics';
  * 
  * @example
  * ```tsx
- * <SignupForm termsUrl="/terms-of-service" privacyUrl="/privacy-policy" />
+ * <SignupForm termsUrl="/terms-and-conditions" privacyUrl="/privacy-policy" />
  * ```
  */
 interface SignupFormProps {
@@ -32,7 +32,7 @@ interface SignupFormProps {
   privacyUrl?: string;
 }
 
-export function SignupForm({ termsUrl = '/terms-of-service', privacyUrl = '/privacy-policy' }: SignupFormProps) {
+export function SignupForm({ termsUrl = '/terms-and-conditions', privacyUrl = '/privacy-policy' }: SignupFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState('');

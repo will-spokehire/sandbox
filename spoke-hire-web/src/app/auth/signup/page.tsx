@@ -16,7 +16,7 @@ export default async function SignupPage() {
       <div className="w-full max-w-[808px] flex flex-col items-center gap-8 md:gap-[80px]">
         <Suspense fallback={<SignupFormSkeleton />}>
           <SignupForm 
-            termsUrl={footerSettings?.termsOfServiceUrl || '/terms-of-service'}
+            termsUrl={footerSettings?.termsOfServiceUrl || '/terms-and-conditions'}
             privacyUrl={footerSettings?.privacyPolicyUrl || '/privacy-policy'}
           />
         </Suspense>
