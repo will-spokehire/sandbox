@@ -161,7 +161,7 @@ export async function Footer({ navigation }: FooterProps) {
                 href={footerSettings.termsOfServiceUrl}
                 className={FOOTER_STYLES.link}
               >
-                Terms of Service
+                Terms & Conditions
               </Link>
             )}
           </div>
