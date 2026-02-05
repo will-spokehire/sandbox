@@ -85,7 +85,13 @@ function serializeNode(node: unknown): string {
       const isOrdered = typedNode.listType === 'number'
       const listTag = isOrdered ? 'ol' : 'ul'
       const listStyleClass = isOrdered ? 'list-decimal' : 'list-disc'
-      return `<${listTag} class="${listStyleClass} pl-6 space-y-2 body-large text-black">${childrenHTML}</${listTag}>`
+      // Nested list styling:
+      // - [&_ul]:list-[circle] - level 2 uses circle bullets
+      // - [&_ul]:pl-4 - reduced padding for nested lists
+      // - [&_ul_ul]:list-[square] - level 3+ uses square bullets
+      // - [&>li:has(>ul)]:list-none - hide bullet on li that directly contains a nested ul
+      // - [&>li:has(>ol)]:list-none - hide bullet on li that directly contains a nested ol
+      return `<${listTag} class="${listStyleClass} pl-6 space-y-2 body-large text-black [&_ul]:list-[circle] [&_ul]:pl-4 [&_ul_ul]:list-[square] [&>li:has(>ul)]:list-none [&>li:has(>ol)]:list-none">${childrenHTML}</${listTag}>`
     
     case 'listitem':
       return `<li>${childrenHTML}</li>`
