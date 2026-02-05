@@ -67,7 +67,9 @@
     "preview:db:setup": "tsx scripts/setup-database.ts",
     "preview:db:verify": "tsx scripts/verify-preview-database.ts",
     "export-production-data": "tsx scripts/export-production-data.ts",
-    "import-preview-data": "tsx scripts/import-preview-data.ts"
+    "import-preview-data": "tsx scripts/import-preview-data.ts",
+    "find-missing-vehicles": "tsx scripts/find-missing-vehicles.ts",
+    "import-missing-vehicles": "tsx scripts/import-missing-vehicles.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.23",
