@@ -719,3 +719,47 @@
     text-transform: uppercase;
   }
 }
+
+/* ============================================
+   RICH TEXT CONTENT STYLING
+   Nested list styling for legal documents
+   ============================================ */
+
+/* Nested ordered list styling - matches CMS appearance */
+/* Scoped to rich-text-content to avoid affecting other lists */
+.rich-text-content ol {
+  list-style-type: decimal;
+}
+
+/* Level 2: A, B, C (upper-alpha) */
+.rich-text-content ol ol {
+  list-style-type: upper-alpha;
+}
+
+/* Level 3: a, b, c (lower-alpha) */
+.rich-text-content ol ol ol {
+  list-style-type: lower-alpha;
+}
+
+/* Level 4: i, ii, iii (lower-roman) */
+.rich-text-content ol ol ol ol {
+  list-style-type: lower-roman;
+}
+
+/* Level 5+: repeat decimal */
+.rich-text-content ol ol ol ol ol {
+  list-style-type: decimal;
+}
+
+/* Nested unordered list styling */
+.rich-text-content ul {
+  list-style-type: disc;
+}
+
+.rich-text-content ul ul {
+  list-style-type: circle;
+}
+
+.rich-text-content ul ul ul {
+  list-style-type: square;
+}

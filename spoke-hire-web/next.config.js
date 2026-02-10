@@ -84,6 +84,12 @@ const config = {
         hostname: "spoke-hire-cms.vercel.app",
         pathname: "/api/media/**",
       },
+      // Main domain
+      {
+        protocol: "https",
+        hostname: "www.spokehire.com",
+        pathname: "/**",
+      },
     ],
   },
 };

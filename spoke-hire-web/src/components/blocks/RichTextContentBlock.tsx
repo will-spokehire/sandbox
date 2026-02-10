@@ -1,145 +1,138 @@
 import { cn } from '~/lib/utils'
 import { getMediaUrl } from '~/lib/payload-api'
 import type { RichTextContentBlockData } from '~/lib/payload-api'
+import {
+  RichText,
+  type JSXConvertersFunction,
+} from '@payloadcms/richtext-lexical/react'
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+import type { DefaultNodeTypes } from '@payloadcms/richtext-lexical'
 
 interface RichTextContentBlockProps {
   data: RichTextContentBlockData
 }
 
 /**
- * Serialize Lexical rich text to HTML with article-style styling
+ * Custom JSX converters to apply project-specific styling
+ * while using PayloadCMS's official Lexical serialization
  */
-function serializeLexicalToHTML(content: unknown): string {
-  if (!content || typeof content !== 'object') {
-    return ''
-  }
-
-  const root = content as { root?: { children?: unknown[] } }
-  if (!root.root?.children) {
-    return ''
-  }
-
-  return serializeChildren(root.root.children)
-}
-
-function serializeChildren(children: unknown[]): string {
-  return children
-    .map((node) => serializeNode(node))
-    .join('')
-}
-
-function serializeNode(node: unknown): string {
-  if (!node || typeof node !== 'object') {
-    return ''
-  }
-
-  const typedNode = node as {
-    type?: string
-    tag?: string
-    text?: string
-    format?: number
-    children?: unknown[]
-    url?: string
-    newTab?: boolean
-    listType?: string
-    value?: { url?: string; alt?: string }
-  }
-
-  // Text node
-  if (typedNode.text !== undefined && typedNode.text !== null) {
-    const textValue: string = typedNode.text
-    let text = escapeHtml(textValue)
-    
-    // Apply formatting
-    if (typedNode.format) {
-      if (typedNode.format & 1) text = `<strong>${text}</strong>` // Bold
-      if (typedNode.format & 2) text = `<em>${text}</em>` // Italic
-      if (typedNode.format & 8) text = `<u>${text}</u>` // Underline
-      if (typedNode.format & 4) text = `<s>${text}</s>` // Strikethrough
-      if (typedNode.format & 16) text = `<code>${text}</code>` // Code
+const jsxConverters: JSXConvertersFunction<DefaultNodeTypes> = ({
+  defaultConverters,
+}) => ({
+  ...defaultConverters,
+  paragraph: ({ node, nodesToJSX }) => {
+    const children = nodesToJSX({ nodes: node.children })
+    if (!children?.length) {
+      return (
+        <p className="body-large text-black tracking-[-0.22px]">
+          <br />
+        </p>
+      )
     }
-    
-    return text
-  }
-
-  const childrenHTML = typedNode.children ? serializeChildren(typedNode.children) : ''
-
-  switch (typedNode.type) {
-    case 'paragraph':
-      return `<p class="body-large text-black tracking-[-0.22px]">${childrenHTML}</p>`
-    
-    case 'heading':
-      const tag = typedNode.tag || 'h2'
-      // Map heading tags to article typography classes
-      const headingClasses: Record<string, string> = {
-        h2: 'heading-2',
-        h3: 'heading-3',
-        h4: 'heading-4',
-        h5: 'heading-5',
-        h6: 'heading-6',
-      }
-      const headingClass = headingClasses[tag] || 'heading-2'
-      return `<${tag} class="${headingClass} text-black">${childrenHTML}</${tag}>`
-    
-    case 'list':
-      const isOrdered = typedNode.listType === 'number'
-      const listTag = isOrdered ? 'ol' : 'ul'
-      const listStyleClass = isOrdered ? 'list-decimal' : 'list-disc'
-      // Nested list styling:
-      // - [&_ul]:list-[circle] - level 2 uses circle bullets
-      // - [&_ul]:pl-4 - reduced padding for nested lists
-      // - [&_ul_ul]:list-[square] - level 3+ uses square bullets
-      // - [&>li:has(>ul)]:list-none - hide bullet on li that directly contains a nested ul
-      // - [&>li:has(>ol)]:list-none - hide bullet on li that directly contains a nested ol
-      return `<${listTag} class="${listStyleClass} pl-6 space-y-2 body-large text-black [&_ul]:list-[circle] [&_ul]:pl-4 [&_ul_ul]:list-[square] [&>li:has(>ul)]:list-none [&>li:has(>ol)]:list-none">${childrenHTML}</${listTag}>`
-    
-    case 'listitem':
-      return `<li>${childrenHTML}</li>`
-    
-    case 'link':
-      const target = typedNode.newTab ? ' target="_blank" rel="noopener noreferrer"' : ''
-      return `<a href="${escapeHtml(typedNode.url || '')}" class="text-black underline hover:no-underline"${target}>${childrenHTML}</a>`
-    
-    case 'quote':
-      return `<blockquote class="body-large text-black border-l-4 border-black pl-4 my-6">${childrenHTML}</blockquote>`
-    
-    case 'upload':
-      if (typedNode.value?.url) {
-        const url = typedNode.value.url
-        if (!url) return ''
-        const imageUrl = getMediaUrl(url)
-        if (!imageUrl || imageUrl === '') return ''
-        const altText = typedNode.value.alt || ''
-        // Images break out of text column and are full-width on desktop
-        return `<div class="my-8 md:my-12 -mx-4 md:-mx-[30px] w-[calc(100%+2rem)] md:w-[calc(100%+60px)]"><img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(altText)}" class="w-full h-[562px] md:h-[810px] object-cover object-center" /></div>`
-      }
-      return ''
-    
-    case 'horizontalrule':
-      return '<hr class="my-8 border-black" />'
-    
-    default:
-      return childrenHTML
-  }
-}
-
-function escapeHtml(text: string): string {
-  const map: Record<string, string> = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;',
-  }
-  return text.replace(/[&<>"']/g, (m) => map[m] || m)
-}
+    return (
+      <p className="body-large text-black tracking-[-0.22px]">{children}</p>
+    )
+  },
+  heading: ({ node, nodesToJSX }) => {
+    const headingClasses: Record<string, string> = {
+      h1: 'heading-1',
+      h2: 'heading-2',
+      h3: 'heading-3',
+      h4: 'heading-4',
+      h5: 'heading-5',
+      h6: 'heading-6',
+    }
+    const Tag = node.tag
+    const headingClass = headingClasses[node.tag] ?? 'heading-2'
+    const children = nodesToJSX({ nodes: node.children })
+    return <Tag className={`${headingClass} text-black`}>{children}</Tag>
+  },
+  list: ({ node, nodesToJSX }) => {
+    const isOrdered = node.listType === 'number'
+    const children = nodesToJSX({ nodes: node.children })
+    // Use node.tag to get the proper HTML element (ol/ul)
+    const Tag = node.tag as 'ol' | 'ul'
+    if (isOrdered) {
+      return (
+        <Tag className="pl-6 space-y-2 body-large text-black">{children}</Tag>
+      )
+    }
+    return (
+      <Tag className="list-disc pl-6 space-y-2 body-large text-black [&_ul]:list-[circle] [&_ul]:pl-4 [&_ul_ul]:list-[square]">
+        {children}
+      </Tag>
+    )
+  },
+  listitem: ({ node, nodesToJSX }) => {
+    // Check if this listitem contains a nested list
+    const hasSubLists = node.children.some(
+      (child: { type?: string }) => child.type === 'list'
+    )
+    const children = nodesToJSX({ nodes: node.children })
+    // Hide the bullet/number for list items that contain nested lists
+    return (
+      <li style={hasSubLists ? { listStyleType: 'none' } : undefined}>
+        {children}
+      </li>
+    )
+  },
+  link: ({ node, nodesToJSX }) => {
+    const linkNode = node
+    const fields = linkNode.fields
+    const url = fields?.url ?? ''
+    const newTab = fields?.newTab
+    const target = newTab ? '_blank' : undefined
+    const rel = newTab ? 'noopener noreferrer' : undefined
+    const children = nodesToJSX({ nodes: node.children })
+    return (
+      <a
+        href={url}
+        target={target}
+        rel={rel}
+        className="text-black underline hover:no-underline"
+      >
+        {children}
+      </a>
+    )
+  },
+  quote: ({ node, nodesToJSX }) => {
+    const children = nodesToJSX({ nodes: node.children })
+    return (
+      <blockquote className="body-large text-black border-l-4 border-black pl-4 my-6">
+        {children}
+      </blockquote>
+    )
+  },
+  upload: ({ node }) => {
+    const uploadNode = node
+    const value = uploadNode.value as { url?: string; alt?: string } | undefined
+    if (value?.url) {
+      const imageUrl = getMediaUrl(value.url)
+      if (!imageUrl || imageUrl === '') return null
+      const altText = value.alt ?? ''
+      return (
+        <div className="my-8 md:my-12 -mx-4 md:-mx-[30px] w-[calc(100%+2rem)] md:w-[calc(100%+60px)]">
+          <img
+            src={imageUrl}
+            alt={altText}
+            className="w-full h-[562px] md:h-[810px] object-cover object-center"
+          />
+        </div>
+      )
+    }
+    return null
+  },
+  horizontalrule: () => <hr className="my-8 border-black" />,
+})
 
 /**
  * RichTextContentBlock Component
  *
  * Renders free-form rich text content from Payload's Lexical editor
  * with article-style typography and layout.
- * 
+ *
+ * Uses PayloadCMS's official RichText component for complete Lexical support.
+ *
  * When a header is provided, renders a two-column layout (header left, content right).
  * When no header is provided, maintains backward-compatible right-aligned single-column layout.
  */
@@ -150,8 +143,6 @@ export function RichTextContentBlock({ data }: RichTextContentBlockProps) {
     return null
   }
 
-  const htmlContent = serializeLexicalToHTML(content)
-
   // Map headerType to heading tag and typography class
   const headingClasses: Record<string, string> = {
     h1: 'heading-1',
@@ -161,8 +152,8 @@ export function RichTextContentBlock({ data }: RichTextContentBlockProps) {
     h5: 'heading-5',
     h6: 'heading-6',
   }
-  const headingClass = headingClasses[headerType] || 'heading-2'
-  const headingLevel = headerType || 'h2'
+  const headingClass = headingClasses[headerType] ?? 'heading-2'
+  const headingLevel = headerType ?? 'h2'
 
   // Render header with appropriate heading tag
   const renderHeader = () => {
@@ -191,6 +182,26 @@ export function RichTextContentBlock({ data }: RichTextContentBlockProps) {
     }
   }
 
+  // Rich text content wrapped in styled container
+  const richTextContent = (
+    <div
+      className={cn(
+        'rich-text-content',
+        'flex flex-col gap-6 md:gap-[38px]',
+        header ? 'w-full md:w-[658px]' : 'max-w-full md:max-w-[710px]',
+        'shrink-0',
+        'text-black',
+        'relative' // For images to break out
+      )}
+    >
+      <RichText
+        data={content as SerializedEditorState}
+        converters={jsxConverters}
+        disableContainer
+      />
+    </div>
+  )
+
   // If header exists, render two-column layout
   if (header) {
     return (
@@ -200,16 +211,7 @@ export function RichTextContentBlock({ data }: RichTextContentBlockProps) {
             {/* Header on left */}
             {renderHeader()}
             {/* Content on right */}
-            <div
-              className={cn(
-                'flex flex-col gap-6 md:gap-[38px]',
-                'w-full md:w-[658px]',
-                'shrink-0',
-                'text-black',
-                'relative' // For images to break out
-              )}
-              dangerouslySetInnerHTML={{ __html: htmlContent }}
-            />
+            {richTextContent}
           </div>
         </div>
       </section>
@@ -221,15 +223,7 @@ export function RichTextContentBlock({ data }: RichTextContentBlockProps) {
     <section className="bg-white pt-[60px] md:pt-[100px] pb-0">
       <div className="container mx-auto">
         <div className="flex items-start justify-end w-full">
-          <div
-            className={cn(
-              'flex flex-col gap-6 md:gap-[38px]',
-              'max-w-full md:max-w-[710px]',
-              'text-black',
-              'relative' // For images to break out
-            )}
-            dangerouslySetInnerHTML={{ __html: htmlContent }}
-          />
+          {richTextContent}
         </div>
       </div>
     </section>
@@ -237,5 +231,3 @@ export function RichTextContentBlock({ data }: RichTextContentBlockProps) {
 }
 
 export default RichTextContentBlock
-
-
