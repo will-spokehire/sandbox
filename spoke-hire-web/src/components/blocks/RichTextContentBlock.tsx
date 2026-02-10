@@ -52,9 +52,14 @@ const jsxConverters: JSXConvertersFunction<DefaultNodeTypes> = ({
     const children = nodesToJSX({ nodes: node.children })
     // Use node.tag to get the proper HTML element (ol/ul)
     const Tag = node.tag as 'ol' | 'ul'
+    // Get the start attribute for ordered lists (Lexical stores this for list continuation)
+    const listNode = node as { start?: number }
+    const start = listNode.start
     if (isOrdered) {
       return (
-        <Tag className="pl-6 space-y-2 body-large text-black">{children}</Tag>
+        <Tag className="pl-6 space-y-2 body-large text-black" start={start}>
+          {children}
+        </Tag>
       )
     }
     return (
@@ -69,9 +74,15 @@ const jsxConverters: JSXConvertersFunction<DefaultNodeTypes> = ({
       (child: { type?: string }) => child.type === 'list'
     )
     const children = nodesToJSX({ nodes: node.children })
+    // Get the value attribute for list items (Lexical stores this for item numbering)
+    const listItemNode = node as { value?: number }
+    const value = listItemNode.value
     // Hide the bullet/number for list items that contain nested lists
     return (
-      <li style={hasSubLists ? { listStyleType: 'none' } : undefined}>
+      <li
+        style={hasSubLists ? { listStyleType: 'none' } : undefined}
+        value={value}
+      >
         {children}
       </li>
     )
