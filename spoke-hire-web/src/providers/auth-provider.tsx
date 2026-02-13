@@ -8,7 +8,7 @@ import {
   useMemo,
   type ReactNode,
 } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import type { User } from '@prisma/client';
 import { createClient } from '~/lib/supabase/client';
 import { api } from '~/trpc/react';
@@ -228,16 +228,18 @@ export function useRequireAuth() {
 export function useRequireAdmin() {
   const context = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!context.isLoading) {
       if (!context.isAuthenticated) {
-        router.push('/auth/login');
+        const callbackUrl = pathname ? encodeURIComponent(pathname) : '';
+        router.push(callbackUrl ? `/auth/login?callbackUrl=${callbackUrl}` : '/auth/login');
       } else if (context.user?.userType !== 'ADMIN') {
         router.push('/');
       }
     }
-  }, [context.isLoading, context.isAuthenticated, context.user, router]);
+  }, [context.isLoading, context.isAuthenticated, context.user, router, pathname]);
 
   return context;
 }

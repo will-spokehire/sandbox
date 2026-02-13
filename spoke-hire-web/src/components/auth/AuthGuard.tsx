@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, type ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '~/providers/auth-provider';
 
 interface AuthGuardProps {
@@ -32,16 +32,18 @@ export function AuthGuard({
 }: AuthGuardProps) {
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!isLoading) {
       if (!isAuthenticated) {
-        router.push('/auth/login');
+        const callbackUrl = pathname ? encodeURIComponent(pathname) : '';
+        router.push(callbackUrl ? `/auth/login?callbackUrl=${callbackUrl}` : '/auth/login');
       } else if (requireAdmin && user?.userType !== 'ADMIN') {
         router.push('/');
       }
     }
-  }, [isLoading, isAuthenticated, requireAdmin, user, router]);
+  }, [isLoading, isAuthenticated, requireAdmin, user, router, pathname]);
 
   if (isLoading) {
     return fallback ?? <AuthGuardLoading />;
