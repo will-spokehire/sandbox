@@ -76,8 +76,8 @@ Any Status → ARCHIVED (User or Admin)
 **Variables:**
 - `{{ownerName}}` - Vehicle owner's first name
 - `{{vehicleName}}` - Full vehicle name (Make Model - Name)
-- `{{vehicleUrl}}` - Link to vehicle in user dashboard
-- `{{dashboardUrl}}` - Link to user's vehicles list
+- `{{vehicleUrl}}` - Link to public vehicle listing
+- `{{dashboardUrl}}` - Link to user's vehicles list (digital garage)
 
 **Sample Content:**
 ```
@@ -99,7 +99,7 @@ Manage your vehicles: {{dashboardUrl}}
 - `{{ownerName}}` - Vehicle owner's first name
 - `{{vehicleName}}` - Full vehicle name
 - `{{declinedReason}}` - Admin's feedback (minimum 10 characters)
-- `{{dashboardUrl}}` - Link to user's vehicles list
+- `{{dashboardUrl}}` - Link to user's vehicles list (digital garage)
 
 **Sample Content:**
 ```

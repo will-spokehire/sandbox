@@ -235,7 +235,7 @@ export class VehicleStatusService {
     // Get base URL (auto-detects Vercel preview URLs)
     const baseUrl = getAppUrl();
     const dashboardUrl = `${baseUrl}/user/vehicles`;
-    const userVehicleUrl = `${baseUrl}/user/vehicles/${vehicle.id}`;
+    const publicVehicleUrl = `${baseUrl}/vehicles/${vehicle.id}`;
     const adminVehicleUrl = `${baseUrl}/admin/vehicles/${vehicle.id}`;
 
     try {
@@ -245,7 +245,7 @@ export class VehicleStatusService {
           to: vehicle.owner.email,
           ownerName,
           vehicleName,
-          vehicleUrl: userVehicleUrl,
+          vehicleUrl: publicVehicleUrl,
           dashboardUrl,
         });
       }
