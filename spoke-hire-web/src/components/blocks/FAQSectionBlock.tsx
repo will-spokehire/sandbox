@@ -1,22 +1,15 @@
-'use client'
-
-import * as React from 'react'
 import Link from 'next/link'
 import { cn } from '~/lib/utils'
-import type { FAQSectionBlockData, FAQ } from '~/lib/payload-api'
+import type { FAQSectionBlockData } from '~/lib/payload-api'
 import { Button } from '~/components/ui/button'
 import { TYPOGRAPHY } from '~/lib/design-tokens'
 import { RichText, type JSXConvertersFunction } from '@payloadcms/richtext-lexical/react'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import type { DefaultNodeTypes } from '@payloadcms/richtext-lexical'
+import { FAQAccordionItem } from './FAQAccordionItem'
 
 interface FAQSectionBlockProps {
   data: FAQSectionBlockData
-}
-
-interface FAQItemProps {
-  faq: FAQ
-  defaultExpanded?: boolean
 }
 
 /**
@@ -60,39 +53,8 @@ const faqJsxConverters: JSXConvertersFunction<DefaultNodeTypes> = ({
 })
 
 /**
- * Plus icon component that transforms to minus when expanded
- * Uses accordian-icon.svg from public folder
- * 16px size matching Figma design
- */
-function PlusIcon({ isOpen, className }: { isOpen: boolean; className?: string }) {
-  return (
-    <div className={cn('w-4 h-4 shrink-0 relative', className)} aria-hidden="true">
-      <img
-        src="/accordian-icon.svg"
-        alt=""
-        className={cn(
-          'w-full h-full transition-opacity duration-200',
-          isOpen && 'opacity-0'
-        )}
-      />
-      {/* Minus icon when expanded - hide vertical line */}
-      <svg
-        className={cn(
-          'absolute inset-0 w-full h-full transition-opacity duration-200',
-          isOpen ? 'opacity-100' : 'opacity-0'
-        )}
-        viewBox="0 0 16 16"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <line x1="2" y1="8" x2="13" y2="8" stroke="currentColor" />
-      </svg>
-    </div>
-  )
-}
-
-/**
  * Render rich text content using PayloadCMS RichText component
+ * Server-compatible - no client hooks
  */
 function RichTextContent({ content }: { content: unknown }) {
   if (!content || typeof content !== 'object') {
@@ -109,63 +71,15 @@ function RichTextContent({ content }: { content: unknown }) {
 }
 
 /**
- * Individual FAQ Item with accordion functionality
- * Matches Figma design with proper typography and spacing
- */
-function FAQItem({ faq, defaultExpanded = false }: FAQItemProps) {
-  const [isOpen, setIsOpen] = React.useState(defaultExpanded)
-  const contentRef = React.useRef<HTMLDivElement>(null)
-  const [contentHeight, setContentHeight] = React.useState<number | undefined>(
-    defaultExpanded ? undefined : 0
-  )
-
-  React.useEffect(() => {
-    if (contentRef.current) {
-      setContentHeight(isOpen ? contentRef.current.scrollHeight : 0)
-    }
-  }, [isOpen])
-
-  return (
-    <div className="border-b border-white w-full">
-      <button
-        type="button"
-        className="flex w-full items-center justify-between py-[6px] text-left"
-        onClick={() => setIsOpen(!isOpen)}
-        aria-expanded={isOpen}
-      >
-        <span className={cn(TYPOGRAPHY.bodyLarge, 'text-spoke-black flex-1 min-w-0')}>
-          {faq.question}
-        </span>
-        <div className="shrink-0">
-          <PlusIcon isOpen={isOpen} className="text-spoke-black" />
-        </div>
-      </button>
-      <div
-        className="overflow-hidden transition-[height] duration-300 ease-in-out"
-        style={{ height: contentHeight }}
-        aria-hidden={!isOpen}
-      >
-        <div ref={contentRef} className="pt-4 pb-0">
-          <div className={cn(TYPOGRAPHY.bodyLarge, 'text-spoke-black rich-text-content')}>
-            {typeof faq.answer === 'string' ? (
-              <p>{faq.answer}</p>
-            ) : (
-              <RichTextContent content={faq.answer} />
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/**
- * FAQSectionBlock Component
+ * FAQSectionBlock Component - SERVER COMPONENT
  *
  * Displays frequently asked questions matching Figma design specifications.
  * Desktop: 64px title, 22px text, 40px gaps
  * Mobile: 42px title, 18px text, 30px gaps
- * Simplified to only support manual FAQ selection
+ * 
+ * All FAQ content (questions AND answers) is server-rendered for SEO.
+ * Crawlers see all Q&A content in the DOM.
+ * The FAQAccordionItem client component handles only the toggle animation.
  */
 export function FAQSectionBlock({ data }: FAQSectionBlockProps) {
   const {
@@ -181,9 +95,9 @@ export function FAQSectionBlock({ data }: FAQSectionBlockProps) {
 
   return (
     <section className="bg-white pt-[60px] pb-0">
-      <div >
+      <div>
         <div className="flex flex-col gap-[30px] md:gap-10 w-full">
-          {/* Title Section */}
+          {/* Title Section - Server Rendered */}
           {(title ?? subtitle) && (
             <div className="flex flex-col gap-[30px] md:gap-10 items-start justify-end w-full">
               {/* Title and Subtitle */}
@@ -212,10 +126,21 @@ export function FAQSectionBlock({ data }: FAQSectionBlockProps) {
             </div>
           )}
 
-          {/* Accordion List */}
+          {/* Accordion List - Server-rendered Q&A with client toggle */}
           <div className="flex flex-col gap-[14px] items-start w-full">
             {selectedFAQs.map((faq) => (
-              <FAQItem key={faq.id} faq={faq} defaultExpanded={defaultExpanded} />
+              <FAQAccordionItem 
+                key={faq.id} 
+                question={faq.question}
+                defaultExpanded={defaultExpanded}
+              >
+                {/* Server-rendered answer content - visible to crawlers */}
+                {typeof faq.answer === 'string' ? (
+                  <p>{faq.answer}</p>
+                ) : (
+                  <RichTextContent content={faq.answer} />
+                )}
+              </FAQAccordionItem>
             ))}
           </div>
         </div>

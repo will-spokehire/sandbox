@@ -1,106 +1,90 @@
-'use client'
-
-import * as React from 'react'
 import Image from 'next/image'
 import { cn } from '~/lib/utils'
 import type { ImageCarouselBlockData } from '~/lib/payload-api'
 import { getMediaUrl } from '~/lib/payload-api'
-import { LAYOUT_CONSTANTS } from '~/lib/design-tokens'
+import { ImageCarouselClient } from './ImageCarouselClient'
 
 interface ImageCarouselBlockProps {
   data: ImageCarouselBlockData
 }
 
 /**
- * ImageCarouselBlock Component
+ * ImageCarouselBlock Component - SERVER COMPONENT
  *
  * Pure image carousel with auto-play functionality.
  * Supports separate mobile and desktop images.
  * No text overlays, navigation arrows, or dots - just images.
+ * 
+ * All images are server-rendered for SEO (crawlers see all images in DOM).
+ * The ImageCarouselClient component handles only autoplay and visibility toggling.
  */
 export function ImageCarouselBlock({ data }: ImageCarouselBlockProps) {
   const { images, autoplay = true, autoplayDelay = 5 } = data
-  const [currentIndex, setCurrentIndex] = React.useState(0)
-  const [isMobile, setIsMobile] = React.useState(false)
-  const timerRef = React.useRef<NodeJS.Timeout | null>(null)
-
-  const totalImages = images?.length || 0
-
-  // Detect mobile viewport
-  React.useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768) // md breakpoint
-    }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
-
-  // Handle autoplay
-  React.useEffect(() => {
-    if (!autoplay || totalImages <= 1) return
-
-    timerRef.current = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % totalImages)
-    }, autoplayDelay * 1000) // Convert seconds to milliseconds
-
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current)
-      }
-    }
-  }, [autoplay, totalImages, autoplayDelay])
 
   if (!images || images.length === 0) {
     return null
   }
 
-  const currentImage = images[currentIndex]
-
-  // Determine which image to show (mobile or desktop)
-  const imageToShow = isMobile && currentImage?.mobileImage
-    ? currentImage?.mobileImage
-    : currentImage?.desktopImage
-
-  if (!imageToShow) {
-    return null
-  }
+  const totalImages = images.length
 
   return (
     <section className="relative w-full overflow-hidden bg-white pt-[40px] pb-0">
-      <div >
-        <div className="relative w-full h-[50vh] md:h-[60vh] lg:h-[813px]">
-        {images.map((image, index) => {
-          const displayImage = isMobile && image.mobileImage
-            ? image.mobileImage
-            : image.desktopImage
+      <div>
+        <ImageCarouselClient 
+          autoplay={autoplay} 
+          autoplayDelay={autoplayDelay}
+          imageCount={totalImages}
+        >
+          {/* All images are server-rendered - visible to crawlers */}
+          {images.map((image, index) => {
+            const desktopImage = image.desktopImage
+            const mobileImage = image.mobileImage
+            const hasMobileImage = !!mobileImage
 
-          if (!displayImage) return null
+            if (!desktopImage) return null
 
-          return (
-            <div
-              key={image.id}
-              className={cn(
-                'absolute inset-0',
-                index === currentIndex ? '' : 'hidden pointer-events-none'
-              )}
-              role="group"
-              aria-roledescription="slide"
-              aria-label={`Image ${index + 1} of ${totalImages}`}
-              aria-hidden={index !== currentIndex}
-            >
-              <Image
-                src={getMediaUrl(displayImage.url)}
-                alt={image.alt || `Carousel image ${index + 1}`}
-                fill
-                className="object-cover object-center"
-                priority={index === 0}
-                sizes="100vw"
-              />
-            </div>
-          )
-        })}
-        </div>
+            return (
+              <div
+                key={image.id}
+                data-slide={index}
+                data-has-mobile={hasMobileImage ? 'true' : 'false'}
+                className={cn(
+                  'absolute inset-0',
+                  index === 0 ? 'block' : 'hidden'
+                )}
+                role="group"
+                aria-roledescription="slide"
+                aria-label={`Image ${index + 1} of ${totalImages}`}
+              >
+                {/* Desktop Image */}
+                <div data-image-type="desktop" className="block w-full h-full">
+                  <Image
+                    src={getMediaUrl(desktopImage.url)}
+                    alt={image.alt || `Carousel image ${index + 1}`}
+                    fill
+                    className="object-cover object-center"
+                    priority={index === 0}
+                    sizes="100vw"
+                  />
+                </div>
+
+                {/* Mobile Image (if exists) */}
+                {mobileImage && (
+                  <div data-image-type="mobile" className="hidden w-full h-full">
+                    <Image
+                      src={getMediaUrl(mobileImage.url)}
+                      alt={image.alt || `Carousel image ${index + 1}`}
+                      fill
+                      className="object-cover object-center"
+                      priority={index === 0}
+                      sizes="100vw"
+                    />
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </ImageCarouselClient>
       </div>
     </section>
   )
