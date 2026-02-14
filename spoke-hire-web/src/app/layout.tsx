@@ -11,7 +11,6 @@ import { getAppUrl } from "~/lib/app-url";
 import { AnalyticsProvider } from "~/components/analytics/AnalyticsProvider";
 import { CookieBanner } from "~/components/analytics/CookieBanner";
 import { env } from "~/env";
-import { MaxWidthWrapper } from "~/components/layout/MaxWidthWrapper";
 import {
   getSiteSettings,
   getFaviconUrl,
@@ -105,9 +104,7 @@ export default async function RootLayout({
           <AuthProvider>
             <Suspense fallback={null}>
               <AnalyticsProvider>
-                <MaxWidthWrapper>
-                  {children}
-                </MaxWidthWrapper>
+                {children}
                 <Toaster />
                 <CookieBanner />
               </AnalyticsProvider>

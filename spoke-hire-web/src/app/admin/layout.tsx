@@ -3,9 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Car, Mail, LayoutDashboard, Menu, Factory, CarFront } from "lucide-react";
+import { Car, Mail, LayoutDashboard, Menu, Factory, CarFront, X } from "lucide-react";
 import { Button } from "~/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "~/components/ui/sheet";
 import { UserMenu } from "~/components/auth/UserMenu";
 import { useRequireAdmin } from "~/providers/auth-provider";
 import { cn } from "~/lib/utils";
@@ -160,51 +159,56 @@ export default function AdminLayout({
             <div className="flex items-center gap-2">
               <UserMenu />
               {isMounted && (
-                <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-                  <SheetTrigger asChild>
-                    <Button variant="outline" size="icon">
-                      <Menu className="h-5 w-5" />
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent side="right" className="w-64 p-0">
-                    <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                    <SheetDescription className="sr-only">
-                      Main navigation menu for the admin panel
-                    </SheetDescription>
-                    <div className="flex flex-col h-full">
-                      {/* Mobile Menu Header */}
-                      <div className="flex items-center justify-between px-4 py-5 border-b">
-                        <span className="text-lg font-semibold">Menu</span>
-                      </div>
-                      
-                      {/* Mobile Navigation */}
-                      <div className="flex-1 px-3 py-4 overflow-y-auto">
-                        <NavLinks 
-                          pathname={pathname} 
-                          onClick={() => setMobileMenuOpen(false)} 
-                        />
-                      </div>
-
-                      {/* Mobile User Info */}
-                      <div className="border-t p-4">
-                        <div className="flex items-center gap-3">
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">
-                              {user.firstName ?? user.email}
-                            </p>
-                            <p className="body-xs text-muted-foreground truncate">
-                              {user.email}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </SheetContent>
-                </Sheet>
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+                >
+                  <Menu className="h-5 w-5" />
+                </Button>
               )}
             </div>
           </div>
         </div>
+        
+        {/* Fullscreen Mobile Menu */}
+        {isMounted && mobileMenuOpen && (
+          <div className="fixed inset-0 z-50 bg-white dark:bg-slate-800 flex flex-col">
+            {/* Menu Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+              <span className="text-lg font-bold text-slate-900 dark:text-slate-50">
+                Menu
+              </span>
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={() => setMobileMenuOpen(false)}
+                aria-label="Close menu"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+            
+            {/* Navigation Links */}
+            <div className="flex-1 px-4 py-6 overflow-y-auto">
+              <NavLinks 
+                pathname={pathname} 
+                onClick={() => setMobileMenuOpen(false)} 
+              />
+            </div>
+            
+            {/* User Info Footer */}
+            <div className="border-t border-slate-200 dark:border-slate-700 px-4 py-4">
+              <p className="text-sm font-medium text-slate-900 dark:text-slate-50 truncate">
+                {user.firstName ?? user.email}
+              </p>
+              <p className="body-xs text-slate-600 dark:text-slate-400 truncate">
+                {user.email}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Main Content */}

@@ -1,5 +1,6 @@
 import { PublicUserNavigation } from "~/components/navigation/PublicUserNavigation";
 import { PublicFooter } from "./_components/PublicFooter";
+import { MaxWidthWrapper } from "~/components/layout/MaxWidthWrapper";
 import { getNavigation } from "~/lib/payload-api";
 
 /**
@@ -16,11 +17,13 @@ export default async function PublicVehiclesLayout({
   const navigation = await getNavigation();
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <PublicUserNavigation navigation={navigation} />
-      <main className="flex-1">{children}</main>
-      <PublicFooter />
-    </div>
+    <MaxWidthWrapper>
+      <div className="flex min-h-screen flex-col">
+        <PublicUserNavigation navigation={navigation} />
+        <main className="flex-1">{children}</main>
+        <PublicFooter />
+      </div>
+    </MaxWidthWrapper>
   );
 }
 
