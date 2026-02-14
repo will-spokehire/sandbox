@@ -88,7 +88,9 @@ export function NavAuthSection({ navigation }: NavAuthSectionProps) {
     <>
       {/* Desktop Auth Buttons / User Menu */}
       <div className="hidden lg:flex lg:items-center lg:gap-4">
-        {!isLoading && !isAuthenticated && (
+        {/* Show login/signup by default to avoid hydration mismatch */}
+        {/* Hide once we confirm user is authenticated */}
+        {(!isMounted || isLoading || !isAuthenticated) && (
           <>
             <Button variant="ghost" asChild>
               <Link href="/auth/login">Login</Link>
@@ -98,7 +100,8 @@ export function NavAuthSection({ navigation }: NavAuthSectionProps) {
             </Button>
           </>
         )}
-        {isAuthenticated && !isLoading && (
+        {/* Show user menu only after mount + auth confirmed */}
+        {isMounted && !isLoading && isAuthenticated && (
           <UserMenu />
         )}
       </div>
@@ -168,7 +171,8 @@ export function NavAuthSection({ navigation }: NavAuthSectionProps) {
                 })}
 
                 {/* Auth Buttons for Non-Authenticated Users in Mobile */}
-                {!isLoading && !isAuthenticated && (
+                {/* Show by default to match server render, hide once auth is confirmed */}
+                {(isLoading || !isAuthenticated) && (
                   <>
                     <Separator className="my-2" />
                     <Button variant="ghost" className="w-full justify-center" asChild>
