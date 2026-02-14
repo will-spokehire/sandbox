@@ -722,7 +722,7 @@ export class DealService {
     const dealName = `Enquiry from ${firstName} ${lastName}`;
 
     // Use transaction to ensure data consistency
-    const deal = await this.repository.transaction(async (tx) => {
+    const { deal, vehicleName } = await this.repository.transaction(async (tx) => {
       const dealRepo = new DealRepository(tx);
       const userRepo = new UserRepository(tx);
       
@@ -740,6 +740,7 @@ export class DealService {
       
       // Validate vehicle exists and get owner if provided
       let vehicleOwnerId: string | undefined;
+      let vehicleName: string | null = null;
       if (vehicleId) {
         const vehicleExists = await dealRepo.validateVehiclesExist([vehicleId]);
         if (!vehicleExists) {
@@ -749,20 +750,21 @@ export class DealService {
           });
         }
         
-        // Get the vehicle owner to add as recipient
+        // Get the vehicle owner and name to add as recipient
         const vehicle = await tx.vehicle.findUnique({
           where: { id: vehicleId },
-          select: { ownerId: true },
+          select: { ownerId: true, name: true },
         });
         
         if (vehicle) {
           vehicleOwnerId = vehicle.ownerId;
+          vehicleName = vehicle.name;
           console.log(`[Enquiry] Adding vehicle owner ${vehicleOwnerId} as recipient for deal`);
         }
       }
 
       // Create deal with optional vehicle and owner as recipient
-      return await dealRepo.createWithRelations({
+      const deal = await dealRepo.createWithRelations({
         name: dealName,
         dealType,
         date,
@@ -779,6 +781,8 @@ export class DealService {
         vehicleIds: vehicleId ? [vehicleId] : [],
         recipientIds: vehicleOwnerId ? [vehicleOwnerId] : [], // Add vehicle owner as recipient
       });
+
+      return { deal, vehicleName };
     });
 
     // Send email notifications (don't block on email failures)
@@ -798,7 +802,7 @@ export class DealService {
       
       // Send admin notification
       if (adminEmail) {
-        await emailService.sendAdminEnquiryNotification({
+        const adminResult = await emailService.sendAdminEnquiryNotification({
           to: adminEmail,
           userName: `${firstName} ${lastName}`,
           userEmail: email,
@@ -810,19 +814,25 @@ export class DealService {
           time: time ?? null,
           location: location ?? null,
           brief: brief ?? null,
-          vehicleName: vehicleId ? "Vehicle attached" : null, // We could fetch vehicle name if needed
+          vehicleName: vehicleName ?? null,
           dealUrl: `${env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'}/admin/deals/${deal.id}`,
         });
+        if (!adminResult.success) {
+          console.warn(`[Enquiry] Admin notification email failed for deal ${deal.id}:`, adminResult.error);
+        }
       } else {
         console.warn("ADMIN_NOTIFICATION_EMAIL not configured - skipping admin notification");
       }
 
       // Send user confirmation
-      await emailService.sendUserEnquiryConfirmation({
+      const userResult = await emailService.sendUserEnquiryConfirmation({
         to: email,
         userName: firstName,
         dealType: getDealTypeLabel(dealType),
       });
+      if (!userResult.success) {
+        console.warn(`[Enquiry] User confirmation email failed for deal ${deal.id}:`, userResult.error);
+      }
     } catch (error) {
       // Log error but don't fail the enquiry creation
       console.error(`Failed to send enquiry notification emails:`, error);
