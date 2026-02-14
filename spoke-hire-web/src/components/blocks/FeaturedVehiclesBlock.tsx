@@ -4,7 +4,8 @@ import { cn } from '~/lib/utils'
 import type { FeaturedVehiclesBlockData } from '~/lib/payload-api'
 import { Button } from '~/components/ui/button'
 import { LAYOUT_CONSTANTS, CARD_STYLES } from '~/lib/design-tokens'
-import { api } from '~/trpc/server'
+import { db } from '~/server/db'
+import { ServiceFactory } from '~/server/api/services/service-factory'
 import { FeaturedVehiclesCarousel } from './FeaturedVehiclesCarousel'
 
 interface FeaturedVehiclesBlockProps {
@@ -116,27 +117,52 @@ export async function FeaturedVehiclesBlock({ data }: FeaturedVehiclesBlockProps
     showMobileButton = true,
   } = data
 
-  // Server-side data fetching
+  // Server-side data fetching using service directly (bypasses tRPC headers() for static generation)
   let vehicles: Vehicle[] = []
 
+  // Map service result to public vehicle format (same as tRPC router)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mapToPublicVehicle = (v: any): Vehicle => ({
+    id: v.id,
+    name: v.name,
+    year: v.year,
+    make: { name: v.make.name },
+    model: { name: v.model.name },
+    media: v.media.map((m: { publishedUrl: string | null; originalUrl: string }) => ({
+      publishedUrl: m.publishedUrl,
+      originalUrl: m.originalUrl,
+    })),
+    collections: v.collections,
+    owner: {
+      city: v.owner.city,
+      county: v.owner.county,
+      country: v.owner.country,
+    },
+  })
+
   try {
+    const vehicleService = ServiceFactory.createVehicleService(db)
+
     if (selectionType === 'latest') {
-      const result = await api.publicVehicle.list({
+      const result = await vehicleService.listVehicles({
+        status: 'PUBLISHED',
         limit: limit ?? 6,
         sortBy: 'createdAt',
         sortOrder: 'desc',
       })
-      vehicles = result.vehicles as Vehicle[]
+      vehicles = result.vehicles.map(mapToPublicVehicle)
     } else if (selectionType === 'manual' && vehicleIds && vehicleIds.length > 0) {
-      // Fetch manual vehicles in parallel
+      // Fetch manual vehicles using vehicleIds filter
       const manualVehicleIds = vehicleIds.map((v) => v.vehicleId).filter(Boolean)
-      const vehiclePromises = manualVehicleIds.map((id) =>
-        api.publicVehicle.getById({ id }).catch(() => null)
-      )
-      const results = await Promise.all(vehiclePromises)
-      vehicles = results.filter(
-        (v): v is NonNullable<typeof v> => v !== null && v !== undefined
-      ) as Vehicle[]
+      const result = await vehicleService.listVehicles({
+        status: 'PUBLISHED',
+        vehicleIds: manualVehicleIds,
+      })
+      // Map and preserve the order from vehicleIds
+      const vehicleMap = new Map(result.vehicles.map((v) => [v.id, mapToPublicVehicle(v)]))
+      vehicles = manualVehicleIds
+        .map((id) => vehicleMap.get(id))
+        .filter((v): v is Vehicle => v !== undefined)
     }
   } catch (error) {
     console.error('Error fetching featured vehicles:', error)

@@ -11,6 +11,12 @@ import {
 } from '~/lib/seo';
 
 /**
+ * Enable Incremental Static Regeneration (ISR)
+ * Revalidate every hour to keep featured vehicles fresh while benefiting from static generation
+ */
+export const revalidate = 3600; // 1 hour
+
+/**
  * Generate metadata for the homepage
  */
 export async function generateMetadata(): Promise<Metadata> {

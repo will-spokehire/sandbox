@@ -75,6 +75,12 @@ export interface VehicleWithRelations {
     firstName: string | null;
     lastName: string | null;
     phone: string | null;
+    postcode: string | null;
+    city: string | null;
+    county: string | null;
+    latitude: number | null;
+    longitude: number | null;
+    country: { id: string; name: string } | null;
   };
   media: Array<{
     id: string;
