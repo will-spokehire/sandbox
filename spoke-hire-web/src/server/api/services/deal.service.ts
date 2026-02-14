@@ -27,6 +27,7 @@ import { EmailService } from "./email.service";
 import { DealRepository } from "../repositories/deal.repository";
 import { UserRepository } from "../repositories/user.repository";
 import { getDealTypeLabel } from "~/lib/deals";
+import { getAppUrl } from "~/lib/app-url";
 import { env } from "~/env";
 import type {
   CreateDealParams,
@@ -815,7 +816,7 @@ export class DealService {
           location: location ?? null,
           brief: brief ?? null,
           vehicleName: vehicleName ?? null,
-          dealUrl: `${env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'}/admin/deals/${deal.id}`,
+          dealUrl: `${getAppUrl()}/admin/deals/${deal.id}`,
         });
         if (!adminResult.success) {
           console.warn(`[Enquiry] Admin notification email failed for deal ${deal.id}:`, adminResult.error);
