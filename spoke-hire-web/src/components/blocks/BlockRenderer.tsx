@@ -15,6 +15,8 @@ import { NumberedListBlock } from './NumberedListBlock'
 interface BlockRendererProps {
   block: PageBlock
   index: number
+  /** Whether this is the first block on the page (used for LCP optimization) */
+  isFirstBlock?: boolean
 }
 
 /**
@@ -25,7 +27,7 @@ interface BlockRendererProps {
  * Handles mobile visibility using CSS (hideOnMobile field).
  * Uses Tailwind's `hidden sm:block` to hide on mobile (< 640px) and show on desktop (>= 640px).
  */
-export function BlockRenderer({ block, index }: BlockRendererProps) {
+export function BlockRenderer({ block, index, isFirstBlock = false }: BlockRendererProps) {
   // Render the block content based on type
   let blockContent: React.ReactNode
 
@@ -55,11 +57,11 @@ export function BlockRenderer({ block, index }: BlockRendererProps) {
       break
 
     case 'featured-vehicles':
-      blockContent = <FeaturedVehiclesBlock key={index} data={block} />
+      blockContent = <FeaturedVehiclesBlock key={index} data={block} isLCPCandidate={isFirstBlock} />
       break
 
     case 'image-carousel':
-      blockContent = <ImageCarouselBlock key={index} data={block} />
+      blockContent = <ImageCarouselBlock key={index} data={block} isLCPCandidate={isFirstBlock} />
       break
 
     case 'spacer':
@@ -67,7 +69,7 @@ export function BlockRenderer({ block, index }: BlockRendererProps) {
       break
 
     case 'project-spotlight':
-      blockContent = <SpotlightBlock key={index} data={block} />
+      blockContent = <SpotlightBlock key={index} data={block} isLCPCandidate={isFirstBlock} />
       break
 
     case 'numbered-list':

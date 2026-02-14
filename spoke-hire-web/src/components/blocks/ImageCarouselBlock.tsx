@@ -6,6 +6,8 @@ import { ImageCarouselClient } from './ImageCarouselClient'
 
 interface ImageCarouselBlockProps {
   data: ImageCarouselBlockData
+  /** Whether this block is a candidate for LCP (Largest Contentful Paint) optimization */
+  isLCPCandidate?: boolean
 }
 
 /**
@@ -18,7 +20,7 @@ interface ImageCarouselBlockProps {
  * All images are server-rendered for SEO (crawlers see all images in DOM).
  * The ImageCarouselClient component handles only autoplay and visibility toggling.
  */
-export function ImageCarouselBlock({ data }: ImageCarouselBlockProps) {
+export function ImageCarouselBlock({ data, isLCPCandidate = false }: ImageCarouselBlockProps) {
   const { images, autoplay = true, autoplayDelay = 5 } = data
 
   if (!images || images.length === 0) {
@@ -57,27 +59,29 @@ export function ImageCarouselBlock({ data }: ImageCarouselBlockProps) {
                 aria-label={`Image ${index + 1} of ${totalImages}`}
               >
                 {/* Desktop Image */}
-                <div data-image-type="desktop" className="block w-full h-full">
+                <div data-image-type="desktop" className="relative block w-full h-full">
                   <Image
                     src={getMediaUrl(desktopImage.url)}
                     alt={image.alt || `Carousel image ${index + 1}`}
                     fill
                     className="object-cover object-center"
                     priority={index === 0}
-                    sizes="100vw"
+                    fetchPriority={index === 0 ? 'high' : 'auto'}
+                    sizes="(max-width: 768px) calc(100vw - 32px), (max-width: 1572px) calc(100vw - 60px), 1452px"
                   />
                 </div>
 
                 {/* Mobile Image (if exists) */}
                 {mobileImage && (
-                  <div data-image-type="mobile" className="hidden w-full h-full">
+                  <div data-image-type="mobile" className="relative hidden w-full h-full">
                     <Image
                       src={getMediaUrl(mobileImage.url)}
                       alt={image.alt || `Carousel image ${index + 1}`}
                       fill
                       className="object-cover object-center"
                       priority={index === 0}
-                      sizes="100vw"
+                      fetchPriority={index === 0 ? 'high' : 'auto'}
+                      sizes="(max-width: 768px) calc(100vw - 32px), (max-width: 1572px) calc(100vw - 60px), 1452px"
                     />
                   </div>
                 )}

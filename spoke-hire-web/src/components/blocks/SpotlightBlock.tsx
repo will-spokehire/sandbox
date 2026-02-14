@@ -5,6 +5,8 @@ import { SpotlightCarousel } from './SpotlightCarousel'
 
 interface SpotlightBlockProps {
   data: SpotlightBlockData
+  /** Whether this block is a candidate for LCP (Largest Contentful Paint) optimization */
+  isLCPCandidate?: boolean
 }
 
 /**
@@ -18,7 +20,7 @@ interface SpotlightBlockProps {
  * All spotlight content is server-rendered for SEO.
  * The SpotlightCarousel client component handles only the interactive parts.
  */
-export function SpotlightBlock({ data }: SpotlightBlockProps) {
+export function SpotlightBlock({ data, isLCPCandidate = false }: SpotlightBlockProps) {
   const { title, selectedSpotlights, showArrows, itemsPerView = 4 } = data
 
   if (!selectedSpotlights || selectedSpotlights.length === 0) {
@@ -56,6 +58,7 @@ export function SpotlightBlock({ data }: SpotlightBlockProps) {
               imageAlt={item.image.alt}
               href={item.link}
               titleSize="h4"
+              priority={index === 0 && isLCPCandidate}
             />
           ))}
         </SpotlightCarousel>

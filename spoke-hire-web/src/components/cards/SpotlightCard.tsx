@@ -22,6 +22,8 @@ export interface SpotlightCardProps {
   subtitle?: string
   /** Title size variant - 'h4' for 32px (Figma design), 'h5' for 24px (default) */
   titleSize?: 'h4' | 'h5'
+  /** Whether this image should be prioritized for LCP optimization */
+  priority?: boolean
 }
 
 /**
@@ -51,6 +53,7 @@ export function SpotlightCard({
   onClick,
   subtitle,
   titleSize = 'h5',
+  priority = false,
 }: SpotlightCardProps) {
   const defaultAlt = imageAlt ?? title
   const titleClass = titleSize === 'h4' ? 'heading-4' : 'heading-5'
@@ -65,6 +68,8 @@ export function SpotlightCard({
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-105"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          priority={priority}
+          fetchPriority={priority ? 'high' : 'auto'}
         />
       </div>
 

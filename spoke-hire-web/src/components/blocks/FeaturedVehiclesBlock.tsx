@@ -10,6 +10,8 @@ import { FeaturedVehiclesCarousel } from './FeaturedVehiclesCarousel'
 
 interface FeaturedVehiclesBlockProps {
   data: FeaturedVehiclesBlockData
+  /** Whether this block is a candidate for LCP (Largest Contentful Paint) optimization */
+  isLCPCandidate?: boolean
 }
 
 // Vehicle type from API response
@@ -47,7 +49,7 @@ interface Vehicle {
  * Shows first image only (no client-side carousel within card).
  * Fully SEO-visible - crawlers see all vehicle info.
  */
-function StaticVehicleCard({ vehicle }: { vehicle: Vehicle }) {
+function StaticVehicleCard({ vehicle, priority = false }: { vehicle: Vehicle; priority?: boolean }) {
   const firstImage = vehicle.media[0]
   const imageUrl = firstImage?.publishedUrl ?? firstImage?.originalUrl ?? "/placeholder-vehicle.jpg"
   
@@ -74,6 +76,8 @@ function StaticVehicleCard({ vehicle }: { vehicle: Vehicle }) {
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover object-center group-hover:scale-105 transition-transform duration-300"
+            priority={priority}
+            fetchPriority={priority ? 'high' : 'auto'}
           />
         </div>
 
@@ -107,7 +111,7 @@ function StaticVehicleCard({ vehicle }: { vehicle: Vehicle }) {
  * - 'manual': Select specific vehicles by entering their IDs
  * - 'latest': Show the most recently added vehicles
  */
-export async function FeaturedVehiclesBlock({ data }: FeaturedVehiclesBlockProps) {
+export async function FeaturedVehiclesBlock({ data, isLCPCandidate = false }: FeaturedVehiclesBlockProps) {
   const {
     title,
     subtitle,
@@ -245,8 +249,8 @@ export async function FeaturedVehiclesBlock({ data }: FeaturedVehiclesBlockProps
 
         {/* Carousel Display - Client component wraps server-rendered cards */}
         <FeaturedVehiclesCarousel itemCount={vehicles.length} showMobileButton={showMobileButton}>
-          {vehicles.map((vehicle) => (
-            <StaticVehicleCard key={vehicle.id} vehicle={vehicle} />
+          {vehicles.map((vehicle, index) => (
+            <StaticVehicleCard key={vehicle.id} vehicle={vehicle} priority={index === 0 && isLCPCandidate} />
           ))}
         </FeaturedVehiclesCarousel>
 

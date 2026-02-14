@@ -78,7 +78,7 @@ export default async function Home() {
       <main>
         {page.layout && page.layout.length > 0 ? (
           page.layout.map((block, index) => (
-            <BlockRenderer key={`${block.blockType}-${index}`} block={block} index={index} />
+            <BlockRenderer key={`${block.blockType}-${index}`} block={block} index={index} isFirstBlock={index === 0} />
           ))
         ) : (
           <div className="container mx-auto px-4 py-16 text-center">
