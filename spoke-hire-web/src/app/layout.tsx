@@ -43,11 +43,14 @@ export default async function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const appUrl = getAppUrl();
   const isProduction = env.NODE_ENV === "production";
-  const gaId = env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
   
   // Fetch site settings to get logo URL for organization schema
   const siteSettings = await getSiteSettings();
   const logoUrl = getLogoUrl(siteSettings);
+  // Use ENV GA ID if set, otherwise fall back to CMS
+  const gaId = env.NEXT_PUBLIC_GA_MEASUREMENT_ID 
+    ?? siteSettings?.analytics?.googleAnalyticsId 
+    ?? null;
   
   // Organization structured data for the entire site
   const organizationSchema = {
