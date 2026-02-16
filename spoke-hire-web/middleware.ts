@@ -21,6 +21,7 @@ export async function middleware(request: NextRequest) {
   // Update the Supabase session (refresh tokens if needed)
   // This ensures cookies are kept up-to-date
   return await updateSession(request);
+  
 }
 
 /**
