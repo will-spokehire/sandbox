@@ -5,7 +5,7 @@
  * Google Analytics 4 and Amplitude.
  */
 
-import { initGA, trackPageView as gaPageView, trackEvent as gaEvent, setUserId as gaSetUserId, setUserProperties as gaSetUserProperties, resetGA } from "./google-analytics";
+import { initGA, trackPageView as gaPageView, trackEvent as gaEvent, setUserId as gaSetUserId, setUserProperties as gaSetUserProperties, resetGA, updateGtagConsent } from "./google-analytics";
 import { initAmplitude, trackAmplitudeEvent, identifyAmplitudeUser, setAmplitudeUserProperties, resetAmplitude } from "./amplitude";
 import { setConsentState as setConsentStorage, shouldTrack, devLog } from "./analytics-config";
 
@@ -21,6 +21,9 @@ export function initAnalytics(): void {
     devLog("Analytics", "init", { status: "skipped (no consent or not production)" });
     return;
   }
+  
+  // Update gtag consent mode for returning users who already gave consent
+  updateGtagConsent(true);
   
   initGA();
   initAmplitude();
@@ -92,6 +95,7 @@ export function setUserProperties(properties: Record<string, unknown>): void {
  */
 export function setConsent(granted: boolean): void {
   setConsentStorage(granted);
+  updateGtagConsent(granted);
   
   if (granted) {
     initAnalytics();

@@ -5,6 +5,17 @@
  */
 
 import ReactGA from "react-ga4";
+
+// Extend Window interface for gtag
+declare global {
+  interface Window {
+    gtag?: (
+      command: string,
+      action: string,
+      params?: Record<string, string>
+    ) => void;
+  }
+}
 import { 
   isGAEnabled, 
   GA_MEASUREMENT_ID, 
@@ -132,6 +143,27 @@ export function resetGA(): void {
     ReactGA.set({ userId: undefined });
   } catch (error) {
     console.error("[Analytics] GA reset failed:", error);
+  }
+}
+
+/**
+ * Update gtag consent mode
+ * This updates the consent state for GA4's consent mode API
+ */
+export function updateGtagConsent(granted: boolean): void {
+  if (typeof window === "undefined" || typeof window.gtag !== "function") {
+    devLog("GA", "updateGtagConsent", { granted, status: "skipped (no gtag)" });
+    return;
+  }
+
+  try {
+    window.gtag("consent", "update", {
+      analytics_storage: granted ? "granted" : "denied",
+      ad_storage: granted ? "granted" : "denied",
+    });
+    devLog("GA", "updateGtagConsent", { granted, status: "updated" });
+  } catch (error) {
+    console.error("[Analytics] GA consent update failed:", error);
   }
 }
 
