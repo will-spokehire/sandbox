@@ -1,18 +1,22 @@
 import type { MetadataRoute } from "next";
 import { db } from "~/server/db";
 import { getAppUrl } from "~/lib/app-url";
-import { getPageSlugs } from "~/lib/payload-api";
+import { getPublishedPages } from "~/lib/payload-api";
 
 /**
  * Dynamic Sitemap Generator
- * 
+ *
  * Generates XML sitemap for search engines with:
- * - All published vehicle pages
+ * - All published vehicle pages (with real lastModified dates)
  * - Vehicle catalogue page
- * - Popular filter combinations
- * 
- * Auto-updates as vehicles are published/unpublished
- * 
+ * - CMS static pages
+ *
+ * Query-string filter URLs are intentionally excluded — they contain
+ * unescaped '&' characters that produce invalid XML, and Google ignores
+ * query-string URLs in sitemaps anyway.
+ *
+ * Auto-updates as vehicles are published/unpublished.
+ *
  * Note: This is generated dynamically at runtime (not at build time)
  * to ensure it's always up-to-date with the latest vehicles
  */
@@ -41,96 +45,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   });
 
   try {
-    // 3. Fetch all published vehicles for individual pages using Prisma directly
+    // 3. Fetch all published vehicles with real updatedAt timestamps
     const vehicles = await db.vehicle.findMany({
       where: {
         status: "PUBLISHED",
       },
       select: {
         id: true,
+        updatedAt: true,
       },
       orderBy: {
         updatedAt: "desc",
       },
-      take: 1000, // Adjust if needed
+      take: 1000,
     });
 
-    // Add individual vehicle pages
+    // Add individual vehicle pages using real last-modified dates
     for (const vehicle of vehicles) {
       sitemapEntries.push({
         url: `${baseUrl}/vehicles/${vehicle.id}`,
-        lastModified: currentDate,
+        lastModified: vehicle.updatedAt.toISOString(),
         changeFrequency: "daily",
         priority: 0.8,
       });
-    }
-
-    // 4. Fetch filter options using Prisma directly
-    const [makes, collections, countries] = await Promise.all([
-      db.make.findMany({
-        where: {
-          vehicles: {
-            some: {
-              status: "PUBLISHED",
-            },
-          },
-        },
-        select: {
-          id: true,
-        },
-        take: 10,
-      }),
-      db.collection.findMany({
-        select: {
-          id: true,
-        },
-      }),
-      db.country.findMany({
-        select: {
-          id: true,
-        },
-        take: 5,
-      }),
-    ]);
-
-    // Add catalogue pages filtered by make (top makes)
-    for (const make of makes) {
-      sitemapEntries.push({
-        url: `${baseUrl}/vehicles?makeIds=${make.id}`,
-        lastModified: currentDate,
-        changeFrequency: "daily",
-        priority: 0.7,
-      });
-    }
-
-    // Add catalogue pages filtered by collection
-    for (const collection of collections) {
-      sitemapEntries.push({
-        url: `${baseUrl}/vehicles?collectionIds=${collection.id}`,
-        lastModified: currentDate,
-        changeFrequency: "daily",
-        priority: 0.7,
-      });
-    }
-
-    // Add catalogue pages filtered by country (top countries)
-    for (const country of countries) {
-      sitemapEntries.push({
-        url: `${baseUrl}/vehicles?countryIds=${country.id}`,
-        lastModified: currentDate,
-        changeFrequency: "daily",
-        priority: 0.6,
-      });
-
-      // Combine country with top makes for more specific pages
-      for (const make of makes.slice(0, 3)) {
-        sitemapEntries.push({
-          url: `${baseUrl}/vehicles?countryIds=${country.id}&makeIds=${make.id}`,
-          lastModified: currentDate,
-          changeFrequency: "weekly",
-          priority: 0.5,
-        });
-      }
     }
 
     console.log(`✅ Generated vehicle sitemap entries: ${sitemapEntries.length}`);
@@ -139,21 +76,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Continue to add CMS pages even if vehicle fetching fails
   }
 
-  // 5. Add CMS static pages
+  // 4. Add CMS static pages
   try {
-    const pageSlugs = await getPageSlugs();
-    for (const slug of pageSlugs) {
+    const pages = await getPublishedPages();
+    for (const page of pages) {
       // Skip 'home' as it's handled by the root URL
-      if (slug !== "home") {
+      if (page.slug !== "home") {
         sitemapEntries.push({
-          url: `${baseUrl}/${slug}`,
-          lastModified: currentDate,
+          url: `${baseUrl}/${page.slug}`,
+          lastModified: page.updatedAt,
           changeFrequency: "weekly",
           priority: 0.7,
         });
       }
     }
-    console.log(`✅ Added ${pageSlugs.filter((s) => s !== "home").length} CMS pages to sitemap`);
+    console.log(`✅ Added ${pages.filter((p) => p.slug !== "home").length} CMS pages to sitemap`);
   } catch (error) {
     console.error("Failed to fetch CMS pages for sitemap:", error);
     // Continue without CMS pages if fetching fails
