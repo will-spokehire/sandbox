@@ -22,6 +22,12 @@ import { getPublishedPages } from "~/lib/payload-api";
  */
 export const dynamic = 'force-dynamic';
 
+/** Ensure URLs are safe for XML by encoding any unescaped ampersands. */
+function sanitizeUrl(url: string): string {
+  // Replace bare & that are not already part of an XML entity (e.g. &amp;)
+  return url.replace(/&(?!(?:amp|lt|gt|quot|apos);)/g, "&amp;");
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getAppUrl();
   const currentDate = new Date().toISOString();
@@ -30,7 +36,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // 1. Home page
   sitemapEntries.push({
-    url: baseUrl,
+    url: sanitizeUrl(baseUrl),
     lastModified: currentDate,
     changeFrequency: "daily",
     priority: 1.0,
@@ -38,7 +44,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // 2. Vehicle catalogue page (main listing)
   sitemapEntries.push({
-    url: `${baseUrl}/vehicles`,
+    url: sanitizeUrl(`${baseUrl}/vehicles`),
     lastModified: currentDate,
     changeFrequency: "hourly",
     priority: 0.9,
@@ -63,7 +69,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Add individual vehicle pages using real last-modified dates
     for (const vehicle of vehicles) {
       sitemapEntries.push({
-        url: `${baseUrl}/vehicles/${vehicle.id}`,
+        url: sanitizeUrl(`${baseUrl}/vehicles/${vehicle.id}`),
         lastModified: vehicle.updatedAt.toISOString(),
         changeFrequency: "daily",
         priority: 0.8,
@@ -83,7 +89,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // Skip 'home' as it's handled by the root URL
       if (page.slug !== "home") {
         sitemapEntries.push({
-          url: `${baseUrl}/${page.slug}`,
+          url: sanitizeUrl(`${baseUrl}/${page.slug}`),
           lastModified: page.updatedAt,
           changeFrequency: "weekly",
           priority: 0.7,
