@@ -1,14 +1,14 @@
 /**
- * Google Analytics 4 Integration
- * 
- * Handles GA4 event tracking with Next.js router integration.
+ * Google Analytics 4 Integration (via GTM)
+ *
+ * All GA4 events are pushed to the dataLayer for GTM to process.
+ * The GA4 tag is configured inside GTM, not in code.
  */
 
-import ReactGA from "react-ga4";
-
-// Extend Window interface for gtag
+// Extend Window interface for gtag and dataLayer
 declare global {
   interface Window {
+    dataLayer?: Record<string, unknown>[];
     gtag?: (
       command: string,
       action: string,
@@ -16,34 +16,33 @@ declare global {
     ) => void;
   }
 }
-import { 
-  isGAEnabled, 
-  GA_MEASUREMENT_ID, 
+
+import {
+  isGAEnabled,
   shouldTrack,
-  devLog 
+  devLog
 } from "./analytics-config";
 
 let isInitialized = false;
 
 /**
- * Initialize Google Analytics
+ * Push an event to the GTM dataLayer
+ */
+function pushToDataLayer(data: Record<string, unknown>): void {
+  if (typeof window === "undefined") return;
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push(data);
+}
+
+/**
+ * Initialize Google Analytics (via GTM)
+ * GTM handles loading GA4, so this just marks as ready.
  */
 export function initGA(): void {
   if (!isGAEnabled || isInitialized) return;
-  
-  try {
-    ReactGA.initialize(GA_MEASUREMENT_ID, {
-      gtagOptions: {
-        anonymize_ip: true, // Anonymize IPs for privacy
-        cookie_flags: "SameSite=None;Secure", // Modern cookie settings
-      },
-    });
-    
-    isInitialized = true;
-    devLog("GA", "initialized");
-  } catch (error) {
-    console.error("[Analytics] GA initialization failed:", error);
-  }
+
+  isInitialized = true;
+  devLog("GA", "initialized (via GTM)");
 }
 
 /**
@@ -54,12 +53,12 @@ export function trackPageView(path: string, title?: string): void {
     devLog("GA", "pageview", { path, title });
     return;
   }
-  
+
   try {
-    ReactGA.send({ 
-      hitType: "pageview", 
-      page: path,
-      title 
+    pushToDataLayer({
+      event: "page_view",
+      page_path: path,
+      page_title: title,
     });
   } catch (error) {
     console.error("[Analytics] GA pageview failed:", error);
@@ -80,13 +79,13 @@ export function trackEvent(
     devLog("GA", "event", { category, action, label, value, ...additionalParams });
     return;
   }
-  
+
   try {
-    ReactGA.event({
-      category,
-      action,
-      label,
-      value,
+    pushToDataLayer({
+      event: action,
+      event_category: category,
+      event_label: label,
+      event_value: value,
       ...additionalParams,
     });
   } catch (error) {
@@ -102,13 +101,11 @@ export function setUserId(userId: string | null): void {
     devLog("GA", "setUserId", { userId });
     return;
   }
-  
+
   try {
-    if (userId) {
-      ReactGA.set({ userId });
-    } else {
-      ReactGA.set({ userId: undefined });
-    }
+    pushToDataLayer({
+      user_id: userId ?? undefined,
+    });
   } catch (error) {
     console.error("[Analytics] GA setUserId failed:", error);
   }
@@ -122,9 +119,11 @@ export function setUserProperties(properties: Record<string, string>): void {
     devLog("GA", "setUserProperties", properties);
     return;
   }
-  
+
   try {
-    ReactGA.set(properties);
+    pushToDataLayer({
+      user_properties: properties,
+    });
   } catch (error) {
     console.error("[Analytics] GA setUserProperties failed:", error);
   }
@@ -138,9 +137,11 @@ export function resetGA(): void {
     devLog("GA", "reset");
     return;
   }
-  
+
   try {
-    ReactGA.set({ userId: undefined });
+    pushToDataLayer({
+      user_id: undefined,
+    });
   } catch (error) {
     console.error("[Analytics] GA reset failed:", error);
   }
@@ -148,7 +149,9 @@ export function resetGA(): void {
 
 /**
  * Update gtag consent mode
- * This updates the consent state for GA4's consent mode API
+ * This updates the consent state for GA4's consent mode API.
+ * The gtag() helper is defined in layout.tsx and pushes to dataLayer,
+ * which GTM reads to process consent commands.
  */
 export function updateGtagConsent(granted: boolean): void {
   if (typeof window === "undefined" || typeof window.gtag !== "function") {
@@ -166,4 +169,3 @@ export function updateGtagConsent(granted: boolean): void {
     console.error("[Analytics] GA consent update failed:", error);
   }
 }
-

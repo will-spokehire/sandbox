@@ -1,7 +1,6 @@
 import "~/styles/globals.css";
 
 import { type Metadata } from "next";
-import Script from "next/script";
 import { Suspense } from "react";
 
 import { TRPCReactProvider } from "~/trpc/react";
@@ -46,11 +45,8 @@ export default async function RootLayout({
   // Fetch site settings to get logo URL for organization schema
   const siteSettings = await getSiteSettings();
   const logoUrl = getLogoUrl(siteSettings);
-  // Use ENV GA ID if set, otherwise fall back to CMS
-  const gaId = env.NEXT_PUBLIC_GA_MEASUREMENT_ID 
-    ?? siteSettings?.analytics?.googleAnalyticsId 
-    ?? null;
-  
+  const gtmId = env.NEXT_PUBLIC_GTM_ID ?? null;
+
   // Organization structured data for the entire site
   const organizationSchema = {
     "@context": "https://schema.org",
@@ -76,30 +72,47 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
         
-        {/* Google Analytics 4 - Only in production with valid ID */}
-        {isProduction && gaId && (
+        {/* Google Tag Manager - Only in production with valid ID */}
+        {isProduction && gtmId && (
           <>
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
-              strategy="afterInteractive"
+            {/* Consent defaults must be set BEFORE GTM loads */}
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('consent', 'default', {
+                    'analytics_storage': 'denied',
+                    'ad_storage': 'denied'
+                  });
+                `,
+              }}
             />
-            <Script id="google-analytics" strategy="afterInteractive">
-              {`
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                
-                // Wait for consent before initializing
-                gtag('consent', 'default', {
-                  'analytics_storage': 'denied',
-                  'ad_storage': 'denied'
-                });
-              `}
-            </Script>
+            {/* GTM container snippet */}
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+                  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+                  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+                  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+                  })(window,document,'script','dataLayer','${gtmId}');`,
+              }}
+            />
           </>
         )}
       </head>
       <body>
+        {/* GTM noscript fallback */}
+        {isProduction && gtmId && (
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+            />
+          </noscript>
+        )}
         <TRPCReactProvider>
           <AuthProvider>
             <Suspense fallback={null}>

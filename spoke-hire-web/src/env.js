@@ -44,6 +44,7 @@ export const env = createEnv({
     // Optional - auto-detects Vercel URL if not set
     NEXT_PUBLIC_APP_URL: z.string().url().optional(),
     // Analytics - Client-side tracking
+    NEXT_PUBLIC_GTM_ID: z.string().optional(),
     NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().optional(),
     NEXT_PUBLIC_AMPLITUDE_API_KEY: z.string().optional(),
   },
@@ -64,6 +65,7 @@ export const env = createEnv({
     GOOGLE_OAUTH_CLIENT_ID: process.env.GOOGLE_OAUTH_CLIENT_ID,
     GOOGLE_OAUTH_CLIENT_SECRET: process.env.GOOGLE_OAUTH_CLIENT_SECRET,
     AMPLITUDE_SERVER_API_KEY: process.env.AMPLITUDE_SERVER_API_KEY,
+    NEXT_PUBLIC_GTM_ID: process.env.NEXT_PUBLIC_GTM_ID,
     NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
     NEXT_PUBLIC_AMPLITUDE_API_KEY: process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY,
     // Email Service (Loops)

@@ -9,11 +9,13 @@
 export const isProduction = process.env.NODE_ENV === "production";
 
 // Analytics IDs (safe for client-side access with NEXT_PUBLIC_ prefix)
+export const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID ?? "";
 export const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "";
 export const AMPLITUDE_API_KEY = process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY ?? "";
 
 // Check if analytics is enabled (only in production and with proper keys)
-export const isGAEnabled = isProduction && !!GA_MEASUREMENT_ID;
+// GA4 is now managed via GTM, so check for GTM_ID
+export const isGAEnabled = isProduction && !!GTM_ID;
 export const isAmplitudeEnabled = isProduction && !!AMPLITUDE_API_KEY;
 
 // Consent state management
