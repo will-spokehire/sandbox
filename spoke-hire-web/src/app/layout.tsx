@@ -72,7 +72,7 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
         
-        {/* Google Tag Manager - Only in production with valid ID */}
+        {/* Google Tag Manager - loads in production when NEXT_PUBLIC_GTM_ID is set */}
         {isProduction && gtmId && (
           <>
             {/* Consent defaults must be set BEFORE GTM loads */}
