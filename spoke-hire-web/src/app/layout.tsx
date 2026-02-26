@@ -9,6 +9,7 @@ import { Toaster } from "~/components/ui/sonner";
 import { getAppUrl } from "~/lib/app-url";
 import { AnalyticsProvider } from "~/components/analytics/AnalyticsProvider";
 import { CookieBanner } from "~/components/analytics/CookieBanner";
+import { GoogleTagManager } from "~/components/analytics/GoogleTagManager";
 import { env } from "~/env";
 import {
   getSiteSettings,
@@ -71,48 +72,10 @@ export default async function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
-        
-        {/* Google Tag Manager - loads in production when NEXT_PUBLIC_GTM_ID is set */}
-        {isProduction && gtmId && (
-          <>
-            {/* Consent defaults must be set BEFORE GTM loads */}
-            <script
-              dangerouslySetInnerHTML={{
-                __html: `
-                  window.dataLayer = window.dataLayer || [];
-                  function gtag(){dataLayer.push(arguments);}
-                  gtag('consent', 'default', {
-                    'analytics_storage': 'denied',
-                    'ad_storage': 'denied'
-                  });
-                `,
-              }}
-            />
-            {/* GTM container snippet */}
-            <script
-              dangerouslySetInnerHTML={{
-                __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-                  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-                  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-                  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-                  })(window,document,'script','dataLayer','${gtmId}');`,
-              }}
-            />
-          </>
-        )}
       </head>
       <body>
-        {/* GTM noscript fallback */}
-        {isProduction && gtmId && (
-          <noscript>
-            <iframe
-              src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
-              height="0"
-              width="0"
-              style={{ display: "none", visibility: "hidden" }}
-            />
-          </noscript>
-        )}
+        {/* GTM - conditionally loaded based on route (excluded on admin pages) */}
+        {isProduction && gtmId && <GoogleTagManager gtmId={gtmId} />}
         <TRPCReactProvider>
           <AuthProvider>
             <Suspense fallback={null}>
