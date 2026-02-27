@@ -10,6 +10,7 @@
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { initAnalytics, trackPageView, hasConsent, isProduction } from "~/lib/analytics";
+import { isAnalyticsExcludedRoute } from "~/lib/analytics/route-exclusions";
 
 /**
  * AnalyticsProvider
@@ -23,14 +24,19 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
   const previousUrlRef = useRef<string>("");
 
   // Initialize analytics on mount (if consent is given or in dev mode)
+  // Skip on excluded routes (e.g. admin)
   useEffect(() => {
+    if (isAnalyticsExcludedRoute(pathname)) return;
     if (hasConsent() || !isProduction) {
       initAnalytics();
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Track page views on route changes
   useEffect(() => {
+    // Skip on excluded routes (e.g. admin)
+    if (isAnalyticsExcludedRoute(pathname)) return;
+
     // In production, require consent. In dev, always track for testing.
     if (!hasConsent() && isProduction) return;
 

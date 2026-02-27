@@ -1,7 +1,6 @@
 import "~/styles/globals.css";
 
 import { type Metadata } from "next";
-import Script from "next/script";
 import { Suspense } from "react";
 
 import { TRPCReactProvider } from "~/trpc/react";
@@ -10,6 +9,7 @@ import { Toaster } from "~/components/ui/sonner";
 import { getAppUrl } from "~/lib/app-url";
 import { AnalyticsProvider } from "~/components/analytics/AnalyticsProvider";
 import { CookieBanner } from "~/components/analytics/CookieBanner";
+import { GoogleTagManager } from "~/components/analytics/GoogleTagManager";
 import { env } from "~/env";
 import {
   getSiteSettings,
@@ -46,11 +46,8 @@ export default async function RootLayout({
   // Fetch site settings to get logo URL for organization schema
   const siteSettings = await getSiteSettings();
   const logoUrl = getLogoUrl(siteSettings);
-  // Use ENV GA ID if set, otherwise fall back to CMS
-  const gaId = env.NEXT_PUBLIC_GA_MEASUREMENT_ID 
-    ?? siteSettings?.analytics?.googleAnalyticsId 
-    ?? null;
-  
+  const gtmId = env.NEXT_PUBLIC_GTM_ID ?? null;
+
   // Organization structured data for the entire site
   const organizationSchema = {
     "@context": "https://schema.org",
@@ -75,31 +72,10 @@ export default async function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
-        
-        {/* Google Analytics 4 - Only in production with valid ID */}
-        {isProduction && gaId && (
-          <>
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
-              strategy="afterInteractive"
-            />
-            <Script id="google-analytics" strategy="afterInteractive">
-              {`
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                
-                // Wait for consent before initializing
-                gtag('consent', 'default', {
-                  'analytics_storage': 'denied',
-                  'ad_storage': 'denied'
-                });
-              `}
-            </Script>
-          </>
-        )}
       </head>
       <body>
+        {/* GTM - conditionally loaded based on route (excluded on admin pages) */}
+        {isProduction && gtmId && <GoogleTagManager gtmId={gtmId} />}
         <TRPCReactProvider>
           <AuthProvider>
             <Suspense fallback={null}>

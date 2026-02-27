@@ -9,18 +9,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import CookieConsent from "react-cookie-consent";
 import { setConsent, hasConsent, isProduction } from "~/lib/analytics";
+import { isAnalyticsExcludedRoute } from "~/lib/analytics/route-exclusions";
 
 export function CookieBanner() {
+  const pathname = usePathname();
   const [shouldShow, setShouldShow] = useState(false);
 
   useEffect(() => {
+    // Hide on excluded routes (e.g. admin) since analytics don't run there
+    if (isAnalyticsExcludedRoute(pathname)) {
+      setShouldShow(false);
+      return;
+    }
     // Only show in production if consent hasn't been given yet
     if (isProduction && !hasConsent()) {
       setShouldShow(true);
     }
-  }, []);
+  }, [pathname]);
 
   if (!shouldShow) return null;
 
