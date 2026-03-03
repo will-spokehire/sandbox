@@ -38,6 +38,20 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
     user = await db.user.findUnique({
       where: { supabaseId: supabaseUser.id },
     });
+
+    // Fallback: try email lookup and heal the stale supabaseId
+    // Handles cases where the Supabase project changed or supabaseId was never set
+    if (!user && supabaseUser.email) {
+      user = await db.user.findUnique({
+        where: { email: supabaseUser.email },
+      });
+      if (user) {
+        await db.user.update({
+          where: { id: user.id },
+          data: { supabaseId: supabaseUser.id },
+        });
+      }
+    }
   }
 
   return {

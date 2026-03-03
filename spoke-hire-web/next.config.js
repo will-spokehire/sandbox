@@ -35,6 +35,12 @@ const config = {
         hostname: "lvaehnoqdzieersmujhb.supabase.co",
         pathname: "/storage/v1/object/public/**",
       },
+      // Test Supabase
+      {
+        protocol: "https",
+        hostname: "fqjvwgrxenogyrcnnhze.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
       // Local Supabase (Docker)
       {
         protocol: "http",

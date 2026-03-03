@@ -56,8 +56,7 @@ export class AuthService {
     const { error } = await this.supabase.auth.signInWithOtp({
       email,
       options: {
-        shouldCreateUser: true, // Allow new user creation
-        emailRedirectTo: redirectTo,
+        shouldCreateUser: true,
       },
     });
 
